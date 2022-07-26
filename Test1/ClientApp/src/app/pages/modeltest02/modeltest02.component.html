@@ -1,0 +1,50 @@
+<h2 class="content-block">iMATE TEST 02</h2>
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="dataSource"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              [columnHidingEnabled]="true">
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+  <dxo-editing mode="popup"
+               [allowUpdating]="true"
+               [allowAdding]="true"
+               [allowDeleting]="true"
+               refreshMode="repaint">
+
+    <dxo-popup title="Employee Info"
+               [showTitle]="true"
+               [width]="700"
+               [height]="525">
+    </dxo-popup>
+    <dxo-form>
+      <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+        <dxi-item dataField="dATA1"></dxi-item>
+        <dxi-item dataField="dATA2"></dxi-item>
+        <dxi-item dataField="dATA3"
+                  [colSpan]="2">
+        </dxi-item>
+      </dxi-item>
+
+
+    </dxo-form>
+  </dxo-editing>
+
+
+
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxi-column dataField="dATA1"
+              [width]="90">
+  </dxi-column>
+  <dxi-column dataField="dATA2"
+              [width]="190"
+              caption="데이터1">
+  </dxi-column>
+  <dxi-column dataField="dATA3"
+              caption="데이터2">
+  </dxi-column>
+</dx-data-grid>

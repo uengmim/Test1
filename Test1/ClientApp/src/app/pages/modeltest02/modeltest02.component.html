@@ -2,11 +2,12 @@
 
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="dataSource"
-              [showBorders]="false"
+              [showBorders]="true"
               [focusedRowEnabled]="true"
               [focusedRowIndex]="0"
               [columnAutoWidth]="true"
               [columnHidingEnabled]="true">
+
   <dxo-paging [pageSize]="10"></dxo-paging>
   <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
 
@@ -19,17 +20,19 @@
     <dxo-popup title="Employee Info"
                [showTitle]="true"
                [width]="700"
-               [height]="525">
+               [height]="650">
     </dxo-popup>
     <dxo-form>
       <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
         <dxi-item dataField="dATA1"></dxi-item>
         <dxi-item dataField="dATA2"></dxi-item>
-        <dxi-item dataField="dATA3"
-                  [colSpan]="2">
-        </dxi-item>
+        <dxi-item dataField="dATA3"[colSpan]="2"></dxi-item>
+        <dxi-item dataField="nUM1" [colSpan]="2"></dxi-item>
+        <dxi-item dataField="cOD1"></dxi-item>
+        <dxi-item dataField="sEL1"></dxi-item>
+        <dxi-item dataField="updat"></dxi-item>
+        <dxi-item dataField="uptim"></dxi-item>
       </dxi-item>
-
 
     </dxo-form>
   </dxo-editing>
@@ -47,4 +50,28 @@
   <dxi-column dataField="dATA3"
               caption="데이터2">
   </dxi-column>
+  <dxi-column dataField="nUM1"
+              caption="숫자">
+  </dxi-column>
+
+  <dxi-column dataField="cOD1" caption="상태">
+    <dxo-lookup [dataSource]="states" displayExpr="Name" valueExpr="ID" >
+    </dxo-lookup>
+  </dxi-column>
+
+  <dxi-column dataField="sEL1" caption="직책">
+    <dxo-lookup [dataSource]="roles" displayExpr="Name" valueExpr="ID">
+    </dxo-lookup>
+  </dxi-column>
+
+  <dxi-column dataField="updat"
+              dataType="date"
+              caption="수정/추가 일자">
+  </dxi-column>
+  <dxi-column dataField="uptim"
+              dataType="string"
+              caption="수정/추가 시간">
+  </dxi-column>
+
+
 </dx-data-grid>

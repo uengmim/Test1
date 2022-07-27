@@ -74,7 +74,8 @@ const routes: Routes = [
     ProfileComponent,
     TasksComponent,
     Modeltest01Component,
-    Modeltest02Component
+    Modeltest02Component,
+    
   ],
   bootstrap: [Modeltest02Component],
 })

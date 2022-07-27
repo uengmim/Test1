@@ -19,7 +19,20 @@ import { DIMModelStatus } from '../imate/dimModelStatusEnum'
         // DATA3 Field
         public dATA3 : string,
 
-   
+        // NUM1 Field
+        public nUM1: number,
+
+        // COD1 Field
+        public cOD1: string,
+
+        // SEL1 Field
+        public sEL1: string,
+
+        // UPDATE Field
+        public updat: string,
+
+        // UPTIM Field
+        public uptim: string,  
                /**
 	   *모델의 상태
  	   **/

@@ -17,3 +17,5 @@ ng serve
 
 ### 5. 테스트페이지 확인
 <a href="http://localhost:4200">http://localhost:4200</a>
+
+## 서버와 연동

@@ -5,7 +5,8 @@ import { AuthGuardService } from './shared/services';
 import { HomeComponent } from './pages/home/home.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { TasksComponent } from './pages/tasks/tasks.component';
-import { DxDataGridModule, DxFormModule } from 'devextreme-angular';
+import {
+  DxDataGridModule, DxFormModule, DxDropDownBoxModule} from 'devextreme-angular';
 import { Modeltest01Component } from './pages/modeltest01/modeltest01.component';
 import { Modeltest02Component } from './pages/modeltest02/modeltest02.component';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
@@ -66,7 +67,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule,DxDataGridModule, DxFormModule],
+  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule],
   providers: [AuthGuardService],
   exports: [RouterModule],
   declarations: [
@@ -75,6 +76,7 @@ const routes: Routes = [
     TasksComponent,
     Modeltest01Component,
     Modeltest02Component,
+
     
   ],
   bootstrap: [Modeltest02Component],

@@ -3,12 +3,22 @@ import { BrowserModule } from '@angular/platform-browser';
 import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../shared/imate/imateDataAdapter';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { lastValueFrom } from 'rxjs';
 import { DxDataGridComponent, DxDataGridModule } from 'devextreme-angular';
 import { ZXNSCRFCResultModel } from '../../shared/dataModel/ZxnscRfcResult';
 import { DIMModelStatus } from '../../shared/imate/dimModelStatusEnum';
 import { QueryCacheType } from '../../shared/imate/imateCommon';
-import {  Service, State, Role } from '../modeltest02/app.service'
+import { Service, State, Role } from '../modeltest02/app.service'
 
+import {
+  DxDropDownBoxModule,
+  DxTreeViewModule,
+  DxTreeViewComponent,
+} from 'devextreme-angular';
+if (!/localhost/.test(document.location.host)) {
+  enableProdMode();
+}
 
 @Component({
   templateUrl: 'modeltest02.component.html',
@@ -16,17 +26,23 @@ import {  Service, State, Role } from '../modeltest02/app.service'
 })
 
 export class Modeltest02Component {
+  @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
+
   states: State[];
   roles: Role[];
-  @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
+
+  gridDataSource: any;
+  gridBoxValue: string[] = [];
+
   dataSource: any;
   rowCount: number;
   _dataService: ImateDataService;
 
-  constructor(private dataService: ImateDataService, service: Service) {
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient) {
     this._dataService = dataService;
     this.states = service.getStates();
     this.roles = service.getRoles();
+    this.gridDataSource = this.makeAsyncDataSource(http, 'roles.json');
 
     this.rowCount = 0;
 
@@ -49,19 +65,33 @@ export class Modeltest02Component {
         remove: function (key) {
           return modelTest01.dataDelete(key);
         },
-      //  remove: (key) => this.dataDelete(key),
+        //  remove: (key) => this.dataDelete(key),
       });
 
 
   }
 
+  makeAsyncDataSource(http: any, jsonFile: any) {
+    return new CustomStore({
+      loadMode: 'raw',
+      key: 'ID',
+      load() {
+        return lastValueFrom(http.get(`data/${jsonFile}`));
+      },
+    });
+  }
+
+
+
   public async dataLoad(dataService: ImateDataService) {
 
     var resultModel = await dataService.SelectModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", [],
       "", "", QueryCacheType.None);
+    
     return resultModel;
   }
   public async dataInsert(values: ZXNSCRFCResultModel) {
+    values.sEL1 = this.gridBoxValue.join(",");
 
     var insertData = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Add);
     //var insertData2 = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, DIMModelStatus.Add);
@@ -74,11 +104,12 @@ export class Modeltest02Component {
   public async dataModify(key: any, values: ZXNSCRFCResultModel) {
     var ModifyData = new ZXNSCRFCResultModel(key, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Modify);
     var ModifyData2 = new ZXNSCRFCResultModel(key, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Modify);
+    values.sEL1 = this.gridBoxValue.join(",");
 
     this.dataGrid.editing; {
       equals: (ModifyData: { dATA1: any; dATA2: any; dATA3: any; nUM1: any; cOD1: any; sEL1: any; updat: any; uptim: any; },
         ModifyData2: { dATA1: any; dATA2: any; dATA3: any; nUM1: any; cOD1: any; sEL1: any; updat: any; uptim: any; }) => {
-        const dATAEuqal = ModifyData.dATA1 =ModifyData2.dATA1;
+        const dATAEuqal = ModifyData.dATA1 = ModifyData2.dATA1;
         const dATA2Euqal = ModifyData.dATA2 === ModifyData2.dATA2;
         const dATA3Euqal = ModifyData.dATA3 === ModifyData2.dATA3;
         const NUM1Euqal = ModifyData.nUM1 === ModifyData2.nUM1;
@@ -103,4 +134,10 @@ export class Modeltest02Component {
     var modelList: ZXNSCRFCResultModel[] = [DeleteData1, DeleteData2];
     this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
   }
+
+  roleFocusedRowChanged(e:any) {
+    let val = e.component.cellvalue(e.rowindex, "sEL1");
+    this.gridBoxValue = val.split(",");
+  }
 }
+

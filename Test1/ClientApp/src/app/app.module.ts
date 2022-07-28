@@ -10,7 +10,12 @@ import { AppRoutingModule } from './app-routing.module';
 import { HttpClientModule } from '@angular/common/http';
 import { AppConfigService } from './shared/services/appconfig.service';
 import { ImateAuthService } from './shared/imate/imateAuthAdapter';
-
+import {
+  DxDropDownBoxModule,
+  DxTreeViewModule,
+  DxDataGridModule,
+  DxTreeViewComponent,
+} from 'devextreme-angular';
 @NgModule({
   declarations: [
     AppComponent
@@ -27,7 +32,12 @@ import { ImateAuthService } from './shared/imate/imateAuthAdapter';
     LoginFormModule,
     UnauthenticatedContentModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    BrowserModule,
+    DxTreeViewModule,
+    DxDropDownBoxModule,
+    HttpClientModule,
+    DxDataGridModule,
   ],
   providers: [
     AuthService,

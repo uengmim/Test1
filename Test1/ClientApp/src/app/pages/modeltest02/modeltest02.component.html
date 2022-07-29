@@ -1,4 +1,21 @@
 <h2 class="content-block">iMATE TEST 02</h2>
+  <!--<div class="dx-field-label">Date picker</div>
+  <div class="dx-field-value">
+    <dx-date-box [value]="now" pickerType="rollers"> </dx-date-box>
+  </div>-->
+
+<dx-range-selector id="range-selector"
+                   title="Select a search period"
+                   [dataSource]="dataSource"
+                   dataSourceField="updat"
+                   (onValueChanged)="onValueChanged($event)">
+  <dxo-scale [tickInterval]="1" [minorTickInterval]="1">
+    <dxo-label format="decimal"></dxo-label>
+  </dxo-scale>
+  <dxo-behavior callValueChanged="onMoving"></dxo-behavior>
+</dx-range-selector>
+
+
 
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="dataSource"
@@ -7,10 +24,7 @@
               [focusedRowIndex]="0"
               [columnAutoWidth]="true"
               [columnHidingEnabled]="true"
-              [selection]="{ mode: 'multiple' }"
-              [onFoucusedRowChanged]="roleFocusedRowChanged($event)"
->
-
+              (onFocusedRowChanged)="roleFocusedRowChanged($event)">
   <dxo-paging [pageSize]="10"></dxo-paging>
   <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
 
@@ -24,6 +38,7 @@
                [showTitle]="true"
                [width]="700"
                [height]="650">
+
     </dxo-popup>
     <dxo-form>
       <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
@@ -41,22 +56,33 @@
                               placeholder="Select a value..."
                               [showClearButton]="true"
                               [dataSource]="roles">
-                <dx-data-grid [dataSource]="roles"
-                              [columns]="['ID', 'Name']"
-                              [selection]="{ mode: 'multiple' }"
-                              [hoverStateEnabled]="true"
-                              [paging]="{ enabled: true, pageSize: 10 }"
-                              [filterRow]="{ visible: true }"
-                              [scrolling]="{ mode: 'virtual' }"
-                              [height]="345"
-                              keyExpr="ID"
-                              [(selectedRowKeys)] ="gridBoxValue">
-                </dx-data-grid>
+              <dx-data-grid [dataSource]="roles"
+                            [columns]="['ID', 'Name']"
+                            [selection]="{ mode: 'multiple' }"
+                            [hoverStateEnabled]="true"
+                            [paging]="{ enabled: true, pageSize: 10 }"
+                            [filterRow]="{ visible: true }"
+                            [scrolling]="{ mode: 'virtual' }"
+                            [height]="345"
+                            keyExpr="ID"
+                            [(selectedRowKeys)]="gridBoxValue">
+              </dx-data-grid>
             </dx-drop-down-box>
           </div>
         </dxi-item>
-        <dxi-item dataField="updat"></dxi-item>
-        <dxi-item dataField="uptim"></dxi-item>
+        <dxi-item dataField="updat">
+        </dxi-item>
+
+          <dxi-item dataField="uptim" caption="시간">
+            <dx-date-box type="time"
+                         [(value)]="now"
+                         pickerType="rollers"
+                         displayFormat="HH:mm:ss"
+                         [useMaskBehavior]="true"
+                         [showClearButton]="true">
+            </dx-date-box>
+          </dxi-item>
+
       </dxi-item>
 
     </dxo-form>
@@ -93,7 +119,8 @@
               caption="수정/추가 일자">
   </dxi-column>
   <dxi-column dataField="uptim"
-              dataType="string"
+              dataType="time"
+              editCellTemplate="uptimeEditor"
               caption="수정/추가 시간">
   </dxi-column>
 

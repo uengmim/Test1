@@ -6,7 +6,13 @@ import { HomeComponent } from './pages/home/home.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { TasksComponent } from './pages/tasks/tasks.component';
 import {
-  DxDataGridModule, DxFormModule, DxDropDownBoxModule} from 'devextreme-angular';
+  DxDataGridModule,
+  DxFormModule,
+  DxDropDownBoxModule,
+  DxBoxModule,
+  DxRangeSelectorModule,
+  DxDateBoxModule
+} from 'devextreme-angular';
 import { Modeltest01Component } from './pages/modeltest01/modeltest01.component';
 import { Modeltest02Component } from './pages/modeltest02/modeltest02.component';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
@@ -67,7 +73,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule],
+  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxBoxModule, DxDateBoxModule, DxRangeSelectorModule],
   providers: [AuthGuardService],
   exports: [RouterModule],
   declarations: [
@@ -82,5 +88,6 @@ const routes: Routes = [
   bootstrap: [Modeltest02Component],
 })
 export class AppRoutingModule { }
+platformBrowserDynamic().bootstrapModule(AppRoutingModule);
 
 

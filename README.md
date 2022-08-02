@@ -19,3 +19,4 @@ ng serve
 <a href="http://localhost:4200">http://localhost:4200</a>
 
 ## 서버와 연동
+DevExtreme 컴포넌트 사용

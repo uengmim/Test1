@@ -7,7 +7,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { ZXNSCRFCResultModel } from '../../shared/dataModel/ZxnscRfcResult';
 import { DIMModelStatus } from '../../shared/imate/dimModelStatusEnum';
-import { QueryCacheType } from '../../shared/imate/imateCommon';
+import { ImateInfo, QueryCacheType } from '../../shared/imate/imateCommon';
 import { Service, State, Role } from '../modeltest02/app.service'
 import {
   DxDataGridComponent,
@@ -15,6 +15,7 @@ import {
   DxDropDownBoxModule,
   DxBoxModule,
   DxDataGridModule,
+  DxButtonModule,
   DxDateBoxModule,
 } from 'devextreme-angular';
 import { formatDate } from '@angular/common';
@@ -32,6 +33,8 @@ if (!/localhost/.test(document.location.host)) {
 export class Modeltest02Component {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
 
+  startDate: any;
+  endDate: any;
   // dropdownbox
   states: State[];
   roles: Role[];
@@ -52,31 +55,29 @@ export class Modeltest02Component {
   dateClear = new Date(2015, 11, 1, 6);
   disabledDates: Date[];
 
-  //Range Seletor
-  employees: CustomStore[];
-  selectedEmployees: CustomStore[];
-  tableTitles: string[] = ['dATA1', 'dATA2', 'dATA3', 'nUM1', 'cOD1', 'sEL1', 'updat', 'uptim'];
 
-
-
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient) {
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo) {
     // dropdownbox
     this.states = service.getStates();
     this.roles = service.getRoles();
-    //multiseletbox
+    // multiselectbox
     this.gridDataSource = this.makeAsyncDataSource(http, 'roles.json');
-    this.selectedEmployees = this.employees;
 
-    //insert,modify,delete 
+    // insert,modify,delete 
     this._dataService = dataService;
     this.rowCount = 0;
     let modelTest01 = this;
+
+    //date
+    var now = new Date();
+    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
+    this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
     this.dataSource = new CustomStore(
       {
         key: "dATA1",
 
         load: function (loadOptions) {
-          return modelTest01.dataLoad(dataService);
+          return modelTest01.dataLoad(imInfo, dataService);
         },
         insert: function (values) {
           return modelTest01.dataInsert(values);
@@ -99,20 +100,8 @@ export class Modeltest02Component {
     return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
   }
 
-  onValueChanged(e:any) {
-    const selectedEmployees: any[] = [];
 
-    this.dataSource.forEach((item: any) => {
-      if (item.updat >= e.value[0] && item.updat <= e.value[1]) {
-        selectedEmployees.push(item);
-      }
-    });
-
-    this.selectedEmployees = selectedEmployees;
-  }
-
-
-  //multiseletbox
+  //multiselectbox
   makeAsyncDataSource(http: any, jsonFile: any) {
     return new CustomStore({
       loadMode: 'raw',
@@ -124,18 +113,26 @@ export class Modeltest02Component {
   }
 
 
-
-  public async dataLoad(dataService: ImateDataService) {
+  public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
+    //period
+    var sdate = formatDate(this.startDate, "yyyyMMDD", "en-US")
+    var edate = formatDate(this.endDate, "yyyyMMDD", "en-US")
 
     var resultModel = await dataService.SelectModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", [],
-      "", "", QueryCacheType.None);
+      `LOGDT >= ${sdate} AND LOGDT <= ${edate}`, "LOGDT DESC, LOGTM DESC", QueryCacheType.None);
     
     return resultModel;
+  }
+
+  //Data refresh
+  public refreshDataGrid(e: Object) {
+    this.dataGrid.instance.refresh();
   }
   public async dataInsert(values: ZXNSCRFCResultModel) {
     //data 서버로 넘기기 위해 쉼표 join
     values.sEL1 = this.gridBoxValue.join(",");
     values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");
+    values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
 
     var insertData = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Add);
     //var insertData2 = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, DIMModelStatus.Add);
@@ -150,6 +147,7 @@ export class Modeltest02Component {
     var ModifyData2 = new ZXNSCRFCResultModel(key, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Modify);
     values.sEL1 = this.gridBoxValue.join(",");
     values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");
+    values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
 
     this.dataGrid.editing; {
       equals: (ModifyData: { dATA1: any; dATA2: any; dATA3: any; nUM1: any; cOD1: any; sEL1: any; updat: any; uptim: any; },
@@ -177,6 +175,11 @@ export class Modeltest02Component {
 
     var modelList: ZXNSCRFCResultModel[] = [DeleteData1, DeleteData2];
     this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
+  }
+
+  public async documentClick(filename: string) {
+    if (filename == "" || filename == null)
+      return;
   }
 
   //multiseletebox

@@ -10,7 +10,7 @@ import {
   DxFormModule,
   DxDropDownBoxModule,
   DxBoxModule,
-  DxRangeSelectorModule,
+  DxButtonModule,
   DxDateBoxModule
 } from 'devextreme-angular';
 import { Modeltest01Component } from './pages/modeltest01/modeltest01.component';
@@ -73,7 +73,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxBoxModule, DxDateBoxModule, DxRangeSelectorModule],
+  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxButtonModule, DxBoxModule, DxDateBoxModule],
   providers: [AuthGuardService],
   exports: [RouterModule],
   declarations: [

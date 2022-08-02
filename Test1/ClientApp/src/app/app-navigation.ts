@@ -24,6 +24,10 @@ export const navigation = [
         text: 'iMATE MODEL TEST2',
         path: '/modeltest02'
       },
+      {
+        text: 'iMATE MODEL TEST3',
+        path: '/modeltest03'
+      },
     ]
   }
 ];

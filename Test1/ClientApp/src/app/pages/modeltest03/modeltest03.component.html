@@ -1,20 +1,100 @@
-<h2 class="content-block">iMATE TEST 02</h2>
+<h2 class="content-block">iMATE TEST 03</h2>
+
+<!-- 툴바 -->
+
+<dx-toolbar>
+
+  <dxi-item location="before" widget="dxButton" [options]="backButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="center" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>Seungmin's Club</b> Products</div>
+    </div>
+  </dxi-item>
+
+  <!--<dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+  </dxi-item>-->
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+    <div *dxTemplate>
+      <dx-button icon="add" (onClick)="addDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+
+  <dxi-item widget="dxButton"
+            locateInMenu="always"
+            [options]="saveButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
 
 
+
+
+
+<!-- 폼 데이터 -->
+<!--<dx-form id="form" [formData]="detaildataSource">
+  <dxi-item itemType="group" [colCount]="2" >
+    <dxi-item dataField="dATA1" [editorOptions]="{ width: '70%' }"></dxi-item>
+    <dxi-item dataField="iTMNO" [editorOptions]="{ width: '70%' }"></dxi-item>
+    <dxi-item dataField="dETAIL1" [editorOptions]="{ width: '70%' }"></dxi-item>
+    <dxi-item dataField="dETAIL2" [editorOptions]="{ width: '70%' }"></dxi-item>
+    <dxi-item dataField="dETUM1" [editorOptions]="{ width: '70%' }"></dxi-item>
+    <dxi-item dataField="dATUM2" [editorOptions]="{ width: '70%' }"></dxi-item>
+  </dxi-item>
+</dx-form>-->
+
+<div class="widget-container">
+  <div *ngIf="labelMode === 'outside'">Select company:</div>
+  <dx-select-box #company
+                 displayExpr="dATA1"
+                 [(dataSource)]="detaildataSource"
+                 label="Select Data"
+                 [labelMode]="getCompanySelectorLabelMode()"
+                 [value]="detaildataSource[0]"></dx-select-box>
+  <dx-form id="form"
+           [(formData)]="company.value"
+           [readOnly]="readOnly"
+           [labelMode]="labelMode"
+           [showColonAfterLabel]="showColon"
+           [labelLocation]="labelLocation"
+           [minColWidth]="minColWidth"
+           [colCount]="colCount"
+           [width]="width"></dx-form>
+</div>
+
+
+
+
+
+
+<!-- 데이터 정보 -->
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="dataSource"
               [showBorders]="true"
               [focusedRowEnabled]="true"
               [focusedRowIndex]="0"
               [columnAutoWidth]="true"
-              [columnHidingEnabled]="true"
-              (onFocusedRowChanged)="roleFocusedRowChanged($event)">
+              [columnHidingEnabled]="true">
   <dxo-paging [pageSize]="10"></dxo-paging>
   <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-filter-row [visible]=" true"></dxo-filter-row>
 
   <dxo-editing mode="popup"
-               [allowUpdating]="true"
                [allowAdding]="true"
                [allowDeleting]="true"
                refreshMode="repaint">
@@ -81,8 +161,6 @@
     </dxo-form>
   </dxo-editing>
 
-
-
   <dxi-column dataField="dATA1"
               [width]="90">
   </dxi-column>
@@ -115,33 +193,9 @@
               caption="수정/추가 시간">
   </dxi-column>
 
-  <dxo-toolbar>
-    <dxi-item location="before">
-      <div *dxTemplate>
-        <div style="float:left">
-          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
-        </div>
-        <div style="float:left; margin-left:10px; margin-right:10px;">
-          ~
-        </div>
-        <div style="float:left">
-          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
-        </div>
-      </div>
-    </dxi-item>
-    <dxi-item location="before">
-      <div *dxTemplate>
-        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
-        </dx-button>
-      </div>
-    </dxi-item>
-
-    <dxi-item location="after">
-      <div *dxTemplate>
-        <dx-button icon="add" (onClick)="addDataGrid($event)">
-        </dx-button>
-      </div>
-    </dxi-item>
-  </dxo-toolbar>
-
 </dx-data-grid>
+
+
+<!--this.proxy = [
+  {name:'dsa' ,value=4}
+]-->

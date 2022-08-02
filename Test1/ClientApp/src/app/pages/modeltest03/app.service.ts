@@ -32,8 +32,6 @@ const roles: Role[] = [{
   Name: '수퍼유저',
   }];
 
-
-
 @Injectable()
 export class Service {
 
@@ -44,5 +42,4 @@ export class Service {
   getRoles() {
     return roles;
   }
-
 }

@@ -33,6 +33,12 @@
     <TypeScriptCompile Remove="ClientApp\src\app\pages\modeltest02\app.service.ts" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ClientApp\src\app\pages\modeltest03\app.service.ts">
+      <SubType>Code</SubType>
+    </None>
+  </ItemGroup>
+
     <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">

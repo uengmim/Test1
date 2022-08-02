@@ -9,12 +9,18 @@ import {
   DxDataGridModule,
   DxFormModule,
   DxDropDownBoxModule,
+  DxToolbarModule,
+  DxSelectBoxModule,
+  DxCheckBoxModule,
+  DxListModule,
   DxBoxModule,
   DxButtonModule,
+  DxNumberBoxModule,
   DxDateBoxModule
 } from 'devextreme-angular';
 import { Modeltest01Component } from './pages/modeltest01/modeltest01.component';
 import { Modeltest02Component } from './pages/modeltest02/modeltest02.component';
+import { Modeltest03Component } from './pages/modeltest03/modeltest03.component';
 import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 import { BrowserModule } from '@angular/platform-browser';
 
@@ -46,6 +52,11 @@ const routes: Routes = [
     canActivate: [AuthGuardService]
   },
   {
+    path: 'modeltest03',
+    component: Modeltest03Component,
+    canActivate: [AuthGuardService]
+  },
+  {
     path: 'login-form',
     component: LoginFormComponent,
     canActivate: [ AuthGuardService ]
@@ -73,7 +84,8 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxButtonModule, DxBoxModule, DxDateBoxModule],
+  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxToolbarModule,
+    DxListModule, DxNumberBoxModule, DxCheckBoxModule, DxSelectBoxModule, DxButtonModule, DxBoxModule, DxDateBoxModule],
   providers: [AuthGuardService],
   exports: [RouterModule],
   declarations: [
@@ -82,10 +94,12 @@ const routes: Routes = [
     TasksComponent,
     Modeltest01Component,
     Modeltest02Component,
+    Modeltest03Component,
 
     
   ],
   bootstrap: [Modeltest02Component],
+
 })
 export class AppRoutingModule { }
 platformBrowserDynamic().bootstrapModule(AppRoutingModule);

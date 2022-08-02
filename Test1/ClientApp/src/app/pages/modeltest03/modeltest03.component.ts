@@ -19,19 +19,22 @@ import {
   DxDateBoxModule,
 } from 'devextreme-angular';
 import { formatDate } from '@angular/common';
-
+import notify from 'devextreme/ui/notify';
+import { ZXNSCRFCDetailModel } from '../../shared/dataModel/ZxnscRfcDetail';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
 }
 
 @Component({
-  templateUrl: 'modeltest02.component.html',
+  templateUrl: 'modeltest03.component.html',
   providers: [ImateDataService, Service]
 })
 
-export class Modeltest02Component {
+export class Modeltest03Component {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
+
+
 
   startDate: any;
   endDate: any;
@@ -45,6 +48,7 @@ export class Modeltest02Component {
 
   //insert,modify,delete 
   dataSource: any;
+  detaildataSource: any;
   rowCount: number;
   _dataService: ImateDataService;
 
@@ -55,8 +59,57 @@ export class Modeltest02Component {
   dateClear = new Date(2015, 11, 1, 6);
   disabledDates: Date[];
 
+  //toolbar option
+  backButtonOptions: any;
+
+  refreshButtonOptions: any;
+
+  addButtonOptions: any;
+
+  saveButtonOptions: any;
+
+
+  //form option
+  labelMode: string;
+
+  labelLocation: string;
+
+  readOnly: boolean;
+
+  showColon: boolean;
+
+  minColWidth: number;
+
+  colCount: number;
+
+  width: any;
 
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo) {
+
+
+    //button option
+    this.backButtonOptions = {
+      type: 'back',
+      onClick: () => {
+        location.href ="http://localhost:44460/#/modeltest02"
+      },
+    };
+
+    this.addButtonOptions = {
+      icon: 'plus',
+      onclick: () => {
+        notify('add button has been clicked!');
+      },
+    };
+
+    this.saveButtonOptions = {
+      text: 'Save',
+      onClick: () => {
+        notify('Save option has been clicked!');
+      },
+    };
+
+  
     // dropdownbox
     this.states = service.getStates();
     this.roles = service.getRoles();
@@ -70,8 +123,6 @@ export class Modeltest02Component {
 
     //date
     var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
-    this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
     this.dataSource = new CustomStore(
       {
         key: "dATA1",
@@ -82,17 +133,29 @@ export class Modeltest02Component {
         insert: function (values) {
           return modelTest01.dataInsert(values);
         },
-        //insert: (values) => this.dataInsert(values),
-        update: function (key, values) {
-          return modelTest01.dataModify(key, values);
-        },
         //update: (key, values) => this.dataModify(key, values),
         remove: function (key) {
           return modelTest01.dataDelete(key);
         },
         //  remove: (key) => this.dataDelete(key),
       });
+
+    //Test
+
+
+    this.detaildataSource = new CustomStore(
+      {
+        key: "dATA1",
+
+        load: function (loadOptions) {
+          return modelTest01.detaildataLoad(dataService);
+        },
+      });
+    //Test
   }
+
+
+  
 
   // 날짜 계산
   get diffInDay() {
@@ -111,16 +174,25 @@ export class Modeltest02Component {
     });
   }
 
+
+
+  public async detaildataLoad(dataService: ImateDataService) {
+
+  //Test
+    var resultModel = await dataService.SelectModelData<ZXNSCRFCDetailModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCDetailModelList", [],
+      "", "", QueryCacheType.None);
+    return resultModel;
+  }
+  //Test
+
+
+
   // 데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
-    //period
-    var sdate = formatDate(this.startDate, "yyyyMMDD", "en-US")
-    var edate = formatDate(this.endDate, "yyyyMMDD", "en-US")
 
-    //sql datafield / 문자열'' / 날짜 시간 내림차순
     var resultModel = await dataService.SelectModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", [],
-      `UPDAT >= '${sdate}' AND UPDAT <= '${edate}'`, "UPDAT DESC, UPTIM DESC", QueryCacheType.None);
-    
+      "", "", QueryCacheType.None);
+
     return resultModel;
   }
 
@@ -139,34 +211,6 @@ export class Modeltest02Component {
     this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
   }
 
-  // 데이터 수정
-  public async dataModify(key: any, values: ZXNSCRFCResultModel) {
-    var ModifyData = new ZXNSCRFCResultModel(key, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Modify);
-    var ModifyData2 = new ZXNSCRFCResultModel(key, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Modify);
-    values.sEL1 = this.gridBoxValue.join(",");
-    values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");
-    values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
-
-    this.dataGrid.editing; {
-      equals: (ModifyData: { dATA1: any; dATA2: any; dATA3: any; nUM1: any; cOD1: any; sEL1: any; updat: any; uptim: any; },
-        ModifyData2: { dATA1: any; dATA2: any; dATA3: any; nUM1: any; cOD1: any; sEL1: any; updat: any; uptim: any; }) => {
-        const dATAEuqal = ModifyData.dATA1 = ModifyData2.dATA1;
-        const dATA2Euqal = ModifyData.dATA2 === ModifyData2.dATA2;
-        const dATA3Euqal = ModifyData.dATA3 === ModifyData2.dATA3;
-        const NUM1Euqal = ModifyData.nUM1 === ModifyData2.nUM1;
-        const COD1Euqal = ModifyData.cOD1 === ModifyData2.cOD1;
-        const SEL1Euqal = ModifyData.sEL1 === ModifyData2.sEL1;
-        const UPDATEuqal = ModifyData.updat === ModifyData2.updat;
-        const UPTIMEuqal = ModifyData.uptim === ModifyData2.uptim;
-
-        return dATAEuqal || dATA2Euqal || dATA3Euqal || NUM1Euqal || COD1Euqal || SEL1Euqal || UPDATEuqal || UPTIMEuqal;
-
-      }
-    }
-    var modelList: ZXNSCRFCResultModel[] = [values, ModifyData];
-    this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
-  }
-
   // 데이터 삭제
   public async dataDelete(key: any) {
     var DeleteData1 = new ZXNSCRFCResultModel(key, key.dATA2, key.dATA3, key.nUM1, key.cOD1, key.sEL1, key.updat, key.uPTIM, DIMModelStatus.Delete);
@@ -176,12 +220,10 @@ export class Modeltest02Component {
     this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
   }
 
-
   //툴바 안의 팝업창 이벤트
   addDataGrid(e: any) {
     this.dataGrid.instance.addRow();
   }
-
 
   //multiseletebox 이벤트
   roleFocusedRowChanged(e: any) {
@@ -189,9 +231,21 @@ export class Modeltest02Component {
     this.gridBoxValue = val.split(",");
   }
 
-  //Data refresh 날짜 새로고침 이벤트
+  //Data refresh 새로고침 이벤트
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
   }
-}
 
+
+
+
+
+
+  getCompanySelectorLabelMode() {
+    return this.labelMode === 'outside'
+      ? 'hidden'
+      : this.labelMode;
+  }
+
+
+}

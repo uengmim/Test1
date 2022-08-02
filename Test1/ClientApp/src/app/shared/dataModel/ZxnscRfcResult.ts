@@ -42,6 +42,8 @@ import { DIMModelStatus } from '../imate/dimModelStatusEnum'
     }
 
   //
-  // Proxy List Define 
+  // Proxy List Define
   //private _ZXNSCRFCResultModelList: ZXNSCRFCResultModel[] = [];
   //
+
+

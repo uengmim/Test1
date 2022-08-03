@@ -18,5 +18,5 @@ ng serve
 ### 5. 테스트페이지 확인
 <a href="http://localhost:4200">http://localhost:4200</a>
 
-## 서버와 연동
-DevExtreme 컴포넌트 사용
+## Web Ui 프레임워크 DevExtreme 사용
+프레임워크이지만 커스텀을 할 수 있는 방법이 매우 다양하게 구현되어 있어서 마음대로 커스텀 가능.

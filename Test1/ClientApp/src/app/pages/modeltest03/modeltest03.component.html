@@ -47,25 +47,16 @@
 
 
 <!-- 폼 데이터 -->
-<!--<dx-form id="form" [formData]="detaildataSource">
-  <dxi-item itemType="group" [colCount]="2" >
-    <dxi-item dataField="dATA1" [editorOptions]="{ width: '70%' }"></dxi-item>
-    <dxi-item dataField="iTMNO" [editorOptions]="{ width: '70%' }"></dxi-item>
-    <dxi-item dataField="dETAIL1" [editorOptions]="{ width: '70%' }"></dxi-item>
-    <dxi-item dataField="dETAIL2" [editorOptions]="{ width: '70%' }"></dxi-item>
-    <dxi-item dataField="dETUM1" [editorOptions]="{ width: '70%' }"></dxi-item>
-    <dxi-item dataField="dATUM2" [editorOptions]="{ width: '70%' }"></dxi-item>
-  </dxi-item>
-</dx-form>-->
-
 <div class="widget-container">
   <div *ngIf="labelMode === 'outside'">Select company:</div>
+
+
   <dx-select-box #company
                  displayExpr="dATA1"
-                 [(dataSource)]="detaildataSource"
+                 [(dataSource)]="dataSource"
                  label="Select Data"
                  [labelMode]="getCompanySelectorLabelMode()"
-                 [value]="detaildataSource[0]"></dx-select-box>
+                 [value]="dataSource[0]"></dx-select-box>
   <dx-form id="form"
            [(formData)]="company.value"
            [readOnly]="readOnly"
@@ -82,7 +73,7 @@
 
 
 
-<!-- 데이터 정보 -->
+  <!-- 데이터 정보 -->
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="dataSource"
               [showBorders]="true"
@@ -94,7 +85,108 @@
   <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
   <dxo-filter-row [visible]=" true"></dxo-filter-row>
 
+
+
   <dxo-editing mode="popup"
+               [allowDeleting]="true"
+               refreshMode="repaint">
+
+    <dxo-popup title="Employee detail"
+               [showTitle]="true"
+               [width]="1500"
+               [height]="800">
+    </dxo-popup>
+
+    <dxo-form id="form" [colCount]="2">
+      <dxi-item itemType="group" caption="System Information">
+        <dxi-item dataField="dATA1"></dxi-item>
+        <dxi-item dataField="iTMNO"></dxi-item>
+        <dxi-item dataField="dETAIL1"></dxi-item>
+        <dxi-item dataField="dETAIL2"></dxi-item>
+        <dxi-item dataField="dETUM1"></dxi-item>
+        <dxi-item dataField="dATUM2"></dxi-item>
+      </dxi-item>
+      <dxi-item itemType="group" caption="Select Box">
+
+        <dxi-item dataField="dETSEL1">
+          <dxo-label title="Sel1" alignment="center">
+          </dxo-label>
+          <div class="dx-field">
+            <div class="dx-field-label">사용</div>
+            <div class="dx-field-value">
+              <dx-check-box [value]="true"></dx-check-box>
+            </div>
+          </div>
+          <div class="dx-field-label">사용안함</div>
+          <div class="dx-field-value">
+            <dx-check-box [value]="false"></dx-check-box>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="dETSEL2">
+          <dxo-label text="Sel2" alignment="center"></dxo-label>
+          <div class="dx-field">
+            <div class="dx-field-label">Options</div>
+            <div class="dx-field-value">
+              <dx-radio-group [items]="priorities"
+                              [value]="priorities[0]"
+                              layout="horizontal">
+              </dx-radio-group>
+            </div>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="dATUM2">
+          <dxo-label text="옵션"></dxo-label>
+          <div *dxTemplate>
+            <dx-drop-down-box [(value)]="gridBoxValue"
+                              valueExpr="ID"
+                              displayExpr="Name"
+                              placeholder="Select a value..."
+                              [showClearButton]="true"
+                              [dataSource]="option">
+
+              <dx-data-grid [dataSource]="option"
+                            [columns]="['ID', 'Name']"
+                            [selection]="{ mode: 'multiple' }"
+                            [hoverStateEnabled]="true"
+                            [paging]="{ enabled: true, pageSize: 10 }"
+                            [filterRow]="{ visible: true }"
+                            [scrolling]="{ mode: 'virtual' }"
+                            [height]="345"
+                            keyExpr="ID"
+                            [(selectedRowKeys)]="gridBoxValue">
+              </dx-data-grid>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+
+
+        <dxi-item dataField="updat">
+          <dx-date-box type="date"
+                       [(value)]="now"
+                       pickerType="rollers"
+                       displayFormat="MM-dd-yyyy"
+                       [useMaskBehavior]="true"
+                       [showClearButton]="true">
+          </dx-date-box>
+        </dxi-item>
+
+        <dxi-item dataField="uptim">
+          <dx-date-box type="time"
+                       [(value)]="now"
+                       pickerType="rollers"
+                       displayFormat="HH:mm:ss"
+                       [useMaskBehavior]="true"
+                       [showClearButton]="true">
+          </dx-date-box>
+        </dxi-item>
+      </dxi-item>
+
+    </dxo-form>
+  </dxo-editing>
+
+  <!--<dxo-editing mode="popup"
                [allowAdding]="true"
                [allowDeleting]="true"
                refreshMode="repaint">
@@ -159,7 +251,7 @@
       </dxi-item>
 
     </dxo-form>
-  </dxo-editing>
+  </dxo-editing>-->
 
   <dxi-column dataField="dATA1"
               [width]="90">
@@ -196,6 +288,6 @@
 </dx-data-grid>
 
 
-<!--this.proxy = [
-  {name:'dsa' ,value=4}
-]-->
+  <!--this.proxy = [
+    {name:'dsa' ,value=4}
+  ]-->

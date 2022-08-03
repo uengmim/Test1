@@ -8,7 +8,7 @@ import { lastValueFrom } from 'rxjs';
 import { ZXNSCRFCResultModel } from '../../shared/dataModel/ZxnscRfcResult';
 import { DIMModelStatus } from '../../shared/imate/dimModelStatusEnum';
 import { ImateInfo, QueryCacheType } from '../../shared/imate/imateCommon';
-import { Service, State, Role } from '../modeltest02/app.service'
+import { PriorityEntity, Service, State, Role, Option } from '../modeltest02/app.service'
 import {
   DxDataGridComponent,
   DxRangeSelectorModule,
@@ -16,7 +16,10 @@ import {
   DxBoxModule,
   DxDataGridModule,
   DxButtonModule,
+  DxFormModule,
   DxDateBoxModule,
+  DxRadioGroupModule,
+  DxCheckBoxModule,
 } from 'devextreme-angular';
 import { formatDate } from '@angular/common';
 import notify from 'devextreme/ui/notify';
@@ -41,7 +44,7 @@ export class Modeltest03Component {
   // dropdownbox
   states: State[];
   roles: Role[];
-
+  option: Option[];
   //multiseletbox
   gridDataSource: any;
   gridBoxValue: string[] = [];
@@ -84,7 +87,24 @@ export class Modeltest03Component {
 
   width: any;
 
+  //check box
+  checkBoxValue: boolean | null = null;
+
+  //radio button
+  priorities: string[];
+  priorityEntities: PriorityEntity[];
+
+
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo) {
+
+    //radio button
+    this.priorities = [
+      'OPTION1',
+      'OPTION2',
+      'OPTION3',
+      'OPTION4',
+    ];
+    this.priorityEntities = service.getPriorityEntities();
 
 
     //button option
@@ -113,6 +133,7 @@ export class Modeltest03Component {
     // dropdownbox
     this.states = service.getStates();
     this.roles = service.getRoles();
+    this.option = service.getOption();
     // multiselectbox
     this.gridDataSource = this.makeAsyncDataSource(http, 'roles.json');
 
@@ -130,9 +151,11 @@ export class Modeltest03Component {
         load: function (loadOptions) {
           return modelTest01.dataLoad(imInfo, dataService);
         },
-        insert: function (values) {
-          return modelTest01.dataInsert(values);
-        },
+
+        //insert: function (values) {
+        //  return modelTest01.dataInsert(values);                                                                얘 주석 지우기
+        //},
+
         //update: (key, values) => this.dataModify(key, values),
         remove: function (key) {
           return modelTest01.dataDelete(key);
@@ -149,6 +172,9 @@ export class Modeltest03Component {
 
         load: function (loadOptions) {
           return modelTest01.detaildataLoad(dataService);
+        },
+        insert: function (values) {
+          return modelTest01.detaildataInsert(values);
         },
       });
     //Test
@@ -197,19 +223,35 @@ export class Modeltest03Component {
   }
 
 
+
   // 데이터 삽입
-  public async dataInsert(values: ZXNSCRFCResultModel) {
+  public async detaildataInsert(values: ZXNSCRFCDetailModel) {
     //data 서버로 넘기기 위해 쉼표 join
-    values.sEL1 = this.gridBoxValue.join(",");
+    values.dETSEL2 = this.gridBoxValue.join(",");
     values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");
     values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
 
-    var insertData = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Add);
+    var insertData = new ZXNSCRFCDetailModel(values.dATA1, values.iTMNO, values.dETAIL1, values.dETAIL2, values.dETUM1, values.dATUM2, values.dETSEL1, values.dETSEL2, values.dETOPT, values.updat, values.uptim, DIMModelStatus.Add);
     //var insertData2 = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, DIMModelStatus.Add);
 
-    var modelList: ZXNSCRFCResultModel[] = [values, insertData];
-    this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
+    var modelList: ZXNSCRFCDetailModel[] = [values, insertData];
+    this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCDetailModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCDetailModelList", modelList);
   }
+
+
+  //// 데이터 삽입
+  //public async dataInsert(values: ZXNSCRFCResultModel) {
+  //  //data 서버로 넘기기 위해 쉼표 join
+  //  values.sEL1 = this.gridBoxValue.join(",");
+  //  values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");                                                                 얘 주석 지워야함
+  //  values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
+
+  //  var insertData = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Add);
+  //  //var insertData2 = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, DIMModelStatus.Add);
+
+  //  var modelList: ZXNSCRFCResultModel[] = [values, insertData];
+  //  this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
+  //}
 
   // 데이터 삭제
   public async dataDelete(key: any) {

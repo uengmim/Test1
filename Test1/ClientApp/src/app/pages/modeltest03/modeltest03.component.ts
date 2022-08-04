@@ -19,6 +19,7 @@ import {
   DxFormModule,
   DxDateBoxModule,
   DxRadioGroupModule,
+  DxSelectBoxModule,
   DxCheckBoxModule,
 } from 'devextreme-angular';
 import { formatDate } from '@angular/common';
@@ -94,6 +95,10 @@ export class Modeltest03Component {
   priorities: string[];
   priorityEntities: PriorityEntity[];
 
+
+  startEditAction = 'click';
+
+  selectTextOnEditStart = true;
 
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo) {
 
@@ -270,6 +275,11 @@ export class Modeltest03Component {
   //multiseletebox 이벤트
   roleFocusedRowChanged(e: any) {
     let val = e.component.cellvalue(e.rowindex, "sEL1");
+    this.gridBoxValue = val.split(",");
+  }
+
+  optionFocusedRowChanged(e: any) {
+    let val = e.component.cellvalue(e.rowindex, "dETSEL2");
     this.gridBoxValue = val.split(",");
   }
 

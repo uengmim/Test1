@@ -10,17 +10,7 @@ import { DIMModelStatus } from '../../shared/imate/dimModelStatusEnum';
 import { ImateInfo, QueryCacheType } from '../../shared/imate/imateCommon';
 import { PriorityEntity, Service, State, Role, Option } from '../modeltest02/app.service'
 import {
-  DxDataGridComponent,
-  DxRangeSelectorModule,
-  DxDropDownBoxModule,
-  DxBoxModule,
-  DxDataGridModule,
-  DxButtonModule,
-  DxFormModule,
-  DxDateBoxModule,
-  DxRadioGroupModule,
-  DxSelectBoxModule,
-  DxCheckBoxModule,
+  DxDataGridComponent
 } from 'devextreme-angular';
 import { formatDate } from '@angular/common';
 import notify from 'devextreme/ui/notify';
@@ -186,7 +176,6 @@ export class Modeltest03Component {
   }
 
 
-  
 
   // 날짜 계산
   get diffInDay() {
@@ -287,11 +276,6 @@ export class Modeltest03Component {
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
   }
-
-
-
-
-
 
   getCompanySelectorLabelMode() {
     return this.labelMode === 'outside'

@@ -10,7 +10,18 @@ import { DIMModelStatus } from '../../shared/imate/dimModelStatusEnum';
 import { ImateInfo, QueryCacheType } from '../../shared/imate/imateCommon';
 import { PriorityEntity, Service, State, Role, Option } from '../modeltest02/app.service'
 import {
-  DxDataGridComponent
+  DxDataGridComponent,
+  DxRangeSelectorModule,
+  DxDropDownBoxModule,
+  DxBoxModule,
+  DxDataGridModule,
+  DxButtonModule,
+  DxTemplateModule,
+  DxFormModule,
+  DxDateBoxModule,
+  DxRadioGroupModule,
+  DxSelectBoxModule,
+  DxCheckBoxModule,
 } from 'devextreme-angular';
 import { formatDate } from '@angular/common';
 import notify from 'devextreme/ui/notify';
@@ -28,6 +39,7 @@ if (!/localhost/.test(document.location.host)) {
 export class Modeltest03Component {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid: DxDataGridComponent;
 
+  @ViewChild("company", { static: false }) company: DxSelectBoxModule;
 
 
   startDate: any;
@@ -86,7 +98,7 @@ export class Modeltest03Component {
   priorityEntities: PriorityEntity[];
 
 
-  startEditAction = 'click';
+  startEditAction = 'dblclick';
 
   selectTextOnEditStart = true;
 
@@ -160,7 +172,6 @@ export class Modeltest03Component {
 
     //Test
 
-
     this.detaildataSource = new CustomStore(
       {
         key: "dATA1",
@@ -171,6 +182,7 @@ export class Modeltest03Component {
         insert: function (values) {
           return modelTest01.detaildataInsert(values);
         },
+        update: (key, values) => this.detaildataModify(key, values),
       });
     //Test
   }
@@ -247,6 +259,20 @@ export class Modeltest03Component {
   //  this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
   //}
 
+
+  //데이터 수정
+
+  public async detaildataModify(key: any, values: ZXNSCRFCDetailModel) {
+    var ModifyData = new ZXNSCRFCDetailModel(key, values.iTMNO, values.dETAIL1, values.dETAIL2, values.dETUM1, values.dATUM2, values.dETSEL1, values.dETSEL2, values.dETOPT, values.updat, values.uptim,  DIMModelStatus.Modify);
+    var ModifyData2 = new ZXNSCRFCDetailModel(key, values.iTMNO, values.dETAIL1, values.dETAIL2, values.dETUM1, values.dATUM2, values.dETSEL1, values.dETSEL2, values.dETOPT, values.updat, values.uptim, DIMModelStatus.Modify);
+    values.dETSEL2 = this.gridBoxValue.join(",");
+    values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");
+    values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
+
+    var modelList: ZXNSCRFCDetailModel[] = [values, ModifyData];
+    this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCDetailModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCDetailModelList", modelList);
+  }
+
   // 데이터 삭제
   public async dataDelete(key: any) {
     var DeleteData1 = new ZXNSCRFCResultModel(key, key.dATA2, key.dATA3, key.nUM1, key.cOD1, key.sEL1, key.updat, key.uPTIM, DIMModelStatus.Delete);
@@ -257,8 +283,8 @@ export class Modeltest03Component {
   }
 
   //툴바 안의 팝업창 이벤트
-  addDataGrid(e: any) {
-    this.dataGrid.instance.addRow();
+  saveDataGrid(e: any) {
+    this.dataGrid.instance.saveEditData();
   }
 
   //multiseletebox 이벤트

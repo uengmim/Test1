@@ -20,11 +20,15 @@
     </div>
   </dxi-item>
 
-  <!--<dxi-item location="after"
+  <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
             [options]="addButtonOptions">
-  </dxi-item>-->
+    <div *dxTemplate>
+      <dx-button icon="add" (onClick)="saveDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
 
 
   <dxi-item widget="dxButton"
@@ -265,70 +269,7 @@
                 [dataSource]="dataSource"
                 keyExpr="ID"
                 [showBorders]="true">
-    <dxi-item dataField="DATA1"></dxi-item>
-    <dxi-item dataField="ITMNO"></dxi-item>
-    <dxi-item dataField="DETAIL1"></dxi-item>
-    <dxi-item dataField="DETAIL2"></dxi-item>
-    <dxi-item dataField="DETNUM1"></dxi-item>
-    <dxi-item dataField="DETNUM2"></dxi-item>
-    <dxi-item dataField="DETSEL1''">
 
-      <div class="dx-field">
-        <div class="dx-field-label">사용</div>
-        <div class="dx-field-value">
-          <dx-check-box [value]="true"></dx-check-box>
-        </div>
-      </div>
-      <div class="dx-field">
-        <div class="dx-field-label"></div>
-        <div class="dx-field-value">
-          <dx-check-box [value]="false"></dx-check-box>
-        </div>
-      </div>
-    </dxi-item>
-    <dxi-item dataField="DETSEL2">
-
-      <div class="dx-field-label">Horizontal layout</div>
-      <div class="dx-field-value">
-        <dx-radio-group [items]="priorities"
-                        [value]="priorities[0]"
-                        layout="horizontal">
-        </dx-radio-group>
-      </div>
-    </dxi-item>
-    <dxi-item dataField="OfficeNo">
-      <dxo-label text="옵션"></dxo-label>
-      <div *dxTemplate>
-        <dx-drop-down-box [(value)]="gridBoxValue"
-                          valueExpr="ID"
-                          displayExpr="Name"
-                          placeholder="Select a value..."
-                          [showClearButton]="true"
-                          [dataSource]="option">
-          <dx-data-grid [dataSource]="option"
-                        [columns]="['ID', 'Name']"
-                        [selection]="{ mode: 'multiple' }"
-                        [hoverStateEnabled]="true"
-                        [paging]="{ enabled: true, pageSize: 10 }"
-                        [filterRow]="{ visible: true }"
-                        [scrolling]="{ mode: 'virtual' }"
-                        [height]="345"
-                        keyExpr="ID"
-                        [(selectedRowKeys)]="gridBoxValue">
-          </dx-data-grid>
-        </dx-drop-down-box>
-      </div>
-    </dxi-item>
-    <dxi-item dataField="updat">
-      <dxo-label text="날짜"></dxo-label>
-      <dx-date-box [value]="now" type="date" [useMaskBehavior]="true" [showClearButton]="true">
-      </dx-date-box>
-    </dxi-item>
-    <dxi-item dataField="OfficeNo">
-      <dxo-label text="시간"></dxo-label>
-      <dx-date-box [value]="now" type="time" pickerType="rollers" displayFormat="HH:mm:ss" [useMaskBehavior]="true" [showClearButton]="true">
-      </dx-date-box>
-    </dxi-item>
     <dxo-paging [enabled]="false"></dxo-paging>
     <dxo-editing mode="batch"
                  [allowUpdating]="true"
@@ -336,8 +277,27 @@
                  [allowDeleting]="true"
                  [selectTextOnEditStart]="selectTextOnEditStart"
                  [startEditAction]="startEditAction">
-
     </dxo-editing>
+    <dxi-item dataField="dATA1"></dxi-item>
+    <dxi-item dataField="iTMNO"></dxi-item>
+    <dxi-item dataField="dETAIL1"></dxi-item>
+    <dxi-item dataField="dETAIL2"></dxi-item>
+    <dxi-item dataField="dETNUM1"></dxi-item>
+    <dxi-item dataField="dETNUM2"></dxi-item>
+    <dxi-item dataField="dETSEL1"></dxi-item>
+    <dxi-item dataField="dETSEL2"></dxi-item>
+    <dxi-item dataField="dETOPT"></dxi-item>
+    <dxi-item dataField="updat">
+      <dxo-label text="날짜"></dxo-label>
+      <dx-date-box [value]="now" dataType="date" [useMaskBehavior]="true" [showClearButton]="true">
+      </dx-date-box>
+    </dxi-item>
+    <dxi-item dataField="uptim">
+      <dxo-label text="시간"></dxo-label>
+      <dx-date-box [value]="now" dataType="time" pickerType="rollers" displayFormat="HH:mm:ss" [useMaskBehavior]="true" [showClearButton]="true">
+      </dx-date-box>
+    </dxi-item>
+
 
     <dxi-column dataField="dATA1" caption="dATA1"> </dxi-column>
     <dxi-column dataField="iTMNO" caption="iTMNO"> </dxi-column>
@@ -345,26 +305,118 @@
     <dxi-column dataField="dETAIL2" caption="dETAIL2"> </dxi-column>
     <dxi-column dataField="dETNUM1" caption="dETNUM1"> </dxi-column>
     <dxi-column dataField="dETNUM2" caption="dETNUM2"> </dxi-column>
-    <dxi-column dataField="dETSEL1" caption="dETSEL1"> </dxi-column>
-    <dxi-column dataField="dETSEL2" caption="dETSEL2"> </dxi-column>
-    <dxi-column dataField="dETOPT" caption="dETOPT"> </dxi-column>
+
+    <dxi-column dataField="dETSEL1"
+                caption="dETSEL1"
+                [allowFiltering]="false"
+                [allowSorting]="false"
+                [width]="300"
+                cellTemplate="Sel1cellTemplate">
+    </dxi-column>
+
+    <dxi-column dataField="dETSEL2"
+                caption="dETSEL2"
+                [allowFiltering]="false"
+                [allowSorting]="false"
+                [width]="500"
+                cellTemplate="Sel2cellTemplate">
+    </dxi-column>
+
+    <dxi-column dataField="dETOPT"
+                caption="dETOPT"
+                [allowFiltering]="false"
+                [allowSorting]="false"
+                [width]="400"
+                cellTemplate="OptcellTemplate">
+
+    </dxi-column>
     <dxi-column dataField="updat"
                 dataType="date"
-                caption="수정/추가 일자">
+                caption="수정/추가 일자"
+                cellTemplate="datcellTemplate"
+                [width]="250">
     </dxi-column>
     <dxi-column dataField="uptim"
                 dataType="time"
-                caption="수정/추가 시간">
+                caption="수정/추가 시간"
+                cellTemplate="timcellTemplate">
     </dxi-column>
-  </dx-data-grid>
 
 
 
-
-
-    <div class="option">
-      <dx-select-box [items]="['click', 'dblClick']"
-                     [(value)]="startEditAction">
-      </dx-select-box>
+    <!--Sel1 cellTemplate-->
+    <div *dxTemplate="let data of 'Sel1cellTemplate'">
+      <div class="dx-field">
+        <div class="dx-field-label">사용</div>
+        <div class="dx-field-value">
+          <dx-check-box [value]="true"></dx-check-box>
+        </div>
+      </div>
+      <div class="dx-field-label">사용안함</div>
+      <div class="dx-field-value">
+        <dx-check-box [value]="false"></dx-check-box>
+      </div>
     </div>
+
+    <!--Sel2 cellTemplate-->
+    <div *dxTemplate="let data of 'Sel2cellTemplate'">
+      <dxo-label text="Sel2" alignment="center"></dxo-label>
+      <div class="dx-field">
+        <div class="dx-field-label">Options</div>
+        <div class="dx-field-value">
+          <dx-radio-group [items]="priorities"
+                          [value]="priorities[0]"
+                          layout="horizontal">
+          </dx-radio-group>
+        </div>
+      </div>
+    </div>
+
+    <!--Opt cellTemplate-->
+    <dxo-label text="옵션"></dxo-label>
+    <div *dxTemplate="let data of 'OptcellTemplate'">
+      <dx-drop-down-box [(value)]="gridBoxValue"
+                        valueExpr="ID"
+                        displayExpr="Name"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="option">
+
+        <dx-data-grid [dataSource]="option"
+                      [columns]="['ID', 'Name']"
+                      [selection]="{ mode: 'multiple' }"
+                      [hoverStateEnabled]="true"
+                      [paging]="{ enabled: true, pageSize: 10 }"
+                      [filterRow]="{ visible: true }"
+                      [scrolling]="{ mode: 'virtual' }"
+                      [height]="345"
+                      keyExpr="ID"
+                      [(selectedRowKeys)]="gridBoxValue">
+        </dx-data-grid>
+      </dx-drop-down-box>
+    </div>
+
+    <!--date cellTemplate-->
+    <div *dxTemplate="let data of 'datcellTemplate'">
+      <dx-date-box type="date"
+                   [(value)]="now"
+                   pickerType="rollers"
+                   displayFormat="MM-dd-yyyy">
+      </dx-date-box>
+
+    </div>
+
+
+    <!--time cellTemplate-->
+    <div *dxTemplate="let data of 'timcellTemplate'">
+      <dx-date-box type="time"
+                   [(value)]="now"
+                   pickerType="rollers"
+                   displayFormat="HH:mm:ss">
+      </dx-date-box>
+
+
+    </div>
+  </dx-data-grid>
   </div>
+

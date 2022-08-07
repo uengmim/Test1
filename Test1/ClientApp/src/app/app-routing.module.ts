@@ -13,7 +13,7 @@ import {
   DxSelectBoxModule,
   DxCheckBoxModule,
   DxRadioGroupModule,
-
+  DxTemplateModule,
   DxListModule,
   DxBoxModule,
   DxButtonModule,
@@ -86,7 +86,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxToolbarModule, 
+  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxToolbarModule, DxTemplateModule,
     DxListModule, DxNumberBoxModule, DxCheckBoxModule, DxSelectBoxModule, DxButtonModule, DxBoxModule, DxSelectBoxModule,DxRadioGroupModule, DxDateBoxModule],
   providers: [AuthGuardService],
   exports: [RouterModule],

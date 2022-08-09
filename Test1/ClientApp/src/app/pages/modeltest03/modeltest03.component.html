@@ -22,10 +22,12 @@
 
   <dxi-item location="after"
             widget="dxButton"
-            locateInMenu="auto"
-            [options]="addButtonOptions">
+            locateInMenu="auto">
     <div *dxTemplate>
-      <dx-button icon="add" (onClick)="saveDataGrid($event)">
+      <!--<dx-button icon="add" (onClick)="saveDataGrid($event)">
+      </dx-button>-->
+
+      <dx-button icon="add" (onClick)="addDataGrid($event)">
       </dx-button>
     </div>
   </dxi-item>
@@ -39,8 +41,122 @@
 </dx-toolbar>
 
 
+<!-- Master 데이터 정보, 입력 -->
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="dataSource"
+              [showBorders]="true"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              [columnHidingEnabled]="true"
+              (onFocusedRowChanged)="optionFocusedRowChanged($event)">
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+  <dxo-filter-row [visible]=" true"></dxo-filter-row>
 
 
+
+  <dxo-editing mode="popup"
+               [allowUpdating]="true"
+               [allowDeleting]="true">
+
+    <dxo-popup title="Employee Info"
+               [showTitle]="true"
+               [width]="700"
+               [height]="650">
+
+    </dxo-popup>
+    <dxo-form>
+      <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+        <dxi-item dataField="dATA1"></dxi-item>
+        <dxi-item dataField="dATA2"></dxi-item>
+        <dxi-item dataField="dATA3" [colSpan]="2"></dxi-item>
+        <dxi-item dataField="nUM1" [colSpan]="2"></dxi-item>
+        <dxi-item dataField="cOD1">
+          <dxo-lookup [dataSource]="states" displayExpr="Name" valueExpr="ID">
+          </dxo-lookup>
+        </dxi-item>
+        <dxi-item>
+          <dxo-label text="직책"></dxo-label>
+          <div *dxTemplate>
+            <dx-drop-down-box [(value)]="gridBoxValue"
+                              valueExpr="ID"
+                              displayExpr="Name"
+                              placeholder="Select a value..."
+                              [showClearButton]="true"
+                              [dataSource]="roles">
+
+              <dx-data-grid [dataSource]="roles"
+                            [columns]="['ID', 'Name']"
+                            [selection]="{ mode: 'multiple' }"
+                            [hoverStateEnabled]="true"
+                            [paging]="{ enabled: true, pageSize: 10 }"
+                            [filterRow]="{ visible: true }"
+                            [scrolling]="{ mode: 'virtual' }"
+                            [height]="345"
+                            keyExpr="ID"
+                            [(selectedRowKeys)]="gridBoxValue">
+              </dx-data-grid>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="updat" caption="일자">
+          <dx-date-box type="date"
+                       [(value)]="now"
+                       pickerType="rollers"
+                       displayFormat="MM-dd-yyyy"
+                       [useMaskBehavior]="true"
+                       [showClearButton]="true">
+          </dx-date-box>
+        </dxi-item>
+
+        <dxi-item dataField="uptim" caption="시간">
+          <dx-date-box type="time"
+                       [(value)]="now"
+                       pickerType="rollers"
+                       displayFormat="HH:mm:ss"
+                       [useMaskBehavior]="true"
+                       [showClearButton]="true">
+          </dx-date-box>
+        </dxi-item>
+
+      </dxi-item>
+
+    </dxo-form>
+  </dxo-editing>
+  <dxi-column dataField="dATA1"
+              [width]="90">
+  </dxi-column>
+  <dxi-column dataField="dATA2"
+              [width]="190"
+              caption="데이터1">
+  </dxi-column>
+  <dxi-column dataField="dATA3"
+              caption="데이터2">
+  </dxi-column>
+  <dxi-column dataField="nUM1"
+              caption="숫자">
+  </dxi-column>
+
+  <dxi-column dataField="cOD1" caption="상태">
+    <dxo-lookup [dataSource]="states" displayExpr="Name" valueExpr="ID">
+    </dxo-lookup>
+  </dxi-column>
+
+  <dxi-column dataField="sEL1" caption="직책">
+
+  </dxi-column>
+
+  <dxi-column dataField="updat"
+              dataType="date"
+              caption="수정/추가 일자">
+  </dxi-column>
+  <dxi-column dataField="uptim"
+              dataType="time"
+              caption="수정/추가 시간">
+  </dxi-column>
+</dx-data-grid>
 
 <!-- 폼 데이터 -->
 <div class="widget-container">
@@ -67,236 +183,22 @@
 </div>
 
 
-
-
-<!-- 데이터 정보 -->
-<!--<dxo-editing mode="popup"
-             [allowAdding]="true"
-             [allowDeleting]="true"
-             refreshMode="repaint">
-
-  <dxo-popup title="Employee Info"
-             [showTitle]="true"
-             [width]="700"
-             [height]="650">
-
-  </dxo-popup>
-  <dxo-form>
-    <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-      <dxi-item dataField="dATA1"></dxi-item>
-      <dxi-item dataField="dATA2"></dxi-item>
-      <dxi-item dataField="dATA3" [colSpan]="2"></dxi-item>
-      <dxi-item dataField="nUM1" [colSpan]="2"></dxi-item>
-      <dxi-item dataField="cOD1"></dxi-item>
-      <dxi-item>
-        <dxo-label text="직책"></dxo-label>
-        <div *dxTemplate>
-          <dx-drop-down-box [(value)]="gridBoxValue"
-                            valueExpr="ID"
-                            displayExpr="Name"
-                            placeholder="Select a value..."
-                            [showClearButton]="true"
-                            [dataSource]="roles">
-
-            <dx-data-grid [dataSource]="roles"
-                          [columns]="['ID', 'Name']"
-                          [selection]="{ mode: 'multiple' }"
-                          [hoverStateEnabled]="true"
-                          [paging]="{ enabled: true, pageSize: 10 }"
-                          [filterRow]="{ visible: true }"
-                          [scrolling]="{ mode: 'virtual' }"
-                          [height]="345"
-                          keyExpr="ID"
-                          [(selectedRowKeys)]="gridBoxValue">
-            </dx-data-grid>
-          </dx-drop-down-box>
-        </div>
-      </dxi-item>
-      <dxi-item dataField="updat" caption="일자">
-        <dx-date-box type="date"
-                     [(value)]="now"
-                     pickerType="rollers"
-                     displayFormat="MM-dd-yyyy"
-                     [useMaskBehavior]="true"
-                     [showClearButton]="true">
-        </dx-date-box>
-      </dxi-item>
-
-      <dxi-item dataField="uptim" caption="시간">
-        <dx-date-box type="time"
-                     [(value)]="now"
-                     pickerType="rollers"
-                     displayFormat="HH:mm:ss"
-                     [useMaskBehavior]="true"
-                     [showClearButton]="true">
-        </dx-date-box>
-      </dxi-item>
-
-    </dxi-item>
-
-  </dxo-form>
-</dxo-editing>-->
-<!--<dx-data-grid id="gridContainer"
-              [dataSource]="dataSource"
-              keyExpr="ID"
-              [showBorders]="true">
-  <dxo-paging [enabled]="false"></dxo-paging>
-
-  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-  <dxo-filter-row [visible]=" true"></dxo-filter-row>
-  <dxo-editing mode="batch"
-               [allowUpdating]="true"
-               [allowAdding]="true"
-               [allowDeleting]="true"
-               [selectTextOnEditStart]="selectTextOnEditStart"
-               [startEditAction]="startEditAction">
-    <dxi-item itemType="group" caption="System Information">
-      <dxi-item dataField="DATA1"></dxi-item>
-      <dxi-item dataField="ITMNO"></dxi-item>
-      <dxi-item dataField="DETAIL1"></dxi-item>
-      <dxi-item dataField="DETAIL2"></dxi-item>
-      <dxi-item dataField="DETNUM1"></dxi-item>
-      <dxi-item dataField="DETNUM2"></dxi-item>
-    </dxi-item>
-    <dxi-item itemType="group" caption="Personal Data">
-      <dxi-item dataField="DETSEL1''">
-
-        <div class="dx-field">
-          <div class="dx-field-label">사용</div>
-          <div class="dx-field-value">
-            <dx-check-box [value]="true"></dx-check-box>
-          </div>
-        </div>
-        <div class="dx-field">
-          <div class="dx-field-label"></div>
-          <div class="dx-field-value">
-            <dx-check-box [value]="false"></dx-check-box>
-          </div>
-        </div>
-      </dxi-item>
-      <dxi-item dataField="DETSEL2">
-
-        <div class="dx-field-label">Horizontal layout</div>
-        <div class="dx-field-value">
-          <dx-radio-group [items]="priorities"
-                          [value]="priorities[0]"
-                          layout="horizontal">
-          </dx-radio-group>
-        </div>
-      </dxi-item>
-      <dxi-item dataField="OfficeNo">
-        <dxo-label text="옵션"></dxo-label>
-        <div *dxTemplate>
-          <dx-drop-down-box [(value)]="gridBoxValue"
-                            valueExpr="ID"
-                            displayExpr="Name"
-                            placeholder="Select a value..."
-                            [showClearButton]="true"
-                            [dataSource]="option">
-            <dx-data-grid [dataSource]="option"
-                          [columns]="['ID', 'Name']"
-                          [selection]="{ mode: 'multiple' }"
-                          [hoverStateEnabled]="true"
-                          [paging]="{ enabled: true, pageSize: 10 }"
-                          [filterRow]="{ visible: true }"
-                          [scrolling]="{ mode: 'virtual' }"
-                          [height]="345"
-                          keyExpr="ID"
-                          [(selectedRowKeys)]="gridBoxValue">
-            </dx-data-grid>
-          </dx-drop-down-box>
-        </div>
-      </dxi-item>
-      <dxi-item dataField="updat">
-        <dxo-label text="날짜"></dxo-label>
-        <dx-date-box [value]="now" type="date" [useMaskBehavior]="true" [showClearButton]="true">
-        </dx-date-box>
-      </dxi-item>
-      <dxi-item dataField="OfficeNo">
-        <dxo-label text="시간"></dxo-label>
-        <dx-date-box [value]="now" type="time" pickerType="rollers" displayFormat="HH:mm:ss" [useMaskBehavior]="true" [showClearButton]="true">
-        </dx-date-box>
-      </dxi-item>
-    </dxi-item>
-  </dxo-editing>
-
-
-  <dxi-item location="before"
-            widget="dxButton"
-            locateInMenu="auto"
-            [options]="addButtonOptions">
-    <div *dxTemplate>
-      <dx-button icon="add" (onClick)="addDataGrid($event)">
-      </dx-button>
-    </div>
-  </dxi-item>
-  <dxi-column dataField="dATA1"
-              [width]="90">
-  </dxi-column>
-  <dxi-column dataField="dATA2"
-              [width]="190"
-              caption="데이터1">
-  </dxi-column>
-  <dxi-column dataField="dATA3"
-              caption="데이터2">
-  </dxi-column>
-  <dxi-column dataField="nUM1"
-              caption="숫자">
-  </dxi-column>
-
-  <dxi-column dataField="cOD1" caption="상태">
-    <dxo-lookup [dataSource]="states" displayExpr="Name" valueExpr="ID">
-    </dxo-lookup>
-  </dxi-column>
-
-  <dxi-column dataField="sEL1" caption="직책">
-    <dxo-lookup [dataSource]="roles" displayExpr="Name" valueExpr="ID">
-    </dxo-lookup>
-  </dxi-column>
-  <dxi-column dataField="updat"
-              dataType="date"
-              caption="수정/추가 일자">
-  </dxi-column>
-  <dxi-column dataField="uptim"
-              dataType="time"
-              caption="수정/추가 시간">
-  </dxi-column>
-
-</dx-data-grid>-->
+<!-- Detail 데이터 정보, 입력 -->
 
 <div id="data-grid-demo">
   <dx-data-grid id="gridContainer"
                 [dataSource]="dataSource"
-                keyExpr="ID"
                 [showBorders]="true">
 
     <dxo-paging [enabled]="false"></dxo-paging>
     <dxo-editing mode="batch"
                  [allowUpdating]="true"
-                 [allowAdding]="true"
                  [allowDeleting]="true"
+                 [allowAdding]="true"
                  [selectTextOnEditStart]="selectTextOnEditStart"
                  [startEditAction]="startEditAction">
     </dxo-editing>
-    <dxi-item dataField="dATA1"></dxi-item>
-    <dxi-item dataField="iTMNO"></dxi-item>
-    <dxi-item dataField="dETAIL1"></dxi-item>
-    <dxi-item dataField="dETAIL2"></dxi-item>
-    <dxi-item dataField="dETNUM1"></dxi-item>
-    <dxi-item dataField="dETNUM2"></dxi-item>
-    <dxi-item dataField="dETSEL1"></dxi-item>
-    <dxi-item dataField="dETSEL2"></dxi-item>
-    <dxi-item dataField="dETOPT"></dxi-item>
-    <dxi-item dataField="updat">
-      <dxo-label text="날짜"></dxo-label>
-      <dx-date-box [value]="now" dataType="date" [useMaskBehavior]="true" [showClearButton]="true">
-      </dx-date-box>
-    </dxi-item>
-    <dxi-item dataField="uptim">
-      <dxo-label text="시간"></dxo-label>
-      <dx-date-box [value]="now" dataType="time" pickerType="rollers" displayFormat="HH:mm:ss" [useMaskBehavior]="true" [showClearButton]="true">
-      </dx-date-box>
-    </dxi-item>
+
 
 
     <dxi-column dataField="dATA1" caption="dATA1"> </dxi-column>
@@ -343,7 +245,7 @@
     </dxi-column>
 
 
-
+    <!-- 셀 템플릿-->
     <!--Sel1 cellTemplate-->
     <div *dxTemplate="let data of 'Sel1cellTemplate'">
       <div class="dx-field">
@@ -357,7 +259,6 @@
         <dx-check-box [value]="false"></dx-check-box>
       </div>
     </div>
-
     <!--Sel2 cellTemplate-->
     <div *dxTemplate="let data of 'Sel2cellTemplate'">
       <dxo-label text="Sel2" alignment="center"></dxo-label>
@@ -371,7 +272,6 @@
         </div>
       </div>
     </div>
-
     <!--Opt cellTemplate-->
     <dxo-label text="옵션"></dxo-label>
     <div *dxTemplate="let data of 'OptcellTemplate'">
@@ -395,7 +295,6 @@
         </dx-data-grid>
       </dx-drop-down-box>
     </div>
-
     <!--date cellTemplate-->
     <div *dxTemplate="let data of 'datcellTemplate'">
       <dx-date-box type="date"
@@ -405,8 +304,6 @@
       </dx-date-box>
 
     </div>
-
-
     <!--time cellTemplate-->
     <div *dxTemplate="let data of 'timcellTemplate'">
       <dx-date-box type="time"
@@ -418,5 +315,14 @@
 
     </div>
   </dx-data-grid>
+
+  <div class="options">
+    <div class="caption">Options</div>
+    <div class="option">
+      <dx-check-box [(value)]="selectTextOnEditStart"
+                    text="Select Text on Edit Start">
+      </dx-check-box>
+    </div>
   </div>
+</div>
 

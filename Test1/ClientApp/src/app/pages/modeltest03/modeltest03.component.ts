@@ -33,7 +33,8 @@ if (!/localhost/.test(document.location.host)) {
 
 @Component({
   templateUrl: 'modeltest03.component.html',
-  providers: [ImateDataService, Service]
+  providers: [ImateDataService, Service],
+  styleUrls: ['modeltest03.component.css']
 })
 
 export class Modeltest03Component {
@@ -100,7 +101,7 @@ export class Modeltest03Component {
 
   startEditAction = 'dblclick';
 
-  selectTextOnEditStart = true;
+  selectTextOnEditStart:any = true;
 
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo) {
 
@@ -159,9 +160,9 @@ export class Modeltest03Component {
           return modelTest01.dataLoad(imInfo, dataService);
         },
 
-        //insert: function (values) {
-        //  return modelTest01.dataInsert(values);                                                                얘 주석 지우기
-        //},
+        insert: function (values) {
+          return modelTest01.dataInsert(values);                                                          
+        },
 
         //update: (key, values) => this.dataModify(key, values),
         remove: function (key) {
@@ -245,19 +246,19 @@ export class Modeltest03Component {
   }
 
 
-  //// 데이터 삽입
-  //public async dataInsert(values: ZXNSCRFCResultModel) {
-  //  //data 서버로 넘기기 위해 쉼표 join
-  //  values.sEL1 = this.gridBoxValue.join(",");
-  //  values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");                                                                 얘 주석 지워야함
-  //  values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
+  // 데이터 삽입
+  public async dataInsert(values: ZXNSCRFCResultModel) {
+    //data 서버로 넘기기 위해 쉼표 join
+    values.sEL1 = this.gridBoxValue.join(",");
+    values.uptim = formatDate(this.now, "HH:mm:ss", "en-US");                                                                
+    values.updat = formatDate(this.now, "MM-dd-yyyy", "en-US");
 
-  //  var insertData = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Add);
-  //  //var insertData2 = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, DIMModelStatus.Add);
+    var insertData = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, values.nUM1, values.cOD1, values.sEL1, values.updat, values.uptim, DIMModelStatus.Add);
+    //var insertData2 = new ZXNSCRFCResultModel(values.dATA1, values.dATA2, values.dATA3, DIMModelStatus.Add);
 
-  //  var modelList: ZXNSCRFCResultModel[] = [values, insertData];
-  //  this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
-  //}
+    var modelList: ZXNSCRFCResultModel[] = [values, insertData];
+    this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCResultModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCResultModelList", modelList);
+  }
 
 
   //데이터 수정
@@ -309,5 +310,8 @@ export class Modeltest03Component {
       : this.labelMode;
   }
 
+  addDataGrid(e: any) {
+    this.dataGrid.instance.addRow();
+  }
 
 }

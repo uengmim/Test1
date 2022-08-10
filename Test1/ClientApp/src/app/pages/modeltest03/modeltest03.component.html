@@ -180,15 +180,14 @@
            [width]="width">
 
   </dx-form>
-</div>
 
 
 <!-- Detail 데이터 정보, 입력 -->
 
-<div id="data-grid-demo">
   <dx-data-grid id="gridContainer"
-                [dataSource]="dataSource"
-                [showBorders]="true">
+                [(dataSource)]="company.value"
+                [showBorders]="true"
+                >
 
     <dxo-paging [enabled]="false"></dxo-paging>
     <dxo-editing mode="batch"

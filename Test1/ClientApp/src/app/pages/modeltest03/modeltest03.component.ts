@@ -314,4 +314,5 @@ export class Modeltest03Component {
     this.dataGrid.instance.addRow();
   }
 
-}
+
+  }

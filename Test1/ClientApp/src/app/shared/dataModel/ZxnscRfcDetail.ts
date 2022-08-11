@@ -22,13 +22,13 @@ import { DIMModelStatus } from '../imate/dimModelStatusEnum'
         public dETAIL2: string,
 
         // dETUM1 Field
-        public dETUM1: number,
+        public dETNUM1: number,
 
         // dETUM2 Field
-        public dATUM2: number,
+        public dATNUM2: number,
 
         // dETSEL1 Field
-        public dETSEL1: string,
+        public dETSEL1: boolean,
 
         // dETSEL2 Field
         public dETSEL2: string,

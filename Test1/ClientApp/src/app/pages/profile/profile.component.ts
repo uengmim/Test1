@@ -16,7 +16,7 @@ export class ProfileComponent {
       LastName: 'Seungmin',
       Prefix: 'Ms.',
       Position: 'Controller',
-      Picture: 'images/employees/06.png',
+      Picture: 'images/employees/01.png',
       BirthDate: new Date('1998/10/14'),
       HireDate: new Date('2022/07/18'),
       /* tslint:disable-next-line:max-line-length */

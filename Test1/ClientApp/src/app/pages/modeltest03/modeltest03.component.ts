@@ -13,17 +13,7 @@ import { alert } from "devextreme/ui/dialog"
 
 import {
   DxDataGridComponent,
-  DxRangeSelectorModule,
-  DxDropDownBoxModule,
-  DxBoxModule,
-  DxDataGridModule,
-  DxButtonModule,
-  DxTemplateModule,
-  DxFormModule,
-  DxDateBoxModule,
-  DxRadioGroupModule,
   DxSelectBoxModule,
-  DxCheckBoxModule,
 } from 'devextreme-angular';
 import { formatDate } from '@angular/common';
 import { ZXNSCRFCDetailModel } from '../../shared/dataModel/ZxnscRfcDetail';
@@ -31,6 +21,7 @@ import { ZXNSCRFCDetailModel } from '../../shared/dataModel/ZxnscRfcDetail';
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
 }
+
 
 @Component({
   templateUrl: 'modeltest03.component.html',
@@ -124,6 +115,8 @@ export class Modeltest03Component {
       },
     };
 
+    //데이터 바인딩
+    this.onValueChanged = this.onValueChanged.bind(this);
     // dropdownbox
     this.states = service.getStates();
     this.roles = service.getRoles();
@@ -171,8 +164,7 @@ export class Modeltest03Component {
       });
    
   }
-
-
+  
 
   // 날짜 계산
   get diffInDay() {
@@ -317,7 +309,6 @@ export class Modeltest03Component {
     let val = e.component.cellvalue(e.rowindex, "sEL1");
     this.gridBoxValue = val.split(",");
   }
-
   optionFocusedRowChanged(e: any) {
     let val = e.component.cellvalue(e.rowindex, "dETSEL2");
     this.gridBoxValue = val.split(",");
@@ -333,14 +324,24 @@ export class Modeltest03Component {
       ? 'hidden'
       : this.labelMode;
   }
-
+  //저장 칸 추가
   addDataGrid(e: any) {
     this.dataGrid.instance.addRow();
   }
-
+  //디테일 테이블 저장
   async onSaved(e: any) {
     this.rowCount = await this._dataService.ModifyModelData<ZXNSCRFCDetailModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCDetailModelList", this.detaildataSource);
     alert("", this.rowCount.toString());
   }
 
+  //체크박스, 라디오버튼 데이터
+  valuechange(e: any, data: any, value: any): void {
+    this.dataGrid.instance.cellValue(data.rowIndex, data.column.dataField, value);
+
+    this.dataGrid.instance.saveEditData();
+  }
+  //데이터 바인딩
+  onValueChanged(e:any, row:any) {
+    row.setValue(e.value);
+  }
   }

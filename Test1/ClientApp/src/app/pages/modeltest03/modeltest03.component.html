@@ -213,7 +213,7 @@
                 caption="dETSEL1"
                 [allowFiltering]="false"
                 [allowSorting]="false"
-                [width]="300"
+                [width]="150"
                 cellTemplate="Sel1cellTemplate">
     </dxi-column>
 
@@ -229,18 +229,22 @@
                 caption="dETOPT"
                 [allowFiltering]="false"
                 [allowSorting]="false"
-                [width]="400"
+                [width]="200"
                 cellTemplate="OptcellTemplate">
 
     </dxi-column>
     <dxi-column dataField="updat"
                 dataType="date"
+                [allowFiltering]="false"
+                [allowSorting]="false"
                 caption="수정/추가 일자"
                 cellTemplate="datcellTemplate"
                 [width]="250">
     </dxi-column>
     <dxi-column dataField="uptim"
                 dataType="time"
+                [allowFiltering]="false"
+                [allowSorting]="false"
                 caption="수정/추가 시간"
                 cellTemplate="timcellTemplate">
     </dxi-column>
@@ -248,16 +252,16 @@
 
     <!-- 셀 템플릿-->
     <!--Sel1 cellTemplate-->
-    <div *dxTemplate="let d of 'Sel1cellTemplate'">
+    <div *dxTemplate="let data of 'Sel1cellTemplate'">
       <div class="dx-field">
         <div class="dx-field-label">사용</div>
         <div class="dx-field-value">
-          <dx-check-box [value]="true"></dx-check-box>
+          <input #cb type="checkbox"  [value]="true" (change)="valuechange($event, data, cb.checked)" />
         </div>
       </div>
       <div class="dx-field-label">사용안함</div>
       <div class="dx-field-value">
-        <dx-check-box [value]="false"></dx-check-box>
+        <input #cb type="checkbox" [value]="false" (change)="valuechange($event, data, cb.checked)" />
       </div>
     </div>
     <!--Sel2 cellTemplate-->
@@ -266,35 +270,45 @@
       <div class="dx-field">
         <div class="dx-field-label">Options</div>
         <div class="dx-field-value">
-          <dx-radio-group [items]="priorities"
+          <dx-radio-group #rg
+                          [items]="priorities"
                           [value]="priorities[0]"
-                          layout="horizontal">
+                          layout="horizontal"
+                          (change)="valuechange($event, data, rg)">
           </dx-radio-group>
+
         </div>
       </div>
     </div>
     <!--Opt cellTemplate-->
     <dxo-label text="옵션"></dxo-label>
-    <div *dxTemplate="let d of 'OptcellTemplate'">
-      <dx-drop-down-box [(value)]="gridBoxValue"
-                        valueExpr="ID"
-                        displayExpr="Name"
-                        placeholder="Select a value..."
-                        [showClearButton]="true"
-                        [dataSource]="option">
+    <div *dxTemplate="let data of 'OptcellTemplate'">
+      <!--<dx-drop-down-box #dd
+                    [(value)]="gridBoxValue"
+                    valueExpr="ID"
+                    displayExpr="Name"
+                    placeholder="Select a value..."
+                    [showClearButton]="true"
+                    [dataSource]="option"
+                    (onValueChanged)="onValueChanged($event, data)">
 
-        <dx-data-grid [dataSource]="option"
-                      [columns]="['ID', 'Name']"
-                      [selection]="{ mode: 'multiple' }"
-                      [hoverStateEnabled]="true"
-                      [paging]="{ enabled: true, pageSize: 10 }"
-                      [filterRow]="{ visible: true }"
-                      [scrolling]="{ mode: 'virtual' }"
-                      [height]="345"
-                      keyExpr="ID"
-                      [(selectedRowKeys)]="gridBoxValue">
-        </dx-data-grid>
-      </dx-drop-down-box>
+    <dx-data-grid [dataSource]="option"
+                  [columns]="['ID', 'Name']"
+                  [selection]="{ mode: 'multiple' }"
+                  [hoverStateEnabled]="true"
+                  [paging]="{ enabled: true, pageSize: 10 }"
+                  [filterRow]="{ visible: true }"
+                  [scrolling]="{ mode: 'virtual' }"
+                  [height]="345"
+                  keyExpr="ID"
+                  [(selectedRowKeys)]="gridBoxValue">
+    </dx-data-grid>
+  </dx-drop-down-box>-->
+      <Select>
+        <option>버튼 추가</option>
+        <option>악세사리 추가</option>
+        <option>외부 안테나 추가</option>
+      </Select>
     </div>
     <!--date cellTemplate-->
     <div *dxTemplate="let data of 'datcellTemplate'">

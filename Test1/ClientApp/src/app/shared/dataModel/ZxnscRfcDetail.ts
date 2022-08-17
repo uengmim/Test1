@@ -3,6 +3,7 @@
 // RUN : imatecc gen_md -title INA -object "ZXNSC_RFC_RESULT" -output "ZxnscRfcResult.ts" -mtype "proxy" -lang "ts"
 
 import { DIMModelStatus } from '../imate/dimModelStatusEnum'
+import { Injectable } from '@angular/core';
 
   /** 
     * ZXNSCRFCResultModel(ZXNSC_RFC_RESULT) Proxy class
@@ -28,7 +29,7 @@ import { DIMModelStatus } from '../imate/dimModelStatusEnum'
         public dATNUM2: number,
 
         // dETSEL1 Field
-        public dETSEL1: boolean,
+        public dETSEL1: string,
 
         // dETSEL2 Field
         public dETSEL2: string,

@@ -3,15 +3,7 @@
 <!-- 툴바 -->
 
 <dx-toolbar>
-  
   <dxi-item location="before" widget="dxButton" [options]="backButtonOptions">
-  </dxi-item>
-
-  <dxi-item location="before">
-    <div *dxTemplate>
-      <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
-      </dx-button>
-    </div>
   </dxi-item>
 
   <dxi-item location="center" widget="dxButton" locateInMenu="never">
@@ -22,141 +14,16 @@
 
   <dxi-item location="after"
             widget="dxButton"
-            locateInMenu="auto">
-    <div *dxTemplate>
-      <!--<dx-button icon="add" (onClick)="saveDataGrid($event)">
-      </dx-button>-->
-
-      <dx-button icon="add" (onClick)="addDataGrid($event)">
-      </dx-button>
-    </div>
+            locateInMenu="auto"
+            [options]="addMasterButtonOptions">
   </dxi-item>
 
-
-  <dxi-item widget="dxButton"
-            locateInMenu="always"
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
             [options]="saveButtonOptions">
   </dxi-item>
-
 </dx-toolbar>
-
-
-<!-- Master 데이터 정보, 입력 -->
-
-<dx-data-grid class="dx-card wide-card"
-              [dataSource]="dataSource"
-              [showBorders]="true"
-              [focusedRowEnabled]="true"
-              [focusedRowIndex]="0"
-              [columnAutoWidth]="true"
-              [columnHidingEnabled]="true"
-              (onFocusedRowChanged)="optionFocusedRowChanged($event)">
-  <dxo-paging [pageSize]="10"></dxo-paging>
-  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-  <dxo-filter-row [visible]=" true"></dxo-filter-row>
-
-
-
-  <dxo-editing mode="popup"
-               [allowUpdating]="true"
-               [allowDeleting]="true">
-
-    <dxo-popup title="Employee Info"
-               [showTitle]="true"
-               [width]="700"
-               [height]="650">
-
-    </dxo-popup>
-    <dxo-form>
-      <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-        <dxi-item dataField="dATA1"></dxi-item>
-        <dxi-item dataField="dATA2"></dxi-item>
-        <dxi-item dataField="dATA3" [colSpan]="2"></dxi-item>
-        <dxi-item dataField="nUM1" [colSpan]="2"></dxi-item>
-        <dxi-item dataField="cOD1">
-          <dxo-lookup [dataSource]="states" displayExpr="Name" valueExpr="ID">
-          </dxo-lookup>
-        </dxi-item>
-        <dxi-item>
-          <dxo-label text="직책"></dxo-label>
-          <div *dxTemplate>
-            <dx-drop-down-box [(value)]="gridBoxValue"
-                              valueExpr="ID"
-                              displayExpr="Name"
-                              placeholder="Select a value..."
-                              [showClearButton]="true"
-                              [dataSource]="roles">
-
-              <dx-data-grid [dataSource]="roles"
-                            [columns]="['ID', 'Name']"
-                            [selection]="{ mode: 'multiple' }"
-                            [hoverStateEnabled]="true"
-                            [paging]="{ enabled: true, pageSize: 10 }"
-                            [filterRow]="{ visible: true }"
-                            [scrolling]="{ mode: 'virtual' }"
-                            [height]="345"
-                            keyExpr="ID"
-                            [(selectedRowKeys)]="gridBoxValue">
-              </dx-data-grid>
-            </dx-drop-down-box>
-          </div>
-        </dxi-item>
-        <dxi-item dataField="updat" caption="일자">
-          <dx-date-box type="date"
-                       [(value)]="now"
-                       pickerType="rollers"
-                       displayFormat="MM-dd-yyyy"
-                       [useMaskBehavior]="true"
-                       [showClearButton]="true">
-          </dx-date-box>
-        </dxi-item>
-
-        <dxi-item dataField="uptim" caption="시간">
-          <dx-date-box type="time"
-                       [(value)]="now"
-                       pickerType="rollers"
-                       displayFormat="HH:mm:ss"
-                       [useMaskBehavior]="true"
-                       [showClearButton]="true">
-          </dx-date-box>
-        </dxi-item>
-
-      </dxi-item>
-
-    </dxo-form>
-  </dxo-editing>
-  <dxi-column dataField="dATA1"
-              [width]="90">
-  </dxi-column>
-  <dxi-column dataField="dATA2"
-              [width]="190"
-              caption="데이터1">
-  </dxi-column>
-  <dxi-column dataField="dATA3"
-              caption="데이터2">
-  </dxi-column>
-  <dxi-column dataField="nUM1"
-              caption="숫자">
-  </dxi-column>
-
-  <dxi-column dataField="cOD1" caption="상태">
-    <dxo-lookup [dataSource]="states" displayExpr="Name" valueExpr="ID">
-    </dxo-lookup>
-  </dxi-column>
-
-  <dxi-column dataField="sEL1" caption="직책">
-
-  </dxi-column>
-
-  <dxi-column dataField="updat"
-              dataType="date"
-              caption="수정/추가 일자">
-  </dxi-column>
-  <dxi-column dataField="uptim"
-              dataType="time"
-              caption="수정/추가 시간">
-  </dxi-column>
-</dx-data-grid>
 
 
 
@@ -164,14 +31,17 @@
 <div class="widget-container">
   <div *ngIf="labelMode === 'outside'">Select company:</div>
 
-
   <dx-select-box #company
                  displayExpr="dATA1"
-                 [(dataSource)]="dataSource"
+                 [dataSource]="dataSource"
                  label="Select Data"
                  [labelMode]="getCompanySelectorLabelMode()"
-                 [value]="dataSource[0]"></dx-select-box>
-  <dx-form id="form"
+                 [value]="dataSource[0]"
+                 (onSelectionChanged)="companyChanged($event)"> <!--폼에서 MasterTable 안의 data 클릭시 DetailTable data출력-->
+  </dx-select-box>
+
+  <dx-form #masterForm
+           id="form"
            [(formData)]="company.value"
            [readOnly]="readOnly"
            [labelMode]="labelMode"
@@ -180,18 +50,20 @@
            [minColWidth]="minColWidth"
            [colCount]="3"
            [width]="width">
-
   </dx-form>
 
-
-<!-- Detail 데이터 정보, 입력 -->
-
-  <dx-data-grid id="gridContainer"
+  <!-- Detail 데이터 정보, 입력 -->
+  <dx-data-grid #detailGrid
+                id="gridContainer"
                 [(dataSource)]="detaildataSource"
+                keyExpr="itmno"
                 [showBorders]="true"
-                (onSaved)="onSaved($event)">
+                (onFocusedRowChanged)="detailRowChanged($event)">
+    <!--상세 자료 Row 변경-->
 
     <dxo-paging [enabled]="false"></dxo-paging>
+
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
     <dxo-editing mode="batch"
                  [allowUpdating]="true"
                  [allowDeleting]="true"
@@ -199,138 +71,148 @@
                  [selectTextOnEditStart]="selectTextOnEditStart"
                  [startEditAction]="startEditAction">
     </dxo-editing>
+    <dxo-selection mode="multiple"></dxo-selection>
 
+    <dxo-toolbar>
+      <dxi-item location="after"
+                widget="dxButton"
+                locateInMenu="auto"
+                [options]="addDetailButtonOptions">
+        <!--디테일 정보 추가 버튼-->
+      </dxi-item>
 
+      <dxi-item location="after"
+                widget="dxButton"
+                locateInMenu="auto"
+                [options]="cancelEditButtonOptions">
+        <!--편집 취소 버튼-->
+      </dxi-item>
 
-    <dxi-column dataField="dATA1" caption="dATA1"> </dxi-column>
-    <dxi-column dataField="iTMNO" caption="iTMNO"> </dxi-column>
-    <dxi-column dataField="dETAIL1" caption="dETAIL1"> </dxi-column>
-    <dxi-column dataField="dETAIL2" caption="dETAIL2"> </dxi-column>
-    <dxi-column dataField="dETNUM1" caption="dETNUM1"> </dxi-column>
-    <dxi-column dataField="dATNUM2" caption="dATNUM2" dataType="number"> </dxi-column>
+            <dxi-item location="after">
+        <dx-button
+          (onClick)="deleteRecords()"
+          [disabled]="!selectedItemKeys.length"
+          icon="trash"
+        >
+        </dx-button>
+      </dxi-item>
+    </dxo-toolbar>
+
+    <dxi-column dataField="dATA1" caption="DATA1" [width]="100">
+      <dxi-validation-rule type="required"></dxi-validation-rule>
+
+    </dxi-column>
+    <dxi-column dataField="itmno" caption="ITMNO" [width]="100">
+      <dxi-validation-rule type="required"></dxi-validation-rule>
+    </dxi-column>
+    <dxi-column dataField="dETAIL1" caption="DETAIL1" [width]="150"> </dxi-column>
+    <dxi-column dataField="dETAIL2" caption="DETAIL2" [width]="150"> </dxi-column>
+    <dxi-column dataField="dETNUM1" caption="DETNUM1" [width]="150"> </dxi-column>
+    <dxi-column dataField="dATNUM2" caption="DATNUM2" dataType="number" [width]="150"> </dxi-column>
 
     <dxi-column dataField="dETSEL1"
-                caption="dETSEL1"
+                caption="DETSEL1"
                 [allowFiltering]="false"
                 [allowSorting]="false"
-                [width]="150"
-                cellTemplate="Sel1cellTemplate">
+                [width]="220"
+                editCellTemplate="Sel1cellTemplate">
     </dxi-column>
 
     <dxi-column dataField="dETSEL2"
-                caption="dETSEL2"
+                caption="DETSEL2"
                 [allowFiltering]="false"
                 [allowSorting]="false"
-                [width]="500"
-                cellTemplate="Sel2cellTemplate">
+                [width]="300"
+                editCellTemplate="Sel2cellTemplate">
     </dxi-column>
 
-    <dxi-column dataField="dETOPT"
-                caption="dETOPT"
+    <dxi-column dataField="detopt"
+                caption="DETOPT"
                 [allowFiltering]="false"
                 [allowSorting]="false"
-                [width]="200"
-                cellTemplate="OptcellTemplate">
-
+                [width]="350"
+                editCellTemplate="OptcellTemplate">
     </dxi-column>
     <dxi-column dataField="updat"
                 dataType="date"
-                [allowFiltering]="false"
-                [allowSorting]="false"
                 caption="수정/추가 일자"
-                cellTemplate="datcellTemplate"
+                editCellTemplate="datcellTemplate"
                 [width]="250">
     </dxi-column>
     <dxi-column dataField="uptim"
                 dataType="time"
-                [allowFiltering]="false"
-                [allowSorting]="false"
                 caption="수정/추가 시간"
-                cellTemplate="timcellTemplate">
+                editCellTemplate="timcellTemplate"
+                [width]="250">
     </dxi-column>
-
 
     <!-- 셀 템플릿-->
     <!--Sel1 cellTemplate-->
-    <div *dxTemplate="let data of 'Sel1cellTemplate'">
-      <div class="dx-field">
-        <div class="dx-field-label">사용</div>
-        <div class="dx-field-value">
-          <input #cb type="checkbox"  [value]="true" (change)="valuechange($event, data, cb.checked)" />
-        </div>
-      </div>
-      <div class="dx-field-label">사용안함</div>
-      <div class="dx-field-value">
-        <input #cb type="checkbox" [value]="false" (change)="valuechange($event, data, cb.checked)" />
-      </div>
+    <div *dxTemplate="let cellInfo of 'Sel1cellTemplate'">
+      <dx-check-box [(value)]="cellInfo.value"
+                    (onValueChanged)="cellInfo.setValue($event.value)">
+        <!--onDetailOptionChanged-->
+      </dx-check-box>
     </div>
-    <!--Sel2 cellTemplate-->
-    <div *dxTemplate="let data of 'Sel2cellTemplate'">
-      <dxo-label text="Sel2" alignment="center"></dxo-label>
-      <div class="dx-field">
-        <div class="dx-field-label">Options</div>
-        <div class="dx-field-value">
-          <dx-radio-group #rg
-                          [items]="priorities"
-                          [value]="priorities[0]"
-                          layout="horizontal"
-                          (change)="valuechange($event, data, rg)">
-          </dx-radio-group>
 
-        </div>
-      </div>
+    <!--Sel2 cellTemplate-->
+    <div *dxTemplate="let cellInfo of 'Sel2cellTemplate'">
+      <dx-radio-group [items]="priorities"
+                      [(value)]="cellInfo.value"
+                      valueExpr="ID"
+                      displayExpr="Name"
+                      layout="horizontal"
+                      (onValueChanged)="cellInfo.setValue($event.value)">
+      </dx-radio-group>
     </div>
+
     <!--Opt cellTemplate-->
     <dxo-label text="옵션"></dxo-label>
-    <div *dxTemplate="let data of 'OptcellTemplate'">
-      <!--<dx-drop-down-box #dd
-                    [(value)]="gridBoxValue"
-                    valueExpr="ID"
-                    displayExpr="Name"
-                    placeholder="Select a value..."
-                    [showClearButton]="true"
-                    [dataSource]="option"
-                    (onValueChanged)="onValueChanged($event, data)">
+    <div *dxTemplate="let cellInfo of 'OptcellTemplate'">
+      <dx-drop-down-box [(value)]="selectedOption"
+                        valueExpr="ID"
+                        displayExpr="Name"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="option"
+                        (onValueChanged)="onDetailOptionChanged(cellInfo, $event)"
+                        (onSelectionChanged)="cellInfo.component.updateDimensions()">
+        <!--선택될 때마다 값 변경-->
 
-    <dx-data-grid [dataSource]="option"
-                  [columns]="['ID', 'Name']"
-                  [selection]="{ mode: 'multiple' }"
-                  [hoverStateEnabled]="true"
-                  [paging]="{ enabled: true, pageSize: 10 }"
-                  [filterRow]="{ visible: true }"
-                  [scrolling]="{ mode: 'virtual' }"
-                  [height]="345"
-                  keyExpr="ID"
-                  [(selectedRowKeys)]="gridBoxValue">
-    </dx-data-grid>
-  </dx-drop-down-box>-->
-      <Select>
-        <option>버튼 추가</option>
-        <option>악세사리 추가</option>
-        <option>외부 안테나 추가</option>
-      </Select>
+        <dx-data-grid [dataSource]="option"
+                      [columns]="['ID', 'Name']"
+                      [selection]="{ mode: 'multiple' }"
+                      [hoverStateEnabled]="true"
+                      [paging]="{ enabled: true, pageSize: 10 }"
+                      [filterRow]="{ visible: true }"
+                      [scrolling]="{ mode: 'virtual' }"
+                      [height]="345"
+                      keyExpr="ID"
+                      [(selectedRowKeys)]="selectedOption">
+        </dx-data-grid>
+      </dx-drop-down-box>
     </div>
+
     <!--date cellTemplate-->
-    <div *dxTemplate="let data of 'datcellTemplate'">
+    <div *dxTemplate="let cellInfo of 'datcellTemplate'">
       <dx-date-box type="date"
-                   [(value)]="now"
+                   [(value)]="cellInfo.value"
                    pickerType="rollers"
+                   (onValueChanged)="cellInfo.setValue($event.value)"
                    displayFormat="MM-dd-yyyy">
       </dx-date-box>
 
     </div>
     <!--time cellTemplate-->
-    <div *dxTemplate="let data of 'timcellTemplate'">
+    <div *dxTemplate="let cellInfo of 'timcellTemplate'">
       <dx-date-box type="time"
-                   [(value)]="now"
+                   [(value)]="cellInfo.value"
                    pickerType="rollers"
+                   (onValueChanged)="cellInfo.setValue($event.value)"
                    displayFormat="HH:mm:ss">
       </dx-date-box>
-
-
     </div>
+
   </dx-data-grid>
-
-
 </div>
 

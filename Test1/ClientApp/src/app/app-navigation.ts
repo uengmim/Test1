@@ -21,13 +21,17 @@ export const navigation = [
         path: '/modeltest01'
       },
       {
-        text: 'iMATE MODEL TEST2',
-        path: '/modeltest02'
-      },
-      {
         text: 'iMATE MODEL TEST3',
         path: '/modeltest03'
       },
+      {
+        text: 'iMATE PTSD001',
+        path: '/PTSD001'
+      },
+      {
+        text: 'iMATE PTSD002',
+        path: '/PTSD002'
+      }
     ]
   }
 ];

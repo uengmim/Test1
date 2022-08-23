@@ -3,19 +3,14 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppComponent } from './app.component';
 import { SideNavOuterToolbarModule, SideNavInnerToolbarModule, SingleCardModule } from './layouts';
-import { FooterModule, ResetPasswordFormModule, CreateAccountFormModule, ChangePasswordFormModule, LoginFormModule } from './shared/components';
+import { FooterModule, ResetPasswordFormModule, ChangePasswordFormModule, LoginFormModule } from './shared/components';
 import { AuthService, ScreenService, AppInfoService } from './shared/services';
 import { UnauthenticatedContentModule } from './unauthenticated-content';
 import { AppRoutingModule } from './app-routing.module';
-import { HttpClientModule } from '@angular/common/http';
 import { AppConfigService } from './shared/services/appconfig.service';
+import { HttpClientModule } from '@angular/common/http';
 import { ImateAuthService } from './shared/imate/imateAuthAdapter';
-import {
-  DxDropDownBoxModule,
-  DxTreeViewModule,
-  DxDataGridModule,
-  DxTreeViewComponent,
-} from 'devextreme-angular';
+
 @NgModule({
   declarations: [
     AppComponent
@@ -27,22 +22,16 @@ import {
     SingleCardModule,
     FooterModule,
     ResetPasswordFormModule,
-    CreateAccountFormModule,
     ChangePasswordFormModule,
     LoginFormModule,
     UnauthenticatedContentModule,
     AppRoutingModule,
-    HttpClientModule,
-    BrowserModule,
-    DxTreeViewModule,
-    DxDropDownBoxModule,
-    HttpClientModule,
-    DxDataGridModule,
+    HttpClientModule
   ],
   providers: [
     AuthService,
-    ScreenService,
     ImateAuthService,
+    ScreenService,
     AppInfoService,
     {
       provide: APP_INITIALIZER,

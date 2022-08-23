@@ -1,32 +1,19 @@
-import { NgModule, Component, enableProdMode } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { LoginFormComponent, ResetPasswordFormComponent, CreateAccountFormComponent, ChangePasswordFormComponent } from './shared/components';
+import { CommonModule } from '@angular/common';
+import { LoginFormComponent, ResetPasswordFormComponent, ChangePasswordFormComponent } from './shared/components';
 import { AuthGuardService } from './shared/services';
 import { HomeComponent } from './pages/home/home.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { TasksComponent } from './pages/tasks/tasks.component';
-import {
-  DxDataGridModule,
-  DxFormModule,
-  DxDropDownBoxModule,
-  DxToolbarModule,
-  DxSelectBoxModule,
-  DxCheckBoxModule,
-  DxRadioGroupModule,
-  DxTemplateModule,
-  DxListModule,
-  DxBoxModule,
-  DxButtonModule,
-  DxNumberBoxModule,
-  DxDateBoxModule
-} from 'devextreme-angular';
-import { Modeltest01Component } from './pages/modeltest01/modeltest01.component';
-import { Modeltest02Component } from './pages/modeltest02/modeltest02.component';
-import { Modeltest03Component } from './pages/modeltest03/modeltest03.component';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { BrowserModule } from '@angular/platform-browser';
+import { DxDataGridModule, DxFormModule, DxToolbarModule, DxSelectBoxModule, DxDropDownBoxModule, DxButtonModule, DxDateBoxModule, DxCheckBoxModule, DxRadioGroupModule } from 'devextreme-angular';
 
-  
+import { Modeltest01Component } from './pages/modeltest01/modeltest01.component';
+import { Modeltest03Component } from './pages/modeltest03/modeltest03.component';
+import { PTSD001Component } from './pages/PTSD001/PTSD001.component';
+import { PTSD002Component } from './pages/PTSD002/PTSD002.component';
+
+
 const routes: Routes = [
   {
     path: 'tasks',
@@ -49,13 +36,18 @@ const routes: Routes = [
     canActivate: [AuthGuardService]
   },
   {
-    path: 'modeltest02',
-    component: Modeltest02Component,
+    path: 'modeltest03',
+    component: Modeltest03Component,
     canActivate: [AuthGuardService]
   },
   {
-    path: 'modeltest03',
-    component: Modeltest03Component,
+    path: 'PTSD001',
+    component: PTSD001Component,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'PTSD002',
+    component: PTSD002Component,
     canActivate: [AuthGuardService]
   },
   {
@@ -69,11 +61,6 @@ const routes: Routes = [
     canActivate: [ AuthGuardService ]
   },
   {
-    path: 'create-account',
-    component: CreateAccountFormComponent,
-    canActivate: [ AuthGuardService ]
-  },
-  {
     path: 'change-password/:recoveryCode',
     component: ChangePasswordFormComponent,
     canActivate: [ AuthGuardService ]
@@ -81,13 +68,22 @@ const routes: Routes = [
   {
     path: '**',
     redirectTo: 'home'
-  },
-
+  }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true }), BrowserModule, DxDataGridModule, DxFormModule, DxDropDownBoxModule, DxToolbarModule, DxTemplateModule,
-    DxListModule, DxNumberBoxModule, DxCheckBoxModule, DxSelectBoxModule, DxButtonModule, DxBoxModule, DxSelectBoxModule,DxRadioGroupModule, DxDateBoxModule],
+  imports: [
+    RouterModule.forRoot(routes, { useHash: true }),
+    CommonModule,
+    DxDataGridModule,
+    DxButtonModule,
+    DxDateBoxModule,
+    DxRadioGroupModule,
+    DxFormModule,
+    DxCheckBoxModule,
+    DxToolbarModule,
+    DxSelectBoxModule,
+    DxDropDownBoxModule],
   providers: [AuthGuardService],
   exports: [RouterModule],
   declarations: [
@@ -95,15 +91,9 @@ const routes: Routes = [
     ProfileComponent,
     TasksComponent,
     Modeltest01Component,
-    Modeltest02Component,
     Modeltest03Component,
-
-    
-  ],
-  bootstrap: [Modeltest02Component],
-
+    PTSD001Component,
+    PTSD002Component
+  ]
 })
 export class AppRoutingModule { }
-platformBrowserDynamic().bootstrapModule(AppRoutingModule);
-
-

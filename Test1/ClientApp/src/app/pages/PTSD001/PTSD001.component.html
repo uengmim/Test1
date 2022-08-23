@@ -1,11 +1,47 @@
 <div style="margin:10px 10px 10px 10px">
+
+
   <dx-toolbar>
+    <dxi-item location="before" widget="dxButton" locateInMenu="never">
+      <div *dxTemplate>
+        <div class="toolbar-label"><b>주문기간</b></div>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+
+        <div style="float:left">
+
+          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+        </div>
+        <div style="float:left; margin-left:10px; margin-right:10px;">
+          ~
+        </div>
+        <div style="float:left">
+          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
 
     <dxi-item location="before" widget="dxButton" locateInMenu="never">
       <div *dxTemplate>
-        <div class="toolbar-label"><b>미수채권현황[frmSCMOrder0060]</b></div>
+        <div class="toolbar-label"><b>거래처</b></div>
       </div>
     </dxi-item>
+    <dxi-item location="before">
+      <dx-select-box [items]="clients"></dx-select-box>
+    </dxi-item>
+  </dx-toolbar>
+
+
+  <!--<dx-toolbar>
+
     <dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"
@@ -26,38 +62,7 @@
               locateInMenu="auto"
               [options]="saveButtonOptions">
     </dxi-item>
-  </dx-toolbar>
-  <dx-toolbar>
-    <dxi-item location="before">
-      <div *dxTemplate>
-        <div style="float:left">
-          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
-        </div>
-        <div style="float:left; margin-left:10px; margin-right:10px;">
-          ~
-        </div>
-        <div style="float:left">
-          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
-        </div>
-      </div>
-    </dxi-item>
-
-    <dxi-item location="before">
-      <div *dxTemplate>
-        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
-        </dx-button>
-      </div>
-    </dxi-item>
-
-    <dxi-item location="before">
-      <div class="dx-field">
-        <div class="dx-field-label">거래처</div>
-        <div class="dx-field-value">
-          <dx-select-box [items]="clients"></dx-select-box>
-        </div>
-      </div>
-    </dxi-item>
-  </dx-toolbar>
+  </dx-toolbar>-->
 
 
   <dx-data-grid class="master"
@@ -67,19 +72,88 @@
                 [focusedRowIndex]="0"
                 [columnAutoWidth]="true"
                 keyExpr="PARAM1"
-                [columnHidingEnabled]="true">
-
+                [columnHidingEnabled]="true"
+                [allowColumnReordering]="true">
+    <!--Datagrid Option-->
     <dxo-paging [pageSize]="10"></dxo-paging>
     <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-builder-popup [position]="popupPosition">
+    </dxo-filter-builder-popup>
     <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+    <!--Grouping Option-->
+    <dxo-group-panel [visible]="true"></dxo-group-panel>
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+    <dxo-editing mode="popup"
+                 [allowUpdating]="true"
+                 [allowAdding]="true"
+                 [allowDeleting]="true">
+      <dxo-popup title="Employee Info"
+                 [showTitle]="true"
+                 [width]="700"
+                 [height]="525">
+      </dxo-popup>
+      <dxo-form>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="PARAM1"
+                    caption="주문번호"
+                    [editorOptions]="{ height: 50 }"></dxi-item>
+          <dxi-item dataField="PARAM2"
+                    caption="주문일자"
+                    displayFormat="MM-dd-yyyy"
+                    editorType="dxDateBox"
+                    [editorOptions]="{ height: 50 }">
+   
+          </dxi-item>
+            <dxi-item dataField="PARAM3"
+                      caption="출고사업장"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM4"
+                      caption="사업장코드"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM5"
+                      caption="도칙사업장"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM6"
+                      caption="제품코드"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM7"
+                      caption="제품명"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM8"
+                      caption="수량"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM9"
+                      caption="단가"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM10"
+                      caption="금액"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+            <dxi-item dataField="PARAM11"
+                      caption="비고"
+                      [editorOptions]="{ height: 50 }"></dxi-item>
+
+
+          </dxi-item>
+      </dxo-form>
+    </dxo-editing>
+
+
 
     <dxi-column dataField="PARAM1"
-                caption="주문번호"
-                [width]="90">
+                caption="주문번호">
     </dxi-column>
     <dxi-column dataField="PARAM2"
-                [width]="190"
-                caption="주문일자">
+                caption="주문일자"
+                [width]="140">
     </dxi-column>
     <dxi-column dataField="PARAM3"
                 caption="출고사업장">
@@ -104,11 +178,21 @@
     </dxi-column>
     <dxi-column dataField="PARAM10"
                 caption="금액">
+      <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
     </dxi-column>
     <dxi-column dataField="PARAM11"
                 caption="비고">
     </dxi-column>
   </dx-data-grid>
+
+
+
+
+
+
+
+
+
 
   <dx-data-grid class="master"
                 [dataSource]="employees"
@@ -158,4 +242,6 @@
                 caption="당원출하(화공)">
     </dxi-column>
   </dx-data-grid>
+
+
 </div>

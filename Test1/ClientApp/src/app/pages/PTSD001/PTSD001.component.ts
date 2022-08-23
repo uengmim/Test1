@@ -12,6 +12,12 @@ import { Service,Employee } from '../PTSD001/app.service'
 import {
   DxDataGridComponent,
 } from 'devextreme-angular';
+
+//필터
+const getOrderDay = function (rowData: any): number {
+  return (new Date(rowData.OrderDate)).getDay();
+};
+
 @Component({
   templateUrl: 'PTSD001.component.html',
   providers: [ImateDataService, Service]
@@ -45,6 +51,11 @@ export class PTSD001Component {
   //데이터 조회 버튼
   searchButtonOptions: any;
 
+  //필터
+  popupPosition: any;
+  saleAmountHeaderFilter: any;
+  customOperations: Array<any>;
+
 
   //_dataService: ImateDataService;
 
@@ -71,6 +82,45 @@ export class PTSD001Component {
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
 
+    //필터
+    this.popupPosition = {
+      of: window, at: 'top', my: 'top', offset: { y: 10 },
+    };
+    this.saleAmountHeaderFilter = [{
+      text: 'Less than $3000',
+      value: ['PARAM10', '<', 3000],
+    }, {
+      text: '$3000 - $5000',
+      value: [
+        ['PARAM10', '>=', 3000],
+        ['PARAM10', '<', 5000],
+      ],
+    }, {
+      text: '$5000 - $10000',
+      value: [
+        ['PARAM10', '>=', 5000],
+        ['PARAM10', '<', 10000],
+      ],
+    }, {
+      text: '$10000 - $20000',
+      value: [
+        ['PARAM10', '>=', 10000],
+        ['PARAM10', '<', 20000],
+      ],
+    }, {
+      text: 'Greater than $20000',
+      value: ['PARAM10', '>=', 20000],
+    }];
+    this.customOperations = [{
+      name: 'weekends',
+      caption: 'Weekends',
+      dataTypes: ['date'],
+      icon: 'check',
+      hasValue: false,
+      calculateFilterExpression() {
+        return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
+      },
+    }];
     this.searchButtonOptions = {
       icon: 'search',
       onClick: () => {
@@ -118,6 +168,10 @@ export class PTSD001Component {
     var resultModel = await dataService.RefcCallUsingModel<ZXNSCNEWRFCCALLTestModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCNEWRFCCALLTestModelList",
       rfcMoelList, QueryCacheType.None);
     return resultModel[0].IT_RESULT;
+  }
+  // 날짜 계산
+  get diffInDay() {
+    return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
   }
 
   //Data refresh 날짜 새로고침 이벤트

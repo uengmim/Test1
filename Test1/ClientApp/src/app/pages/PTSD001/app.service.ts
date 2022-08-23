@@ -18,9 +18,9 @@ export class Employee {
 
   PARAM8!: string;
 
-  PARAM9!: string;
+  PARAM9!: number;
 
-  PARAM10!: string;
+  PARAM10!: number;
 
   PARAM11!: string;
 }
@@ -34,8 +34,8 @@ const employees: Employee[] = [{
     PARAM6: 'A001',
     PARAM7: '컴퓨터',
     PARAM8: '3',
-    PARAM9: '5000',
-    PARAM10: '6000',
+    PARAM9: 5000,
+    PARAM10: 6000,
     PARAM11: ''
   },
   {
@@ -47,8 +47,8 @@ const employees: Employee[] = [{
     PARAM6: 'A002',
     PARAM7: '키보드',
     PARAM8: '3',
-    PARAM9: '2000',
-    PARAM10: '4000',
+    PARAM9: 2000,
+    PARAM10: 4000,
     PARAM11: ''
   }
 ]

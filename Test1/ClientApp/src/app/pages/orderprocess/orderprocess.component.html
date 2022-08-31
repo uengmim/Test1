@@ -1,0 +1,215 @@
+  <!--toolbar-->
+<dx-toolbar style="height: 40px; margin-top: 5px;">
+  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>주문기간</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div *dxTemplate>
+
+      <div style="float:left">
+
+        <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+      </div>
+      <div style="float:left; margin-left:10px; margin-right:10px;">
+        ~
+      </div>
+      <div style="float:left">
+        <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>주문처(산하)</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <dx-select-box [items]="clients"></dx-select-box>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="cancelEditButtonOptions">
+  </dxi-item>
+  <dxi-item location="after"
+            locateInMenu="auto">
+    <dx-button (onClick)="deleteRecords()"
+               [disabled]="!selectedItemKeys.length"
+               icon="trash">
+    </dx-button>
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="saveButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+
+<!--formdata-->
+<div class="widget-container">
+  <div *ngIf="labelMode === 'outside'">Select company:</div>
+  <dx-select-box #company
+                 displayExpr="OrderNum"
+                 [dataSource]="requestprocess"
+                 label="Select company"
+                 [labelMode]="getCompanySelectorLabelMode()"
+                 [value]="requestprocess[0]"
+></dx-select-box>
+  <dx-form id="form"
+           [(formData)]="company.value"
+           [readOnly]="readOnly"
+           [labelMode]="labelMode"
+           [showColonAfterLabel]="showColon"
+           [labelLocation]="labelLocation"
+           [minColWidth]="minColWidth"
+           [colCount]="4"
+           [width]="width"></dx-form>
+</div>
+
+
+<dx-data-grid id="grid"
+              [dataSource]="requestprocess"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              [columnWidth]="150"
+              [allowColumnResizing]="true"
+              columnResizingMode="nextColumn"
+              keyExpr="OrderNum"
+              [selection]="{ mode: 'multiple' }"
+              [allowColumnReordering]="true"
+              (onSelectionChanged)="selectionChanged($event)">
+  <!--Datagrid Option-->
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-scrolling columnRenderingMode="virtual" ></dxo-scrolling>
+
+  <!--Filtering Option-->
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <!--Grouping Option-->
+  <dxo-group-panel [visible]="true"></dxo-group-panel>
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+
+  <!--Batch Option-->
+  <dxo-editing mode="cell"
+               [allowUpdating]="true"
+               [selectTextOnEditStart]="selectTextOnEditStart"
+               [startEditAction]="startEditAction">
+  </dxo-editing>
+
+
+  <!--Data column-->
+  <dxi-column dataField="OrderNum"
+              caption="주문번호">
+  </dxi-column>
+
+  <dxi-column dataField="OrderPlace"
+              caption="주문처">
+  </dxi-column>
+  <dxi-column dataField="ProductName"
+              caption="제품">
+  </dxi-column>
+  <dxi-column dataField="Packing"
+              caption="포장">
+  </dxi-column>
+  <dxi-column dataField="OrderClass"
+              caption="주문구분">
+  </dxi-column>
+  <dxi-column dataField="Purpose"
+              caption="용도">
+  </dxi-column>
+  <dxi-column dataField="Destination"
+              caption="도착지">
+  </dxi-column>
+  <dxi-column dataField="OrderQuantity"
+              caption="주문량">
+  </dxi-column>
+
+  <dxi-column dataField="OrderPrice"
+              caption="주문단가"
+              format="currency"
+              dataType="number">
+    <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+  </dxi-column>
+  <dxi-column dataField="Vehicle"
+              caption="배차량">
+  </dxi-column>
+  <dxi-column dataField="Released"
+              caption="출고량">
+  </dxi-column>
+  <dxi-column dataField="NumofVehicle"
+              caption="차량댓수">
+  </dxi-column>
+  <dxi-column dataField="Load"
+              caption="상차">
+  </dxi-column>
+  <dxi-column dataField="DeliveryDate"
+              caption="납기일자"
+              dataType="date">
+  </dxi-column>
+  <dxi-column dataField="Address"
+              caption="출고지">
+  </dxi-column>
+  <dxi-column dataField="Shipping"
+              caption="운송사">
+  </dxi-column>
+  <dxi-column dataField="ShipmentNum"
+              caption="출하요청번호">
+  </dxi-column>
+  <dxi-column dataField="OrderAccount"
+              caption="주문등록계정">
+  </dxi-column>
+
+  <dxi-column dataField="OrderDate"
+              dataType="date"
+              caption="주문일자">
+  </dxi-column>
+  <dxi-column dataField="Approval1"
+              caption="본/지사승인(1차)">
+  </dxi-column>
+
+  <dxi-column dataField="ApprovalDate"
+              dataType="date"
+              caption="본/지사 승인일">
+  </dxi-column>
+  <dxi-column dataField="Approval2"
+              caption="본/지사승인(2차)">
+  </dxi-column>
+  <dxi-column dataField="ApprovalDate2"
+              dataType="date"
+              caption="본사/팀장 승인일">
+  </dxi-column>
+  <dxi-column dataField="OfficeApproval"
+              caption="본사승인">
+  </dxi-column>
+  <dxi-column dataField="Shipment"
+              caption="출하가능">
+  </dxi-column>
+  <dxi-column dataField="ProductClass"
+              caption="제품구분">
+  </dxi-column>
+  <dxi-column dataField="Note"
+              caption="비고">
+  </dxi-column>
+
+
+</dx-data-grid>

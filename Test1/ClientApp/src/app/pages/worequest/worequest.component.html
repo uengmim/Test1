@@ -1,0 +1,54 @@
+<div style="margin:10px 10px 10px 10px">
+  <!--<div class="dx-field">
+    <div class="dx-field-label">Value-dependent icon</div>
+    <div class="dx-field-value">
+      <dx-select-box [dataSource]="products"
+                     [(selectedItem)]="selectedItem"
+                     [showClearButton]="true"
+                     displayExpr="SCODENM"
+                     valueExpr="SCODE">
+
+        <div *dxTemplate="let data of 'item'" class="custom-item">
+          <div>{{ data.GCODE }}</div>
+          <div>{{ data.GCODENM }}</div>
+          <div>{{ data.SCODE }}</div>
+          <div>{{ data.SCODENM }}</div>
+        </div>
+      </dx-select-box>
+    </div>
+  </div>-->
+</div>
+<div style="margin:10px 10px 10px 10px">
+  <div class="dx-field">
+    <div class="dx-field-label">DropDownBox with embedded DataGrid</div>
+    <div class="dx-field-value">
+      <dx-drop-down-box [(value)]="gridBoxValue"
+                        [(opened)]="isGridBoxOpened"
+                        valueExpr="SCODE"
+                        [deferRendering]="false"
+                        [displayExpr]="gridBox_displayExpr"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="products"
+                        (onOptionChanged)="onGridBoxOptionChanged($event)">
+        <div *dxTemplate="let data of 'content'">
+          <dx-data-grid [dataSource]="products"
+                        [hoverStateEnabled]="true"
+                        [(selectedRowKeys)]="gridBoxValue"
+                        height="100%">
+
+            <dxi-column dataField="GCODE" dataType="string" caption="그룹코드"></dxi-column>
+            <dxi-column dataField="GCODENM" dataType="string" caption="그룹코드명"></dxi-column>
+            <dxi-column dataField="SCODE" dataType="string" caption="코드"></dxi-column>
+            <dxi-column dataField="SCODENM" dataType="string" caption="코드명"></dxi-column>
+
+            <dxo-selection mode="single"></dxo-selection>
+            <dxo-filter-row [visible]="true"></dxo-filter-row>
+            <dxo-scrolling mode="virtual"></dxo-scrolling>
+            <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+          </dx-data-grid>
+        </div>
+      </dx-drop-down-box>
+    </div>
+  </div>
+</div>

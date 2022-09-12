@@ -10,6 +10,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppConfigService } from './shared/services/appconfig.service';
 import { HttpClientModule } from '@angular/common/http';
 import { ImateAuthService } from './shared/imate/imateAuthAdapter';
+import { ImateDataService } from './shared/imate/imateDataAdapter';
 
 @NgModule({
   declarations: [
@@ -31,6 +32,7 @@ import { ImateAuthService } from './shared/imate/imateAuthAdapter';
   providers: [
     AuthService,
     ImateAuthService,
+    ImateDataService,
     ScreenService,
     AppInfoService,
     {

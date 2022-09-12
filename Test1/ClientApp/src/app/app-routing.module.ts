@@ -6,6 +6,8 @@ import { AuthGuardService } from './shared/services';
 import { HomeComponent } from './pages/home/home.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { TasksComponent } from './pages/tasks/tasks.component';
+import { CommonPossibleEntryModule } from './shared/components/comm-possible-entry/comm-possible-entry.component'
+import { TablePossibleEntryModule } from './shared/components/table-possible-entry/table-possible-entry.component'
 
 import {
   DxDataGridModule,
@@ -17,40 +19,55 @@ import {
   DxButtonModule,
   DxDateBoxModule,
   DxCheckBoxModule,
-  DxRadioGroupModule
+  DxRadioGroupModule,
+  DxBoxModule,
+  DxTextBoxModule,
+  DxBulletModule,
+  DxTemplateModule,
+  DxPopupModule,
+  DxScrollViewModule,
+  DxRangeSelectorModule,
+  DxListModule,
+  DxNumberBoxModule,
+  DxPopoverModule,
 } from 'devextreme-angular';
 
 import { Modeltest01Component } from './pages/modeltest01/modeltest01.component';
 import { Modeltest03Component } from './pages/modeltest03/modeltest03.component';
-
+import { BondInqComponent } from './pages/bondinq/bondinq.component';
+import { OrderProcessComponent } from './pages/orderprocess/orderprocess.component';
+import { WeightComponent } from './pages/weight/weight.component';
+import { VehiclereComponent } from './pages/Vehiclere/Vehiclere.component';
+import { DispatchinComponent } from './pages/Dispatchin/Dispatchin.component';
+import { FSHSComponent } from './pages/MFSAP/FSHS/fshs.component';
+import { SecondaryCarrierComponent } from './pages/SecondaryCarrier/SecondaryCarrier.component';
+import { ShippingRegistrationComponent } from './pages/ShippingRegistration/ShippingRegistration.component';
 import { WORequestComponent } from './pages/worequest/worequest.component';
 import { WOProgressComponent } from './pages/woprogress/woprogress.component';
-import { PTSD001Component } from './pages/PTSD001/PTSD001.component';
-import { PTSD002Component } from './pages/PTSD002/PTSD002.component';
-import { PTSD003Component } from './pages/PTSD003/PTSD003.component';
-<<<<<<< HEAD
-import { PTSD004Component } from './pages/PTSD004/PTSD004.component';
-import { PTSD007Component } from './pages/PTSD007/PTSD007.component';
-import { PTSD008Component } from './pages/PTSD008/PTSD008.component';
+import { WOSTComponent } from './pages/MFMPO/WOST/wost.component';
+import { CSRQComponent } from './pages/MCSHP/CSRQ/csrq.component';
+import { CSSOComponent } from './pages/MCSHP/CSSO/csso.component';
+import { CSSQComponent } from './pages/MCSHP/CSSQ/cssq.component';
+import { OWDRComponent } from './pages/MCSHP/OWDR/owdr.component';
+import { SOSHComponent } from './pages/MCSHP/SOSH/sosh.component';
+import { TRMTComponent } from './pages/MLOGP/TRMT/trmt.component';
 
-=======
->>>>>>> 55dfd025d25305dd75506e41eab5c1e4d4785f2d
 
 const routes: Routes = [
   {
     path: 'tasks',
     component: TasksComponent,
-    canActivate: [ AuthGuardService ]
+    canActivate: [AuthGuardService]
   },
   {
     path: 'profile',
     component: ProfileComponent,
-    canActivate: [ AuthGuardService ]
+    canActivate: [AuthGuardService]
   },
   {
     path: 'home',
     component: HomeComponent,
-    canActivate: [ AuthGuardService ]
+    canActivate: [AuthGuardService]
   },
   {
     path: 'modeltest01',
@@ -63,33 +80,79 @@ const routes: Routes = [
     canActivate: [AuthGuardService]
   },
   {
-    path: 'PTSD001',
-    component: PTSD001Component,
+    path: 'bondinq',
+    component: BondInqComponent,
     canActivate: [AuthGuardService]
   },
   {
-    path: 'PTSD002',
-    component: PTSD002Component,
+    path: 'orderprocess',
+    component: OrderProcessComponent,
     canActivate: [AuthGuardService]
   },
   {
-    path: 'PTSD003',
-    component: PTSD003Component,
+    path: 'weight',
+    component: WeightComponent,
+    canActivate: [AuthGuardService]
+  },
+
+  {
+    path: 'trmt',
+    component: TRMTComponent,
     canActivate: [AuthGuardService]
   },
   {
-<<<<<<< HEAD
-    path: 'PTSD004',
-    component: PTSD004Component,
+    path: 'csrq',
+    component: CSRQComponent,
     canActivate: [AuthGuardService]
   },
   {
-    path: 'PTSD007',
-    component: PTSD007Component,
-=======
+    path: 'csso',
+    component: CSSOComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'cssq',
+    component: CSSQComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'owdr',
+    component: OWDRComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'sosh',
+    component: SOSHComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'Vehiclere',
+    component: VehiclereComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'Dispatchin',
+    component: DispatchinComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'fshs',
+    component: FSHSComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'SecondaryCarrier',
+    component: SecondaryCarrierComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
+    path: 'ShippingRegistration',
+    component: ShippingRegistrationComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
     path: 'worequest',
     component: WORequestComponent,
->>>>>>> 55dfd025d25305dd75506e41eab5c1e4d4785f2d
     canActivate: [AuthGuardService]
   },
   {
@@ -98,19 +161,24 @@ const routes: Routes = [
     canActivate: [AuthGuardService]
   },
   {
+    path: 'wost',
+    component: WOSTComponent,
+    canActivate: [AuthGuardService]
+  },
+  {
     path: 'login-form',
     component: LoginFormComponent,
-    canActivate: [ AuthGuardService ]
+    canActivate: [AuthGuardService]
   },
   {
     path: 'reset-password',
     component: ResetPasswordFormComponent,
-    canActivate: [ AuthGuardService ]
+    canActivate: [AuthGuardService]
   },
   {
     path: 'change-password/:recoveryCode',
     component: ChangePasswordFormComponent,
-    canActivate: [ AuthGuardService ]
+    canActivate: [AuthGuardService]
   },
   {
     path: '**',
@@ -122,6 +190,8 @@ const routes: Routes = [
   imports: [
     RouterModule.forRoot(routes, { useHash: true }),
     CommonModule,
+    CommonPossibleEntryModule,
+    TablePossibleEntryModule,
     DxDataGridModule,
     DxButtonModule,
     DxDateBoxModule,
@@ -131,7 +201,17 @@ const routes: Routes = [
     DxSpeedDialActionModule,
     DxToolbarModule,
     DxSelectBoxModule,
-    DxDropDownBoxModule],
+    DxDropDownBoxModule,
+    DxTextBoxModule,
+    DxBulletModule,
+    DxTemplateModule,
+    DxPopupModule,
+    DxScrollViewModule,
+    DxRangeSelectorModule,
+    DxListModule,
+    DxNumberBoxModule,
+    DxBoxModule,
+    DxPopoverModule  ],
   providers: [AuthGuardService],
   exports: [RouterModule],
   declarations: [
@@ -140,16 +220,23 @@ const routes: Routes = [
     TasksComponent,
     Modeltest01Component,
     Modeltest03Component,
-    PTSD001Component,
-    PTSD002Component,
-    PTSD003Component,
-<<<<<<< HEAD
-    PTSD004Component,
-    PTSD007Component,
-    PTSD008Component
-
-=======
->>>>>>> 55dfd025d25305dd75506e41eab5c1e4d4785f2d
+    BondInqComponent,
+    OrderProcessComponent,
+    TRMTComponent,
+    WeightComponent,
+    CSRQComponent,
+    CSSOComponent,
+    CSSQComponent,
+    OWDRComponent,
+    SOSHComponent,
+    VehiclereComponent,
+    DispatchinComponent,
+    FSHSComponent,
+    SecondaryCarrierComponent,
+    ShippingRegistrationComponent,
+    WORequestComponent,
+    WOProgressComponent,
+    WOSTComponent,
   ]
 })
 export class AppRoutingModule { }

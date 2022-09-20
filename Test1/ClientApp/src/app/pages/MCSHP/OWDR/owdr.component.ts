@@ -11,7 +11,7 @@ import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { formatDate } from '@angular/common';
-import { Service, Regis, AddData } from '../OWDR/app.service'
+import { Service, Regis, AddData, Data } from '../OWDR/app.service'
 import {
   DxDataGridComponent,
 } from 'devextreme-angular';
@@ -42,6 +42,8 @@ export class OWDRComponent {
   //정보
   regis: Regis[];
   adddata: AddData[];
+  data: any;
+
   //날짜 조회
   startDate: any;
   endDate: any;
@@ -76,6 +78,7 @@ export class OWDRComponent {
     //정보
     this.regis = service.getRegis();
     this.adddata = service.getAddData();
+    this.data = service.getData();
 
     //필터
     this.customOperations = [{

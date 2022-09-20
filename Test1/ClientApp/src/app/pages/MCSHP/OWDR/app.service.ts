@@ -36,7 +36,14 @@ export class AddData {
   //배분량
   distriQuan?: number;
 }
-
+export class Data {
+  //유창
+  dDispcNumv?: number;
+  //용량
+  dIndiNum?: number;
+  //배분량
+  dIndiQuan?: number;
+}
 const regis: Regis[] = [{
 
   dispcDate: '2022-07-01',
@@ -144,7 +151,12 @@ const adddata: AddData[] = [{
   yuChang: 6234,
   capacity: 253241,
   distriQuan: 123123
-}]
+  }]
+const data: Data = {
+  dDispcNumv: 512312,
+  dIndiNum: 7234323762,
+  dIndiQuan: 26235
+}
 @Injectable()
 export class Service {
 
@@ -155,5 +167,7 @@ export class Service {
   getAddData() {
     return adddata;
   }
-
+  getData() {
+    return data;
+  }
 }

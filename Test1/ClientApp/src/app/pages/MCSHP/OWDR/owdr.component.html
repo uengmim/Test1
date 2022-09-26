@@ -6,26 +6,18 @@
 
   -->
 <!--toolbar-->
-<div style="margin:10px 10px 10px 10px">
-
-  <dx-toolbar style="height: 40px; margin-top: 5px;">
-    <dxi-item location="before" widget="dxButton" locateInMenu="never">
+  <dx-toolbar style="margin: 5px 0px 5px 0px;padding:0px 5px 0px 5px">
+    <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <div class="toolbar-label"><b>기간</b></div>
-      </div>
-    </dxi-item>
-    <dxi-item location="before">
-      <div *dxTemplate>
-
+        <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>기간</b></div>
         <div style="float:left">
-
-          <dx-date-box [(value)]="startDate" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+          <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
         </div>
-        <div style="float:left; margin-left:10px; margin-right:10px;">
+        <div style="float:left; margin:10px 5px 0px 5px">
           ~
         </div>
         <div style="float:left">
-          <dx-date-box [(value)]="endDate" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+          <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
         </div>
       </div>
     </dxi-item>
@@ -43,16 +35,19 @@
                 [dataSource]="regis"
                 [showBorders]="true"
                 [focusedRowIndex]="0"
-                [allowColumnResizing]="true"
                 columnResizingMode="nextColumn"
                 keyExpr="dispcNum"
                 [selection]="{ mode: 'multiple' }"
-                [allowColumnReordering]="true"
                 (onRowDblClick)="addRow($event)"
                 [height]="900"
                 (onFocusedRowChanging)="onFocusedRowChanging($event)"
                 (onFocusedRowChanged)="onFocusedRowChanged($event)"
-                (onSelectionChanged)="selectionChanged($event)">
+                (onSelectionChanged)="selectionChanged($event)"
+                [allowColumnReordering]="true"
+                [columnWidth]="150"
+                [columnAutoWidth]="false"
+                [allowColumnResizing]="true"
+                height="calc(100vh - 230px)">
     <!--Datagrid Option-->
     <dxo-paging [enabled]="false"></dxo-paging>
 
@@ -63,7 +58,8 @@
     </dxo-filter-builder>
     <dxo-filter-row [visible]="true"></dxo-filter-row>
     <dxo-header-filter [visible]="true"></dxo-header-filter>
-
+    <!--Grouping Option-->
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
     <!--Data column-->
     <dxi-column dataField="dispcDate" caption="배차일자" dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
 
@@ -152,4 +148,3 @@
     </dx-scroll-view>
 
   </dx-popup>
-</div>

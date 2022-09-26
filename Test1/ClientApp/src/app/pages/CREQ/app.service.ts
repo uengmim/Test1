@@ -3,27 +3,27 @@ import { Injectable } from '@angular/core';
 
 export class Datainq {
   //주문번호
-  OrderNum!: number;
+  orderNum!: number;
   //주문일자
-  OrderDate!: string;
+  orderDate!: string;
   //출고사업장
-  FWBs!: string;
+  releBusi!: string;
   //사업장코드
-  BsCod!: string;
+  busiCode!: string;
   //도칙사업장
-  DCBs!: string;
+  roughBusi!: string;
   //제품코드
-  PrCod!: string;
+  proCode!: string;
   //제품명
-  PrName!: string;
+  proName!: string;
   //수량
-  Quantity!: number;
+  quant!: number;
   //단가
-  UnitPri!: number;
+  unitPrice!: number;
   //금액
-  Amount!: number;
+  price!: number;
   //비고
-  Note!: string;
+  note!: string;
 }
 export class Sum {
   //담보합계
@@ -63,30 +63,30 @@ const Summary: Sum = {
   sameTimShip: 6777
 }
 const datainq: Datainq[] = [{
-    OrderNum: 1,
-    OrderDate: '2022/08/22',
-    FWBs: 'ISTN',
-    BsCod: 'ISTN-1',
-    DCBs: 'SEOUL',
-    PrCod: 'A001',
-    PrName: '컴퓨터',
-    Quantity: 3,
-    UnitPri: 5000,
-    Amount: 6000,
-    Note: ''
+  orderNum: 1,
+  orderDate: '2022/08/22',
+  releBusi: 'ISTN',
+  busiCode: 'ISTN-1',
+  roughBusi: 'SEOUL',
+  proCode: 'A001',
+  proName: '컴퓨터',
+  quant: 3,
+  unitPrice: 5000,
+  price: 6000,
+  note: ''
   },
   {
-    OrderNum: 2,
-    OrderDate: '2022/08/22',
-    FWBs: 'ISTN',
-    BsCod: 'ISTN-1',
-    DCBs: 'SEOUL',
-    PrCod: 'A002',
-    PrName: '키보드',
-    Quantity: 5,
-    UnitPri: 2000,
-    Amount: 4000,
-    Note: ''
+    orderNum: 2,
+    orderDate: '2022/08/22',
+    releBusi: 'ISTN',
+    busiCode: 'ISTN-1',
+    roughBusi: 'SEOUL',
+    proCode: 'A002',
+    proName: '키보드',
+    quant: 5,
+    unitPrice: 2000,
+    price: 4000,
+    note: ''
   }
 ]
 

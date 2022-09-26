@@ -1,9 +1,12 @@
-import { NgModule, Component, enableProdMode, ViewChild } from '@angular/core';
+/**
+ *
+ * 여신현황정보조회
+ * 
+ */
+import {  Component, enableProdMode, ViewChild } from '@angular/core';
 import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../shared/imate/imateDataAdapter';
-import notify from 'devextreme/ui/notify';
-
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { QueryCacheType } from '../../shared/imate/imateCommon';
 import { AppInfoService } from '../../shared/services/app-info.service';
@@ -33,7 +36,8 @@ export class CREQComponent {
   //정보
   datainq: Datainq[];
   Summary: any;
-
+  exportSelectedData: any;
+  printSelectedData: any;
   //날짜 조회
   startDate: any;
   endDate: any;
@@ -68,16 +72,6 @@ export class CREQComponent {
     this.datainq = service.getDatainq();
     this.Summary = service.getsum();
 
-    //this._dataService = dataService;
-    let modelTest01 = this;
-    this.dataSource = new CustomStore(
-      {
-        key: ["PARAM1"],
-        load: function (loadOptions) {
-          return modelTest01.dataLoad(dataService);
-        }
-      });
-
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
@@ -90,34 +84,30 @@ export class CREQComponent {
       },
     };
 
-    //필터
-    this.popupPosition = {
-      of: window, at: 'top', my: 'top', offset: { y: 10 },
-    };
     this.saleAmountHeaderFilter = [{
       text: 'Less than $3000',
-      value: ['PARAM10', '<', 3000],
+      value: ['price', '<', 3000],
     }, {
       text: '$3000 - $5000',
       value: [
-        ['PARAM10', '>=', 3000],
-        ['PARAM10', '<', 5000],
+        ['price', '>=', 3000],
+        ['price', '<', 5000],
       ],
     }, {
       text: '$5000 - $10000',
       value: [
-        ['PARAM10', '>=', 5000],
-        ['PARAM10', '<', 10000],
+        ['price', '>=', 5000],
+        ['price', '<', 10000],
       ],
     }, {
       text: '$10000 - $20000',
       value: [
-        ['PARAM10', '>=', 10000],
-        ['PARAM10', '<', 20000],
+        ['price', '>=', 10000],
+        ['price', '<', 20000],
       ],
     }, {
       text: 'Greater than $20000',
-      value: ['PARAM10', '>=', 20000],
+      value: ['price', '>=', 20000],
     }];
     this.customOperations = [{
       name: 'weekends',
@@ -129,26 +119,20 @@ export class CREQComponent {
         return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
       },
     }];
-  }
+    this.exportSelectedData = {
+      icon: 'export',
+      onClick: () => {
+        this.dataGrid.instance.exportToExcel(true);
 
-  public async dataLoad(dataService: ImateDataService) {
+      },
+    };
 
-    var sdate = formatDate(this.startDate, "yyyyMMDD", "en-US")
-    var edate = formatDate(this.endDate, "yyyyMMDD", "en-US")
+    this.printSelectedData = {
+      icon: 'print',
+      onClick: () => {
 
-    var itInput: ZIMATETESTStructModel[] = [];
-    var input1 = new ZIMATETESTStructModel("ABCD", 1.21, 10000, new Date("2020-12-01"), "10:05:30.91");
-
-    itInput.push(new ZIMATETESTStructModel("EGCH", 2.32, 20, new Date("2021-01-02"), "22:00:15.1"));
-    itInput.push(new ZIMATETESTStructModel("IJKL", 3.43, 30, new Date("2022-05-11"), "09:20:27.540"));
-    itInput.push(new ZIMATETESTStructModel("MNON", 4.54, 40, new Date("2022-04-20"), "16:00:20.101"));
-
-    var rfcModel = new ZXNSCNEWRFCCALLTestModel(input1, itInput);
-    var rfcMoelList: ZXNSCNEWRFCCALLTestModel[] = [rfcModel];
-
-    var resultModel = await dataService.RefcCallUsingModel<ZXNSCNEWRFCCALLTestModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCNEWRFCCALLTestModelList",
-      rfcMoelList, QueryCacheType.None);
-    return resultModel[0].IT_RESULT;
+      },
+    };
   }
   // 날짜 계산
   get diffInDay() {

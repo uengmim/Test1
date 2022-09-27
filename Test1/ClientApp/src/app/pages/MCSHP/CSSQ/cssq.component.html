@@ -1,43 +1,26 @@
 <!--
-
-
   출하 진행 현황
-
-
   -->
 <!--toolbar-->
-<dx-toolbar style="height: 40px; margin-top: 5px;">
-  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+<dx-toolbar style="margin: 5px 0px 5px 0px;padding:0px 5px 0px 5px">
+  <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <div class="toolbar-label"><b>기간</b></div>
-    </div>
-  </dxi-item>
-  <dxi-item location="before">
-    <div *dxTemplate>
-
+      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>기간</b></div>
       <div style="float:left">
-
-        <dx-date-box [(value)]="startDate" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
-      <div style="float:left; margin-left:10px; margin-right:10px;">
+      <div style="float:left; margin:10px 5px 0px 5px">
         ~
       </div>
       <div style="float:left">
-        <dx-date-box [(value)]="endDate" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
     </div>
   </dxi-item>
 
-
-  <dxi-item location="before" widget="dxButton" locateInMenu="never">
-    <div *dxTemplate>
-      <div class="toolbar-label"><b>구분</b></div>
-    </div>
+  <dxi-item location="before" locateInMenu="auto">
+      <dx-select-box [items]="sort" placeholder="구분"></dx-select-box>
   </dxi-item>
-  <dxi-item location="before">
-    <dx-select-box [items]="sort"></dx-select-box>
-  </dxi-item>
-
 
   <dxi-item location="before"
             widget="dxButton"
@@ -68,13 +51,14 @@
                     [dataSource]="Orderdata"
                     [showBorders]="true"
                     [focusedRowIndex]="0"
-                    [columnWidth]="150"
-                    [allowColumnResizing]="true"
-                    columnResizingMode="nextColumn"
+                    columnResizingMode="widget"
                     keyExpr="oilClient"
                     [selection]="{ mode: 'multiple' }"
                     [allowColumnReordering]="true"
-                    [height]="900">
+                    [columnWidth]="150"
+                    [columnAutoWidth]="false"
+                    [allowColumnResizing]="true"
+                    height="calc(100vh - 230px)">
         <!--Datagrid Option-->
         <dxo-paging [enabled]="false"></dxo-paging>
         <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
@@ -86,23 +70,24 @@
         </dxo-filter-builder>
         <dxo-filter-row [visible]="true"></dxo-filter-row>
         <dxo-header-filter [visible]="true"></dxo-header-filter>
-
+        <!--Grouping Option-->
+        <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
         <!--Data column-->
-        <dxi-column dataField="oilClient" caption="거래처" >  </dxi-column>
+        <dxi-column dataField="oilClient" caption="거래처">  </dxi-column>
 
-        <dxi-column dataField="oilDesti" caption="도착지" >  </dxi-column>
+        <dxi-column dataField="oilDesti" caption="도착지">  </dxi-column>
 
         <dxi-column dataField="oilSort" caption="유종">  </dxi-column>
 
-        <dxi-column dataField="oilShipDate" caption="출하일자"  dataType="date" format="yyyy-MM-dd" alignment="center">   </dxi-column>
+        <dxi-column dataField="oilShipDate" caption="출하일자" dataType="date" format="yyyy-MM-dd" alignment="center">   </dxi-column>
 
-        <dxi-column dataField="oilTurn" caption="순번" >  </dxi-column>
+        <dxi-column dataField="oilTurn" caption="순번">  </dxi-column>
 
-        <dxi-column dataField="oilRack" caption="RACK" >  </dxi-column>
+        <dxi-column dataField="oilRack" caption="RACK">  </dxi-column>
 
-        <dxi-column dataField="oilOrderSort" caption="주문구분" >  </dxi-column>
+        <dxi-column dataField="oilOrderSort" caption="주문구분">  </dxi-column>
 
-        <dxi-column dataField="oilVehNum" caption="차량번호" >  </dxi-column>
+        <dxi-column dataField="oilVehNum" caption="차량번호">  </dxi-column>
 
         <dxi-column dataField="oilIndQuanL" caption="지시량(L)" format="#,###">
 
@@ -120,7 +105,7 @@
 
         <dxi-column dataField="oilTem" caption="온도">  </dxi-column>
 
-        <dxi-column dataField="oilVCF" caption="V.C.F" >  </dxi-column>
+        <dxi-column dataField="oilVCF" caption="V.C.F">  </dxi-column>
 
         <dxi-column dataField="oilSpecific" caption="비중">  </dxi-column>
 
@@ -130,7 +115,7 @@
 
         <dxi-column dataField="oilOrder" caption="ORDER">  </dxi-column>
 
-        <dxi-column dataField="oilRequset" caption="REQUEST" >  </dxi-column>
+        <dxi-column dataField="oilRequset" caption="REQUEST">  </dxi-column>
 
         <dxi-column dataField="oilSOil" caption="선적번호(S-OIL)">   </dxi-column>
 
@@ -143,12 +128,13 @@
                     [showBorders]="true"
                     [focusedRowIndex]="0"
                     [columnWidth]="150"
+                    [columnAutoWidth]="false"
                     [allowColumnResizing]="true"
-                    columnResizingMode="nextColumn"
+                    columnResizingMode="widget"
                     keyExpr="oilClient"
                     [selection]="{ mode: 'multiple' }"
                     [allowColumnReordering]="true"
-                    [height]="900"
+                    height="calc(100vh - 230px)"
                     (onCellPrepared)="onCellPrepared($event)">
         <!--Datagrid Option-->
         <dxo-paging [enabled]="false"></dxo-paging>
@@ -161,21 +147,25 @@
         </dxo-filter-builder>
         <dxo-filter-row [visible]="true"></dxo-filter-row>
         <dxo-header-filter [visible]="true"></dxo-header-filter>
-        <dxi-column dataField="oilClient" caption="거래처" >  </dxi-column>
 
-        <dxi-column dataField="oilDesti" caption="도착지" >  </dxi-column>
+        <!--Grouping Option-->
+        <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
 
-        <dxi-column dataField="oilSort" caption="유종" >  </dxi-column>
+        <dxi-column dataField="oilClient" caption="거래처">  </dxi-column>
 
-        <dxi-column dataField="oilShipDate" caption="출하일자"  dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
+        <dxi-column dataField="oilDesti" caption="도착지">  </dxi-column>
 
-        <dxi-column dataField="oilTurn" caption="순번" >  </dxi-column>
+        <dxi-column dataField="oilSort" caption="유종">  </dxi-column>
 
-        <dxi-column dataField="oilRack" caption="RACK" >  </dxi-column>
+        <dxi-column dataField="oilShipDate" caption="출하일자" dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
 
-        <dxi-column dataField="oilOrderSort" caption="주문구분" >  </dxi-column>
+        <dxi-column dataField="oilTurn" caption="순번">  </dxi-column>
 
-        <dxi-column dataField="oilVehNum" caption="차량번호" >  </dxi-column>
+        <dxi-column dataField="oilRack" caption="RACK">  </dxi-column>
+
+        <dxi-column dataField="oilOrderSort" caption="주문구분">  </dxi-column>
+
+        <dxi-column dataField="oilVehNum" caption="차량번호">  </dxi-column>
 
         <dxi-column dataField="oilIndQuanL" caption="지시량(L)" format="#,###">  </dxi-column>
 
@@ -189,19 +179,19 @@
 
         <dxi-column dataField="oilUnit" caption="단위" alignment="center">  </dxi-column>
 
-        <dxi-column dataField="oilTem" caption="온도" >  </dxi-column>
+        <dxi-column dataField="oilTem" caption="온도">  </dxi-column>
 
-        <dxi-column dataField="oilVCF" caption="V.C.F" >  </dxi-column>
+        <dxi-column dataField="oilVCF" caption="V.C.F">  </dxi-column>
 
-        <dxi-column dataField="oilSpecific" caption="비중" >  </dxi-column>
+        <dxi-column dataField="oilSpecific" caption="비중">  </dxi-column>
 
-        <dxi-column dataField="oilFWTime" caption="출고시간" alignment="center" >  </dxi-column>
+        <dxi-column dataField="oilFWTime" caption="출고시간" alignment="center">  </dxi-column>
 
-        <dxi-column dataField="oilBLNum" caption="B/L번호" >  </dxi-column>
+        <dxi-column dataField="oilBLNum" caption="B/L번호">  </dxi-column>
 
-        <dxi-column dataField="oilOrder" caption="ORDER" >  </dxi-column>
+        <dxi-column dataField="oilOrder" caption="ORDER">  </dxi-column>
 
-        <dxi-column dataField="oilRequset" caption="REQUEST" >  </dxi-column>
+        <dxi-column dataField="oilRequset" caption="REQUEST">  </dxi-column>
 
         <dxi-column dataField="oilSOil" caption="선적번호(S-OIL)">  </dxi-column>
 

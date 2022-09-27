@@ -25,6 +25,7 @@ const getOrderDay = function (rowData: any): number {
 
 @Component({
   templateUrl: 'cssq.component.html',
+  styleUrls: ['./cssq.component.scss'],
   providers: [ImateDataService, Service]
 })
 

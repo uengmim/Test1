@@ -5,24 +5,18 @@
 
   -->
 <!--toolbar-->
-<dx-toolbar style="height: 40px; margin-top: 5px;">
-  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+<dx-toolbar style="margin: 5px 0px 5px 0px;padding:0px 5px 0px 5px">
+  <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <div class="toolbar-label"><b>기간</b></div>
-    </div>
-  </dxi-item>
-  <dxi-item location="before">
-    <div *dxTemplate>
-
+      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>기간</b></div>
       <div style="float:left">
-
-        <dx-date-box [(value)]="startDate" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
-      <div style="float:left; margin-left:10px; margin-right:10px;">
+      <div style="float:left; margin:10px 5px 0px 5px">
         ~
       </div>
       <div style="float:left">
-        <dx-date-box [(value)]="endDate" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
     </div>
   </dxi-item>
@@ -75,14 +69,16 @@
               [dataSource]="shipdata"
               [showBorders]="true"
               [focusedRowIndex]="0"
-              [columnWidth]="150"
-              [allowColumnResizing]="true"
               columnResizingMode="nextColumn"
               keyExpr="turn"
               [selection]="{ mode: 'multiple' }"
-              [allowColumnReordering]="true"
               [height]="900"
-              (onSelectionChanged)="selectionChanged($event)">
+              (onSelectionChanged)="selectionChanged($event)"
+              [allowColumnReordering]="true"
+              [columnWidth]="150"
+              [columnAutoWidth]="false"
+              [allowColumnResizing]="true"
+              height="calc(100vh - 230px)">
   <dxo-editing mode="batch">
   </dxo-editing>
   <!--Datagrid Option-->

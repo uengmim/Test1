@@ -5,6 +5,7 @@ import { ImateDataService } from '../../shared/imate/imateDataAdapter';
 import { ZXNSCRFCDataModel } from '../../shared/dataModel/ZxnscRfcData';
 import { QueryCacheType } from '../../shared/imate/imateCommon';
 import { AppInfoService } from '../../shared/services/app-info.service';
+import ArrayStore from 'devextreme/data/array_store';
 import { formatDate } from '@angular/common';
 import { Service, RequestProcess } from '../orderprocess/app.service'
 import {
@@ -27,7 +28,7 @@ export class OrderProcessComponent {
   //delete
   selectedItemKeys: any[] = [];
 
-  dataSource: any;
+  dataSource: ArrayStore;
   //거래처
   clients: string[];
   //정보
@@ -84,7 +85,7 @@ export class OrderProcessComponent {
   //_dataService: ImateDataService;
 
   constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | MODEL TEST1";
+    appInfo.title = AppInfoService.APP_TITLE + " | 고객주문처리 - 포장재";
     //form
     this.labelMode = 'floating';
     this.labelLocation = 'left';
@@ -100,14 +101,10 @@ export class OrderProcessComponent {
 
     //this._dataService = dataService;
     let modelTest01 = this;
-    this.dataSource = new CustomStore(
-      {
-        key: ["PARAM1"],
-
-        load: function (loadOptions) {
-          return modelTest01.dataLoad(dataService);
-        }
-      });
+    this.dataSource = new ArrayStore({
+      key: 'OrderNum',
+      data: service.getRequestProcess(),
+    });
 
     //date
     var now = new Date();

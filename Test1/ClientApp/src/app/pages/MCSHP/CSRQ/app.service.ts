@@ -63,16 +63,7 @@ export class OrderData {
 const reqclass: Reqclass[] = [{
   ID: 'S',
   Name: 'S-OIL주문',
-}, {
-  ID: 'N',
-  Name: 'N-OIL주문',
-}, {
-  ID: 'W',
-  Name: 'W-OIL주문',
-  }, {
-    ID: 'E',
-    Name: 'E-OIL주문',
-  },];
+}];
 const oiltype: OilType[] = [{
   ID: 'a',
   Name: '휘발유',

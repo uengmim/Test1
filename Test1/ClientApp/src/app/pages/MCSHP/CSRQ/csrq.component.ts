@@ -1,9 +1,5 @@
 /*
- *
- * 
  * 출하 요청 등록
- *
- * 
  */
 import { Component, enableProdMode, ViewChild, Input, AfterViewInit } from '@angular/core';
 import DataSource from 'devextreme/data/data_source';
@@ -12,7 +8,6 @@ import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { HttpClient} from '@angular/common/http';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { lastValueFrom } from 'rxjs';
 import { formatDate } from '@angular/common';
 import { Service, OrderData, Reqclass, OilType, ShipSort } from '../CSRQ/app.service'
 import {
@@ -28,11 +23,18 @@ const getOrderDay = function (rowData: any): number {
 
 @Component({
   templateUrl: 'csrq.component.html',
-  providers: [ImateDataService, Service]
+  providers: [ImateDataService, Service],
+
 })
 
 export class CSRQComponent implements AfterViewInit {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
+  @ViewChild('gridBox1') gridBox1: any; 
+  @ViewChild('gridBox2') gridBox2: any; 
+  @ViewChild('gridBox3') gridBox3: any; 
+  @ViewChild('gridBox4') gridBox4: any; 
+  @ViewChild('gridBox5') gridBox5: any; 
+  @ViewChild('gridBox6') gridBox6: any; 
 
   
   //multiseletbox
@@ -44,6 +46,8 @@ export class CSRQComponent implements AfterViewInit {
   gridBoxValue5: string[] = [];
   gridBoxValue6: string[] = [];
 
+  isGridBoxOpened: boolean;
+  gridBoxValue: number[] = [3];
 
   //delete
   selectedItemKeys: any[] = [];
@@ -56,7 +60,8 @@ export class CSRQComponent implements AfterViewInit {
   Orderdata: OrderData[];
   reqclass: Reqclass[];
   shipsort: ShipSort[];
-  
+  formData: any = {};
+
   //날짜 조회
   startDate: any;
   endDate: any;
@@ -64,6 +69,7 @@ export class CSRQComponent implements AfterViewInit {
   //form popup
   colCountByScreen: Object;
   closeButtonOptions: any;
+  exportSelectedData: any;
 
   //form
   popupVisible = false;
@@ -100,6 +106,7 @@ export class CSRQComponent implements AfterViewInit {
   //detail 편집 모드 설정
   startEditAction = 'click';
   selectTextOnEditStart = true;
+  popupMode = 'Edit';
 
   //줄 선택
   selectedRowIndex = -1;
@@ -110,32 +117,18 @@ export class CSRQComponent implements AfterViewInit {
 
   //_dataService: ImateDataService;
 
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, private appInfo: AppInfoService) {
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, private appInfo: AppInfoService ) {
     appInfo.title = AppInfoService.APP_TITLE + " | 출하요청등록";
+    this.isGridBoxOpened = false;
 
     this.formOrderData = new OrderData();
     // formpopup
     const that = this;
-
+    // 
     this.colCountByScreen = {
       md: 3,
       sm: 2,
     };
-    this.closeButtonOptions = {
-      text: 'Close',
-      onClick(e:any) {
-        that.popupVisible = false;
-      }
-    }
-    this.savesButtonOptions = {
-      text: 'Save',
-      onClick: () => {
-
-        this.Orderdata.push(this.formOrderData);
-        that.popupVisible = false;
-      },
-    };
-
 
     //form
     this.labelMode = 'floating';
@@ -158,28 +151,28 @@ export class CSRQComponent implements AfterViewInit {
     //필터
     this.saleAmountHeaderFilter = [{
       text: 'Less than $3000',
-      value: ['orderQuantity', '<', 3000],
+      value: ['settlement', '<', 3000],
     }, {
       text: '$3000 - $5000',
       value: [
-        ['orderQuantity', '>=', 3000],
-        ['orderQuantity', '<', 5000],
+        ['settlement', '>=', 3000],
+        ['settlement', '<', 5000],
       ],
     }, {
       text: '$5000 - $10000',
       value: [
-        ['orderQuantity', '>=', 5000],
-        ['orderQuantity', '<', 10000],
+        ['settlement', '>=', 5000],
+        ['settlement', '<', 10000],
       ],
     }, {
       text: '$10000 - $20000',
       value: [
-        ['orderQuantity', '>=', 10000],
-        ['orderQuantity', '<', 20000],
+        ['settlement', '>=', 10000],
+        ['settlement', '<', 20000],
       ],
     }, {
       text: 'Greater than $20000',
-      value: ['orderQuantity', '>=', 20000],
+      value: ['settlement', '>=', 20000],
     }];
     this.customOperations = [{
       name: 'weekends',
@@ -191,7 +184,30 @@ export class CSRQComponent implements AfterViewInit {
         return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
       },
     }];
+    //엑셀버튼
+    this.exportSelectedData = {
+      icon: 'export',
+      onClick: () => {
+        this.dataGrid.instance.exportToExcel(true);
 
+      },
+    };
+    //팝업 close 버튼
+    this.closeButtonOptions = {
+      text: 'Close',
+      onClick(e: any) {
+        that.popupVisible = false;
+      }
+    }
+    //팝업 save 버튼
+    this.savesButtonOptions = {
+      text: 'Save',
+      onClick: () => {
+
+        this.Orderdata.push(this.formOrderData);
+        that.popupVisible = false;
+      },
+    };
     //저장버튼
     this.saveButtonOptions = {
       icon: 'save',
@@ -199,7 +215,6 @@ export class CSRQComponent implements AfterViewInit {
         this.dataGrid.instance.saveEditData();
       },
     };
-
     //조회버튼
     this.searchButtonOptions = {
       icon: 'search',
@@ -239,13 +254,10 @@ export class CSRQComponent implements AfterViewInit {
     this.dataGrid.instance.refresh();
 
   }
-
-  selectedChanged(e: any) {
-    this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
-  }
-
-  selectionChanged(data: any) {
-    this.selectedItemKeys = data.selectedRowKeys;
+ 
+  selectionChanged(data: any ) {
+    this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
+    this.selectedItemKeys = data.currentSelectedRowKeys;
   }
 
   AddRecords() {
@@ -261,7 +273,7 @@ export class CSRQComponent implements AfterViewInit {
 
     this.popupVisible = true;
   };
-  
+
   onToolbarPreparing(e:any) {
     e.toolbarOptions.items[0].showText = 'always';
 
@@ -308,5 +320,28 @@ export class CSRQComponent implements AfterViewInit {
   screen(width:any) {
     return width < 720 ? 'sm' : 'md';
   }
+  editRow(e: any): void {
+    e.component.editRow(this.selectedRowIndex);  
 
+  }
+  showPopup(popupMode: any, data: any): void {
+    this.formData = {};
+    console.log(data);
+    console.log(this.formData);
+
+    this.formData = data;
+    this.popupMode = popupMode;
+    this.popupVisible = true;
+    console.log(this.formData);
+  }
+  //드롭박스close
+  onSelectionChanged(e: any): void {
+    this.gridBox1.instance.close();
+    this.gridBox2.instance.close();
+    this.gridBox3.instance.close();
+    this.gridBox4.instance.close();
+    this.gridBox5.instance.close();
+    this.gridBox6.instance.close();
+
+  }
 }

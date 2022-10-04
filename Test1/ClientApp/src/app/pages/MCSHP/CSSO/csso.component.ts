@@ -1,9 +1,5 @@
 /*
- *
- * 
  * 출고 지시 등록
- *
- * 
  */
 import { Component, enableProdMode, ViewChild, AfterViewInit } from '@angular/core';
 import DataSource from 'devextreme/data/data_source';
@@ -34,7 +30,7 @@ const getOrderDay = function (rowData: any): number {
 export class CSSOComponent implements AfterViewInit {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
 
-  //data
+  //databinding
   cusDate?: string;
   cusNum?: number;
   oilClass?: string;
@@ -92,7 +88,7 @@ export class CSSOComponent implements AfterViewInit {
   min: Date = new Date(1900, 0, 1);
   dateClear = new Date(2015, 11, 1, 6);
 
-  //버튼
+  //버튼 옵션
   saveButtonOptions: any;
   savesButtonOptions: any;
   liqsavesButtonOptions: any;
@@ -135,38 +131,6 @@ export class CSSOComponent implements AfterViewInit {
       md: 3,
       sm: 2,
     };
-    this.closeButtonOptions = {
-      text: 'Close',
-      onClick(e: any) {
-        that.popupVisible = false;
-      }
-    }
-    this.savesButtonOptions = {
-      text: 'Save',
-      onClick: () => {
-
-        this.orderinfo.push(this.formOrderData);
-        that.popupVisible = false;
-      },
-    };
-
-    this.liqcloseButtonOptions = {
-      text: 'Close',
-      onClick(e: any) {
-        that.liqpopupVisible = false;
-      }
-    }
-    this.liqsavesButtonOptions = {
-      text: 'Save',
-      onClick: () => {
-
-        this.orderinfo.push(this.formOrderData);
-        that.liqpopupVisible = false;
-      },
-    };
-    // multiselectbox
-    this.gridDataSource = this.makeAsyncDataSource(http, 'roles.json');
-
 
     //정보
     this.oiltype = service.getOilType();
@@ -183,9 +147,7 @@ export class CSSOComponent implements AfterViewInit {
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
-
-
-
+    //필터
     this.customOperations = [{
       name: 'weekends',
       caption: 'Weekends',
@@ -197,7 +159,38 @@ export class CSSOComponent implements AfterViewInit {
       },
     }];
 
+    //유류팝업닫기버튼
+    this.closeButtonOptions = {
+      text: 'Close',
+      onClick(e: any) {
+        that.popupVisible = false;
+      }
+    }
+    //유류팝업저장버튼
+    this.savesButtonOptions = {
+      text: 'Save',
+      onClick: () => {
 
+        this.orderinfo.push(this.formOrderData);
+        that.popupVisible = false;
+      },
+    };
+    //액상팝업닫기버튼
+    this.liqcloseButtonOptions = {
+      text: 'Close',
+      onClick(e: any) {
+        that.liqpopupVisible = false;
+      }
+    }
+    //액상팝업저장버튼
+    this.liqsavesButtonOptions = {
+      text: 'Save',
+      onClick: () => {
+
+        this.orderinfo.push(this.formOrderData);
+        that.liqpopupVisible = false;
+      },
+    };
     //조회버튼
     this.searchButtonOptions = {
       icon: 'search',
@@ -230,7 +223,6 @@ export class CSSOComponent implements AfterViewInit {
       },
     };
     //저장버튼
-
     this.saveButtonOptions = {
       icon: 'save',
       onClick: () => {
@@ -240,21 +232,11 @@ export class CSSOComponent implements AfterViewInit {
 
   }
 
-  makeAsyncDataSource(http: any, jsonFile: any) {
-    return new CustomStore({
-      loadMode: 'raw',
-      key: 'ID',
-      load() {
-        return lastValueFrom(http.get(`data/${jsonFile}`));
-      },
-    });
-  }
   //Data refresh 날짜 새로고침 이벤트
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
 
   }
-
   selectedChanged(e: any) {
     this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
   }
@@ -397,7 +379,6 @@ export class CSSOComponent implements AfterViewInit {
       this.liqShipReqNum = rowData.liqShipReqNum;
       this.liqSOrdNum = rowData.liqSOrdNum;
       this.liqAlloVol = rowData.liqAlloVol;
-
     }
   }
 }

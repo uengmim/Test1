@@ -28,6 +28,8 @@ export class WORequestComponent {
 
   displayExpr: string;
 
+  simpleProducts: string[];
+
   gridColumns: any = ['그룹코드', '그룹명', '코드', '코드명'];
 
   //_dataService: ImateDataService;
@@ -43,6 +45,8 @@ export class WORequestComponent {
     this.isGridBoxOpened = false;
 
     this.displayExpr = "";
+
+    this.simpleProducts = service.getSimpleProducts();
 
     let model = this;
     model.displayExpr = "";

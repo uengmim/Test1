@@ -32,6 +32,22 @@
                         [dataSource]="products"
                         (onOptionChanged)="onGridBoxOptionChanged($event)">
         <div *dxTemplate="let data of 'content'">
+
+          <div class="dx-field">
+            <div class="dx-field-label">Default mode</div>
+            <div class="dx-field-value">
+              <dx-select-box [items]="simpleProducts"></dx-select-box>
+            </div>
+          </div>
+          <div class="dx-field">
+            <div class="dx-field-label">With a custom placeholder</div>
+            <div class="dx-field-value">
+              <dx-select-box [items]="simpleProducts"
+                             placeholder="Choose Product"
+                             [showClearButton]="true"></dx-select-box>
+            </div>
+          </div>
+
           <dx-data-grid [dataSource]="products"
                         [hoverStateEnabled]="true"
                         [(selectedRowKeys)]="gridBoxValue"

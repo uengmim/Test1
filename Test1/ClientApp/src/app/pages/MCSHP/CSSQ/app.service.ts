@@ -46,7 +46,38 @@ export class OrderData {
   oilSOil?: number;
   //저장탱크
   oilStorTank?: string;
-  
+}
+export class CheOrderData {
+  //거래처
+  cheOilClient?: string;
+  //도착지
+  cheOilDesti?: string;
+  //유종
+  cheOilSort?: string;
+  //출하일자
+  cheOilShipDate?: string;
+  //순번
+  cheOilTurn?: number;
+  //차량번호
+  cheOilVehNum?: string;
+  //지시량(L)
+  cheOilIndQuanL?: number;
+  //출하량(L)
+  cheOilShipQuanL?: number;
+  //출하량(MT)
+  cheOilShipQuanMT?: number;
+  //정산량
+  cheOilSetAmount!: number;
+  //단위
+  cheOilUnit?: string;
+  //V.C.F
+  cheOilVCF?: number;
+  //비중
+  cheOilSpecific?: number;
+  //출고시간
+  cheOilFWTime?: string;
+  //저장탱크
+  cheOilStorTank?: string;
 }
 const sort: string[] = [
   '남해',
@@ -191,7 +222,69 @@ const Orderdata: OrderData[] = [{
   }
 ]
 
+const CheOrderdata: CheOrderData[] = [{
 
+  cheOilClient: '도곡농협주유소',
+
+  cheOilDesti: '화순',
+
+  cheOilSort: '등유',
+
+  cheOilShipDate: '2022-05-15',
+
+  cheOilTurn: 14,
+
+  cheOilVehNum: '43다1235',
+
+  cheOilIndQuanL: 8000,
+
+  cheOilShipQuanL: 8000,
+
+  cheOilShipQuanMT: 6248,
+
+  cheOilSetAmount: 9735,
+
+  cheOilUnit: '[V2]부피공란',
+
+  cheOilVCF: 0.9787,
+
+  cheOilSpecific: 0.7991,
+
+  cheOilFWTime: '12:01 ~ 12:12',
+
+  cheOilStorTank: '50%'
+},
+  {
+    cheOilClient: '화천농협주유소',
+
+    cheOilDesti: '순천',
+
+    cheOilSort: '휘발유',
+
+    cheOilShipDate: '2022-10-14',
+
+    cheOilTurn: 14,
+
+    cheOilVehNum: '55다9534',
+
+    cheOilIndQuanL: 10242,
+
+    cheOilShipQuanL: 675534,
+
+    cheOilShipQuanMT: 3453,
+
+    cheOilSetAmount: 32132,
+
+    cheOilUnit: '[V2]부피공란',
+
+    cheOilVCF: 0.9787,
+
+    cheOilSpecific: 0.7991,
+
+    cheOilFWTime: '10:24 ~ 10:28',
+
+    cheOilStorTank: '70%'
+  }]
 @Injectable()
 export class Service {
 
@@ -199,7 +292,9 @@ export class Service {
   getOrderData() {
     return Orderdata;
   }
-
+  getCheOrderData() {
+    return CheOrderdata;
+  }
   getSort(): string[] {
     return sort;
   }

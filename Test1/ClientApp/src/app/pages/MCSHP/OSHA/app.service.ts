@@ -139,7 +139,7 @@ const oilship: OilShip[] = [{
 
     oilYuchang2: '20:21~20:48',
 
-    oilYuchang3: '20;48~21:03',
+    oilYuchang3: '20:48~21:03',
 
     oilYuchang4: '21:03~21:22',
 

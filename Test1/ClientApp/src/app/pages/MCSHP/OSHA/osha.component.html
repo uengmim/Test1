@@ -1,42 +1,35 @@
 <!--
-  
   출고결과반영
-
   -->
 <!--toolbar-->
-<dx-toolbar style="margin: 5px 0px 5px 0px;padding:0px 5px 0px 5px">
-    <dxi-item location="before" locateInMenu="auto">
-      <div *dxTemplate>
-        <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>출고기간</b></div>
-        <div style="float:left">
-          <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
-        </div>
-        <div style="float:left; margin:10px 5px 0px 5px">
-          ~
-        </div>
-        <div style="float:left">
-          <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
-        </div>
+<dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>기간</b></div>
+      <div style="float:left">
+        <dx-date-box [(value)]="startDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
-    </dxi-item>
-    <dxi-item location="before"
-              widget="dxButton"
-              locateInMenu="auto"
-              [height]="25"
-              [options]="searchButtonOptions">
-    </dxi-item>
-    <dxi-item location="after"
-              widget="dxButton"
-              locateInMenu="auto"
-              [height]="25"
-              [options]="printSelectedData">
-    </dxi-item>
-    <dxi-item location="after"
-              widget="dxButton"
-              locateInMenu="auto"
-              [height]="25"
-              [options]="exportSelectedData">
-    </dxi-item>
+      <div style="float:left; margin-left:10px; margin-right:10px;">
+        ~
+      </div>
+      <div style="float:left; margin-right:10px;">
+        <dx-date-box [(value)]="endDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="exportSelectedData">
+  </dxi-item>
 </dx-toolbar>
 
 <dx-form>
@@ -52,10 +45,12 @@
                     keyExpr="oilNum"
                     [selection]="{ mode: 'multiple' }"
                     [allowColumnReordering]="true"
-                    [columnWidth]="150"
-                    [columnAutoWidth]="false"
+                    [columnAutoWidth]="true"
                     [allowColumnResizing]="true"
+                    [remoteOperations]="false"
+                    [rowAlternationEnabled]="true"
                     height="calc(100vh - 230px)">
+
         <!--Datagrid Option-->
         <dxo-paging [enabled]="false"></dxo-paging>
         <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
@@ -114,15 +109,15 @@
                     [dataSource]="ChemShip"
                     [showBorders]="true"
                     [focusedRowIndex]="0"
-                    [columnWidth]="150"
-                    [columnAutoWidth]="false"
+                    [columnAutoWidth]="true"
+                    [remoteOperations]="false"
+                    [rowAlternationEnabled]="true"
                     [allowColumnResizing]="true"
                     columnResizingMode="widget"
                     keyExpr="chemNum"
                     [selection]="{ mode: 'multiple' }"
                     [allowColumnReordering]="true"
-                    height="calc(100vh - 230px)"
-                    (onCellPrepared)="onCellPrepared($event)">
+                    height="calc(100vh - 230px)">
         <!--Datagrid Option-->
         <dxo-paging [enabled]="false"></dxo-paging>
         <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>

@@ -1,17 +1,13 @@
-/**
- *
- * 
+/*
  * 유창 배분 등록
- *
- * 
  */
 import { NgModule, Component, enableProdMode, ViewChild } from '@angular/core';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { formatDate } from '@angular/common';
-import { Service, Regis, AddData, Data } from '../OWDR/app.service'
+import { Service, Regis, AddData } from '../OWDR/app.service'
 import {
   DxDataGridComponent,
 } from 'devextreme-angular';
@@ -80,7 +76,60 @@ export class OWDRComponent {
     this.adddata = service.getAddData();
     this.data = service.getData();
 
+    //date
+    var now = new Date();
+    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
+    this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
+    const that = this;
+
+    //닫기버튼
+    this.closeButtonOptions = {
+      text: 'Close',
+      onClick(e: any) {
+        that.popupVisible = false;
+      }
+    }
+    //저장버튼
+    this.savesButtonOptions = {
+      text: 'Save',
+      onClick: () => {
+
+        that.popupVisible = false;
+      },
+    };
+    //조회버튼
+    this.searchButtonOptions = {
+      icon: 'search',
+      onClick: async () => {
+        this.dataGrid.instance.refresh();
+      },
+    };
     //필터
+    this.saleAmountHeaderFilter = [{
+      text: 'Less than $100',
+      value: ['indiQuan', '<', 3000],
+    }, {
+      text: '$100 - $200',
+      value: [
+        ['indiQuan', '>=', 3000],
+        ['indiQuan', '<', 5000],
+      ],
+    }, {
+      text: '$300 - $400',
+      value: [
+        ['indiQuan', '>=', 5000],
+        ['indiQuan', '<', 10000],
+      ],
+    }, {
+      text: '$400 - $500',
+      value: [
+        ['indiQuan', '>=', 10000],
+        ['indiQuan', '<', 20000],
+      ],
+    }, {
+      text: 'Greater than $500',
+      value: ['indiQuan', '>=', 20000],
+      }];
     this.customOperations = [{
       name: 'weekends',
       caption: 'Weekends',
@@ -90,59 +139,6 @@ export class OWDRComponent {
       calculateFilterExpression() {
         return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
       },
-    }];
-    //date
-    var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
-    this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
-    const that = this;
-
-    //popup
-    this.closeButtonOptions = {
-      text: 'Close',
-      onClick(e: any) {
-        that.popupVisible = false;
-      }
-    }
-    this.savesButtonOptions = {
-      text: 'Save',
-      onClick: () => {
-
-        that.popupVisible = false;
-      },
-    };
-
-    //조회버튼
-    this.searchButtonOptions = {
-      icon: 'search',
-      onClick: async () => {
-        this.dataGrid.instance.refresh();
-      },
-    };
-    this.saleAmountHeaderFilter = [{
-      text: 'Less than $100',
-      value: ['oilSetAmount', '<', 3000],
-    }, {
-      text: '$100 - $200',
-      value: [
-        ['PARoilSetAmountAM9', '>=', 3000],
-        ['oilSetAmount', '<', 5000],
-      ],
-    }, {
-      text: '$300 - $400',
-      value: [
-        ['oilSetAmount', '>=', 5000],
-        ['oilSetAmount', '<', 10000],
-      ],
-    }, {
-      text: '$400 - $500',
-      value: [
-        ['oilSetAmount', '>=', 10000],
-        ['oilSetAmount', '<', 20000],
-      ],
-    }, {
-      text: 'Greater than $500',
-      value: ['oilSetAmount', '>=', 20000],
     }];
   }
 
@@ -174,57 +170,5 @@ export class OWDRComponent {
     this.popupVisible = true;
     console.log(this.formData);
   }
-  onCellPrepared(e: any) {
-    if (e.rowType === "data" && e.column.dataField == ["oilRack"]) {
-      e.cellElement.style.backgroundColor = '#424242';
-    }
-    if (e.rowType === "data" && e.column.dataField == ["oilOrderSort"]) {
-      e.cellElement.style.backgroundColor = '#424242';
-    }
-    if (e.rowType === "data" && e.column.dataField == ["oilTem"]) {
-      e.cellElement.style.backgroundColor = '#424242';
-    }
-    if (e.rowType === "data" && e.column.dataField == ["oilBLNum"]) {
-      e.cellElement.style.backgroundColor = '#424242';
-    }
-    if (e.rowType === "data" && e.column.dataField == ["oilOrder"]) {
-      e.cellElement.style.backgroundColor = '#424242';
-    }
-    if (e.rowType === "data" && e.column.dataField == ["oilRequset"]) {
-      e.cellElement.style.backgroundColor = '#424242';
-    }
-    if (e.rowType === "data" && e.column.dataField == ["oilSOil"]) {
-      e.cellElement.style.backgroundColor = '#424242';
-    }
-  }
 
-  onFocusedRowChanging(e: any) {
-    const rowsCount = e.component.getVisibleRows().length;
-    const pageCount = e.component.pageCount();
-    const pageIndex = e.component.pageIndex();
-    const key = e.event && e.event.key;
-
-    if (key && e.prevRowIndex === e.newRowIndex) {
-      if (e.newRowIndex === rowsCount - 1 && pageIndex < pageCount - 1) {
-        e.component.pageIndex(pageIndex + 1).done(() => {
-          e.component.option('focusedRowIndex', 0);
-        });
-      } else if (e.newRowIndex === 0 && pageIndex > 0) {
-        e.component.pageIndex(pageIndex - 1).done(() => {
-          e.component.option('focusedRowIndex', rowsCount - 1);
-        });
-      }
-    }
-  }
-
-  onFocusedRowChanged(e: any) {
-    const rowData = e.row && e.row.data;
-
-    if (rowData) {
-      this.indiQuan = rowData.indiQuan;
-      this.dispcNum = rowData.dispcNum;
-      this.indiNum = rowData.indiNum;
-
-    }
-  }
 }

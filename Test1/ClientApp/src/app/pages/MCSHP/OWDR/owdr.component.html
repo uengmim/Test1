@@ -1,34 +1,30 @@
 <!--
-
-
   유창 배분 등록
-
-
   -->
 <!--toolbar-->
-  <dx-toolbar style="margin: 5px 0px 5px 0px;padding:0px 5px 0px 5px">
-    <dxi-item location="before" locateInMenu="auto">
-      <div *dxTemplate>
-        <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>기간</b></div>
-        <div style="float:left">
-          <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
-        </div>
-        <div style="float:left; margin:10px 5px 0px 5px">
-          ~
-        </div>
-        <div style="float:left">
-          <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
-        </div>
+<dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>기간</b></div>
+      <div style="float:left">
+        <dx-date-box [(value)]="startDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
-    </dxi-item>
+      <div style="float:left; margin-left:10px; margin-right:10px;">
+        ~
+      </div>
+      <div style="float:left; margin-right:10px;">
+        <dx-date-box [(value)]="endDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
 
-    <dxi-item location="before"
-              widget="dxButton"
-              locateInMenu="auto"
-              [height]="25"
-              [options]="searchButtonOptions">
-    </dxi-item>
-  </dx-toolbar>
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
 
 
   <dx-data-grid id="grid"
@@ -39,17 +35,15 @@
                 keyExpr="dispcNum"
                 [selection]="{ mode: 'multiple' }"
                 (onRowDblClick)="addRow($event)"
-                [height]="900"
-                (onFocusedRowChanging)="onFocusedRowChanging($event)"
-                (onFocusedRowChanged)="onFocusedRowChanged($event)"
                 (onSelectionChanged)="selectionChanged($event)"
                 [allowColumnReordering]="true"
-                [columnWidth]="150"
-                [columnAutoWidth]="false"
-                [allowColumnResizing]="true"
+                [columnAutoWidth]="true"
+                [remoteOperations]="false"
+                [rowAlternationEnabled]="true"
                 height="calc(100vh - 230px)">
     <!--Datagrid Option-->
     <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
     <!--Filtering Option-->
     <dxo-filter-panel [visible]="true"></dxo-filter-panel>
@@ -89,14 +83,23 @@
             [showTitle]="true"
             title="유류출하 지시 등록"
             [dragEnabled]="false"
-            [hideOnOutsideClick]="true"
             [showCloseButton]="false"
             container=".dx-viewport"
             [(visible)]="popupVisible">
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="bottom"
+                      location="before"
+                      [options]="savesButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="bottom"
+                      location="after"
+                      [options]="closeButtonOptions">
+    </dxi-toolbar-item>
     <dx-scroll-view width="100%" height="100%">
       <div id="form-container">
         <div style="margin-bottom:20px">오더내역</div>
-        <dx-form id="data" [formData]="data"  width="80%" >
+        <dx-form id="data" [formData]="data" width="80%">
           <dxi-item dataField="dDispcNumv"><dxo-label text="배차번호"></dxo-label></dxi-item>
           <dxi-item dataField="dIndiNum"><dxo-label text="지시번호"></dxo-label></dxi-item>
           <dxi-item dataField="dIndiQuan"><dxo-label text="총지시량"></dxo-label></dxi-item>
@@ -110,7 +113,7 @@
                     [showBorders]="true"
                     [selection]="{ mode: 'single' }"
                     [focusedRowIndex]="0"
-                    [height]="500"
+                    [height]="400"
                     keyExpr="yuChang"
                     [focusedRowEnabled]="true"
                     [allowColumnResizing]="true"
@@ -120,6 +123,7 @@
         <dxo-filter-row [visible]="true"></dxo-filter-row>
         <dxo-editing mode="batch"
                      [allowAdding]="true"
+                     [allowUpdating]="true"
                      [allowDeleting]="true">
         </dxo-editing>
 

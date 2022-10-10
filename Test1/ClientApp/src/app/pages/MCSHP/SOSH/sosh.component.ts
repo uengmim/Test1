@@ -58,7 +58,6 @@ export class SOSHComponent {
   //데이터 조회 버튼
   searchButtonOptions: any;
   exportSelectedData: any;
-  printSelectedData: any;
   saveButtonOptions: any;
   deleteButtonOptions: any;
   addButtonOptions: any;
@@ -82,17 +81,6 @@ export class SOSHComponent {
     //정보
     this.shipdata = service.getShipData();
 
-    //필터
-    this.customOperations = [{
-      name: 'weekends',
-      caption: 'Weekends',
-      dataTypes: ['date'],
-      icon: 'check',
-      hasValue: false,
-      calculateFilterExpression() {
-        return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
-      },
-    }];
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
@@ -130,14 +118,13 @@ export class SOSHComponent {
       },
     };
     //저장버튼
-
     this.saveButtonOptions = {
       icon: 'save',
       onClick: () => {
         this.dataGrid.instance.saveEditData();
       },
     };
-  
+    //엑셀버튼
     this.exportSelectedData = {
       icon: 'export',
       onClick: () => {
@@ -146,36 +133,41 @@ export class SOSHComponent {
       },
     };
 
-    this.printSelectedData = {
-      icon: 'print',
-      onClick: () => {
-
-      },
-    };
+    //필터
     this.saleAmountHeaderFilter = [{
       text: 'Less than $100',
-      value: ['oilSetAmount', '<', 3000],
+      value: ['shipTotalAmt', '<', 3000],
     }, {
       text: '$100 - $200',
       value: [
-        ['PARoilSetAmountAM9', '>=', 3000],
-        ['oilSetAmount', '<', 5000],
+        ['shipTotalAmt', '>=', 3000],
+        ['shipTotalAmt', '<', 5000],
       ],
     }, {
       text: '$300 - $400',
       value: [
-        ['oilSetAmount', '>=', 5000],
-        ['oilSetAmount', '<', 10000],
+        ['shipTotalAmt', '>=', 5000],
+        ['shipTotalAmt', '<', 10000],
       ],
     }, {
       text: '$400 - $500',
       value: [
-        ['oilSetAmount', '>=', 10000],
-        ['oilSetAmount', '<', 20000],
+        ['shipTotalAmt', '>=', 10000],
+        ['shipTotalAmt', '<', 20000],
       ],
     }, {
       text: 'Greater than $500',
-      value: ['oilSetAmount', '>=', 20000],
+      value: ['shipTotalAmt', '>=', 20000],
+      }];
+    this.customOperations = [{
+      name: 'weekends',
+      caption: 'Weekends',
+      dataTypes: ['date'],
+      icon: 'check',
+      hasValue: false,
+      calculateFilterExpression() {
+        return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
+      },
     }];
   }
 

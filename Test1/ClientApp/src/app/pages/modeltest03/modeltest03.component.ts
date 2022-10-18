@@ -1,4 +1,5 @@
 import { NgModule, Component, enableProdMode, ViewChild } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
 import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../shared/imate/imateDataAdapter';
@@ -8,6 +9,7 @@ import { ZXNSCRFCResultModel } from '../../shared/dataModel/ZxnscRfcResult';
 import { DIMModelStatus } from '../../shared/imate/dimModelStatusEnum';
 import { ImateInfo, QueryCacheType } from '../../shared/imate/imateCommon';
 import { Service, State, Role, PriorityEntity, Option } from '../modeltest03/app.service'
+
 import {
   DxDataGridComponent,
   DxSelectBoxComponent,
@@ -16,6 +18,7 @@ import {
 import { formatDate } from '@angular/common';
 import { ZXNSCRFCDetailModel } from '../../shared/dataModel/ZxnscRfcDetail';
 import { updateObject } from '../../shared/imate/utility/object-copy';
+import { AppInfoService } from '../../shared/services/app-info.service';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -28,9 +31,8 @@ if (!/localhost/.test(document.location.host)) {
 
 export class Modeltest03Component {
   @ViewChild('detailGrid', { static: false }) detailGrid!: DxDataGridComponent;
-  @ViewChild("masterForm", { static: false }) masterForm!: DxFormComponent; //masterform viewChild
-  @ViewChild("company", { static: false }) companySelBox!: DxSelectBoxComponent; //selectbox viewChild
-
+  @ViewChild("masterForm", { static: false }) masterForm!: DxFormComponent;
+  @ViewChild("company", { static: false }) companySelBox!: DxSelectBoxComponent;
 
 
   startDate: any;
@@ -39,7 +41,7 @@ export class Modeltest03Component {
   states: State[];
   roles: Role[];
   option: Option[];
-  selectedOption: string[] = []; //선택된 옵션 배열로 처리
+  selectedOption: string[] = [];
 
   //multiseletbox
   gridDataSource: any;
@@ -49,7 +51,7 @@ export class Modeltest03Component {
   dataSource: any;
   detaildataSource: any;
   rowCount: number;
-  selectedMaterKey: number = -1; //???
+  selectedMaterKey: number = -1;
 
   _dataService: ImateDataService;
 
@@ -63,23 +65,20 @@ export class Modeltest03Component {
   //toolbar option
   backButtonOptions: any;
 
-  //새로고침 버튼
+  //새로고침 버턴
   refreshButtonOptions: any;
 
-  //마스터 추가 버튼
+  //마스터 추가 버턴
   addMasterButtonOptions: any;
 
-  //자료 저정 버튼
+  //자료 저정 버턴
   saveButtonOptions: any;
 
-  //상세 추가 버튼
+  //상세 추가 버턴
   addDetailButtonOptions: any;
 
-  //편집 취소 버튼
+  //편집 취소 보놑
   cancelEditButtonOptions: any;
-
-
-  selectedItemKeys: any[] = [];
 
   //form option
   labelMode: string = "";
@@ -109,14 +108,12 @@ export class Modeltest03Component {
 
   //Mater 모드
   masterAddMode: boolean = false;
-    dataGrid: any;
 
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo) {
-
-
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService) {
+    appInfo.title = AppInfoService.APP_TITLE + " | MODEL TEST3";
 
     //radio button
-    this.priorities = [            //ID 넣어야함
+    this.priorities = [
       { ID: '1', Name: 'OPTION1' },
       { ID: '2', Name: 'OPTION2' },
       { ID: '3', Name: 'OPTION3' },
@@ -309,7 +306,7 @@ export class Modeltest03Component {
     values.updat = formatDate(parent.now, "MM-dd-yyyy", "en-US");
 
     var opt = values.detopt.join(",");
-    var sel = values.dETSEL1 ? "X" : "";
+    var sel = values.dETSEL1 ? "O" : "X";
 
     var data = new ZXNSCRFCDetailModel(values.dATA1, values.itmno, values.dETAIL1, values.dETAIL2, values.dETNUM1, values.dATNUM2, sel, values.dETSEL2, opt, values.updat, values.uptim, DIMModelStatus.Add);
     var modelList: ZXNSCRFCDetailModel[] = [data];
@@ -381,24 +378,4 @@ export class Modeltest03Component {
   {
     return cellInfo.value.split(',');
   }
-  selectionChanged(data: any) {
-    this.selectedItemKeys = data.selectedRowKeys;
-  }
-
-  deleteRecords() {
-    this.selectedItemKeys.forEach((key) => {
-      this.dataSource.remove(key);
-    });
-    this.detailGrid.instance.refresh();
-  }
-
-  onToolbarPreparing(e:any) {
-    e.toolbarOptions.items[0].showText = 'always';
-
-    e.toolbarOptions.items.push({
-      location: 'after',
-      template: 'deleteButton',
-    });
-  }
-
 }

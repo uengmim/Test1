@@ -9,6 +9,7 @@ import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { HttpClient} from '@angular/common/http';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { formatDate } from '@angular/common';
+import { lastValueFrom } from 'rxjs';
 import { Service, OrderData, Reqclass, OilType, ShipSort } from '../CSRQ/app.service'
 import {
   DxDataGridComponent,
@@ -39,9 +40,9 @@ export class CSRQComponent implements AfterViewInit {
   
   //multiseletbox
   gridDataSource: any;
-  gridBoxValue1: string[] = [];
-  gridBoxValue2: string[] = [];
-  gridBoxValue3: string[] = [];
+  selectedOption1: string[] = [];
+  selectedOption2: string[] = [];
+  selectedOption3: string[] = [];
   gridBoxValue4: string[] = [];
   gridBoxValue5: string[] = [];
   gridBoxValue6: string[] = [];
@@ -343,5 +344,18 @@ export class CSRQComponent implements AfterViewInit {
     this.gridBox5.instance.close();
     this.gridBox6.instance.close();
 
+  }
+  detailRowChanged(e: any) {
+    this.selectedOption1 = e.component.cellValue(e.rowIndex, "orderClass");
+    this.selectedOption2 = e.component.cellValue(e.rowIndex, "liquidClass");
+    this.selectedOption3 = e.component.cellValue(e.rowIndex, "sort");
+
+
+  }
+  onDetailOptionChanged(cellInfo: any, e: any) {
+    cellInfo.setValue(e.value);
+  }
+  detailSelectedKeys(cellInfo: any) {
+    return cellInfo.value.split(',');
   }
 }

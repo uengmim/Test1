@@ -61,24 +61,21 @@ export class OrderData {
 }
 
 const reqclass: Reqclass[] = [{
-  ID: 'S',
+  ID: 'S-OIL',
   Name: 'S-OIL주문',
 }];
 const oiltype: OilType[] = [{
-  ID: 'a',
-  Name: '휘발유',
+  ID: '염산',
+  Name: '염산',
 }, {
-  ID: 'b',
-  Name: '일반 휘발유',
-}, {
-  ID: 'c',
-  Name: '경유',
-  }];
+  ID: '암모니아',
+  Name: '암모니아',
+}];
 const shipsort: ShipSort[] = [{
-  ID: '1',
+  ID: '도착도',
   Name: '도착도',
 }, {
-  ID: '2',
+  ID: '출발도',
   Name: '출발도',
 }];
 const Orderdata: OrderData[] = [{
@@ -87,7 +84,7 @@ const Orderdata: OrderData[] = [{
 
   reqDate: '2022/08/29',
   
-  orderClass: '주문완료',
+  orderClass: 'S-OIL',
 
   client: 'LG',
 
@@ -115,7 +112,7 @@ const Orderdata: OrderData[] = [{
 
   vehicleCapacity: '1000',
 
-  sort: '',
+  sort: '도착도',
 
   storage: '10TB',
 
@@ -132,7 +129,7 @@ const Orderdata: OrderData[] = [{
 
     reqDate: '2022/10/10',
 
-    orderClass: '주문완료',
+    orderClass: 'S-OIL',
 
     client: '삼성',
 
@@ -160,7 +157,7 @@ const Orderdata: OrderData[] = [{
 
     vehicleCapacity: '412',
 
-    sort: '',
+    sort: '도착도',
 
     storage: '98GB',
 
@@ -177,7 +174,7 @@ const Orderdata: OrderData[] = [{
 
     reqDate: '2022/01/01',
 
-    orderClass: '배송 전',
+    orderClass: 'S-OIL',
 
     client: '네이버',
 
@@ -205,7 +202,7 @@ const Orderdata: OrderData[] = [{
 
     vehicleCapacity: '5372',
 
-    sort: '',
+    sort: '출발도',
 
     storage: '80TB',
 

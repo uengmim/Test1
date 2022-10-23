@@ -7,13 +7,13 @@
     <div *dxTemplate>
       <div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>기간</b></div>
       <div style="float:left">
-        <dx-date-box [(value)]="startDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="startDate" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
       <div style="float:left; margin-left:10px; margin-right:10px;">
         ~
       </div>
       <div style="float:left; margin-right:10px;">
-        <dx-date-box [(value)]="endDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="endDate" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
     </div>
   </dxi-item>
@@ -57,12 +57,12 @@
                     keyExpr="insNum"
                     [selection]="{ mode: 'multiple' }"
                     [allowColumnReordering]="true"
-                    [height]="900"
                     (onSelectionChanged)="selectionChanged($event)"
                     [columnAutoWidth]="true"
                     [allowColumnResizing]="true"
                     [remoteOperations]="false"
                     [rowAlternationEnabled]="true"
+                    (onRowDblClick)="editRow($event)"
                     height="calc(100vh - 230px)">
         <!--Datagrid Option-->
         <dxo-paging [enabled]="false"></dxo-paging>
@@ -77,6 +77,40 @@
         <dxo-header-filter [visible]="true"></dxo-header-filter>
         <!--Grouping Option-->
         <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+        <!--Popup Option-->
+        <dxo-editing mode="popup"
+                     [selectTextOnEditStart]="selectTextOnEditStart"
+                     [startEditAction]="startEditAction"
+                     refreshMode="repaint">
+          <dxo-popup title="유류출하 등록"
+                     [showTitle]="true"
+                     width="80%"
+                     height="50%">
+          </dxo-popup>
+          <dxo-form>
+            <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+              <dxi-item dataField="date" caption="일자" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="insNum" caption="지시번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="cliName" caption="거래처명" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="destination" caption="도착지" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="product" caption="제품" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="insQuan" caption="지시량" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="vehicleNum" caption="차량번호" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="driverName" caption="기사명" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="address" caption="주소" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="shipType" caption="출하형태" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="sort" caption="구분" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="disNum" caption="배차번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="cRequest" caption="C_REQUEST" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="cBusiNo" caption="C_BUSI_NO" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="cPass" caption="C_PASS" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="severDate" caption="서버일자" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="serverNum" caption="서버순번" [editorOptions]="{ height: 50 }">
+
+              </dxi-item>
+            </dxi-item>
+          </dxo-form>
+        </dxo-editing>
         <!--Data column-->
         <dxi-column dataField="date"
                     caption="일자"
@@ -163,8 +197,8 @@
                     keyExpr="liqInsNum"
                     [selection]="{ mode: 'multiple' }"
                     [allowColumnReordering]="true"
-                    [height]="900"
                     (onSelectionChanged)="selectionChanged($event)"
+                    (onRowDblClick)="editRow($event)"
                     [columnAutoWidth]="true"
                     [remoteOperations]="false"
                     [rowAlternationEnabled]="true"
@@ -182,6 +216,38 @@
         <dxo-header-filter [visible]="true"></dxo-header-filter>
         <!--Grouping Option-->
         <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+        <!--Popup Option-->
+        <dxo-editing mode="popup"
+                     [selectTextOnEditStart]="selectTextOnEditStart"
+                     [startEditAction]="startEditAction"
+                     refreshMode="repaint">
+          <dxo-popup title="화학출하 등록"
+                     [showTitle]="true"
+                     width="80%"
+                     height="50%">
+          </dxo-popup>
+          <dxo-form>
+            <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+              <dxi-item dataField="liqDate" caption="일자" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="liqInsNum" caption="지시번호" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="liqCliName" caption="거래처명" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="liqDestination" caption="도착지" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqProduct" caption="제품" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqInsQuan" caption="지시량" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqVehicleNum" caption="차량번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqDriverName" caption="기사명" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqAddress" caption="주소" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqShipType" caption="출하형태" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqSort" caption="구분" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqDisNum" caption="배차번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqCRequest" caption="C_REQUEST" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqCBusiNo" caption="C_BUSI_NO" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqCPass" caption="C_PASS" [editorOptions]="{ height: 50 }"> </dxi-item>
+              <dxi-item dataField="liqShipDate" caption="출하일자" [editorOptions]="{ height: 50 }"></dxi-item>
+              <dxi-item dataField="liqShipNum" caption="출하순번" [editorOptions]="{ height: 50 }"> </dxi-item>
+            </dxi-item>
+          </dxo-form>
+        </dxo-editing>
         <!--Data column-->
         <dxi-column dataField="liqDate"
                     caption="일자"

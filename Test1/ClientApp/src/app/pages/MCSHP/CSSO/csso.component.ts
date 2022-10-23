@@ -237,13 +237,7 @@ export class CSSOComponent implements AfterViewInit {
     this.dataGrid.instance.refresh();
 
   }
-  selectedChanged(e: any) {
-    this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
-  }
 
-  selectionChanged(data: any) {
-    this.selectedItemKeys = data.selectedRowKeys;
-  }
 
   AddRecords() {
     this.selectedItemKeys.forEach((key: any) => {
@@ -380,5 +374,13 @@ export class CSSOComponent implements AfterViewInit {
       this.liqSOrdNum = rowData.liqSOrdNum;
       this.liqAlloVol = rowData.liqAlloVol;
     }
+  }
+  selectionChanged(data: any) {
+    this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
+    this.selectedItemKeys = data.currentSelectedRowKeys;
+  }
+  editRow(e: any): void {
+    e.component.editRow(this.selectedRowIndex);
+
   }
 }

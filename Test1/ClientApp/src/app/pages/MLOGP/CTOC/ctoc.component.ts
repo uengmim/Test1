@@ -29,7 +29,6 @@ export class CTOCComponent {
   selectedItemKeys: any[] = [];
   selectedRowIndex = -1;
 
-
   //정보
   data: Data[];
   order!: string[];
@@ -38,6 +37,7 @@ export class CTOCComponent {
   classification!: string[];
   product!: string[];
 
+  //date box
   value: Date = new Date(1981, 3, 27);
   now: Date = new Date();
 

@@ -1,0 +1,370 @@
+<!--물류기지 CHECK LIST 등록-->
+
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>체크기준월</b> </div>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [showClearButton]="true"
+                     [useMaskBehavior]="true"
+                     displayFormat="yyyy-MM"
+                     type="date"
+                     [width]="150">
+        </dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div class="toolbar-label" style="float:left; margin-top:5px; margin-left:10px;"><b>거래처</b> </div>
+    <div style="float: left; margin-left: 10px; ">
+      <dx-select-box [items]="simpleProducts"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid id="gridContainer"
+              [dataSource]="dataSource"
+              keyExpr="representative"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'multiple' }"
+              height="calc(100vh - 230px)"
+              [columnAutoWidth]="true"
+
+              (onContentReady)="contentReady($event)"
+              (onRowDblClick)="orderDBClick($event)"
+              [allowColumnReordering]="true"
+              columnResizingMode="widget">
+  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+  <dxo-paging [pageSize]="100"></dxo-paging>
+  <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-editing mode="popup"
+               [selectTextOnEditStart]="selectTextOnEditStart"
+               [startEditAction]="startEditAction"
+               refreshMode="repaint">
+    <dxo-popup title="물류기지 관리 CHECK LIST"
+               [showTitle]="true"
+               width="50%"
+               height="90%"
+   
+               [dragEnabled]="false"
+               [showCloseButton]="false"
+               container=".dx-viewport">
+    </dxo-popup>
+    <div id="form-container" style="margin-top:20px;">
+      <dxo-form id="orderInfo" [formData]="orderInfo">
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="registDate"><dxo-label text="등록일자"></dxo-label> </dxi-item>
+          <dxi-item dataField="checker"><dxo-label text="확인자"></dxo-label></dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="account"><dxo-label text="업체명"></dxo-label></dxi-item>
+          <dxi-item dataField="privateVehicle"><dxo-label text="자가차량"></dxo-label></dxi-item>
+          <dxi-item dataField="leaseAgreement"><dxo-label text="용차계약"></dxo-label></dxi-item>
+          <dxi-item dataField="forkLift"><dxo-label text="지게차"></dxo-label></dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="representative"><dxo-label text="대표자"></dxo-label></dxi-item>
+          <dxi-item dataField="landArea"><dxo-label text="부지면적"></dxo-label></dxi-item>
+          <dxi-item dataField="stockpileAmount"><dxo-label text="비축가능량"></dxo-label></dxi-item>
+          <dxi-item dataField="landOwnership"><dxo-label text="부지소유"></dxo-label></dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="productStorage"><dxo-label text="1. 제품 보관 창고(그늘막)"></dxo-label></dxi-item>
+          <dxi-item dataField="barbarian"><dxo-label text="야적"></dxo-label></dxi-item>
+          <dxi-item dataField="integrtiy"><dxo-label text="2. 고결/파포 수량"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+
+          <dxi-item dataField="workState" [editorOptions]="{ width: 360 }">  <dxo-label text="3. 복포 작업 상태"></dxo-label> </dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="state" [editorOptions]="{ width: 360 }"><dxo-label text="4. 복포 상태(구벙, 이물질)"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="cleanliness" [editorOptions]="{ width: 360 }"><dxo-label text="5. 제품 먼지, 이물질 청결 상태"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="floor" [editorOptions]="{ width: 360 }"><dxo-label text="6. 바닥 물고임이나 파인 곳"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="vehicle" [editorOptions]="{ width: 360 }"><dxo-label text="7. 차량 및 지게차 청결 상태"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="fertilizer" [editorOptions]="{ width: 360 }"><dxo-label text="8. 비료 재고 차이"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="palette" [editorOptions]="{ width: 360 }"><dxo-label text="9. 파렛트 재고 차이(KPP대사결과)"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="moistureAbsorption" [editorOptions]="{ width: 360 }"><dxo-label text="10. 제품 고결/흡습 상태"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="hradSale" [editorOptions]="{ width: 360 }"><dxo-label text="11. 판매가 어려운 정상 제품(10톤이상)"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="1" [colSpan]="2">
+          <dxi-item dataField="coplain"><dxo-label text="12. 민원 발생 내용 및 경과사항(발생시)"></dxo-label></dxi-item>
+          <dxi-item dataField="tendinous"><dxo-label text="13. 기타(수급포함) 건의사항"></dxo-label></dxi-item>
+        </dxi-item>
+      </dxo-form>
+    </div>
+
+  </dxo-editing>
+
+
+
+
+
+  <dxi-column dataField="registDate" caption="등록일자"  alignment="center"></dxi-column>
+  <dxi-column dataField="competentBranch" caption="관할지사" ></dxi-column>
+  <dxi-column dataField="account" caption="거래처" ></dxi-column>
+  <dxi-column dataField="representative" caption="대표자"></dxi-column>
+  <dxi-column dataField="use" caption="사용유무" ></dxi-column>
+  <dxi-column dataField="note" caption="비고"></dxi-column>
+
+</dx-data-grid>
+
+<dx-popup title="물류기지 관리 CHECK LIST"
+          [showTitle]="true"
+          width="50%"
+          height="90%"
+          [(visible)]="popupVisible"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport">
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="bottom"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+  <dx-scroll-view width="100%" height="100%">
+    <div id="form-container2" style="margin-top:20px;" width="100%">
+      <dx-form id="add" [formData]="orderInfo">
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="registDate"> <dxo-label text="등록일자"></dxo-label></dxi-item>
+          <dxi-item dataField="checker"><dxo-label text="확인자"></dxo-label></dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="account"><dxo-label text="업체명"></dxo-label></dxi-item>
+          <dxi-item dataField="privateVehicle"><dxo-label text="자가차량"></dxo-label></dxi-item>
+          <dxi-item dataField="leaseAgreement"><dxo-label text="용차계약"></dxo-label></dxi-item>
+          <dxi-item dataField="forkLift"><dxo-label text="지게차"></dxo-label></dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="representative"><dxo-label text="대표자"></dxo-label></dxi-item>
+          <dxi-item dataField="landArea"><dxo-label text="부지면적"></dxo-label></dxi-item>
+          <dxi-item dataField="stockpileAmount"><dxo-label text="비축가능량"></dxo-label></dxi-item>
+          <dxi-item dataField="landOwnership"><dxo-label text="부지소유"></dxo-label></dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="productStorage"><dxo-label text="1. 제품 보관 창고(그늘막)"></dxo-label></dxi-item>
+          <dxi-item dataField="barbarian"><dxo-label text="야적"></dxo-label></dxi-item>
+          <dxi-item dataField="integrtiy"><dxo-label text="2. 고결/파포 수량"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+
+          <dxi-item dataField="workState" [editorOptions]="{ width: 360 }">  <dxo-label text="3. 복포 작업 상태"></dxo-label> </dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="state" [editorOptions]="{ width: 360 }"><dxo-label text="4. 복포 상태(구벙, 이물질)"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="cleanliness" [editorOptions]="{ width: 360 }"><dxo-label text="5. 제품 먼지, 이물질 청결 상태"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="floor" [editorOptions]="{ width: 360 }"><dxo-label text="6. 바닥 물고임이나 파인 곳"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="vehicle" [editorOptions]="{ width: 360 }"><dxo-label text="7. 차량 및 지게차 청결 상태"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="fertilizer" [editorOptions]="{ width: 360 }"><dxo-label text="8. 비료 재고 차이"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="palette" [editorOptions]="{ width: 360 }"><dxo-label text="9. 파렛트 재고 차이(KPP대사결과)"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="moistureAbsorption" [editorOptions]="{ width: 360 }"><dxo-label text="10. 제품 고결/흡습 상태"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="hradSale" [editorOptions]="{ width: 360 }"><dxo-label text="11. 판매가 어려운 정상 제품(10톤이상)"></dxo-label></dxi-item>
+          <dxi-item>
+            <div class="dx-field">
+              <div class="dx-field-value">
+                <dx-radio-group [items]="priorities"
+                                [value]="priorities[0]"
+                                layout="horizontal">
+                </dx-radio-group>
+              </div>
+            </div>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="1" [colSpan]="2">
+          <dxi-item dataField="coplain"><dxo-label text="12. 민원 발생 내용 및 경과사항(발생시)"></dxo-label></dxi-item>
+          <dxi-item dataField="tendinous"><dxo-label text="13. 기타(수급포함) 건의사항"></dxo-label></dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+  </dx-scroll-view>
+</dx-popup>
+
+
+
+
+
+

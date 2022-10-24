@@ -1,0 +1,105 @@
+<!--보관검수대비 실출고량-->
+
+
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" style="margin-left:20px">
+      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>기준년도</b> </div>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="startDate" type="date" [width]="150" displayFormat="yyyy" pickerType="calendar">
+          <dxo-calendar-options zoomLevel="decade" minZoomLevel="decade" maxZoomLevel="decade"></dxo-calendar-options>
+        </dx-date-box>
+      </div>
+  </dxi-item>
+
+  <dxi-item location="before">
+    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>주문처</b> </div>
+    <div style="float: left; margin-left: 10px;">
+      <dx-select-box [items]="states"></dx-select-box>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" style="margin-left:20px">
+    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>제품명</b> </div>
+    <div style="float: left; margin-left: 10px;">
+      <dx-select-box></dx-select-box>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<div class="dx-field">
+  <dx-data-grid id="gridContainer"
+                [dataSource]="dataSource"
+                [showBorders]="true"
+                [focusedRowEnabled]="true"
+                [focusedRowIndex]="0"
+                [columnAutoWidth]="true"
+                [columnHidingEnabled]="true"
+                [remoteOperations]="true"
+                (onContentReady)="contentReady($event)"
+                height="calc(100vh - 230px)"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [allowColumnResizing]="true">
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+    <dxo-paging [pageSize]="100"></dxo-paging>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxi-column dataField="placeOrder" caption="주문처" width="auto" dataType="string"></dxi-column>
+    <dxi-column dataField="placeDeli" caption="선검수 출고지" width="auto" dataType="string"></dxi-column>
+    <dxi-column dataField="placeTarget" caption="선검수 도착처" width="auto" dataType="string"></dxi-column>
+    <dxi-column dataField="deliNum" caption="선검수 출고번호" width="auto" dataType="string"></dxi-column>
+    <dxi-column dataField="product" caption="제품" width="auto" dataType="string"></dxi-column>
+    <dxi-column dataField="packaging" caption="포장" width="auto" dataType="string"></dxi-column>
+    <dxi-column dataField="inspQuantity" caption="선검수량" format="#,###" width="auto" dataType="number"></dxi-column>
+    <dxi-column dataField="orderQuantity" caption="실주문량" format="#,###" width="auto" dataType="number"></dxi-column>
+    <dxi-column dataField="deliQuantity" caption="실출고량" format="#,###" width="auto" dataType="number"></dxi-column>
+
+    <dxo-search-panel [visible]="true"></dxo-search-panel>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-group-panel [visible]="true"></dxo-group-panel>
+    <dxo-grouping #expand [autoExpandAll]="false"></dxo-grouping>
+
+    <dxo-summary>
+      <dxi-total-item column="inspQuantity"
+                      summaryType="sum">
+      </dxi-total-item>
+      <dxi-total-item column="orderQuantity"
+                      summaryType="sum">
+      </dxi-total-item>
+      <dxi-total-item column="deliQuantity"
+                      summaryType="sum">
+      </dxi-total-item>
+
+      <!--<dxi-group-item column="inspQuantity"
+                      summaryType="sum"
+                      valueFormat="number"
+                      [showInGroupFooter]="false" [alignByColumn]="true">
+      </dxi-group-item>
+
+      <dxi-group-item column="orderQuantity"
+                      summaryType="sum"
+                      valueFormat="number"
+                      [showInGroupFooter]="false" [alignByColumn]="true">
+      </dxi-group-item>
+
+      <dxi-group-item column="deliQuantity"
+                      summaryType="sum"
+                      valueFormat="number"
+                      [showInGroupFooter]="false" [alignByColumn]="true">
+      </dxi-group-item>-->
+    </dxo-summary>
+  </dx-data-grid>
+</div>
+
+
+
+
+

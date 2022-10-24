@@ -68,6 +68,7 @@ export class ADSTComponent {
   collapsed: any;
   orderInfo: any;
   management: any;
+  searchButtonOptions: any;
   detailsButtonMouseEnter(id: any) {
     this.positionOf = `#image${id}`;
   }
@@ -99,7 +100,13 @@ export class ADSTComponent {
         that.popupVisible = false;
       },
     };
-
+    //조회버튼
+    this.searchButtonOptions = {
+      icon: 'search',
+      onClick: async () => {
+        this.dataGrid.instance.refresh();
+      },
+    };
 
   }
 

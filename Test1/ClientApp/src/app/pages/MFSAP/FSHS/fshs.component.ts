@@ -45,7 +45,8 @@ export class FSHSComponent {
 
   data: any;
   backButtonOption: any;
-
+  //조회버튼
+  searchButtonOptions: any;
   //insert,modify,delete 
   rowCount: number;
   _dataService: ImateDataService;
@@ -76,7 +77,13 @@ export class FSHSComponent {
 
     this.simpleProducts = service.getSimpleProducts();
 
-
+    //조회버튼
+    this.searchButtonOptions = {
+      icon: 'search',
+      onClick: async () => {
+        this.dataGrid.instance.refresh();
+      },
+    };
 
   }
 
@@ -95,5 +102,7 @@ export class FSHSComponent {
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
   }
+
+
 
 }

@@ -1,0 +1,115 @@
+ <!--toolbar-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>출하기간</b></div>
+      <div style="float:left">
+        <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+      <div style="float:left; margin:10px 5px 0px 5px">
+        ~
+      </div>
+      <div style="float:left">
+        <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="left"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="data"
+              keyExpr="turn"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'multiple' }"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="widget"
+              [columnHidingEnabled]="true"
+              [allowColumnReordering]="true"
+              height="calc(100vh - 230px)">
+
+  <!--Datagrid Option-->
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+
+  <!--Filtering Option-->
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-builder-popup [position]="popupPosition">
+  </dxo-filter-builder-popup>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+  <dxo-scrolling mode="virtual"></dxo-scrolling>
+
+
+  <!--Grouping Option-->
+  <dxo-group-panel [visible]="true"></dxo-group-panel>
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+
+  <!--Data column-->
+  <dxi-column dataField="sortation"
+              caption="구분">
+  </dxi-column>
+
+  <dxi-column dataField="entry"
+              caption="입출문일시"
+              alignment="center">
+  </dxi-column>
+
+  <dxi-column dataField="turn"
+              caption="순번"
+              alignment="center">
+  </dxi-column>
+
+  <dxi-column dataField="entrance"
+              caption="입출문구분">
+  </dxi-column>
+
+  <dxi-column dataField="vehicle"
+              caption="차량번호">
+  </dxi-column>
+
+  <dxi-column dataField="grWeight"
+              format="#,###"
+              caption="총중량">
+  </dxi-column>
+
+  <dxi-column dataField="toWeight"
+              format="#,###"
+              caption="공차중량">
+  </dxi-column>
+
+  <dxi-column dataField="acWeight"
+              format="#,###"
+              caption="실중량">
+  </dxi-column>
+
+  <dxi-column dataField="drName"
+              caption="기사명">
+  </dxi-column>
+
+  <dxi-column dataField="product"
+              caption="제품">
+  </dxi-column>
+
+  <dxi-column dataField="client"
+              caption="거래처">
+  </dxi-column>
+
+  <dxi-column dataField="surveyor"
+              caption="검량자">
+  </dxi-column>
+</dx-data-grid>

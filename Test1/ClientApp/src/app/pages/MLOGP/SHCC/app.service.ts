@@ -112,22 +112,22 @@ export class Division {
   //비고
   note!: string;
 }
-
+//정산구분
 export class SetDivision {
   ID!: string;
   Name!: string;
 }
-
+//제품
 export class Product {
   ID!: string;
   Name!: string;
 }
-
+//거래처
 export class Account {
   ID!: string;
   Name!: string;
 }
-
+//도착지
 export class Destination {
   ID!: string;
   Name!: string;

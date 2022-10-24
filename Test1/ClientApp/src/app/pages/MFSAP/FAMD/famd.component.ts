@@ -73,7 +73,7 @@ export class FAMDComponent {
   closeButtonOptions: any;
   popupVisible = false;
   collapsed: any;
-
+  searchButtonOptions: any;
   //multiseletbox
   gridDataSource: any;
   gridBoxValue1: string[] = [];
@@ -122,7 +122,14 @@ export class FAMDComponent {
         onClick(e: any) {
           that.popupVisible = false;
         }
-      }
+    }
+    //조회버튼
+    this.searchButtonOptions = {
+      icon: 'search',
+      onClick: async () => {
+        this.dataGrid.instance.refresh();
+      },
+    };
     };
     
 

@@ -20,9 +20,9 @@ export class Employee {
   //제품
   product!: string;
   //출고수량
-  releaseNumber!: string;
+  releaseNumber!: number;
   //출고톤
-  releaseTon!: string;
+  releaseTon!: number;
   //전송사태
   transmissionState!: string;
   //검수상태
@@ -42,19 +42,19 @@ export class Employee {
   //인수도구분
   takeover!: string;
   //검수번호
-  inspectionNumber!: string;
+  inspectionNumber!: number;
   //검수일자
   inspectionDate!: string;
   //검수수량
-  inspectionQuantity!: string;
+  inspectionQuantity!: number;
   //검수단가
-  inspectionPrice!: string;
+  inspectionPrice!: number;
   //공급가
-  supplyPrice!: string;
+  supplyPrice!: number;
   //P-수량
-  pQuantity!: string;
+  pQuantity!: number;
   //W-수량
-  wQuantity!: string;
+  wQuantity!: number;
   //세무구분
   tax!: string;
   //관할대리
@@ -78,19 +78,19 @@ export class Employee {
   //농협코드
   nhCode!: string;
   //주문번호
-  orderNumber!: string;
+  orderNumber!: number;
   //출하요청
   shipmentReq!: string;
   //order
   order!: string;
   //사번
-  companyNumber!: string;
+  companyNumber!: number;
   //color
   color!: string;
   //lock
   lock!: string;
   //전표번호
-  slipNumber!: string;
+  slipNumber!: number;
 }
 
 export class Task {
@@ -252,47 +252,141 @@ const employees: Employee[] = [
     releaseDate: '2020-05-16',
     releasePlace: '용인',
     competentBranch: '아이에스티엔',
-    orderCompany: '삼성',
-    shippingCompnay: '쿠팡',
+    orderCompany: '여수점',
+    shippingCompnay: '여수점',
     deliverySlip: '배송',
     productCategory: '완제품',
     product: '화물차',
-    releaseNumber: '100',
-    releaseTon: '10',
+    releaseNumber: 100,
+    releaseTon: 10,
     transmissionState: '전송완료',
     inspectionState: '검수완료',
     delete: '삭제',
-    carNumber: '2020',
+    carNumber: '경기85가 2020',
     quit: '하차',
     bookClass: '상',
     nhProduct: 'O',
     nhOffice: '용인점',
     takeover: 'O',
-    inspectionNumber: '1',
+    inspectionNumber: 1,
     inspectionDate: '2020-05-20',
-    inspectionQuantity: '10',
-    inspectionPrice: '10000000',
-    supplyPrice: '1000000',
-    pQuantity: '10',
-    wQuantity: '10',
+    inspectionQuantity: 10,
+    inspectionPrice: 10000000,
+    supplyPrice: 1000000,
+    pQuantity: 10,
+    wQuantity: 10,
     tax: 'X',
     jurisdiction: 'O',
     address: '용인시 처인구',
     orderClass: '주문완료',
-    carrier: '쿠팡',
+    carrier: '여수점',
     manager: '홍인호',
     note: 'X',
     cust: 'cust',
     dest: 'dest',
     prod: 'prod',
     nhCode: '1110011',
-    orderNumber: '1',
+    orderNumber: 1,
     shipmentReq: 'O',
     order: 'O',
-    companyNumber: '12',
+    companyNumber: 12,
     color: 'blue',
     lock: 'lock',
-    slipNumber: '11',
+    slipNumber: 11,
+  },
+  {
+    ID: 2,
+    releaseDate: '2020-04-16',
+    releasePlace: '서울',
+    competentBranch: '아이에스티엔',
+    orderCompany: '안동점',
+    shippingCompnay: '안동점',
+    deliverySlip: '배송',
+    productCategory: '완제품',
+    product: '화물차',
+    releaseNumber: 1000,
+    releaseTon: 100,
+    transmissionState: '전송완료',
+    inspectionState: '검수완료',
+    delete: '삭제',
+    carNumber: '경기85가 1211',
+    quit: '하차',
+    bookClass: '상',
+    nhProduct: 'O',
+    nhOffice: '용인점',
+    takeover: 'O',
+    inspectionNumber: 1,
+    inspectionDate: '2020-04-20',
+    inspectionQuantity: 10,
+    inspectionPrice: 10000000,
+    supplyPrice: 1000000,
+    pQuantity: 10,
+    wQuantity: 10,
+    tax: 'X',
+    jurisdiction: 'O',
+    address: '용인시 처인구',
+    orderClass: '주문완료',
+    carrier: '안동점',
+    manager: '김호열',
+    note: 'X',
+    cust: 'cust',
+    dest: 'dest',
+    prod: 'prod',
+    nhCode: '1110011',
+    orderNumber: 2,
+    shipmentReq: 'O',
+    order: 'O',
+    companyNumber: 13,
+    color: 'blue',
+    lock: 'lock',
+    slipNumber: 12,
+  },
+  {
+    ID: 3,
+    releaseDate: '2020-07-15',
+    releasePlace: '용인',
+    competentBranch: '아이에스티엔',
+    orderCompany: '서울점',
+    shippingCompnay: '서울점',
+    deliverySlip: '배송',
+    productCategory: '완제품',
+    product: '화물차',
+    releaseNumber: 1000,
+    releaseTon: 100,
+    transmissionState: '전송완료',
+    inspectionState: '검수완료',
+    delete: '삭제',
+    carNumber: '경기81너 1220',
+    quit: '하차',
+    bookClass: '상',
+    nhProduct: 'O',
+    nhOffice: '서울점',
+    takeover: 'O',
+    inspectionNumber: 1,
+    inspectionDate: '2020-05-20',
+    inspectionQuantity: 10,
+    inspectionPrice: 100000,
+    supplyPrice: 10000,
+    pQuantity: 10,
+    wQuantity: 10,
+    tax: 'X',
+    jurisdiction: 'O',
+    address: '용인시 처인구',
+    orderClass: '주문완료',
+    carrier: '서울점',
+    manager: '송민호',
+    note: 'X',
+    cust: 'cust',
+    dest: 'dest',
+    prod: 'prod',
+    nhCode: '1110011',
+    orderNumber: 1,
+    shipmentReq: 'O',
+    order: 'O',
+    companyNumber: 14,
+    color: 'blue',
+    lock: 'lock',
+    slipNumber: 15,
   },
 ];
 
@@ -314,13 +408,13 @@ const tasks: Task[] = [
     orderNumber: '10',
     shipmentReq: '11',
     dsNumber: '1',
-    shipmentInspectionState: '상태좋음',
-    purchaseInspectionState: '상태좋음',
+    shipmentInspectionState: '검수완료',
+    purchaseInspectionState: '검수완료',
     inspectionDate: '2021-01-01',
     inspectionQuantity: '100',
     inspectionFlag: 'FLAG',
-    inspectionState: '상태좋음',
-    carNumber: '2050',
+    inspectionState: '검수완료',
+    carNumber: '82너 2050',
     driver: '김영호',
     note: 'X',
     releasePlace: '서울',

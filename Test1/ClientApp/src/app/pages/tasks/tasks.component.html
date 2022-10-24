@@ -18,7 +18,38 @@
                   [width]="500"
                   [gridBoxWidth]="800"
                   (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
-
+<div>
+  <dx-number-box [value]="weight" width="120px" class="weight-test"></dx-number-box>
+  <dx-button stylingMode="contained"
+             text="모니터링중지"
+             type="normal"
+             [width]="150"
+             class="weight-test"
+             (onClick)="stopMonitorClick($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+             text="모니터링시작"
+             type="normal"
+             [width]="150"
+             class="weight-test"
+             (onClick)="startMonitorClick($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+             text="저울COM 닫기"
+             type="normal"
+             [width]="150"
+             class="weight-test"
+             (onClick)="closeComClick($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+             text="저울COM 열기"
+             type="normal"
+             [width]="150"
+             class="weight-test"
+             (onClick)="openComClick($event)">
+  </dx-button>
+  <div style="clear:both"></div>
+</div>
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="dataSource"
               [showBorders]="false"

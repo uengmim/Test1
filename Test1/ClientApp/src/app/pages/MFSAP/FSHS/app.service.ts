@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 //데이터 정보
 export class Employee {
   //요청번호
-  reqNum!: string;
+  reqNum!: number;
   //주문처
   whereOrder!: string;
   //제품명
@@ -19,17 +19,17 @@ export class Employee {
   //도착지
   destination!: string;
   //주문량
-  orderQuantity!: string;
+  orderQuantity!: number;
   //주문단가
-  orderPrice!: string;
+  orderPrice!: number;
   //주문단위
-  orderUnit!: string;
+  orderUnit!: number;
   //주문잔량
-  orderBacklog!: string;
+  orderBacklog!: number;
   //주문가능량
-  availableOrder!: string;
+  availableOrder!: number;
   //납품잔량
-  deliveryBalance!: string;
+  deliveryBalance!: number;
   //인도처
   whereabouts!: string;
   //검수요청여부
@@ -51,7 +51,7 @@ export class Employee {
 
 const employees: Employee[] = [
   {
-    reqNum: '1',
+    reqNum: 1,
     whereOrder: '영업관리담당',
     productName!: 'AX11',
     orderState!: '주문완료',
@@ -59,12 +59,12 @@ const employees: Employee[] = [
     orderClass!: '일시불',
     purpose!: '개인',
     destination!: '용인',
-    orderQuantity!: '10',
-    orderPrice!: '10000',
-    orderUnit!: '10',
-    orderBacklog!: '100',
-    availableOrder!: '1000000',
-    deliveryBalance!: '1000',
+    orderQuantity!: 10,
+    orderPrice!: 10000,
+    orderUnit!: 10,
+    orderBacklog!: 100,
+    availableOrder!: 1000000,
+    deliveryBalance!: 100,
     whereabouts!: '아이에스티엔',
     inspectionReq!: 'O',
     inspectionReturn!: 'O',
@@ -75,7 +75,7 @@ const employees: Employee[] = [
     approvalClass!: '승인',
   },
   {
-    reqNum: '2',
+    reqNum: 2,
     whereOrder: '제품관리담당',
     productName!: 'AX12',
     orderState!: '주문완료',
@@ -83,12 +83,12 @@ const employees: Employee[] = [
     orderClass!: '일시불',
     purpose!: '공용',
     destination!: '성남',
-    orderQuantity!: '100',
-    orderPrice!: '100000',
-    orderUnit!: '100',
-    orderBacklog!: '1000',
-    availableOrder!: '10000000',
-    deliveryBalance!: '10000',
+    orderQuantity!: 100,
+    orderPrice!: 100000,
+    orderUnit!: 100,
+    orderBacklog!: 1000,
+    availableOrder!: 10000000,
+    deliveryBalance!: 10000,
     whereabouts!: '쿠팡',
     inspectionReq!: 'X',
     inspectionReturn!: 'X',
@@ -99,7 +99,7 @@ const employees: Employee[] = [
     approvalClass!: '미승인',
   },
   {
-    reqNum: '3',
+    reqNum: 3,
     whereOrder: '영업관리담당',
     productName!: 'AX13',
     orderState!: '주문완료',
@@ -107,12 +107,12 @@ const employees: Employee[] = [
     orderClass!: '일시불',
     purpose!: '공용',
     destination!: '수원',
-    orderQuantity!: '1',
-    orderPrice!: '1000',
-    orderUnit!: '1',
-    orderBacklog!: '10',
-    availableOrder!: '100000',
-    deliveryBalance!: '100',
+    orderQuantity!: 1,
+    orderPrice!: 1000,
+    orderUnit!: 1,
+    orderBacklog!: 10,
+    availableOrder!: 100000,
+    deliveryBalance!: 100,
     whereabouts!: '쿠팡',
     inspectionReq!: 'X',
     inspectionReturn!: 'O',

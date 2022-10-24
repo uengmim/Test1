@@ -1,5 +1,5 @@
   <!--toolbar-->
-<dx-toolbar style="height: 40px; margin-top: 5px;">
+<dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
       <div class="dx-field-label" style="width: 100px; margin-left: 20px;">챠랑번호</div>
@@ -8,7 +8,7 @@
                      [maxLength]="40"></dx-text-box>
       </div>
     </div>
-</dxi-item>
+  </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
@@ -21,7 +21,12 @@
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="carsnumber" placeholder="차량종류"></dx-select-box>
+    <dx-select-box [items]="carsnumber"
+                   placeholder="차량종류"
+                   style="width: auto;
+                   margin-left: 10px;
+                   margin-right: 10px;">
+    </dx-select-box>
   </dxi-item>
 
 
@@ -43,14 +48,14 @@
 <dx-data-grid class="master"
               [dataSource]="data"
               [showBorders]="false"
-              [columnAutoWidth]="false"
+              [columnAutoWidth]="true"
               keyExpr="vehNumber"
-              [columnWidth]="150"
               [columnHidingEnabled]="true"
               [allowColumnResizing]="true"
               columnResizingMode="widget"
               [selection]="{ mode: 'multiple' }"
               [allowColumnReordering]="true"
+              (onRowDblClick)="orderDBClick($event)"
               height="calc(100vh - 230px)">
 
   <!--Datagrid Option-->
@@ -81,8 +86,8 @@
 
     <dxo-popup title="차량번호"
                [showTitle]="true"
-               [width]="1000"
-               [height]="600">
+               width="55%"
+               height="55%">
     </dxo-popup>
     <dxo-form>
       <dxi-item dataField="PARAM1"></dxi-item>
@@ -203,4 +208,3 @@
     </dxo-lookup>
   </dxi-column>
 </dx-data-grid>
-

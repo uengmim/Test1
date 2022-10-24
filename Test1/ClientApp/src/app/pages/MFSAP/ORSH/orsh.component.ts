@@ -50,7 +50,8 @@ export class ORSHComponent {
   employees: Employee[];
   orderInfo: any;
   dataSource: Employee[];
-
+  //조회버튼
+  searchButtonOptions: any;
   data: any;
   backButtonOption: any;
 
@@ -85,8 +86,8 @@ export class ORSHComponent {
   gridBoxValue9: string[] = [];
   gridBoxValue10: string[] = [];
   formEmployee!: Employee;
-  
-
+  popupPosition: any;
+  customOperations!: Array<any>;
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | 주민등록분 출고등록";
@@ -122,7 +123,14 @@ export class ORSHComponent {
         onClick(e: any) {
           that.popupVisible = false;
         }
-      }
+    }
+    //조회버튼
+    this.searchButtonOptions = {
+      icon: 'search',
+      onClick: async () => {
+        this.dataGrid.instance.refresh();
+      },
+    };
     };
     
 

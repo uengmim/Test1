@@ -67,4 +67,13 @@
       </dx-drop-down-box>
     </div>
   </div>
+  <div class="dx-field">
+    <nh-possible-comm [codeInfo]="sd007Code"
+                      valueColumn="ZCM_CODE3"
+                      valueDisplayFormat="%ZCMF01_CH%"
+                      [width]="200"
+                      [gridBoxWidth]="500"
+                      (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-comm>
+
+  </div>
 </div>

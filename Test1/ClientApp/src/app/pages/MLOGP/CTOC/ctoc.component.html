@@ -1,5 +1,5 @@
  <!--toolbar-->
-<dx-toolbar style="margin: 5px 0px 5px 0px;padding:0px 5px 0px 5px">
+<dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
       <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>출하기간</b></div>
@@ -16,23 +16,48 @@
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="order" placeholder="주문처(산하)"></dx-select-box>
+    <dx-select-box [items]="order"
+                   placeholder="주문처(산하)"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="shAddress" placeholder="출하지"></dx-select-box>
+    <dx-select-box [items]="shAddress"
+                   placeholder="출하지"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="sortation" placeholder="구분"></dx-select-box>
+    <dx-select-box [items]="sortation"
+                   placeholder="구분"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="classification" placeholder="제품구분"></dx-select-box>
+    <dx-select-box [items]="classification"
+                   placeholder="제품구분"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="product" placeholder="제품"></dx-select-box>
+    <dx-select-box [items]="product"
+                   placeholder="제품"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="left"
@@ -52,9 +77,8 @@
               class="dx-card wide-card"
               [showBorders]="false"
               [dataSource]="data"
-              [columnAutoWidth]="false"
+              [columnAutoWidth]="true"
               keyExpr="cuName"
-              [columnWidth]="150"
               [allowColumnResizing]="true"
               columnResizingMode="widget"
               (onFocusedRowChanged)="detailRowChanged($event)"
@@ -65,9 +89,7 @@
   <!--Datagrid Option-->
   <dxo-paging [enabled]="false"></dxo-paging>
   <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-  <dxo-editing mode="batch"
-               [allowUpdating]="true">
-  </dxo-editing>
+
 
   <!--Filtering Option-->
   <dxo-filter-panel [visible]="true"></dxo-filter-panel>
@@ -84,7 +106,7 @@
   <dxo-group-panel [visible]="true"></dxo-group-panel>
   <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
 
-
+  <!--Data column-->
   <dxi-column dataField="cuName"
               caption="거래처명">
   </dxi-column>
@@ -101,7 +123,7 @@
   </dxi-column>
 
   <dxi-column dataField="ShNumber"
-              alignment="right"
+              alignment="center"
               caption="출하번호">
   </dxi-column>
 
@@ -118,19 +140,16 @@
   </dxi-column>
 
   <dxi-column dataField="orQuantity"
-              alignment="right"
               format="#,###"
               caption="주문량(포)">
   </dxi-column>
 
   <dxi-column dataField="shVolume"
-              alignment="right"
               format="#,###"
               caption="출하량(포)">
   </dxi-column>
 
   <dxi-column dataField="MTVolume"
-              alignment="right"
               format="#,###"
               caption="출하량(MT)">
   </dxi-column>
@@ -143,7 +162,7 @@
 
   <dxi-column dataField="acStatus"
               caption="인수여부"
-               dataType="boolean"
+              dataType="boolean"
               [allowFiltering]="false"
               [allowSorting]="false"
               [width]="100"
@@ -190,7 +209,7 @@
   <!-- 셀 템플릿-->
   <!--Sel1 cellTemplate-->
   <div *dxTemplate="let cellInfo of 'Sel1cellTemplate'">
-    <dx-check-box [(value)]="cellInfo.setValue"
+    <dx-check-box [value]="true"
                   (onValueChanged)="cellInfo.setValue($event.value)">
     </dx-check-box>
   </div>

@@ -8,7 +8,7 @@ import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared
 import { QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { formatDate } from '@angular/common';
-import { Service, Data, Option, Company, Car, Local } from '../TRMT/app.service'
+import { Service, Data, SerchInfo, Option, Company, Car, Local } from '../TRMT/app.service'
 import {
   DxDataGridComponent,
   DxDateBoxModule,
@@ -42,7 +42,6 @@ export class TRMTComponent {
 
   //정보
   data: Data[];
-
   options: Option[];
   company: Company[];
   car: Car[];
@@ -68,6 +67,8 @@ export class TRMTComponent {
   searchButtonOptions: any;
   //상세 추가 버튼
   addDetailButtonOptions: any;
+  //버튼
+  closeButtonOptions: any;
 
   //편집 취소 버튼
   cancelEditButtonOptions: any;
@@ -83,6 +84,8 @@ export class TRMTComponent {
   saleAmountHeaderFilter: any;
   customOperations!: Array<any>;
 
+  //상세팝업 오픈
+  popupVisible = false;
 
 
   //_dataService: ImateDataService;
@@ -113,7 +116,7 @@ export class TRMTComponent {
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
-
+    const that = this;
     //추가버튼
     this.addButtonOptions =
     {
@@ -161,7 +164,13 @@ export class TRMTComponent {
         this.dataGrid.instance.cancelEditData()
       },
     };
-
+    //닫기버튼
+    this.closeButtonOptions = {
+      text: 'Close',
+      onClick(e: any) {
+        that.popupVisible = false;
+      }
+    }
   }
 
   public async dataLoad(dataService: ImateDataService) {
@@ -184,5 +193,7 @@ export class TRMTComponent {
   selectedChanged(e: any) {
     this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
   }
-
+  orderDBClick(e: any) {
+    this.popupVisible = !this.popupVisible;
+  }
 }

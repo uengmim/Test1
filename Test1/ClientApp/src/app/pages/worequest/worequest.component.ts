@@ -8,6 +8,8 @@ import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../shared/da
 import { QueryCacheType } from '../../shared/imate/imateCommon';
 import { AppInfoService } from '../../shared/services/app-info.service';
 import { Service, Product } from './app.service';
+import { CommonCodeInfo } from '../../shared/app.utilitys';
+import { AppConfigService } from '../../shared/services/appconfig.service';
 
 @Component({
   templateUrl: './worequest.component.html',
@@ -32,9 +34,11 @@ export class WORequestComponent {
 
   gridColumns: any = ['그룹코드', '그룹명', '코드', '코드명'];
 
+  sd007Code: CommonCodeInfo;
+
   //_dataService: ImateDataService;
 
-  constructor(private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, private ref: ChangeDetectorRef) {
+  constructor(private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, private ref: ChangeDetectorRef, private appConfig: AppConfigService) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 요청";
     //this._dataService = dataService;
 
@@ -47,6 +51,8 @@ export class WORequestComponent {
     this.displayExpr = "";
 
     this.simpleProducts = service.getSimpleProducts();
+
+    this.sd007Code = appConfig.commonCode("주문유형");
 
     let model = this;
     model.displayExpr = "";
@@ -81,6 +87,11 @@ export class WORequestComponent {
       this.ref.detectChanges();
     }
   }
+
+  onCodeValueChanged(e: any) {
+    return;
+  }
+
 
   public async dataLoad(dataService: ImateDataService) {
     

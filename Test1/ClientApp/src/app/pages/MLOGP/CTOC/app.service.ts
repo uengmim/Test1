@@ -43,27 +43,27 @@ export class Data {
   S_FWD_NUM!: string;
 }
 
-
+//주문처
 export class Order {
   ID!: string;
   Name!: string;
 }
-
+//출하지
 export class ShAddress {
   ID!: string;
   Name!: string;
 }
-
+//구분
 export class Sortation {
   ID!: string;
   Name!: string;
 }
-
+//제품구분
 export class Classification {
   ID!: string;
   Name!: string;
 }
-
+//제품
 export class Product {
   ID!: string;
   Name!: string;

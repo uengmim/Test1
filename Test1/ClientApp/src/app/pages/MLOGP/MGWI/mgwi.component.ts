@@ -27,16 +27,17 @@ export class MGWIComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent
   dataSource: any;
 
-  price!: string[];
-
   //정보
   data: Data[];
   seasonalInfo: any;
+  price!: string[];
 
   //데이터 조회 버튼
   searchButtonOptions: any;
   //데이터 삭제 버튼
   deleteButtonOptions: any;
+  //버튼
+  closeButtonOptions: any;
 
   //날짜 조회
   startDate: any;
@@ -65,7 +66,6 @@ export class MGWIComponent {
 
   //상세팝업 오픈
   popupVisible = false;
-
   formOrderData: Data;
 
   constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService) {
@@ -83,7 +83,7 @@ export class MGWIComponent {
           return modelTest01.dataLoad(dataService);
         }
       });
-
+    const that = this;
     //조회버튼
     this.searchButtonOptions = {
       icon: 'search',
@@ -99,8 +99,16 @@ export class MGWIComponent {
         this.dataGrid.instance.deleteRow(this.selectedRowIndex)
       },
     };
-
+    //닫기버튼
+    this.closeButtonOptions = {
+      text: 'Close',
+      onClick(e: any) {
+        that.popupVisible = false;
+      }
+    }
   }
+
+
 
   RegisRecords() {
     this.formOrderData = new Data();

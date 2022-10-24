@@ -1,5 +1,5 @@
  <!--toolbar-->
-<dx-toolbar style="height: 40px; margin-top: 5px;">
+<dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
       <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>작업일자</b></div>
@@ -19,7 +19,10 @@
   </dxi-item>
 
   <dxi-item location="left"
-            locateInMenu="auto">
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
     <dx-button (onClick)="deleteRecords()"
                [disabled]="!selectedItemKeys.length"
                icon="trash">
@@ -28,18 +31,24 @@
 
   <dxi-item location="left"
             widget="dxButton"
-            locateInMenu="auto">
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
     <dx-button stylingMode="contained"
-               text="수동 시작"
+               text="수동 등록"
                type="normal">
     </dx-button>
   </dxi-item>
 
   <dxi-item location="left"
             widget="dxButton"
-            locateInMenu="auto">
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
     <dx-button stylingMode="contained"
-               text="계근 등록"
+               text="계근 시작"
                type="normal">
     </dx-button>
   </dxi-item>
@@ -54,11 +63,10 @@
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="data"
               keyExpr="turn"
-              [showBorders]="true"
-              [columnWidth]="150"
+              [showBorders]="false"
               [focusedRowEnabled]="true"
               [focusedRowIndex]="0"
-              [columnAutoWidth]="false"
+              [columnAutoWidth]="true"
               [allowColumnResizing]="true"
               columnResizingMode="widget"
               [columnHidingEnabled]="true"
@@ -89,6 +97,7 @@
   <dxo-group-panel [visible]="true"></dxo-group-panel>
   <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
 
+  <!--Data column-->
   <dxi-column dataField="turn"
               caption="순번"
               alignment="center">
@@ -104,19 +113,16 @@
 
   <dxi-column dataField="grWeight"
               caption="총중량"
-              alignment="right"
               format="#,###">
   </dxi-column>
 
   <dxi-column dataField="toWeight"
               caption="공차중량"
-              alignment="right"
               format="#,###">
   </dxi-column>
 
   <dxi-column dataField="acWeight"
               caption="실중량"
-              alignment="right"
               format="#,###">
   </dxi-column>
 
@@ -134,34 +140,41 @@
 
 </dx-data-grid>
 
+<!--Popup-->
 <dx-popup [width]="900"
           [height]="600"
           margin="20px"
           [showTitle]="true"
           title="계근정보"
           [dragEnabled]="false"
-          [hideOnOutsideClick]="true"
           [showCloseButton]="false"
           container=".dx-viewport"
           [(visible)]="popupVisible">
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="bottom"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
 
   <dx-scroll-view width="100%" height="100%">
     <div id="form-container">
       <div style="margin-bottom:20px"></div>
       <dx-form id="seasonalInfo" [formData]="seasonalInfo" [colCount]="1" width="80%">
         <dxi-item itemType="group" caption="">
-          <dxi-item dataField="seasonalWe"><dxo-label text="계근중량"></dxo-label></dxi-item>
-          <dxi-item dataField="grossWe"><dxo-label text="총중량"></dxo-label></dxi-item>
-          <dxi-item dataField="toleranceWe"><dxo-label text="공차중량"></dxo-label></dxi-item>
-          <dxi-item dataField="actualWe"><dxo-label text="실중량"></dxo-label></dxi-item>
-          <dxi-item dataField="vehicleNu"><dxo-label text="차량번호"></dxo-label></dxi-item>
-          <dxi-item dataField="driver"><dxo-label text="기사명"></dxo-label></dxi-item>
-          <dxi-item dataField="company"><dxo-label text="거래처"></dxo-label></dxi-item>
-          <dxi-item dataField="thProduct"><dxo-label text="제품"></dxo-label></dxi-item>
-          <dxi-item dataField="person"><dxo-label text="검량자"></dxo-label></dxi-item>
+          <dxi-item dataField="seasonalWe" [disabled]="true"><dxo-label text="계근중량"></dxo-label></dxi-item>
+          <dxi-item dataField="grossWe" [disabled]="true"><dxo-label text="총중량"></dxo-label></dxi-item>
+          <dxi-item dataField="toleranceWe" [disabled]="true"><dxo-label text="공차중량"></dxo-label></dxi-item>
+          <dxi-item dataField="actualWe" [disabled]="true"><dxo-label text="실중량"></dxo-label></dxi-item>
+          <dxi-item dataField="vehicleNu" [disabled]="true"><dxo-label text="차량번호"></dxo-label></dxi-item>
+          <dxi-item dataField="driver" [disabled]="true"><dxo-label text="기사명"></dxo-label></dxi-item>
+          <dxi-item dataField="company" [disabled]="true"><dxo-label text="거래처"></dxo-label></dxi-item>
+          <dxi-item dataField="thProduct" [disabled]="true"><dxo-label text="제품"></dxo-label></dxi-item>
+          <dxi-item dataField="person" [disabled]="true"><dxo-label text="검량자"></dxo-label></dxi-item>
         </dxi-item>
       </dx-form>
 
+      <!--FOrm-->
       <dx-form>
         <dxi-item itemType="group" [colCount]="3" [colSpan]="3">
           <dxi-item location="before"

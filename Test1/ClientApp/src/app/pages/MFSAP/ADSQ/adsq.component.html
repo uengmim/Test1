@@ -1,59 +1,58 @@
 <!--검수/미검수현황-->
 
-<div style="margin:5px 5px 10px 5px ">
-  <dx-toolbar>
-    <dxi-item location="before">
-      <div *dxTemplate>
-        <div class="toolbar-label" style="float: left; margin-top: 10px; margin-right: 5px; margin-left: 15px"><b>검색기간</b> </div>
-        <div style="float:left">
-          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
-        </div>
-        <div style="float:left;margin-left:10px;margin-right:10px">
-          ~
-        </div>
-        <div style="float:left">
-          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
-        </div>
-      </div>
-    </dxi-item>
-    <dxi-item location="before">
-      <div class="toolbar-label" style="float:left;margin-top:10px;margin-right:5px"><b>도착지</b> </div>
-      <div style="float:left">
-        <dx-select-box [items]="simpleProducts"></dx-select-box>
-      </div>
-    </dxi-item>
-    <dxi-item location="before" widget="dxButton" locateInMenu="never">
-      <div *dxTemplate>
-        <div class="toolbar-label"><b>환출포함</b></div>
-      </div>
-    </dxi-item>
-    <dxi-item location="before">
-      <dx-check-box [value]=""></dx-check-box>
-    </dxi-item>
-    <dxi-item location="before" widget="dxButton" locateInMenu="never">
-      <div *dxTemplate>
-        <div class="toolbar-label"><b>선검수포함</b></div>
-      </div>
-    </dxi-item>
-    <dxi-item location="before">
-      <dx-check-box [value]=""></dx-check-box>
-    </dxi-item>
-    <dxi-item location="before" widget="dxButton" locateInMenu="never">
-      <div *dxTemplate>
-        <div class="toolbar-label"><b>관할도착지포함</b></div>
-      </div>
-    </dxi-item>
-    <dxi-item location="before">
-      <dx-check-box [value]=""></dx-check-box>
-    </dxi-item>
-    <dxi-item location="left">
-      <div *dxTemplate>
-        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
 
-        </dx-button>
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>검색기간</b> </div>
+      <div style="float:left; margin-left:10px">
+        <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
       </div>
-    </dxi-item>
-  </dx-toolbar>
+      <div style="float:left; margin-left:10px" >
+        ~
+      </div>
+      <div style="float:left; margin-left:10px" >
+        <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before;">
+    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>도착지</b> </div>
+    <div style="float:left; margin-left:10px">
+      <dx-select-box [items]="simpleProducts"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before;" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>환출포함</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before; ">
+    <dx-check-box [value]=""></dx-check-box>
+  </dxi-item>
+  <dxi-item location="before; " widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>선검수포함</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before; ">
+    <dx-check-box [value]=""></dx-check-box>
+  </dxi-item>
+  <dxi-item location="before; " widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>관할도착지포함</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before; ">
+    <dx-check-box [value]=""></dx-check-box>
+  </dxi-item>
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
 
   <div>
     <dx-data-grid id="gridContainer"
@@ -61,11 +60,9 @@
                   [dataSource]="dataSource"
                   [showBorders]="true"
                   [focusedRowIndex]="0"
-                  [columnWidth]="150"
-                  [columnAutoWidth]="false"
+                  [columnAutoWidth]="true"
                   [allowColumnResizing]="true"
                   columnResizingMode="widget"
-                  [selection]="{ mode: 'multiple' }"
                   [allowColumnReordering]="true"
                   height="calc(100vh - 230px)">
       <dxo-paging [enabled]="false"></dxo-paging>
@@ -80,59 +77,59 @@
       </dxo-filter-builder-popup>
       <dxo-filter-row [visible]="true"></dxo-filter-row>
 
-      <dxi-column dataField="shipDate" caption="출하일자"></dxi-column>
-      <dxi-column dataField="shipPlace" caption="출하지"></dxi-column>
-      <dxi-column dataField="number" caption="번호"></dxi-column>
-      <dxi-column dataField="shipNumber" width="200" caption="출하요청번호"></dxi-column>
-      <dxi-column dataField="prefect" caption="지사"></dxi-column>
-      <dxi-column dataField="whereOrder" caption="주문처"></dxi-column>
-      <dxi-column dataField="abbreviation" caption="약명"></dxi-column>
-      <dxi-column dataField="competentAgency" caption="관할대리점"></dxi-column>
-      <dxi-column dataField="destination" caption="도착지"></dxi-column>
+      <dxi-column dataField="shipDate" caption="출하일자"  ></dxi-column>
+      <dxi-column dataField="shipPlace" caption="출하지"  ></dxi-column>
+      <dxi-column dataField="number" caption="번호" format="#,###" ></dxi-column>
+      <dxi-column dataField="shipNumber"  caption="출하요청번호"  ></dxi-column>
+      <dxi-column dataField="prefect" caption="지사"  ></dxi-column>
+      <dxi-column dataField="whereOrder" caption="주문처" ></dxi-column>
+      <dxi-column dataField="competentAgency" caption="관할대리점"  ></dxi-column>
+      <dxi-column dataField="destination" caption="도착지"  ></dxi-column>
       <dxi-column caption="출하현황(남해)">
-        <dxi-column dataField="mainCategory" caption="대분류"></dxi-column>
-        <dxi-column dataField="productName" caption="제품명"></dxi-column>
-        <dxi-column dataField="packaging" caption="포장"></dxi-column>
-        <dxi-column dataField="shipmentPack" caption="출하량(포)"></dxi-column>
-        <dxi-column dataField="shipmentTon" caption="출하량(톤)"></dxi-column>
+        <dxi-column dataField="mainCategory" caption="대분류"  ></dxi-column>
+        <dxi-column dataField="productName" caption="제품명"  ></dxi-column>
+        <dxi-column dataField="packaging" caption="포장" ></dxi-column>
+        <dxi-column dataField="shipmentPack" caption="출하량(포)" format="#,###" ></dxi-column>
+        <dxi-column dataField="shipmentTon" caption="출하량(톤)" format="#,###"></dxi-column>
         <dxi-column dataField="shipSlipNumber" caption="배송전표번호"></dxi-column>
       </dxi-column>
       <dxi-column caption="검수현황(농협)">
-        <dxi-column dataField="mainCategory2" caption="대분류"></dxi-column>
-        <dxi-column dataField="inspectionNumber" caption="검수번호"></dxi-column>
+        <dxi-column dataField="mainCategory2" caption="대분류" ></dxi-column>
+        <dxi-column dataField="inspectionNumber" caption="검수번호" ></dxi-column>
         <dxi-column dataField="inspectionDate" caption="검수일자"></dxi-column>
-        <dxi-column dataField="inspectionClassification" caption="검수구분"></dxi-column>
-        <dxi-column dataField="productName2" caption="제품명"></dxi-column>
-        <dxi-column dataField="packaging2" caption="포장"></dxi-column>
-        <dxi-column dataField="inspectionPack" caption="검수량(포)"></dxi-column>
-        <dxi-column dataField="inspectionTon" caption="검수량(톤)"></dxi-column>
-        <dxi-column dataField="unitPrice" caption="단가"></dxi-column>
-        <dxi-column dataField="amount" caption="금액"></dxi-column>
+        <dxi-column dataField="inspectionClassification" caption="검수구분"  ></dxi-column>
+        <dxi-column dataField="productName2" caption="제품명"  ></dxi-column>
+        <dxi-column dataField="packaging2" caption="포장" ></dxi-column>
+        <dxi-column dataField="inspectionPack" caption="검수량(포)" format="#,###" ></dxi-column>
+        <dxi-column dataField="inspectionTon" caption="검수량(톤)"  format="#,###" ></dxi-column>
+        <dxi-column dataField="unitPrice" caption="단가" format="#,###" ></dxi-column>
+        <dxi-column dataField="amount" caption="금액" format="#,###" ></dxi-column>
       </dxi-column>
-      <dxi-column dataField="carNumber" caption="차량번호"></dxi-column>
-      <dxi-column dataField="driver" caption="기사"></dxi-column>
-      <dxi-column dataField="vehicleClassification" caption="차량구분"></dxi-column>
-      <dxi-column dataField="basicDistributed" caption="기본/분산"></dxi-column>
-      <dxi-column dataField="carrier1" caption="운송사(1차)"></dxi-column>
-      <dxi-column dataField="carrier2" caption="운송사(2차)"></dxi-column>
-      <dxi-column dataField="zipCode" caption="착지(출하지)"></dxi-column>
-      <dxi-column dataField="landing" caption="출고지"></dxi-column>
-      <dxi-column dataField="releasePlace" caption="거래처"></dxi-column>
-      <dxi-column dataField="account" caption="파렛트"></dxi-column>
-      <dxi-column dataField="pallet" caption="인수도"></dxi-column>
-      <dxi-column dataField="takeoverDegree" caption="매입코드"></dxi-column>
-      <dxi-column dataField="purchaseCode" caption="세무구분"></dxi-column>
-      <dxi-column dataField="taxClass" caption="시군"></dxi-column>
-      <dxi-column dataField="city" caption="거리"></dxi-column>
-      <dxi-column dataField="distance" caption="납품단가"></dxi-column>
-      <dxi-column dataField="deliveryPrice" caption="사업장코드"></dxi-column>
-      <dxi-column dataField="businessCode" caption="주문구분"></dxi-column>
-      <dxi-column dataField="orderClass" caption="실출고지"></dxi-column>
-      <dxi-column dataField="releaseNotice" caption="본/지소"></dxi-column>
-      <dxi-column dataField="headOffice" caption="특기사항"></dxi-column>
-      <dxi-column dataField="remarks" caption="남해제품"></dxi-column>
-      <dxi-column dataField="namhaeProduct" caption="남해"></dxi-column>
-      <dxi-column dataField="namhae" caption="농협"></dxi-column>
+      <dxi-column dataField="carNumber" caption="차량번호"  ></dxi-column>
+      <dxi-column dataField="driver" caption="기사" ></dxi-column>
+      <dxi-column dataField="vehicleClassification" caption="차량구분"  ></dxi-column>
+      <dxi-column dataField="basicDistributed" caption="기본/분산" ></dxi-column>
+      <dxi-column dataField="carrier1" caption="운송사(1차)" ></dxi-column>
+      <dxi-column dataField="carrier2" caption="운송사(2차)"  ></dxi-column>
+      <dxi-column dataField="zipCode" caption="우편번호"  ></dxi-column>
+      <dxi-column dataField="landing" caption="착지(출하지)"  ></dxi-column>
+      <dxi-column dataField="releasePlace" caption="출고지" ></dxi-column>
+      <dxi-column dataField="account" caption="거래처" ></dxi-column>
+      <dxi-column dataField="pallet" caption="파렛트" ></dxi-column>
+      <dxi-column dataField="takeoverDegree" caption="인수도"  ></dxi-column>
+      <dxi-column dataField="purchaseCode" caption="매입코드" ></dxi-column>
+      <dxi-column dataField="taxClass" caption="세무구분" ></dxi-column>
+      <dxi-column dataField="city" caption="시군"  ></dxi-column>
+      <dxi-column dataField="distance" caption="거리"  ></dxi-column>
+      <dxi-column dataField="deliveryPrice" caption="납품단가" format="#,###" ></dxi-column>
+      <dxi-column dataField="businessCode" caption="사업장코드" ></dxi-column>
+      <dxi-column dataField="orderClass" caption="주문구분"  ></dxi-column>
+      <dxi-column dataField="releaseNotice" caption="실출고지"  ></dxi-column>
+      <dxi-column dataField="headOffice" caption="본/지소" ></dxi-column>
+      <dxi-column dataField="remarks" caption="특기사항"  ></dxi-column>
+      <dxi-column dataField="namhaeProduct" caption="남해제품"  ></dxi-column>
+      <dxi-column dataField="namhae" caption="남해"  ></dxi-column>
+      <dxi-column dataField="nh" caption="농협" ></dxi-column>
 
 
       <dxo-search-panel [visible]="true"></dxo-search-panel>
@@ -141,4 +138,3 @@
     </dx-data-grid>
   </div>
 
-</div>

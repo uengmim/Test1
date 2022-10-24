@@ -45,7 +45,7 @@ export class ADSQComponent {
   
   data: any;
   backButtonOption: any;
-
+  searchButtonOptions: any;
   //insert,modify,delete 
   rowCount: number;
   _dataService: ImateDataService;
@@ -77,7 +77,13 @@ export class ADSQComponent {
     let modelTest01 = this;
 
     this.simpleProducts = service.getSimpleProducts();
-   
+    //조회버튼
+    this.searchButtonOptions = {
+      icon: 'search',
+      onClick: async () => {
+        this.dataGrid.instance.refresh();
+      },
+    };
 
   }
 

@@ -6,7 +6,7 @@
     <div *dxTemplate>
       <div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>주문기간</b></div>
       <div style="float:left; margin-right:10px;">
-        <dx-date-box [(value)]="now" type="date" [width]="100"></dx-date-box>
+        <dx-date-box [(value)]="now" type="date" [width]="120"></dx-date-box>
       </div>
     </div>
   </dxi-item>
@@ -30,20 +30,20 @@
 <div id="form-container">
   <dx-form id="summary" [formData]="Summary" width="80%">
     <dxi-item itemType="group" caption="담보합계" [colCount]="6" [colSpan]="2">
-      <dxi-item dataField="totalColl" [editorOptions]="{ readOnly: true }"><dxo-label text="담보합계"></dxo-label></dxi-item>
-      <dxi-item dataField="estate" [editorOptions]="{ readOnly: true }"><dxo-label text="부동산"></dxo-label></dxi-item>
-      <dxi-item dataField="pledge" [editorOptions]="{ readOnly: true }"><dxo-label text="질권"></dxo-label></dxi-item>
-      <dxi-item dataField="suretyIns" [editorOptions]="{ readOnly: true }"><dxo-label text="보증보험"></dxo-label></dxi-item>
-      <dxi-item dataField="surplusMoney" [editorOptions]="{ readOnly: true }"><dxo-label text="가수금"></dxo-label></dxi-item>
+      <dxi-item dataField="totalColl"   [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="담보합계"></dxo-label></dxi-item>
+      <dxi-item dataField="estate" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="부동산"></dxo-label></dxi-item>
+      <dxi-item dataField="pledge" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="질권"></dxo-label></dxi-item>
+      <dxi-item dataField="suretyIns" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="보증보험"></dxo-label></dxi-item>
+      <dxi-item dataField="surplusMoney" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="가수금"></dxo-label></dxi-item>
     </dxi-item>
 
     <dxi-item itemType="group" caption="채권합계" [colCount]="6" [colSpan]="2">
-      <dxi-item dataField="totalBond" [editorOptions]="{ readOnly: true }"><dxo-label text="채권합계"></dxo-label></dxi-item>
-      <dxi-item dataField="accReceivable" [editorOptions]="{ readOnly: true }"><dxo-label text="외상매출"></dxo-label></dxi-item>
-      <dxi-item dataField="outstanding" [editorOptions]="{ readOnly: true }"><dxo-label text="미수금"></dxo-label></dxi-item>
-      <dxi-item dataField="invenRetained" [editorOptions]="{ readOnly: true }"><dxo-label text="보유재고"></dxo-label></dxi-item>
-      <dxi-item dataField="orderAppQuan" [editorOptions]="{ readOnly: true }"><dxo-label text="주문승인물량"></dxo-label></dxi-item>
-      <dxi-item dataField="sameTimShip" [editorOptions]="{ readOnly: true }"><dxo-label text="당하출하(화공)"></dxo-label></dxi-item>
+      <dxi-item dataField="totalBond" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="채권합계"></dxo-label></dxi-item>
+      <dxi-item dataField="accReceivable" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="외상매출"></dxo-label></dxi-item>
+      <dxi-item dataField="outstanding" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="미수금"></dxo-label></dxi-item>
+      <dxi-item dataField="invenRetained" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="보유재고"></dxo-label></dxi-item>
+      <dxi-item dataField="orderAppQuan" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="주문승인물량"></dxo-label></dxi-item>
+      <dxi-item dataField="sameTimShip" [editorOptions]="{ readOnly: true, format: 'currency' }"><dxo-label text="당하출하(화공)"></dxo-label></dxi-item>
     </dxi-item>
   </dx-form>
 </div>

@@ -17,9 +17,9 @@ export class Employee {
   //포장
   packaging!: string;
   //등록수량
-  registeredQuantity!: string;
+  registeredQuantity!: number;
   //처리수량
-  throughput!: string;
+  throughput!: number;
   //발생처
   origin!: string;
   //처리예정일
@@ -41,7 +41,7 @@ export class Employee {
   //등록번호
   registrationNumber!: string;
   //순번
-  turn!: string;
+  turn!: number;
   //SECT
   sect!: string;
   //제품명
@@ -108,9 +108,9 @@ const employees: Employee[] =[
     //포장
     packaging!: '20KG 표준백',
     //등록수량
-    registeredQuantity!: '28',
+    registeredQuantity!: 28,
     //처리수량
-    throughput!: '0',
+    throughput!: 10000,
     //발생처
     origin!: '우표농협(구매처)',
     //처리예정일
@@ -120,7 +120,7 @@ const employees: Employee[] =[
     //비고
     note!: '농가배송',
     //차량번호
-    carNumber!: '경북86거5042',
+    carNumber!: '경북86거 5042',
     //차종
     carType!: 'Y',
     //기사
@@ -132,7 +132,7 @@ const employees: Employee[] =[
     //등록번호
     registrationNumber!: '12-11',
     //순번
-    turn!: '2',
+    turn!: 2,
     //SECT
     sect!: 'sect',
     //제품명
@@ -143,7 +143,112 @@ const employees: Employee[] =[
     destination!: '용인',
     //등록구분
     registration!: '등록'
-  }]
+  },
+  {
+    //ID
+    ID!: 2,
+    //구분
+    division!: '농가배송',
+    //관할지사
+    competentBracnh!: '서울',
+    //주문처
+    whereOrder!: '(주)농협물류(서울)',
+    //등록일자
+    registrationDate!: '2022-09-03',
+    //제품
+    product!: '맞춤17호',
+    //포장
+    packaging!: '20KG 표준백',
+    //등록수량
+    registeredQuantity!: 289,
+    //처리수량
+    throughput!: 10,
+    //발생처
+    origin!: '우표농협(구매처)',
+    //처리예정일
+    processingDate!: '2022-03-03',
+    //상태
+    situation!: '미처리',
+    //비고
+    note!: '농가배송',
+    //차량번호
+    carNumber!: '경북86거 4332',
+    //차종
+    carType!: 'Y',
+    //기사
+    driver!: '김우형',
+    //전화번호
+    phoneNumber!: '010-1232-2242',
+    //승인
+    approval!: '승인',
+    //등록번호
+    registrationNumber!: '12-12',
+    //순번
+    turn!: 2,
+    //SECT
+    sect!: 'sect',
+    //제품명
+    productName!: '골드측조',
+    //검수구분
+    inspectionClass!: '검수완료',
+    //도착지
+    destination!: '서울',
+    //등록구분
+    registration!: '등록'
+  },
+  {
+    //ID
+    ID!: 3,
+    //구분
+    division!: '농가배송',
+    //관할지사
+    competentBracnh!: '천안',
+    //주문처
+    whereOrder!: '(주)농협물류(천안)',
+    //등록일자
+    registrationDate!: '2022-09-05',
+    //제품
+    product!: '맞춤17호',
+    //포장
+    packaging!: '20KG 표준백',
+    //등록수량
+    registeredQuantity!: 2892,
+    //처리수량
+    throughput!: 100,
+    //발생처
+    origin!: '우표농협(구매처)',
+    //처리예정일
+    processingDate!: '2022-09-13',
+    //상태
+    situation!: '미처리',
+    //비고
+    note!: '농가배송',
+    //차량번호
+    carNumber!: '경기86거 2422',
+    //차종
+    carType!: 'Y',
+    //기사
+    driver!: '김준형',
+    //전화번호
+    phoneNumber!: '010-2252-2222',
+    //승인
+    approval!: '승인',
+    //등록번호
+    registrationNumber!: '12-14',
+    //순번
+    turn!: 4,
+    //SECT
+    sect!: 'sect',
+    //제품명
+    productName!: '골드측조',
+    //검수구분
+    inspectionClass!: '검수완료',
+    //도착지
+    destination!: '천안',
+    //등록구분
+    registration!: '등록'
+  },
+]
 
 const orderInfo: OrderInfo = {
   //주문처

@@ -35,25 +35,66 @@ export class Data {
   //앞번호
   prNumber!: string;
   //뒷번호
-  baNumber!: string;
+  baNumber!: number;
+}
+
+//오더데이터
+export class SerchInfo {
+  //지역
+  A!: string;
+  //년도
+  B!: string;
+  //차량 앞번호
+  C!: string;
+  //차량 뒷번호
+  D!: string;
+  //차량 전체번호
+  E!: string;
+  //소속회사
+  F!: string;
+  //기사명
+  G!: string;
+  //자택전화
+  H!: string;
+  //회사전화
+  I!: string;
+  //휴대폰번호
+  J!: string;
+  //호출번호
+  K!: string;
+  //적재중량
+  L!: number;
+  //유창수량
+  M!: number;
+  //공차중량
+  N!: number;
+  //우편번호
+  O!: string;
+  //우편번호
+  P!: string;
+  //RFID번호
+  Q!: string;
+  //유류,화학
+  R!: string;
 }
 
 
+//유류,화학
 export class Option {
   ID!: string;
   Name!: string;
 }
-
+//소속회사
 export class Company {
   ID!: string;
   Name!: string;
 }
-
+//차량 앞번호
 export class Car {
   ID!: string;
   Name!: string;
 }
-
+//지역
 export class Local {
   ID!: string;
   Name!: string;
@@ -68,38 +109,50 @@ const carsnumber: string[] = [
 //유류,화학
 const options: Option[] = [{
   ID: 'A',
-  Name: '유류',
+  Name: '유류출하',
 },
   {
     ID: 'B',
-    Name: '화학',
+    Name: '화학출하',
   }];
 //소속회사
 const company: Company[] = [{
   ID: 'A',
-  Name: 'AAAA',
+  Name: '주영광특운',
 },
 {
   ID: 'B',
-  Name: 'BBBB',
-  }];
+  Name: '(주)대창',
+},
+{
+  ID: 'C',
+  Name: '(주)협성유조',
+},];
 //지역
 const local: Local[] = [{
   ID: 'A',
-  Name: '서울',
+  Name: '연천군',
 },
 {
   ID: 'B',
-  Name: '경기',
+  Name: '포천시',
+},
+{
+   ID: 'C',
+   Name: '밀양시',
 }];
 //차량앞번호
 const car: Car[] = [{
   ID: 'A',
-  Name: '1234',
+  Name: '88하',
 },
 {
   ID: 'B',
-  Name: '2345',
+  Name: '95다',
+},
+{
+    ID: 'C',
+    Name: '36바',
 }];
 //테스트데이터
 const data: Data[] = [{
@@ -119,7 +172,7 @@ const data: Data[] = [{
   area: '08',
   year: '2022',
   prNumber: '경기89가',
-  baNumber: '8278',
+  baNumber: 8278,
 },
 {
   vehNumber: '경기90아5137',
@@ -138,7 +191,7 @@ const data: Data[] = [{
   area: '08',
   year: '2022',
   prNumber: '경기90아',
-  baNumber: '5137',
+  baNumber: 5137,
 },
 {
   vehNumber: '경기92사2101',
@@ -157,9 +210,10 @@ const data: Data[] = [{
   area: '08',
   year: '2022',
   prNumber: '경기92사',
-  baNumber: '2101',
+  baNumber: 2101,
 },
 ]
+
 
 @Injectable()
 export class Service {

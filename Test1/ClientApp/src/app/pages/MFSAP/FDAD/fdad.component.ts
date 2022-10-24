@@ -8,7 +8,7 @@ import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared
 import { QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { formatDate } from '@angular/common';
-import { Service, Data, Option, Company, Car, Local } from '../FDAD/app.service'
+import { Service, Data } from './app.service';
 import {
   DxDataGridComponent,
   DxDateBoxModule,
@@ -20,11 +20,6 @@ const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
 };
 
-/**
- *
- *차량배차(국판) component
- * */
-
 @Component({
   templateUrl: 'fdad.component.html',
   providers: [ImateDataService, Service]
@@ -35,18 +30,13 @@ const getOrderDay = function (rowData: any): number {
 export class FDADComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
 
-  carsnumber!: string[];
+  clients: string[];
 
   dataSource: any;
   //거래처
 
   //정보
   data: Data[];
-
-  options: Option[];
-  company: Company[];
-  car: Car[];
-  local: Local[];
 
 
   //날짜 조회
@@ -88,15 +78,10 @@ export class FDADComponent {
   //_dataService: ImateDataService;
 
   constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 차량배차(국판)";
+    appInfo.title = AppInfoService.APP_TITLE + " | 차량배판(국판)";
     //정보
     this.data = service.getData();
-    this.carsnumber = service.getclient();
-
-    this.options = service.getOption();
-    this.company = service.getCompany();
-    this.car = service.getCar();
-    this.local = service.getLocal();
+    this.clients = service.getclient();
 
     //this._dataService = dataService;
     let modelTest01 = this;
@@ -137,7 +122,7 @@ export class FDADComponent {
         this.dataGrid.instance.deselectAll();
       },
     };
-
+  
     this.saveButtonOptions = {
       icon: 'save',
       onClick: () => {
@@ -181,7 +166,7 @@ export class FDADComponent {
 
   }
 
-  selectedChanged(e: any) {
+  selectedChanged(e:any) {
     this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
   }
 

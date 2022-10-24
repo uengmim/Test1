@@ -151,9 +151,7 @@ export class OWDRComponent {
     this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
   }
 
-  selectionChanged(data: any) {
-    this.selectedItemKeys = data.selectedRowKeys;
-  }
+
 
   addRow(e: any): void {
     this.showPopup('Add', {}); //change undefined to {}
@@ -170,5 +168,12 @@ export class OWDRComponent {
     this.popupVisible = true;
     console.log(this.formData);
   }
+  selectionChanged(data: any) {
+    this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
+    this.selectedItemKeys = data.currentSelectedRowKeys;
+  }
+  editRow(e: any): void {
+    e.component.editRow(this.selectedRowIndex);
 
+  }
 }

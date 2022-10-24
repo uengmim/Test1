@@ -27,6 +27,7 @@ export class SHCAComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent
   dataSource: any;
 
+  //date box
   value: Date = new Date(1981, 3, 27);
   now: Date = new Date();
 

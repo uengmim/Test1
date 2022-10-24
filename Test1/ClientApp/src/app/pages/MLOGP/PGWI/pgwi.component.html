@@ -1,0 +1,213 @@
+ <!--toolbar-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>작업일자</b></div>
+      <div class="dx-field-value">
+        <dx-date-box [value]="now" type="date" [width]="150"> </dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>현재시간</b></div>
+      <div class="dx-field-value">
+        <dx-date-box [value]="now" type="time" [width]="150"> </dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="left"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button (onClick)="deleteRecords()"
+               [disabled]="!selectedItemKeys.length"
+               icon="trash">
+    </dx-button>
+  </dxi-item>
+
+  <dxi-item location="left"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+               text="수동 등록"
+               type="normal">
+    </dx-button>
+  </dxi-item>
+
+  <dxi-item location="left"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+               text="계근 시작"
+               type="normal">
+    </dx-button>
+  </dxi-item>
+
+  <dxi-item location="left"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="data"
+              keyExpr="turn"
+              [showBorders]="true"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="widget"
+              [columnHidingEnabled]="true"
+              [allowColumnReordering]="true"
+              (onSelectionChanged)="selectionChanged($event)"
+              (onRowDblClick)="orderDBClick($event)"
+              [selection]="{ mode: 'multiple' }"
+              height="calc(100vh - 230px)">
+
+  <!--Datagrid Option-->
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+
+  <!--Filtering Option-->
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-builder-popup [position]="popupPosition">
+  </dxo-filter-builder-popup>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+
+  <!--Grouping Option-->
+  <dxo-group-panel [visible]="true"></dxo-group-panel>
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+  <!--Data column-->
+  <dxi-column dataField="turn"
+              caption="순번"
+              alignment="center">
+  </dxi-column>
+
+  <dxi-column dataField="entrance"
+              caption="입출문구분">
+  </dxi-column>
+
+  <dxi-column dataField="veNumber"
+              caption="차량번호">
+  </dxi-column>
+
+  <dxi-column dataField="grWeight"
+              caption="총중량"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="toWeight"
+              caption="공차중량"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="acWeight"
+              caption="실중량"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="drName"
+              caption="기사명">
+  </dxi-column>
+
+  <dxi-column dataField="product"
+              caption="제품">
+  </dxi-column>
+
+  <dxi-column dataField="client"
+              caption="거래처">
+  </dxi-column>
+
+</dx-data-grid>
+
+<!--Popup-->
+<dx-popup [width]="900"
+          [height]="600"
+          margin="20px"
+          [showTitle]="true"
+          title="계근정보"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="popupVisible">
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="bottom"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+
+  <dx-scroll-view width="100%" height="100%">
+    <div id="form-container">
+      <div style="margin-bottom:20px"></div>
+      <dx-form id="seasonalInfo" [formData]="seasonalInfo" [colCount]="1" width="80%">
+        <dxi-item itemType="group" caption="">
+          <dxi-item dataField="seasonalWe" [disabled]="true"><dxo-label text="계근중량" format="#,###"></dxo-label></dxi-item>
+          <dxi-item dataField="grossWe" [disabled]="true"><dxo-label text="총중량" format="#,###"></dxo-label></dxi-item>
+          <dxi-item dataField="toleranceWe" [disabled]="true"><dxo-label text="공차중량" format="#,###"></dxo-label></dxi-item>
+          <dxi-item dataField="actualWe" [disabled]="true"><dxo-label text="실중량" format="#,###"></dxo-label></dxi-item>
+          <dxi-item dataField="vehicleNu" [disabled]="true"><dxo-label text="차량번호"></dxo-label></dxi-item>
+          <dxi-item dataField="driver" [disabled]="true"><dxo-label text="기사명"></dxo-label></dxi-item>
+          <dxi-item dataField="company" [disabled]="true"><dxo-label text="거래처"></dxo-label></dxi-item>
+          <dxi-item dataField="thProduct" [disabled]="true"><dxo-label text="제품"></dxo-label></dxi-item>
+          <dxi-item dataField="person" [disabled]="true"><dxo-label text="검량자"></dxo-label></dxi-item>
+        </dxi-item>
+      </dx-form>
+
+      <!--FOrm-->
+      <dx-form>
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="3">
+          <dxi-item location="before"
+                    widget="dxButton"
+                    locateInMenu="auto">
+            <dx-button stylingMode="contained"
+                       text="전표출력"
+                       type="normal"
+                       style="margin-top: 20px;">
+            </dx-button>
+          </dxi-item>
+
+          <dxi-item location="before"
+                    widget="dxButton"
+                    locateInMenu="auto">
+            <dx-button stylingMode="contained"
+                       text="입문등록"
+                       type="normal"
+                       style="margin-top: 20px;">
+            </dx-button>
+          </dxi-item>
+
+          <dxi-item location="before"
+                    widget="dxButton"
+                    locateInMenu="auto">
+            <dx-button stylingMode="contained"
+                       text="출문등록"
+                       type="normal"
+                       style="margin-top: 20px; margin-left: 3px;">
+            </dx-button>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+  </dx-scroll-view>
+</dx-popup>

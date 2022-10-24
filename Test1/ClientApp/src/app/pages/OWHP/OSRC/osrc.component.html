@@ -1,0 +1,117 @@
+<!--
+  출하 진행 현황
+  -->
+<!--toolbar-->
+<dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>기간</b></div>
+      <div style="float:left;width:auto">
+        <dx-date-box [(value)]="startDate" type="date" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+      <div style="float:left; margin-left:10px; margin-right:10px;">
+        ~
+      </div>
+      <div style="float: left; margin-right: 10px; width: auto">
+        <dx-date-box [(value)]="endDate" type="date" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;" >
+    <dx-select-box [items]="sort" placeholder="구분"></dx-select-box>
+  </dxi-item>
+
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="exportSelectedData">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid id="grid"
+    [dataSource]="Orderdata"
+    [showBorders]="true"
+    [focusedRowIndex]="0"
+    columnResizingMode="widget"
+    keyExpr="oilClient"
+    [selection]="{ mode: 'multiple' }"
+    [allowColumnReordering]="true"
+    [columnAutoWidth]="true"
+    [allowColumnResizing]="true"
+    [remoteOperations]="false"
+    [rowAlternationEnabled]="true"
+    height="calc(100vh - 230px)">
+      <!--Datagrid Option-->
+      <dxo-paging [enabled]="false"></dxo-paging>
+      <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+      <!--Filtering Option-->
+      <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+      <dxo-filter-builder [customOperations]="customOperations"
+                          [allowHierarchicalFields]="true">
+      </dxo-filter-builder>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+      <dxo-header-filter [visible]="true"></dxo-header-filter>
+      <!--Grouping Option-->
+      <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+      <!--Data column-->
+      <dxi-column dataField="oilClient" caption="거래처">  </dxi-column>
+
+      <dxi-column dataField="oilDesti" caption="도착지">  </dxi-column>
+
+      <dxi-column dataField="oilSort" caption="유종">  </dxi-column>
+
+      <dxi-column dataField="oilShipDate" caption="출하일자" dataType="date" format="yyyy-MM-dd" alignment="center">   </dxi-column>
+
+      <dxi-column dataField="oilTurn" caption="순번">  </dxi-column>
+
+      <dxi-column dataField="oilRack" caption="RACK">  </dxi-column>
+
+      <dxi-column dataField="oilOrderSort" caption="주문구분">  </dxi-column>
+
+      <dxi-column dataField="oilVehNum" caption="차량번호">  </dxi-column>
+
+      <dxi-column dataField="oilIndQuanL" caption="지시량(L)" format="#,###">
+
+      </dxi-column>
+
+      <dxi-column dataField="oilShipQuanL" caption="출하량(L)" format="#,###">   </dxi-column>
+
+      <dxi-column dataField="oilShipQuanMT" caption="출하량(MT)" format="#,###">  </dxi-column>
+
+      <dxi-column dataField="oilSetAmount" caption="정산량" format="#,###">
+        <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+      </dxi-column>
+
+      <dxi-column dataField="oilUnit" caption="단위" alignment="center">  </dxi-column>
+
+      <dxi-column dataField="oilTem" caption="온도">  </dxi-column>
+
+      <dxi-column dataField="oilVCF" caption="V.C.F">  </dxi-column>
+
+      <dxi-column dataField="oilSpecific" caption="비중">  </dxi-column>
+
+      <dxi-column dataField="oilFWTime" caption="출고시간" alignment="center">  </dxi-column>
+
+      <dxi-column dataField="oilBLNum" caption="B/L번호">  </dxi-column>
+
+      <dxi-column dataField="oilOrder" caption="ORDER">  </dxi-column>
+
+      <dxi-column dataField="oilRequset" caption="REQUEST">  </dxi-column>
+
+      <dxi-column dataField="oilSOil" caption="선적번호(S-OIL)">   </dxi-column>
+
+      <dxi-column dataField="oilStorTank" caption="저장탱크" alignment="center">  </dxi-column>
+    </dx-data-grid>
+
+
+

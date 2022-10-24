@@ -1,23 +1,23 @@
 <!--고결/파포자료 등록/수정-->
 
-<div style="margin:5px 5px 10px 5px">
-  <dx-toolbar>
+
+  <dx-toolbar style="margin:20px 0px 20px 0px">
     <dxi-item location="before">
-      <div class="toolbar-label" style="float:left;margin-top:10px;margin-right:5px"><b>주문처</b> </div>
-      <div style="float:left">
+      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>주문처</b> </div>
+      <div style="float: left; margin-left: 10px;">
         <dx-select-box [items]="states"></dx-select-box>
       </div>
     </dxi-item>
     <dxi-item location="before">
       <div *dxTemplate>
-        <div class="toolbar-label" style="float: left; margin-top: 10px; margin-right: 5px; margin-left: 15px"><b>검색기간</b> </div>
-        <div style="float:left">
+        <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>검색기간</b> </div>
+        <div style="float: left; margin-left: 10px;">
           <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
         </div>
-        <div style="float:left;margin-left:10px;margin-right:10px">
+        <div style="float:left;margin-left:10px;">
           ~
         </div>
-        <div style="float:left">
+        <div style="float: left; margin-left: 10px;">
           <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
         </div>
       </div>
@@ -32,12 +32,11 @@
         </dx-button>
       </div>
     </dxi-item>
-    <dxi-item location="left">
-      <div *dxTemplate>
-        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
-
-        </dx-button>
-      </div>
+    <dxi-item location="before"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="searchButtonOptions">
     </dxi-item>
   </dx-toolbar>
 
@@ -47,56 +46,44 @@
                   [showBorders]="true"
                   [focusedRowEnabled]="true"
                   [focusedRowIndex]="0"
-                  [columnAutoWidth]="false"
+                  [columnAutoWidth]="true"
                   [columnHidingEnabled]="true"
                   [remoteOperations]="true"
-                  [wordWrapEnabled]="true"
                   [selection]="{ mode: 'multiple' }"
                   (onRowDblClick)="orderDBClick($event)"
                   (onContentReady)="contentReady($event)"
-                  [columnWidth]="150"
+               
                   height="calc(100vh - 230px)"
                   [allowColumnReordering]="true"
                   columnResizingMode="widget"
-                  [allowColumnResizing]="true">
+                  [allowColumnResizing]="true"
+                   keyExpr="whereOrder">
       <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
       <dxo-paging [pageSize]="100"></dxo-paging>
-
       <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
       <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
       <dxi-column dataField="division" caption="구분"></dxi-column>
       <dxi-column dataField="competentBracnh" caption="관할지사"></dxi-column>
-      <dxi-column dataField="whereOrder" caption="주문처">
-        <dxo-lookup [dataSource]="states" displayExpr="Name">
-        </dxo-lookup>
-      </dxi-column>
-      <dxi-column dataField="registrationDate" caption="등록일자" dataType="date"></dxi-column>
+      <dxi-column dataField="whereOrder" caption="주문처" ></dxi-column>
+      <dxi-column dataField="registrationDate" caption="등록일자"></dxi-column>
       <dxi-column dataField="product" caption="제품"></dxi-column>
       <dxi-column dataField="packaging" caption="포장"></dxi-column>
-      <dxi-column dataField="registeredQuantity" caption="등록수량"></dxi-column>
-      <dxi-column dataField="throughput" caption="처리수량"></dxi-column>
-      <dxi-column dataField="origin" caption="발생처">
-        <dxo-lookup [dataSource]="states4" displayExpr="Name">
-        </dxo-lookup>
-      </dxi-column>
-      <dxi-column dataField="processingDate" caption="처리예정일"></dxi-column>
+      <dxi-column dataField="registeredQuantity" caption="등록수량" format="#,###"></dxi-column>
+      <dxi-column dataField="throughput" caption="처리수량" format="#,###"></dxi-column>
+      <dxi-column dataField="origin" caption="발생처"></dxi-column>
+      <dxi-column dataField="processingDate" caption="처리예정일" ></dxi-column>
       <dxi-column dataField="situation" caption="상태"></dxi-column>
       <dxi-column dataField="note" caption="비고"></dxi-column>
-      <dxi-column dataField="carNumber" caption="차량번호">
-        <dxo-lookup [dataSource]="states5" displayExpr="Name">
-        </dxo-lookup>
-      </dxi-column>
+      <dxi-column dataField="carNumber" caption="차량번호"> </dxi-column>
       <dxi-column dataField="carType" caption="차종"></dxi-column>
       <dxi-column dataField="driver" caption="기사"></dxi-column>
-      <dxi-column dataField="phoneNumber" caption="전화번호"></dxi-column>
+      <dxi-column dataField="phoneNumber" caption="전화번호" ></dxi-column>
       <dxi-column dataField="approval" caption="승인"></dxi-column>
       <dxi-column dataField="registrationNumber" caption="등록번호"></dxi-column>
-      <dxi-column dataField="turn" caption="순번"></dxi-column>
+      <dxi-column dataField="turn" caption="순번"format="#,###"></dxi-column>
       <dxi-column dataField="sect" caption="SECT"></dxi-column>
-      <dxi-column dataField="productName" caption="제품명">
-        <dxo-lookup [dataSource]="states2" displayExpr="Name">
-        </dxo-lookup>
-      </dxi-column>
+      <dxi-column dataField="productName" caption="제품명"></dxi-column>
       <dxi-column dataField="inspectionClass" caption="검수구분"></dxi-column>
       <dxi-column dataField="destination" caption="도착지"></dxi-column>
       <dxi-column dataField="registration" caption="등록구분"></dxi-column>
@@ -109,18 +96,17 @@
 
 
   <dx-popup width="80%"
-            height="calc(50vh - 230px)"
+            height="50%"
             [showTitle]="true"
             title="수정 및 조회"
             [dragEnabled]="false"
-            [hideOnOutsideClick]="true"
             [showCloseButton]="false"
             container=".dx-viewport"
             [(visible)]="popupVisible"
             >
     <dxi-toolbar-item widget="dxButton"
                       toolbar="bottom"
-                      location="before"
+                      location="after"
                       [options]="saveButtonOptions">
     </dxi-toolbar-item>
     <dxi-toolbar-item widget="dxButton"
@@ -131,7 +117,7 @@
     <dx-scroll-view width="100%" height="100%">
 
       <div id="form-container">
-        <dx-form id="orderInfo" [formData]="orderInfo" [colCount]="4" width="80%">
+        <dx-form id="orderInfo" [formData]="orderInfo" [colCount]="4" width="100%">
           <dxi-item itemType="group" caption="">
             <dxi-item dataField="whereOrder">
               <dxo-label text="주문처"></dxo-label>
@@ -202,7 +188,7 @@
                 </dx-drop-down-box>
               </div>
             </dxi-item>
-            <dxi-item dataField="remarks" [editorOptions]="{ height: 60, width:280 }"><dxo-label text="발생사유 특기사항"></dxo-label></dxi-item>
+            <dxi-item dataField="remarks" [editorOptions]="{ height: 100}"><dxo-label text="특기사항"></dxo-label></dxi-item>
           </dxi-item>
           <dxi-item itemType="group" caption="">
             <dxi-item dataField="packagingName">
@@ -403,4 +389,4 @@
   </dx-popup>
 
 
-</div>
+

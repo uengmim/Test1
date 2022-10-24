@@ -27,9 +27,11 @@ export class SHCCComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent
   dataSource: any;
 
+  //date box
   value: Date = new Date(1981, 3, 27);
   now: Date = new Date();
 
+  //데이터
   product: string[];
   setDivision: string[];
   account: string[];
@@ -67,7 +69,6 @@ export class SHCCComponent {
   //날짜 조회
   startDate: any;
   endDate: any;
-
   formOrderData: Data;
 
   constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService) {
@@ -110,12 +111,14 @@ export class SHCCComponent {
         this.dataGrid.instance.refresh();
       },
     };
+    //닫기버튼
     this.closeButtonOptions = {
       text: 'Close',
       onClick(e: any) {
         that.popupVisible = false;
       }
     }
+    //저장버튼
     this.savesButtonOptions = {
       text: 'Save',
       onClick: () => {

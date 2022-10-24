@@ -27,10 +27,9 @@ export class SHCQComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent
   dataSource: any;
 
-  price!: string[];
-
   //정보
   data: Data[];
+  price!: string[];
 
   //데이터 조회 버튼
   searchButtonOptions: any;

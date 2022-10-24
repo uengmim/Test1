@@ -45,22 +45,22 @@ export class Data {
   note!: string;
 }
 
-
+//운송사
 export class FoAgent {
   ID!: string;
   Name!: string;
 }
-
+//정산구분
 export class SettlementCl {
   ID!: string;
   Name!: string;
 }
-
+//비종구분
 export class SeedlingCl {
   ID!: string;
   Name!: string;
 }
-
+//비종구분
 export class SeClassification {
   ID!: string;
   Name!: string;

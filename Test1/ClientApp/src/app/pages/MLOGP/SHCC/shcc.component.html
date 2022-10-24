@@ -1,5 +1,5 @@
   <!--toolbar-->
-<dx-toolbar style="height: 40px; margin-top: 5px;">
+<dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" widget="dxButton" locateInMenu="never">
     <div *dxTemplate>
       <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>정산년월</b></div>
@@ -10,19 +10,39 @@
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="setDivision" placeholder="정산구분"></dx-select-box>
+    <dx-select-box [items]="setDivision"
+                   placeholder="정산구분"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="product" placeholder="제품"></dx-select-box>
+    <dx-select-box [items]="product"
+                   placeholder="제품"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="account" placeholder="거래처"></dx-select-box>
+    <dx-select-box [items]="account"
+                   placeholder="거래처"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="destination" placeholder="도착지"></dx-select-box>
+    <dx-select-box [items]="destination"
+                   placeholder="도착지"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
   </dxi-item>
 
   <dxi-item location="left"
@@ -47,9 +67,8 @@
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="data"
               [showBorders]="false"
-              [columnAutoWidth]="false"
+              [columnAutoWidth]="true"
               keyExpr="customerName"
-              [columnWidth]="150"
               [columnHidingEnabled]="true"
               [allowColumnResizing]="true"
               columnResizingMode="widget"
@@ -78,7 +97,7 @@
   <dxo-group-panel [visible]="true"></dxo-group-panel>
   <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
 
-
+  <!--Data column-->
   <dxi-column dataField="customerName"
               caption="거래처명">
   </dxi-column>
@@ -104,21 +123,20 @@
 
     <dxi-column caption="순번" dataField="shInformation_turn" alignment="center"></dxi-column>
 
-    <dxi-column caption="출하중량" dataField="shInformation_shWeight" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="출하중량" dataField="shInformation_shWeight" format="#,###"></dxi-column>
 
-    <dxi-column caption="착지중량" dataField="shInformation_laWeight" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="착지중량" dataField="shInformation_laWeight" format="#,###"></dxi-column>
 
-    <dxi-column caption="기본중량" dataField="shInformation_baWeight" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="기본중량" dataField="shInformation_baWeight" format="#,###"></dxi-column>
   </dxi-column>
 
   <dxi-column dataField="shCost" caption="기본운송비">
     <dxi-column caption="단가"
                 dataField="shCost_unPrice"
-                alignment="right"
                 format="#,###">
     </dxi-column>
 
-    <dxi-column caption="운송비합계" dataField="shCost_totCost" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="운송비합계" dataField="shCost_totCost" format="#,###"></dxi-column>
   </dxi-column>
 
   <dxi-column dataField="caAccount" caption="운송사계산">
@@ -126,23 +144,22 @@
                 dataField="caAccount_unPrice">
     </dxi-column>
 
-    <dxi-column caption="정산중량" dataField="caAccount_setWeight" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="정산중량" dataField="caAccount_setWeight" format="#,###"></dxi-column>
 
-    <dxi-column caption="단가" dataField="caAccount_unitPr" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="단가" dataField="caAccount_unitPr" format="#,###"></dxi-column>
 
-    <dxi-column caption="운송비합계" dataField="caAccount_totCost" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="운송비합계" dataField="caAccount_totCost" format="#,###"></dxi-column>
   </dxi-column>
 
   <dxi-column dataField="HPCharge" caption="본사담장자계산">
     <dxi-column caption="정산중량(톤)"
                 dataField="HPCharge_setWeight"
-                alignment="right"
                 format="#,###">
     </dxi-column>
 
-    <dxi-column caption="단가" dataField="HPCharge_unPrice" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="단가" dataField="HPCharge_unPrice" format="#,###"></dxi-column>
 
-    <dxi-column caption="운송비합계" dataField="HPCharge_totCost" alignment="right" format="#,###"></dxi-column>
+    <dxi-column caption="운송비합계" dataField="HPCharge_totCost" format="#,###"></dxi-column>
   </dxi-column>
 
   <dxi-column dataField="note"
@@ -175,7 +192,6 @@
 
   <dxi-column dataField="reNumber"
               caption="출고번호"
-              alignment="right"
               [visible]="false">
   </dxi-column>
 
@@ -187,12 +203,12 @@
 
 
 
-
+<!--Popup-->
 <dx-popup [showTitle]="true"
           [(visible)]="popupVisible"
-          [width]="1700"
+          width="80%"
+          height="80%"
           title="운송비 자료 생성"
-          [height]="1000"
           [showCloseButton]="false">
   <dxi-toolbar-item widget="dxButton"
                     toolbar="bottom"
@@ -205,58 +221,55 @@
                     [options]="closeButtonOptions">
   </dxi-toolbar-item>
 
-
+  <!--Form-->
   <dx-form>
     <dxi-item>
       <div *dxTemplate="let data of 'content'">
-        <dx-toolbar style="height: 40px; margin-top: 5px;">
+        <dx-toolbar style="margin:20px 0px 20px 0px" >
 
-          <dxi-item location="before" widget="dxButton" locateInMenu="never">
+          <dxi-item location="before" widget="dxButton" locateInMenu="auto">
             <div *dxTemplate>
-              <div class="toolbar-label"><b>정산년월</b></div>
+              <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>정산년월</b></div>
+              <div class="dx-field-value">
+                <dx-date-box [value]="now" type="date" [width]="150"> </dx-date-box>
+              </div>
             </div>
           </dxi-item>
 
-          <dxi-item location="before">
-            <div class="dx-field-value">
-              <dx-date-box [value]="now" type="date"> </dx-date-box>
-            </div>
+          <dxi-item location="before" locateInMenu="auto">
+            <dx-select-box [items]="setDivision"
+                           placeholder="정산구분"
+                           style="width: auto;
+                           margin-left: 10px;
+                           margin-right: 10px;">
+            </dx-select-box>
           </dxi-item>
 
-          <dxi-item location="before" widget="dxButton" locateInMenu="never">
-            <div *dxTemplate>
-              <div class="toolbar-label"><b>정산구분</b></div>
-            </div>
-          </dxi-item>
-          <dxi-item location="before">
-            <dx-select-box [items]="setDivision"></dx-select-box>
-          </dxi-item>
-
-          <dxi-item location="before" widget="dxButton" locateInMenu="never">
-            <div *dxTemplate>
-              <div class="toolbar-label"><b>제품</b></div>
-            </div>
-          </dxi-item>
-          <dxi-item location="before">
-            <dx-select-box [items]="product"></dx-select-box>
+          <dxi-item location="before" locateInMenu="auto">
+            <dx-select-box [items]="product"
+                           placeholder="제품"
+                           style="width: auto;
+                           margin-left: 10px;
+                           margin-right: 10px;">
+            </dx-select-box>
           </dxi-item>
 
-          <dxi-item location="before" widget="dxButton" locateInMenu="never">
-            <div *dxTemplate>
-              <div class="toolbar-label"><b>거래처</b></div>
-            </div>
-          </dxi-item>
-          <dxi-item location="before">
-            <dx-select-box [items]="account"></dx-select-box>
+          <dxi-item location="before" locateInMenu="auto">
+            <dx-select-box [items]="account"
+                           placeholder="거래처"
+                           style="width: auto;
+                           margin-left: 10px;
+                           margin-right: 10px;">
+            </dx-select-box>
           </dxi-item>
 
-          <dxi-item location="before" widget="dxButton" locateInMenu="never">
-            <div *dxTemplate>
-              <div class="toolbar-label"><b>도착지</b></div>
-            </div>
-          </dxi-item>
-          <dxi-item location="before">
-            <dx-select-box [items]="destination"></dx-select-box>
+          <dxi-item location="before" locateInMenu="auto">
+            <dx-select-box [items]="destination"
+                           placeholder="도착지"
+                           style="width: auto;
+                           margin-left: 10px;
+                           margin-right: 10px;">
+            </dx-select-box>
           </dxi-item>
 
           <dxi-item location="before" widget="dxButton" locateInMenu="never">
@@ -298,9 +311,9 @@
                       [columnWidth]="100"
                       [selection]="{ mode: 'multiple' }"
                       [focusedRowIndex]="0"
-                      [width]="1600"
+                      [width]="1800"
                       [height]="600"
-                      keyExpr="division">
+                      keyExpr="customerName">
 
 
           <!--Datagrid Option-->
@@ -318,16 +331,19 @@
           <dxo-group-panel [visible]="true"></dxo-group-panel>
           <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
 
+          <!--Data column-->
           <dxi-column dataField="division"
                       caption="구분">
           </dxi-column>
 
           <dxi-column dataField="customerName"
-                      caption="거래처명">
+                      caption="거래처명"
+                      [width]="130">
           </dxi-column>
 
           <dxi-column dataField="productName"
-                      caption="품명">
+                      caption="품명"
+                      [width]="130">
           </dxi-column>
 
           <dxi-column dataField="shInformation" caption="출하정보">
@@ -342,32 +358,31 @@
 
             <dxi-column caption="도착지" dataField="shInformation_dest"></dxi-column>
 
-            <dxi-column caption="출하중량" dataField="shInformation_shWeight" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="출하중량" dataField="shInformation_shWeight" format="#,###"></dxi-column>
 
-            <dxi-column caption="착지중량" dataField="shInformation_laWeight" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="착지중량" dataField="shInformation_laWeight" format="#,###"></dxi-column>
 
-            <dxi-column caption="기본중량" dataField="shInformation_baWeight" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="기본중량" dataField="shInformation_baWeight" format="#,###"></dxi-column>
           </dxi-column>
 
           <dxi-column dataField="caAccount" caption="운송사계산">
 
-            <dxi-column caption="정산중량" dataField="caAccount_setWeight" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="정산중량" dataField="caAccount_setWeight" format="#,###"></dxi-column>
 
-            <dxi-column caption="단가" dataField="caAccount_unitPr" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="단가" dataField="caAccount_unitPr" format="#,###"></dxi-column>
 
-            <dxi-column caption="운송비합계" dataField="caAccount_totCost" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="운송비합계" dataField="caAccount_totCost" format="#,###"></dxi-column>
           </dxi-column>
 
           <dxi-column dataField="HPCharge" caption="본사담장자계산">
             <dxi-column caption="정산중량(톤)"
                         dataField="HPCharge_setWeight"
-                        alignment="right"
                         format="#,###">
             </dxi-column>
 
-            <dxi-column caption="단가" dataField="HPCharge_unPrice" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="단가" dataField="HPCharge_unPrice" format="#,###"></dxi-column>
 
-            <dxi-column caption="운송비합계" dataField="HPCharge_totCost" alignment="right" format="#,###"></dxi-column>
+            <dxi-column caption="운송비합계" dataField="HPCharge_totCost" format="#,###"></dxi-column>
           </dxi-column>
 
           <dxi-column caption="출발지" dataField="shInformation_StartPo"></dxi-column>
@@ -375,15 +390,16 @@
           <dxi-column caption="도착지" dataField="shInformation_dest"></dxi-column>
 
           <dxi-column dataField="reNumber"
-                      caption="출고번호"
-                      alignment="right">
+                      caption="출고번호">
           </dxi-column>
 
           <dxi-column dataField="note"
                       caption="비고">
           </dxi-column>
         </dx-data-grid>
-    </div>
+      </div>
     </dxi-item>
   </dx-box>
 </dx-popup>
+
+

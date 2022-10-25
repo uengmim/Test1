@@ -1,0 +1,269 @@
+<!--고객주문처리(액상)-->
+
+<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+  <dxi-item location="before">
+    <div class="toolbar-label" style="width:100px; float: left; margin-top: 5px; margin-left: 10px; "><b>주문처(산하)</b> </div>
+    <div style="float: left; margin-left: 10px; ">
+      <dx-select-box [items]="clients"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="width:80px; float: left; margin-top: 5px; margin-left: 10px; "><b>출고기간</b> </div>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="startDate" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+      <div style="float: left; margin-left: 10px;">
+        ~
+      </div>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="endDate" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item>
+    <div class="toolbar-label" style="width: 80px; float: left; margin-top: 5px; margin-left: 10px; "><b>주문구분</b> </div>
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-comm #sd007Entery
+                        [codeInfo]="sd007Code"
+                        valueColumn="ZCM_CODE3"
+                        valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                        placeholderText="주문구분"
+                        [width]="200"
+                        [gridBoxWidth]="500"
+                        class="weight-test"></nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="saveButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+
+<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+  <dxi-item location="before">
+    <div class="toolbar-label" style="width: 100px; float: left; margin-top: 5px; margin-left: 10px; "><b>제품구분</b> </div>
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-table #maEntery
+                         [codeInfo]="maCode"
+                         valueColumn="MATKL"
+                         valueDisplayFormat="%WGBEZ%(%MATKL%)"
+                         placeholderText="제품구분"
+                         width="200"
+                         [gridBoxWidth]="500"
+                         class="weight-test"></nh-possible-table>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div class="toolbar-label" style="width: 80px; float: left; margin-top: 5px; margin-left: 10px; "><b>제품명</b> </div>
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-table #maktEntery
+                         [codeInfo]="maktCode"
+                         valueColumn="MATNR"
+                         valueDisplayFormat="%MAKTX%(%MATNR%)"
+                         placeholderText="제품명"
+                         width="270"
+                         [gridBoxWidth]="500"
+                         class="weight-test"></nh-possible-table>
+    </div>
+  </dxi-item>
+  <dxi-item>
+    <div class="toolbar-label" style="width: 80px; float: left; margin-top: 5px; margin-left: 10px; "><b>승인구분</b> </div>
+    <div style="float: left; margin-left: 10px; ">
+      <dx-select-box [items]="clients"></dx-select-box>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="deleteButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+
+
+<dx-data-grid id="grid"
+              [dataSource]="orderData"
+              keyExpr="VBELN"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'multiple' }"
+              height="calc(100vh - 230px)"
+              [columnAutoWidth]="true"
+              (onContentReady)="contentReady($event)"
+              (onRowDblClick)="orderDBClick($event)"
+              [allowColumnReordering]="true"
+              columnResizingMode="widget">
+  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+  <dxo-paging [pageSize]="100"></dxo-paging>
+  <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+  <dxo-paging [pageSize]="10"></dxo-paging>
+
+
+  <!--Data column-->
+  <dxi-column dataField="ZEXID"
+              caption="주문번호">
+  </dxi-column>
+
+  <dxi-column dataField="ZEXIDNAME"
+              caption="주문처">
+  </dxi-column>
+  <dxi-column dataField="ZZPACK_N"
+              caption="제품명">
+  </dxi-column>
+  <dxi-column dataField="ZZPACK_N"
+              caption="포장">
+  </dxi-column>
+  <dxi-column dataField="AUART_N"
+              caption="주문구분">
+  </dxi-column>
+  <dxi-column dataField="VKAUS_N"
+              caption="용도">
+  </dxi-column>
+  <dxi-column dataField="KUNWE_N"
+              caption="도착지">
+  </dxi-column>
+  <dxi-column dataField="KWMENG"
+              caption="주문량">
+  </dxi-column>
+
+  <dxi-column dataField="NETPR"
+              caption="주문단가"
+              format="currency"
+              dataType="number">
+    <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+  </dxi-column>
+  <dxi-column dataField="vehicle"
+              caption="배차량">
+  </dxi-column>
+  <dxi-column dataField="GIQTY"
+              caption="출고량">
+  </dxi-column>
+  <dxi-column dataField="numofVehicle"
+              caption="차량댓수">
+  </dxi-column>
+  <dxi-column dataField="VDATU"
+              caption="납기일자"
+              dataType="date">
+  </dxi-column>
+  <dxi-column dataField="LGORT"
+              caption="출고지">
+  </dxi-column>
+  <dxi-column dataField="TDLNR_N"
+              caption="운송사">
+  </dxi-column>
+  <dxi-column dataField="shipmentNum"
+              caption="출하요청번호">
+  </dxi-column>
+  <dxi-column dataField="orderAccount"
+              caption="주문등록계정">
+  </dxi-column>
+
+  <dxi-column dataField="ERDAT"
+              dataType="date"
+              caption="주문일자">
+  </dxi-column>
+  <dxi-column dataField="DOLOG"
+              caption="출하가능">
+  </dxi-column>
+  <dxi-column dataField="productClass"
+              caption="제품구분">
+  </dxi-column>
+  <dxi-column dataField="TEXT"
+              caption="비고">
+  </dxi-column>
+
+
+</dx-data-grid>
+
+<dx-popup title="주문등록/수정"
+          [showTitle]="true"
+          width="80%"
+          height="80%"
+          [(visible)]="popupVisible"
+          [dragEnabled]="false"
+          [showCloseButton]="true"
+          container=".dx-viewport">
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="saveButtonOptions"
+                    [visible]="saveVisible">
+  </dxi-toolbar-item>
+  <dx-scroll-view width="100%" height="100%">
+    <div id="form-container">
+      <dx-form id="orderData" [formData]="orderData" [disabled] = "editFlag">
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+          <dxi-item dataField="VBELNSO" [disabled]="true"><dxo-label text="주문번호"></dxo-label></dxi-item>
+          <dxi-item dataField="ZEXIDNAME" [disabled]="true"><dxo-label text="주문처(산하)"></dxo-label></dxi-item>
+          <dxi-item dataField="a" [disabled]="true"><dxo-label text="담보금액"></dxo-label></dxi-item>
+          <dxi-item dataField="a" [disabled]="true"><dxo-label text="요청번호"></dxo-label></dxi-item>
+          <dxi-item dataField="a" [disabled]="true"><dxo-label text="미수채권(비료+화공등)"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+          <dxi-item dataField="VDATU" [disabled]="false"><dxo-label text="납기일자"></dxo-label></dxi-item>
+          <dxi-item dataField="KUNWE" [disabled]="false"><dxo-label text="도착지"></dxo-label></dxi-item>
+          <dxi-item dataField="ZEXIDNAME" [disabled]="true"><dxo-label text="주문처"></dxo-label></dxi-item>
+          <dxi-item dataField="MAKTX" [disabled]="false"><dxo-label text="제품명"></dxo-label></dxi-item>
+          <dxi-item dataField="KWMENG" [disabled]="false"><dxo-label text="주문수량"></dxo-label></dxi-item>
+          <dxi-item dataField="AUART" [disabled]="false"><dxo-label text="주문구분"></dxo-label></dxi-item>
+          <dxi-item dataField="VKAUS" [disabled]="false"><dxo-label text="용도구분"></dxo-label></dxi-item>
+          <dxi-item dataField="ZUNLOAD" [disabled]="false"><dxo-label text="하차방법"></dxo-label></dxi-item>
+          <dxi-item dataField="INCO1" [disabled]="false"><dxo-label text="운송방법"></dxo-label></dxi-item>
+          <dxi-item dataField="TEXT" [colSpan]="2" [editorOptions]="{height:60}" [disabled]="false"><dxo-label text="특기사항"></dxo-label></dxi-item>
+          <dxi-item dataField="REVQTY" [disabled]="true"><dxo-label text="예약물량"></dxo-label></dxi-item>
+          <dxi-item dataField="GIQTY" [disabled]="true"><dxo-label text="출고물량"></dxo-label></dxi-item>
+          <dxi-item dataField="TDLNR" [disabled]="true"><dxo-label text="운송사"></dxo-label></dxi-item>
+          <dxi-item dataField="LGORT" [disabled]="true"><dxo-label text="출고사업장"></dxo-label></dxi-item>
+          <dxi-item dataField="TDLNR2" [disabled]="false"><dxo-label text="실제운송사"></dxo-label></dxi-item>
+          <dxi-item dataField="a" [disabled]="false"><dxo-label text="시행부서/문서번호"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group"
+                  caption="농협검수항목관리"
+                  [colCount]="3"
+                  [colSpan]="2">
+          <dxi-item dataField="ZNHMAME" [disabled]="true"><dxo-label text="농협명"></dxo-label></dxi-item>
+          <dxi-item dataField="MVGR3" [disabled]="true"><dxo-label text="사업방식"></dxo-label></dxi-item>  
+          <dxi-item dataField="a" [disabled]="true"><dxo-label text="거래구분"></dxo-label></dxi-item>
+          <dxi-item dataField="MAKTX_NH" [disabled]="true"><dxo-label text="농협제품"></dxo-label></dxi-item>
+          <dxi-item dataField="MVGR4" [disabled]="true"><dxo-label text="계통구분"></dxo-label></dxi-item>
+          <dxi-item dataField="a" [disabled]="true"><dxo-label text="단가구분"></dxo-label></dxi-item>
+          <dxi-item dataField="MVGR2" [disabled]="true"><dxo-label text="대분류"></dxo-label></dxi-item>
+          <dxi-item dataField="TAXK1" [disabled]="true"><dxo-label text="세무구분"></dxo-label></dxi-item>
+          <dxi-item dataField="INCO1" [disabled]="true"><dxo-label text="인수도구분"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="a" [disabled]="true"><dxo-label text="주문처 담보금액"></dxo-label></dxi-item>
+          <dxi-item dataField="a" [disabled]="true"><dxo-label text="주문처 미수채권"></dxo-label></dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+  </dx-scroll-view>
+</dx-popup>

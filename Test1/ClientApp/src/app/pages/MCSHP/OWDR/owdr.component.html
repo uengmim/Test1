@@ -1,30 +1,38 @@
 <!--
   유창 배분 등록
   -->
-<!--toolbar-->
-<dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
-  <dxi-item location="before" locateInMenu="auto">
-    <div *dxTemplate>
-      <div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>기간</b></div>
-      <div style="float:left">
-        <dx-date-box [(value)]="startDate" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
-      </div>
-      <div style="float:left; margin-left:10px; margin-right:10px;">
-        ~
-      </div>
-      <div style="float:left; margin-right:10px;">
-        <dx-date-box [(value)]="endDate" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
-      </div>
-    </div>
-  </dxi-item>
+<div style="margin:10px 10px 0px 10px">
 
-  <dxi-item location="before"
-            widget="dxButton"
-            locateInMenu="auto"
-            [height]="25"
-            [options]="searchButtonOptions">
-  </dxi-item>
-</dx-toolbar>
+  <!--toolbar-->
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <div style="float:left; ">
+          <dx-date-box [(value)]="startDate"
+                       label="시작일"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+
+        <div style="float: left; margin-left: 10px; margin-right: 10px;">
+          <dx-date-box [(value)]="endDate"
+                       label="종료일"
+                       labelMode="floating"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="searchButtonOptions">
+    </dxi-item>
+  </dx-toolbar>
 
 
   <dx-data-grid id="grid"
@@ -40,7 +48,7 @@
                 [columnAutoWidth]="true"
                 [remoteOperations]="false"
                 [rowAlternationEnabled]="true"
-                height="calc(100vh - 230px)">
+                height="calc(100vh - 155px)">
     <!--Datagrid Option-->
     <dxo-paging [enabled]="false"></dxo-paging>
     <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
@@ -54,6 +62,8 @@
     <dxo-header-filter [visible]="true"></dxo-header-filter>
     <!--Grouping Option-->
     <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
     <!--Data column-->
     <dxi-column dataField="dispcDate" caption="배차일자" dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
 
@@ -152,3 +162,4 @@
     </dx-scroll-view>
 
   </dx-popup>
+  </div>

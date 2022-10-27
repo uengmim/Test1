@@ -5,22 +5,32 @@ import { Component, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy } from
 import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
+import 'devextreme/data/odata/store';
 import { BrowserModule } from '@angular/platform-browser';
 import { formatDate } from '@angular/common';
 import { ZPMF0001Model } from '../../../shared/dataModel/MFMPO/ZPmF0001Proxy';
-import { ZPMF0002Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
+import { ZPMF0002Model, ZPMS0003Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
+import { ZPMF0003Model } from '../../../shared/dataModel/MFMPO/ZPmF0003Proxy';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { Service, Product } from './app.service';
-import { DxDataGridComponent,} from 'devextreme-angular';
+import { DxDataGridComponent, } from 'devextreme-angular';
+import ArrayStore from 'devextreme/data/array_store';
+import { AuthService } from '../../../shared/services';
+
+//필터
+const getOrderDay = function (rowData: any): number {
+  return (new Date(rowData.OrderDate)).getDay();
+};
+
 @Component({
   templateUrl: './wost.component.html',
   styleUrls: ['./wost.component.scss'],
   providers: [ImateDataService, Service],
-//  changeDetection: ChangeDetectionStrategy.OnPush
+  //  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class WOSTComponent {
@@ -56,10 +66,10 @@ export class WOSTComponent {
   dateClear = new Date(2015, 11, 1, 6);
 
   collapsed = false;
-
-  _dataService: ImateDataService;
+  selectedMaterKey: number = -1;
   rowCount: number;
 
+  _dataService: ImateDataService;
   //상세팝업 오픈
   popupVisible = false;
   //줄 선택
@@ -67,11 +77,19 @@ export class WOSTComponent {
   selectedItemKeys: any[] = [];
   formData: any = {};
   popupMode = 'Add';
+  customOperations: Array<any>;
 
   //_dataService: ImateDataService;
+  /**
+ * 생성자
+ * @param appConfig 앱 수정 정보
+ * @param nbpAgetService nbpAgent Service
+ * @param authService 사용자 인증 서버스
+ */
 
-  constructor(private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, imInfo: ImateInfo) {
+  constructor(private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 진행현황";
+
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
@@ -79,8 +97,17 @@ export class WOSTComponent {
     this.orderData = service.getOrderData();
     const that = this;
     let test = this;
-
-  
+    this.rowCount = 0;
+    this.customOperations = [{
+      name: 'weekends',
+      caption: 'Weekends',
+      dataTypes: ['date'],
+      icon: 'check',
+      hasValue: false,
+      calculateFilterExpression() {
+        return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
+      },
+    }];
     this._dataService = dataService;
     this.rowCount = 0;
     this.orderData = new CustomStore(
@@ -91,39 +118,6 @@ export class WOSTComponent {
         }
       });
 
-    this.orderInfo = service.getOrderInfo();
-
-    this.MaterialList = new CustomStore(
-      {
-        key: ["AUFNR", "RSNUM", "WERKS", "LGORT", "MATNR"],
-        load: function (loadOptions) {
-          return service.getMaterialList();
-        }
-      });
-
-    this.FaultInfo = new CustomStore(
-      {
-        key: ["AUFNR", "QMNUM", "FENUM", "URNUM", "FEKAT", "FECOD", "FEVER", "OTKAT", "OTGRP", "OTEIL", "FEGRP"],
-        load: function (loadOptions) {
-          return service.getFaultInfo();
-        }
-      });
-
-    this.ItemPrice = new CustomStore(
-      {
-        key: ["AUFNR", "PAYITEM"],
-        load: function (loadOptions) {
-          return service.getItemPrice();
-        }
-      });
-
-    this.TroubleshootingList = new CustomStore(
-      {
-        key: ["QMNUM", "MANUM"],
-        load: function (loadOptions) {
-          return service.getTroubleshootingList();
-        }
-      });
 
     //엑셀버튼
     this.exportSelectedData = {
@@ -155,6 +149,8 @@ export class WOSTComponent {
         that.popupVisible = false;
       },
     };
+
+
   }
 
   contentReady = (e: any) => {
@@ -164,10 +160,41 @@ export class WOSTComponent {
     }
   };
 
-  addRow(e: any): void {
+  dblClick: any = async (e: any) => {
+    //this.showPopup('Add', {}); //change undefined to {}
+    //this.dataGrid.instance.saveEditData();
+
+    var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].AUFNR);
+    //if (resultModel[0].E_TYPE !== "S") {
+    //  alert(`상세 자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`);
+    //}
+
+    this.orderInfo = resultModel[0].ITAB_DATA2[0]
+    this.MaterialList = new ArrayStore(
+      {
+        key: ["AUFNR", "RSNUM", "WERKS", "LGORT", "MATNR"],
+        data: resultModel[0].ITAB_DATA3
+      });
+    this.FaultInfo = new ArrayStore(
+      {
+        key: ["AUFNR", "QMNUM", "FENUM", "URNUM", "FEKAT", "FECOD", "FEVER", "OTKAT", "OTGRP", "OTEIL", "FEGRP"],
+        data: resultModel[0].ITAB_DATA4
+        
+      });
+    this.ItemPrice = new ArrayStore(
+      {
+        key: ["AUFNR", "PAYITEM"],
+        data: resultModel[0].ITAB_DATA5
+      });
+    this.TroubleshootingList = new ArrayStore(
+      {
+        key: ["QMNUM", "MANUM"],
+        data: resultModel[0].ITAB_DATA6
+      });
     this.showPopup('Add', {}); //change undefined to {}
-    this.dataGrid.instance.saveEditData();
   }
+
+
   showPopup(popupMode: any, data: any): void {
     this.formData = {};
     console.log(data);
@@ -193,18 +220,32 @@ export class WOSTComponent {
   selectionChanged(data: any) {
     this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
     this.selectedItemKeys = data.currentSelectedRowKeys;
+
   }
   AddRecords() {
     this.selectedItemKeys.forEach((key: any) => {
       this.orderData.addRow();
     });
-    this.dataGrid.instance.refresh();
+    this.dataGrid.instance.saveEditData();
   }
+  ReqRecords: any = async () => {
+    var resultModel = await this.datainsert();
+    if (resultModel.E_TYPE !== "S") {
+      alert(`자재요청을 하지 못했습니다.\n\nSAP 메시지: ${resultModel.E_MSG}`);
+      return;
+    }
+    this.orderInfo = resultModel.ITAB_DATA1[0]
+
+    alert(`자재요청 하였습니다.`);
+
+  }
+
+  //데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
     var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
     var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
 
-    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate,  "", "", "","", "", []);
+    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", "", "", []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
@@ -214,8 +255,36 @@ export class WOSTComponent {
     }
     return resultModel[0].ITAB_DATA;
   }
+
+  // 상세 데이터 로드
+  public async detaildataLoad(parent: WOSTComponent, aufnr: string) {
+    var zpf0002Model = new ZPMF0002Model("", "", aufnr, []);
+    var modelList: ZPMF0002Model[] = [zpf0002Model];
+    //Test
+    return await parent.dataService.RefcCallUsingModel<ZPMF0002Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZPMF0002ModelList", modelList, QueryCacheType.None);
+  }
+
+
+  // 상세 데이터 삽입
+  public async datainsert() {
+    var zpf0003Model = new ZPMF0003Model("", "", this.orderInfo.AUFNR, []);
+    zpf0003Model.ITAB_DATA1.push(new ZPMS0003Model(this.orderInfo.AUFNR, this.orderInfo.KURZTEXT, this.orderInfo.ARBEI, this.orderInfo.MEINH, this.orderInfo.ANZZL));
+    var modelList: ZPMF0003Model[] = [zpf0003Model];
+
+    var insertModel = await this.dataService.RefcCallUsingModel<ZPMF0003Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZPMF0003ModelList", modelList, QueryCacheType.None);
+    
+    return insertModel[0];
+  }
+
+
+
+
   //Data refresh 날짜 새로고침 이벤트
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
   }
+}
+
+function aufnr(imInfo: ImateInfo, dataService: ImateDataService, aufnr: any): PromiseLike<any> {
+    throw new Error('Function not implemented.');
 }

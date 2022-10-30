@@ -3,9 +3,13 @@ import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { ZXNSCRFCDataModel } from '../../../shared/dataModel/ZxnscRfcData';
-import { QueryCacheType } from '../../../shared/imate/imateCommon';
+import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import ArrayStore from 'devextreme/data/array_store';
+import { AppConfigService } from '../../../shared/services/appconfig.service';
+import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
+import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
+import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { formatDate } from '@angular/common';
 import { Service, RequestProcess } from './app.service';
 import {
@@ -13,6 +17,7 @@ import {
   DxButtonModule
 } from 'devextreme-angular';
 import notify from 'devextreme/ui/notify';
+import { ZSDS5000Model } from '../../../shared/dataModel/MFSAP/ZSDEpSoListProxy';
 
 /*고객주문등록(S/O)-포장재 Component*/
 
@@ -27,6 +32,26 @@ const getOrderDay = function (rowData: any): number {
 
 export class FORDComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
+  @ViewChild('sd007Entery', { static: false }) sd007Entery!: CommonPossibleEntryComponent;
+  @ViewChild('maEntery', { static: false }) maEntery!: TablePossibleEntryComponent;
+  @ViewChild('maktEntery', { static: false }) maktEntery!: TablePossibleEntryComponent;
+
+
+  //주문구분 
+  sd007Code: CommonCodeInfo;
+
+  //주문구분 필터 : 처음에 필터는 자료가 아무것도 안나오게 한다.
+  //sd007Filter: any = ["ZCM_CODE2", "=", "#"];
+
+  //제품구분 정보
+
+  maCode: TableCodeInfo;
+  //제품구분 필터 : 처음에 필터는 자료가 아무것도 안나오게 한다.
+  //maFilter: any = ["MTART", "=", "#"];
+
+  //주문명 정보
+  maktCode: TableCodeInfo;
+
 
   //delete
   selectedItemKeys: any[] = [];
@@ -35,7 +60,7 @@ export class FORDComponent {
   //거래처
   clients: string[];
   //정보
-  requestprocess: RequestProcess[];
+  orderData: any;
 
   //날짜 조회
   startDate: any;
@@ -57,6 +82,8 @@ export class FORDComponent {
   colCount: number;
 
   width: any;
+
+  formData: any = {};
   //date box
   now: any = new Date();
   value: Date = new Date(1981, 3, 27);
@@ -81,27 +108,31 @@ export class FORDComponent {
   //줄 선택
   selectedRowIndex = -1;
 
+  //
+
   //필터
   saleAmountHeaderFilter: any;
   customOperations: Array<any>;
 
+  editFlag = false;
+  saveVisible = false;
   popupVisible = false;
   //_dataService: ImateDataService;
-  simpleProducts: string[];
-  simpleProducts2: string[];
-  simpleProducts3: string[];
-  simpleProducts4: string[];
-  simpleProducts5: string[];
-  simpleProducts6: string[];
-
   capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
-  click = (e:any) => {
+  click = (e: any) => {
     const buttonText = e.component.option('text');
     notify(`The ${this.capitalize(buttonText)} button was clicked`);
   };
-  constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 고객주문등록(S/O) - 포장재";
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo) {
+
+
+    appInfo.title = AppInfoService.APP_TITLE + " | 고객주문처리(액상)";
+
+
+    this.sd007Code = appConfig.commonCode("주문구분");
+    this.maCode = appConfig.tableCode("제품구분");
+    this.maktCode = appConfig.tableCode("제품명");
     //form
     this.labelMode = 'floating';
     this.labelLocation = 'left';
@@ -109,33 +140,34 @@ export class FORDComponent {
     this.showColon = true;
     this.minColWidth = 300;
     this.colCount = 2;
-    //거래처
-    this.clients = service.getclient();
-    const that = this;
-    //정보
-    this.requestprocess = service.getRequestProcess();
-    this.simpleProducts = service.getSimpleProducts();
-    this.simpleProducts2 = service.getSimpleProducts2();
-    this.simpleProducts3 = service.getSimpleProducts3();
-    this.simpleProducts4 = service.getSimpleProducts4();
-    this.simpleProducts5 = service.getSimpleProducts5();
-    this.simpleProducts6 = service.getSimpleProducts6();
-    //this._dataService = dataService;
-    let modelTest01 = this;
-    this.dataSource = new ArrayStore({
-      key: 'orderNum',
-      data: service.getRequestProcess(),
-    });
-    this.closeButtonOptions = {
-      text: 'Close',
-      onClick(e: any) {
-        that.popupVisible = false;
-      },
-    };
+    let page = this;
+
+
+
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
+
+    //거래처
+    this.clients = service.getclient();
+    const that = this;
+    //정보
+
+    let modelTest01 = this;
+
+    this.dataSource = new ArrayStore({
+      key: 'VBELN',
+      data: service.getRequestProcess(),
+    });
+
+    this.orderData = new CustomStore(
+      {
+        key: ["VBELN"],
+        load: function (loadOptions) {
+          return page.dataLoad(imInfo, dataService);
+        }
+      });
 
 
     //필터
@@ -188,17 +220,13 @@ export class FORDComponent {
     {
       icon: 'add',
       onClick: async () => {
-        this.dataGrid.instance.addRow();
+        this.editFlag = false;
+        this.saveVisible = true;
+        this.popupVisible = !this.popupVisible;
+        //this.dataGrid.instance.addRow();
       },
     };
-    //취소버튼
-    this.cancelEditButtonOptions =
-    {
-      icon: 'undo',
-      onClick: async () => {
-        this.dataGrid.instance.cancelEditData( )
-      },
-    };
+
     //삭제버튼
     this.deleteButtonOptions = {
       icon: 'trash',
@@ -208,7 +236,7 @@ export class FORDComponent {
       },
     };
     //저장버튼
-    
+
     this.saveButtonOptions = {
       icon: 'save',
       onClick: () => {
@@ -217,16 +245,6 @@ export class FORDComponent {
     };
   }
 
-  public async dataLoad(dataService: ImateDataService) {
-
-    var sdate = formatDate(this.startDate, "yyyyMMDD", "en-US")
-    var edate = formatDate(this.endDate, "yyyyMMDD", "en-US")
-
-    var resultModel = await dataService.SelectModelData<ZXNSCRFCDataModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCRFCDataModelList", [],
-      `PARAM14 >= '${sdate}' AND PARAM14 <= '${edate}'`, "PARAM14 DESC", QueryCacheType.None);
-
-    return resultModel;
-  }
 
   //Data refresh 날짜 새로고침 이벤트
   public refreshDataGrid(e: Object) {
@@ -242,20 +260,6 @@ export class FORDComponent {
     this.selectedItemKeys = data.selectedRowKeys;
   }
 
-  deleteRecords() {
-    this.selectedItemKeys.forEach((key:any) => {
-      this.dataSource.remove(key);
-    });
-    this.dataGrid.instance.refresh();
-  }
-  onToolbarPreparing(e:any) {
-    e.toolbarOptions.items[0].showText = 'always';
-
-    e.toolbarOptions.items.push({
-      location: 'after',
-      template: 'deleteButton',
-    });
-  }
 
   getCompanySelectorLabelMode() {
     return this.labelMode === 'outside'
@@ -271,7 +275,28 @@ export class FORDComponent {
     }
   };
   orderDBClick(e: any) {
+
+    //from 수정가능여부
+    this.editFlag = true;
+    //저장버튼 여부
+    this.saveVisible = false;
     this.popupVisible = !this.popupVisible;
   }
+
+  //고객주문리스트 조회 RFC
+  public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
+
+    var zps5000Model = new ZSDS5000Model("", this.startDate, this.endDate, this.sd007Entery.selectedValue ? this.sd007Entery.selectedValue : "", this.maEntery.selectedValue ? this.maEntery.selectedValue : "", this.maktEntery.selectedValue ? this.maktEntery.selectedValue : "");
+    var modelList: ZSDS5000Model[] = [zps5000Model];
+
+    var resultModel = await dataService.RefcCallUsingModel<ZSDS5000Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZSDEPSOListModelList", modelList, QueryCacheType.None);
+    console.log(resultModel);
+    console.log(JSON.stringify(resultModel));
+
+    console.table(resultModel);
+    return resultModel[0]['E_RETRUN'];
+
+  }
+
 
 }

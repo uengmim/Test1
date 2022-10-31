@@ -1,23 +1,42 @@
 <h2 class="content-block">Tasks</h2>
 
-<nh-possible-comm [codeInfo]="pp001Code"
-                  valueColumn ="ZCM_CODE2"
-                  valueDisplayFormat="%ZCMF03_CH%(%ZCM_CODE2%)"
-                  [width]="200"
-                  [gridBoxWidth]="500"
-                  (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-comm>
-<nh-possible-comm [codeInfo]="cm001Code"
-                  valueColumn="ZCM_CODE1"
-                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE1%)"
-                  [width]="200"
-                  [gridBoxWidth]="500"
-                  (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-comm>
-<nh-possible-table [codeInfo]="maraCode"
-                  valueColumn="MATNR"
-                  valueDisplayFormat="%MAKTX%(%MATNR%)"
-                  [width]="500"
-                  [gridBoxWidth]="800"
-                  (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+<div>
+  <nh-possible-comm #cm001Entery
+                    [codeInfo]="cm001Code"
+                    valueColumn="ZCM_CODE1"
+                    valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE1%)"
+                    placeholderText="결재코드"
+                    [width]="200"
+                    [gridBoxWidth]="500"
+                    class="weight-test"
+                    (onEntryValueChanged)="onCm001ValueChanged($event)"></nh-possible-comm>
+  <nh-possible-comm #dynamicEntery
+                    [width]="200"
+                    [gridBoxWidth]="500"
+                    class="weight-test"
+                    (onEntryValueChanged)="onDynamicValueChanged($event)"></nh-possible-comm>
+  <nh-possible-comm #sd007Entery
+                    [codeInfo]="sd007Code"
+                    valueColumn="ZCM_CODE3"
+                    valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                    placeholderText="주문유형"
+                    [width]="200"
+                    [gridBoxWidth]="500"
+                    [filerExpression]="sd007Filter"
+                    class="weight-test"
+                    (onEntryValueChanged)="onSd004ValueChanged($event)"></nh-possible-comm>
+  <nh-possible-table #maraEntery
+                     [codeInfo]="maraCode"
+                     valueColumn="MATNR"
+                     valueDisplayFormat="%MAKTX%(%MATNR%)"
+                     placeholderText="아이템코드"
+                     width="100%"
+                     [gridBoxWidth]="800"
+                     [filerExpression]="maraFilter"
+                     class="weight-test"
+                     (onEntryValueChanged)="onMaraValueChanged($event)"></nh-possible-table>
+  <div style="clear:both"></div>
+</div>
 <div>
   <dx-number-box [value]="weight" width="120px" class="weight-test"></dx-number-box>
   <dx-button stylingMode="contained"

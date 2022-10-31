@@ -3,40 +3,41 @@
 
 <dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before">
-    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>주문처</b> </div>
+    <!--<div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>주문처</b> </div>-->
     <div style="float: left; margin-left: 10px;">
-      <dx-select-box [items]="states"></dx-select-box>
+      <dx-select-box [items]="states" label="주문처" [width]="150"></dx-select-box>
     </div>
   </dxi-item>
   
   <dxi-item location="before" style="margin-left:20px">
     <div *dxTemplate>
-      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>주문기간</b> </div>
+      <!--<div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>주문기간</b> </div>-->
       <div style="float: left; margin-left: 10px;">
-        <dx-date-box [(value)]="startDate" type="date" [width]="150" displayFormat="yyyy-MM-dd" pickerType="calendar"></dx-date-box>
+        <dx-date-box [(value)]="startDate" type="date" [width]="150" displayFormat="yyyy-MM-dd" pickerType="calendar" label="주문기간(From)">
+        </dx-date-box>
       </div>
       <div style="float:left;margin-left:10px;">
         ~
       </div>
       <div style="float: left; margin-left: 10px;">
-        <dx-date-box [(value)]="endDate" type="date" [width]="150" displayFormat="yyyy-MM-dd" pickerType="calendar"></dx-date-box>
+        <dx-date-box [(value)]="endDate" type="date" [width]="150" displayFormat="yyyy-MM-dd" pickerType="calendar" label="주문기간(To)"></dx-date-box>
       </div>
     </div>
   </dxi-item>
-  <dxi-item location="before" style="margin-left:20px">
-    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>제품명</b> </div>
+  <dxi-item location="before" style="margin-left:20px" locateInMenu="auto">
+    <!--<div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>제품명</b> </div>-->
     <div style="float: left; margin-left: 10px;">
-      <dx-select-box ></dx-select-box>
+      <dx-select-box label="제품명" [width]="150"></dx-select-box>
     </div>
   </dxi-item>
-  <dxi-item location="before" style="margin-left:20px">
-    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>배송처</b> </div>
+  <dxi-item location="before" style="margin-left:20px" locateInMenu="auto">
+    <!--<div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>배송처</b> </div>-->
     <div style="float: left; margin-left: 10px;">
-      <dx-select-box ></dx-select-box>
+      <dx-select-box label="배송처" [width]="150"></dx-select-box>
     </div>
   </dxi-item>
 
-  <dxi-item location="after" >
+  <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button icon="save" (onClick)="saveDataGrid($event)">
         <dx-box direction="row" width="100%" [height]="15">
@@ -46,7 +47,7 @@
       </dx-button>
     </div>
   </dxi-item>
-  <dxi-item location="after">
+  <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button icon="save" (onClick)="saveDataGrid($event)">
         <dx-box direction="row" width="100%" [height]="15">
@@ -56,7 +57,7 @@
       </dx-button>
     </div>
   </dxi-item>
-  <dxi-item location="after">
+  <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button icon="save" (onClick)="saveDataGrid($event)">
       </dx-button>

@@ -118,10 +118,10 @@
               (onRowDblClick)="orderDBClick($event)"
               [allowColumnReordering]="true"
               columnResizingMode="widget">
-  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
-  <dxo-paging [pageSize]="100"></dxo-paging>
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+
   <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
-  <dxo-paging [pageSize]="10"></dxo-paging>
+
 
 
   <!--Data column-->
@@ -132,7 +132,7 @@
   <dxi-column dataField="ZEXIDNAME"
               caption="주문처">
   </dxi-column>
-  <dxi-column dataField="ZZPACK_N"
+  <dxi-column dataField="MAKTX"
               caption="제품명">
   </dxi-column>
   <dxi-column dataField="ZZPACK_N"
@@ -157,14 +157,8 @@
               dataType="number">
     <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
   </dxi-column>
-  <dxi-column dataField="vehicle"
-              caption="배차량">
-  </dxi-column>
   <dxi-column dataField="GIQTY"
               caption="출고량">
-  </dxi-column>
-  <dxi-column dataField="numofVehicle"
-              caption="차량댓수">
   </dxi-column>
   <dxi-column dataField="VDATU"
               caption="납기일자"
@@ -200,7 +194,7 @@
 
 </dx-data-grid>
 
-<dx-popup title="주문등록/수정"
+<dx-popup [title]="popupTitle"
           [showTitle]="true"
           width="80%"
           height="80%"
@@ -216,9 +210,9 @@
   </dxi-toolbar-item>
   <dx-scroll-view width="100%" height="100%">
     <div id="form-container">
-      <dx-form id="orderData" [formData]="orderData" [disabled] = "editFlag">
+      <dx-form id="popupForm" [formData]="popupData" [disabled] = "editFlag" >
         <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
-          <dxi-item dataField="VBELNSO" [disabled]="true"><dxo-label text="주문번호"></dxo-label></dxi-item>
+          <dxi-item dataField="VBELN" [disabled]="true"><dxo-label text="주문번호"></dxo-label></dxi-item>
           <dxi-item dataField="ZEXIDNAME" [disabled]="true"><dxo-label text="주문처(산하)"></dxo-label></dxi-item>
           <dxi-item dataField="a" [disabled]="true"><dxo-label text="담보금액"></dxo-label></dxi-item>
           <dxi-item dataField="a" [disabled]="true"><dxo-label text="요청번호"></dxo-label></dxi-item>
@@ -226,22 +220,166 @@
         </dxi-item>
 
         <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
-          <dxi-item dataField="VDATU" [disabled]="false"><dxo-label text="납기일자"></dxo-label></dxi-item>
-          <dxi-item dataField="KUNWE" [disabled]="false"><dxo-label text="도착지"></dxo-label></dxi-item>
+          <dxi-item dataField="VDATU" [disabled]="false" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="납기일자"></dxo-label></dxi-item>
+          <dxi-item dataField="KUNWE" [disabled]="false" [visible]="saveVisible">
+            <dxo-label text="도착지"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-table [codeInfo]="kunnCode" #kunnEntery
+                                 valueColumn="KUNNR"
+                                 valueDisplayFormat="%NAME1%"
+                                 width="auto"
+                                 valueExpr="KUNWE"
+                                 [gridBoxWidth]="500"
+                                 (onEntryValueChanged)="onKunweCodeValueChanged($event)"></nh-possible-table>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="KUNWE_N" [disabled]="false" [visible]="!saveVisible">
+            <dxo-label text="도착지"></dxo-label>
+          </dxi-item>
           <dxi-item dataField="ZEXIDNAME" [disabled]="true"><dxo-label text="주문처"></dxo-label></dxi-item>
-          <dxi-item dataField="MAKTX" [disabled]="false"><dxo-label text="제품명"></dxo-label></dxi-item>
-          <dxi-item dataField="KWMENG" [disabled]="false"><dxo-label text="주문수량"></dxo-label></dxi-item>
-          <dxi-item dataField="AUART" [disabled]="false"><dxo-label text="주문구분"></dxo-label></dxi-item>
-          <dxi-item dataField="VKAUS" [disabled]="false"><dxo-label text="용도구분"></dxo-label></dxi-item>
-          <dxi-item dataField="ZUNLOAD" [disabled]="false"><dxo-label text="하차방법"></dxo-label></dxi-item>
+          <dxi-item dataField="MATNR" [disabled]="false" [visible]="saveVisible">
+            <dxo-label text="제품명"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-table #maktEntery
+                                 [codeInfo]="maktCode"
+                                 valueColumn="MATNR"
+                                 valueDisplayFormat="%MAKTX%"
+                                 placeholderText="제품명"
+                                 width="270"
+                                 [gridBoxWidth]="500"
+                                 class="weight-test"></nh-possible-table>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="MAKTX" [disabled]="false" [visible]="!saveVisible">
+            <dxo-label text="제품명"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="KWMENG" [disabled]="false" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="주문수량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="AUART" [disabled]="false" [visible]="saveVisible">
+            <dxo-label text="주문구분"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #sd007Entery
+                                [codeInfo]="sd007Code"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%"
+                                placeholderText="주문구분"
+                                [width]="200"
+                                [gridBoxWidth]="500"
+                                class="weight-test"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="AUART_N" [disabled]="false" [visible]="!saveVisible">
+            <dxo-label text="주문구분"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="VKAUS" [disabled]="false" [visible]="saveVisible">
+            <dxo-label text="용도구분"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-table #tvlvEntery
+                                 [codeInfo]="tvlvCode"
+                                 valueColumn="ABRVW"
+                                 valueDisplayFormat="%BEZEI%"
+                                 placeholderText="용도구분"
+                                 [width]="200"
+                                 [gridBoxWidth]="500"
+                                 class="weight-test"></nh-possible-table>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="VKAUS_N" [disabled]="false" [visible]="!saveVisible">
+            <dxo-label text="용도구분"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZUNLOAD" [disabled]="false" [visible]="saveVisible">
+            <dxo-label text="하차방법"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-table #dd07tEntery
+                                 [codeInfo]="dd07tCode"
+                                 valueColumn="DOMVALUE_L"
+                                 valueDisplayFormat="%DDTEXT%"
+                                 placeholderText="하차방법"
+                                 [width]="200"
+                                 [gridBoxWidth]="500"
+                                 class="weight-test"></nh-possible-table>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="ZUNLOAD" [disabled]="false" [visible]="!saveVisible">
+            <dxo-label text="하차방법"></dxo-label>
+          </dxi-item>
           <dxi-item dataField="INCO1" [disabled]="false"><dxo-label text="운송방법"></dxo-label></dxi-item>
           <dxi-item dataField="TEXT" [colSpan]="2" [editorOptions]="{height:60}" [disabled]="false"><dxo-label text="특기사항"></dxo-label></dxi-item>
+          <dxi-item dataField="LGORT" [disabled]="true">
+            <dxo-label text="출고사업장"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #t001Entery
+                                [codeInfo]="t001Code"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%"
+                                placeholderText="출고사업장"
+                                [width]="200"
+                                [gridBoxWidth]="500"
+                                class="weight-test"></nh-possible-comm>
+            </div>
+          </dxi-item>
           <dxi-item dataField="REVQTY" [disabled]="true"><dxo-label text="예약물량"></dxo-label></dxi-item>
           <dxi-item dataField="GIQTY" [disabled]="true"><dxo-label text="출고물량"></dxo-label></dxi-item>
-          <dxi-item dataField="TDLNR" [disabled]="true"><dxo-label text="운송사"></dxo-label></dxi-item>
-          <dxi-item dataField="LGORT" [disabled]="true"><dxo-label text="출고사업장"></dxo-label></dxi-item>
-          <dxi-item dataField="TDLNR2" [disabled]="false"><dxo-label text="실제운송사"></dxo-label></dxi-item>
           <dxi-item dataField="a" [disabled]="false"><dxo-label text="시행부서/문서번호"></dxo-label></dxi-item>
+          <dxi-item dataField="TDLNR" [disabled]="true">
+            <dxo-label text="운송사"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #tdlnr1Entery
+                                [codeInfo]="tdlnr1Code"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                placeholderText="운송사"
+                                width="auto"
+                                [gridBoxWidth]="500"
+                                class="weight-test"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="TDLNR2" [disabled]="false">
+            <dxo-label text="실제운송사"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #tdlnr2Entery
+                                [codeInfo]="tdlnr2Code"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                placeholderText="운송사"
+                                width="auto"
+                                [gridBoxWidth]="500"
+                                class="weight-test"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="ZCARTYPE" [disabled]="false">
+            <dxo-label text="화물차종"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-table #dd07tCarEntery
+                                 [codeInfo]="dd07tCarCode"
+                                 valueColumn="DOMVALUE_L"
+                                 valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                 placeholderText="화물차종"
+                                 [width]="200"
+                                 [gridBoxWidth]="500"
+                                 class="weight-test"></nh-possible-table>
+             </div>
+          </dxi-item>
+          <dxi-item dataField="ZCARNO" [disabled]="false"><dxo-label text="차량번호"></dxo-label></dxi-item>
+          <dxi-item dataField="ZDRIVER" [disabled]="false"><dxo-label text="운전기사명"></dxo-label></dxi-item>
+          <dxi-item dataField="ZPHONE" [disabled]="false"><dxo-label text="전화번호"></dxo-label></dxi-item>
+          <dxi-item dataField="VSBED" [disabled]="true" [visible]="saveVisible">
+            <dxo-label text="출하조건"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #sd007Entery
+                                [codeInfo]="sd007Code"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                placeholderText="출하조건"
+                                [width]="200"
+                                [gridBoxWidth]="500"
+                                class="weight-test"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="VSBED" [disabled]="false" [visible]="!saveVisible">
+            <dxo-label text="출하조건"></dxo-label>
+          </dxi-item>
         </dxi-item>
 
         <dxi-item itemType="group"

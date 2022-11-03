@@ -5,7 +5,7 @@ import { Injectable } from '@angular/core';
 
 export class RequestProcess {
   //주문번호
-  orderNum?: number;
+  VBELN?: number;
   //주문처
   orderPlace?: string;
   //제품명
@@ -45,14 +45,14 @@ export class RequestProcess {
   //제품구분
   productClass?: string;
   //비고
-  note?: string;
+  TEXT?: string;
 
 }
 
 
 const requestprocess: RequestProcess[] = [{
 
-  orderNum: 13123123,
+  VBELN: 13123123,
 
   orderPlace: '남해화학',
   
@@ -92,11 +92,11 @@ const requestprocess: RequestProcess[] = [{
 
   productClass: '채소',
 
-  note: ''
+  TEXT: ''
 
 },
   {
-    orderNum: 4123277,
+    VBELN: 4123277,
 
     orderPlace: '스타벅스',
 
@@ -136,10 +136,10 @@ const requestprocess: RequestProcess[] = [{
 
     productClass: '채소',
 
-    note: ''
+    TEXT: ''
   },
   {
-    orderNum: 87162312,
+    VBELN: 87162312,
 
     orderPlace: 'LG',
 
@@ -179,7 +179,7 @@ const requestprocess: RequestProcess[] = [{
 
     productClass: '가전제품',
 
-    note: ''
+    TEXT: ''
   },
 ]
 const clients: string[] = [
@@ -187,7 +187,7 @@ const clients: string[] = [
   '생산관리담당',
   '운송관리담당'
 
-  ];
+];
 
 //도착지
 const simpleProducts: string[] = [
@@ -224,6 +224,14 @@ const simpleProducts5: string[] = [
 const simpleProducts6: string[] = [
   '운송',
 ];
+
+
+export class ProductDiv {
+  //주문구분코드
+  productDivCode?: string;
+  //주문구분명
+  productDicName?: string;
+}
 
 
 @Injectable()

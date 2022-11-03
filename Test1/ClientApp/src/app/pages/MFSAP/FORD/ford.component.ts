@@ -14,12 +14,18 @@ import { formatDate } from '@angular/common';
 import { Service, RequestProcess } from './app.service';
 import {
   DxDataGridComponent,
-  DxButtonModule
+  DxButtonModule,
+  DxFormComponent,
+  DxPopupComponent
 } from 'devextreme-angular';
 import notify from 'devextreme/ui/notify';
-import { ZSDS5000Model } from '../../../shared/dataModel/MFSAP/ZSDEpSoListProxy';
+import { ZSDEPSOListModel, ZSDS5000Model, ZSDS5001Model } from '../../../shared/dataModel/MFSAP/ZSDEpSoListProxy';
+import dxForm from 'devextreme/ui/form';
+import { AuthService } from '../../../shared/services';
+import { ZSDEPSOENTRYInfoModel, ZSDS3013Model, ZSDS3014Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoEntryInfoProxy';
+import { ZSDCREATESODoModel, ZSDS3100Model, ZSDS6001Model, ZSDS6002Model } from '../../../shared/dataModel/MFSAP/ZsdCreateSodoProxy';
 
-/*고객주문등록(S/O)-포장재 Component*/
+/*고객주문처리(S/O)-포장재 Component*/
 
 const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
@@ -32,31 +38,47 @@ const getOrderDay = function (rowData: any): number {
 
 export class FORDComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
+  @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
+  @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
   @ViewChild('sd007Entery', { static: false }) sd007Entery!: CommonPossibleEntryComponent;
   @ViewChild('maEntery', { static: false }) maEntery!: TablePossibleEntryComponent;
   @ViewChild('maktEntery', { static: false }) maktEntery!: TablePossibleEntryComponent;
+  @ViewChild('kunnEntery', { static: false }) kunnEntery!: TablePossibleEntryComponent;
+  @ViewChild('tvlvEntery', { static: false }) tvlvEntery!: TablePossibleEntryComponent;
+  @ViewChild('dd07tEntery', { static: false }) dd07tEntery!: TablePossibleEntryComponent;
+  @ViewChild('dd07tCarEntery', { static: false }) dd07tCarEntery!: TablePossibleEntryComponent;
+  @ViewChild('tdlnr1Entery', { static: false }) tdlnr1Entery!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnr2Entery', { static: false }) tdlnr2Entery!: CommonPossibleEntryComponent;
+  @ViewChild('t001Entery', { static: false }) t001Entery!: CommonPossibleEntryComponent;
 
+
+  /* Entry  선언 */
 
   //주문구분 
   sd007Code: CommonCodeInfo;
-
-  //주문구분 필터 : 처음에 필터는 자료가 아무것도 안나오게 한다.
-  //sd007Filter: any = ["ZCM_CODE2", "=", "#"];
-
   //제품구분 정보
-
   maCode: TableCodeInfo;
-  //제품구분 필터 : 처음에 필터는 자료가 아무것도 안나오게 한다.
-  //maFilter: any = ["MTART", "=", "#"];
-
   //주문명 정보
   maktCode: TableCodeInfo;
+  //도착지 정보
+  kunnCode: TableCodeInfo;
+  //용도 정보
+  tvlvCode: TableCodeInfo;
+  //하차 방법
+  dd07tCode: TableCodeInfo;
+  //화물차종
+  dd07tCarCode: TableCodeInfo;
+  //운송사
+  tdlnr1Code: CommonCodeInfo;
+  //2차운송사
+  tdlnr2Code: CommonCodeInfo;
+  //출고사업장
+  t001Code: CommonCodeInfo;
 
 
   //delete
   selectedItemKeys: any[] = [];
 
-  dataSource: ArrayStore;
   //거래처
   clients: string[];
   //정보
@@ -83,7 +105,14 @@ export class FORDComponent {
 
   width: any;
 
-  formData: any = {};
+  popupData: any;
+
+  popupTitle: string;
+
+  addData: any;
+
+
+
   //date box
   now: any = new Date();
   value: Date = new Date(1981, 3, 27);
@@ -107,6 +136,7 @@ export class FORDComponent {
   collapsed: any;
   //줄 선택
   selectedRowIndex = -1;
+  ;
 
   //
 
@@ -124,15 +154,24 @@ export class FORDComponent {
     const buttonText = e.component.option('text');
     notify(`The ${this.capitalize(buttonText)} button was clicked`);
   };
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
 
 
-    appInfo.title = AppInfoService.APP_TITLE + " | 고객주문처리(액상)";
+    appInfo.title = AppInfoService.APP_TITLE + " | 고객주문처리(S/O)-포장재";
 
 
     this.sd007Code = appConfig.commonCode("주문구분");
     this.maCode = appConfig.tableCode("제품구분");
     this.maktCode = appConfig.tableCode("제품명");
+    this.kunnCode = appConfig.tableCode("납품처");
+    this.tvlvCode = appConfig.tableCode("용도구분");
+    this.dd07tCode = appConfig.tableCode("하차정보");
+    this.dd07tCarCode = appConfig.tableCode("화물차종");
+    this.tdlnr1Code = appConfig.commonCode("운송사");
+    this.tdlnr2Code = appConfig.commonCode("운송사");
+    this.t001Code = appConfig.commonCode("출고사업장");
+
+
     //form
     this.labelMode = 'floating';
     this.labelLocation = 'left';
@@ -141,8 +180,10 @@ export class FORDComponent {
     this.minColWidth = 300;
     this.colCount = 2;
     let page = this;
+    this.popupTitle = "";
 
-
+    let userInfo = authService.getUser().data;
+    console.log(userInfo);
 
     //date
     var now = new Date();
@@ -156,19 +197,16 @@ export class FORDComponent {
 
     let modelTest01 = this;
 
-    this.dataSource = new ArrayStore({
-      key: 'VBELN',
-      data: service.getRequestProcess(),
-    });
 
     this.orderData = new CustomStore(
       {
-        key: ["VBELN"],
+        key: ["VBELN", "MATNR"],
         load: function (loadOptions) {
-          return page.dataLoad(imInfo, dataService);
+          return page.dataLoad();
         }
       });
 
+    console.log(this.orderData);
 
     //필터
     this.saleAmountHeaderFilter = [{
@@ -220,6 +258,9 @@ export class FORDComponent {
     {
       icon: 'add',
       onClick: async () => {
+        //this.dxForm.instance.option("formdata", {});
+        this.dxForm.instance.resetValues();
+        this.popupTitle = "주문등록/수정";
         this.editFlag = false;
         this.saveVisible = true;
         this.popupVisible = !this.popupVisible;
@@ -240,7 +281,9 @@ export class FORDComponent {
     this.saveButtonOptions = {
       icon: 'save',
       onClick: () => {
-        this.dataGrid.instance.saveEditData();
+        console.log(this.dxForm.instance.option('formData'));
+        //this.dataGrid.instance.saveEditData();
+        this.dataInsert(this);
       },
     };
   }
@@ -275,28 +318,70 @@ export class FORDComponent {
     }
   };
   orderDBClick(e: any) {
+    this.infoDataLoad();
 
-    //from 수정가능여부
+  }
+  form_fieldDataChanged(e: any) {
+    console.log(e.component.option("formData"));
+    this.popupData = e.component.option("formData");
+  }
+  onKunweCodeValueChanged(e: any) {
+    this.popupData.KUNWE = e.selectedValue;
+  }
+  //고객주문리스트 조회 RFC
+  public async dataLoad() {
+
+    var zps5000Model = new ZSDS5000Model("", this.startDate, this.endDate, this.sd007Entery.selectedValue ? this.sd007Entery.selectedValue : "", this.maEntery.selectedValue ? this.maEntery.selectedValue : "", this.maktEntery.selectedValue ? this.maktEntery.selectedValue : "");
+    var modelList: ZSDS5001Model[] = [];
+    var zpsModel = new ZSDEPSOListModel(zps5000Model, modelList);
+
+    var zps500List: ZSDEPSOListModel[] = [zpsModel];
+
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDEPSOListModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDEPSOListModelList", zps500List, QueryCacheType.None);
+
+    return resultModel[0].E_RETURN;
+
+  }
+
+  //고객주문 정보 조회 RFC
+  public async infoDataLoad() {
+    var selectData = this.dataGrid.instance.getSelectedRowsData();
+
+
+    var zsd3013Model = new ZSDS3013Model(selectData[0].KUNNR, selectData[0].KUNWE, "30", selectData[0].MATNR, selectData[0].AUART);
+    var zsd3014Model = new ZSDS3014Model(0, 0, 0, "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+
+
+    var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
+    var zsdList: ZSDEPSOENTRYInfoModel[] = [zsdModel];
+
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDEPSOENTRYInfoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDEPSOENTRYInfoModelList", zsdList, QueryCacheType.None);
+
+    var allData = Object.assign(selectData[0], resultModel[0].E_RETURN);
+    this.popupData = allData;
+    console.log(this.popupData);
+    this.popupTitle = "주문조회";
     this.editFlag = true;
     //저장버튼 여부
     this.saveVisible = false;
     this.popupVisible = !this.popupVisible;
   }
 
-  //고객주문리스트 조회 RFC
-  public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
+  //주문생성
+  public async dataInsert(thisObj : FORDComponent) {
+    var headModel = new ZSDS3100Model("", "1000", "10", "", "", "", this.startDate, this.endDate, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+    var itemModel = new ZSDS6001Model("10", "", 0, "", "", "", 0, 0, "", "");
+    var textModel = new ZSDS6002Model("");
+    //배열선언
+    var itemModel2 = [itemModel];
+    var textModel2 = [textModel];
+    var zsdModel = new ZSDCREATESODoModel("", "", "", "", "", "", headModel, itemModel2, textModel2);
+    var zsdList: ZSDCREATESODoModel[] = [zsdModel];
+    var resultModel = await thisObj.dataService.RefcCallUsingModel<ZSDCREATESODoModel[]>("DS4", "NBPDataModels", "NAMHE.Model.ZSDCREATESODoModelList", zsdList, QueryCacheType.None);
 
-    var zps5000Model = new ZSDS5000Model("", this.startDate, this.endDate, this.sd007Entery.selectedValue ? this.sd007Entery.selectedValue : "", this.maEntery.selectedValue ? this.maEntery.selectedValue : "", this.maktEntery.selectedValue ? this.maktEntery.selectedValue : "");
-    var modelList: ZSDS5000Model[] = [zps5000Model];
-
-    var resultModel = await dataService.RefcCallUsingModel<ZSDS5000Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZSDEPSOListModelList", modelList, QueryCacheType.None);
-    console.log(resultModel);
-    console.log(JSON.stringify(resultModel));
-
-    console.table(resultModel);
-    return resultModel[0]['E_RETRUN'];
-
+    return resultModel[0];
+    /*return resultModel[0].E_TYPESO;*/
+    // console.log(insertModel);
   }
-
 
 }

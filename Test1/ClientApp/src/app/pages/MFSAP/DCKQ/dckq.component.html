@@ -2,21 +2,23 @@
 <dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before">
     <div *dxTemplate>
-      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>체크기준</b> </div>
+      <!---<div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>체크기준</b> </div>-->
       <div style="float: left; margin-left: 10px;">
         <dx-date-box [showClearButton]="true"
                      [useMaskBehavior]="true"
                      [value]="now"
                      type="date"
-                     [width]="150">
+                     labelMode="floating"
+                     label="체크기준"
+                     [width]="140">
         </dx-date-box>
       </div>
     </div>
   </dxi-item>
   <dxi-item location="before">
-    <div class="toolbar-label" style="float:left; margin-top:5px; margin-left:10px;"><b>거래처</b> </div>
+    <!---<div class="toolbar-label" style="float:left; margin-top:5px; margin-left:10px;"><b>거래처</b> </div>-->
     <div style="float: left; margin-left: 10px; ">
-      <dx-select-box [items]="simpleProducts"></dx-select-box>
+      <dx-select-box [items]="simpleProducts" labelMode="floating" label="거래처"></dx-select-box>
     </div>
   </dxi-item>
   <dxi-item location="before"

@@ -2,215 +2,220 @@
 <dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>출하기간</b></div>
-      <div style="float:left">
-        <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
+      <!---<div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>출하기간</b></div>-->
+      <div style="float:left; margin-left: 10px;">
+        <dx-date-box [(value)]="startDate" type="date" [width]="130" displayFormat="yyyy-MM-dd" label="출하기간(From)"></dx-date-box>
       </div>
       <div style="float:left; margin:10px 5px 0px 5px">
-        ~
+        
       </div>
       <div style="float:left">
-        <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="endDate" type="date" [width]="130" displayFormat="yyyy-MM-dd" label="출하기간(To)"></dx-date-box>
       </div>
     </div>
-  </dxi-item>
+    </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="order"
-                   placeholder="주문처(산하)"
-                   style="width: auto;
-                   margin-left: 5px;
-                   margin-right: 5px;">
-    </dx-select-box>
-  </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+      <dx-select-box [items]="order"
+                     labelMode="floating"
+                     label="주문처(산하)"
+                     style="width: auto;
+                     margin-left: 5px;
+                     margin-right: 5px;">
+      </dx-select-box>
+    </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="shAddress"
-                   placeholder="출하지"
-                   style="width: auto;
-                   margin-left: 5px;
-                   margin-right: 5px;">
-    </dx-select-box>
-  </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+      <dx-select-box [items]="shAddress"
+                     labelMode="floating"
+                     label="출하지"
+                     style="width: auto;
+                     margin-left: 5px;
+                     margin-right: 5px;">
+      </dx-select-box>
+    </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="sortation"
-                   placeholder="구분"
-                   style="width: auto;
-                   margin-left: 5px;
-                   margin-right: 5px;">
-    </dx-select-box>
-  </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+      <dx-select-box [items]="sortation"
+                     labelMode="floating"
+                     label="구분"
+                     style="width: auto;
+                     margin-left: 5px;
+                     margin-right: 5px;">
+      </dx-select-box>
+    </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="classification"
-                   placeholder="제품구분"
-                   style="width: auto;
-                   margin-left: 5px;
-                   margin-right: 5px;">
-    </dx-select-box>
-  </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+      <dx-select-box [items]="classification"
+                     labelMode="floating"
+                     label="제품구분"
+                     style="width: auto;
+                     margin-left: 5px;
+                     margin-right: 5px;">
+      </dx-select-box>
+    </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto">
-    <dx-select-box [items]="product"
-                   placeholder="제품"
-                   style="width: auto;
-                   margin-left: 5px;
-                   margin-right: 5px;">
-    </dx-select-box>
-  </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+      <dx-select-box [items]="product"
+                     labelMode="floating"
+                     label="제품"
+                     style="width: auto;
+                     margin-left: 5px;
+                     margin-right: 5px;">
+      </dx-select-box>
+    </dxi-item>
 
-  <dxi-item location="left"
-            widget="dxButton"
-            locateInMenu="auto"
-            [options]="searchButtonOptions">
-  </dxi-item>
+    <dxi-item location="left"
+              widget="dxButton"
+              locateInMenu="auto"
+              [options]="searchButtonOptions">
+    </dxi-item>
 
-  <dxi-item location="left"
-            widget="dxButton"
-            locateInMenu="auto"
-            [options]="saveButtonOptions">
-  </dxi-item>
-</dx-toolbar>
+    <dxi-item location="left"
+              widget="dxButton"
+              locateInMenu="auto"
+              [options]="saveButtonOptions">
+    </dxi-item>
+  </dx-toolbar>
 
-<dx-data-grid #detailGrid
-              class="dx-card wide-card"
-              [showBorders]="false"
-              [dataSource]="data"
-              [columnAutoWidth]="true"
-              keyExpr="cuName"
-              [allowColumnResizing]="true"
-              columnResizingMode="widget"
-              (onFocusedRowChanged)="detailRowChanged($event)"
-              (onSelectionChanged)="selectionChanged($event)"
-              [allowColumnReordering]="true"
-              height="calc(100vh - 230px)">
+  <dx-data-grid #detailGrid
+                class="dx-card wide-card"
+                [showBorders]="false"
+                [dataSource]="data"
+                [columnAutoWidth]="true"
+                keyExpr="cuName"
+                [allowColumnResizing]="true"
+                columnResizingMode="widget"
+                (onFocusedRowChanged)="detailRowChanged($event)"
+                (onSelectionChanged)="selectionChanged($event)"
+                [allowColumnReordering]="true"
+                height="calc(100vh - 230px)">
 
-  <!--Datagrid Option-->
-  <dxo-paging [enabled]="false"></dxo-paging>
-  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+    <!--Datagrid Option-->
+      <dxo-paging [enabled]="false"></dxo-paging>
+      <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
 
 
-  <!--Filtering Option-->
-  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
-  <dxo-filter-builder [customOperations]="customOperations"
-                      [allowHierarchicalFields]="true">
-  </dxo-filter-builder>
-  <dxo-filter-builder-popup [position]="popupPosition">
-  </dxo-filter-builder-popup>
-  <dxo-filter-row [visible]="true"></dxo-filter-row>
-  <dxo-header-filter [visible]="true"></dxo-header-filter>
-  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+      <!--Filtering Option-->
+      <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+      <dxo-filter-builder [customOperations]="customOperations"
+                          [allowHierarchicalFields]="true">
+      </dxo-filter-builder>
+      <dxo-filter-builder-popup [position]="popupPosition">
+      </dxo-filter-builder-popup>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+      <dxo-header-filter [visible]="true"></dxo-header-filter>
+      <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
-  <!--Grouping Option-->
-  <dxo-group-panel [visible]="true"></dxo-group-panel>
-  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+      <!--Grouping Option-->
+      <dxo-group-panel [visible]="true"></dxo-group-panel>
+      <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
 
-  <!--Data column-->
-  <dxi-column dataField="cuName"
-              caption="거래처명">
-  </dxi-column>
+      <!--Data column-->
+      <dxi-column dataField="cuName"
+                  caption="거래처명">
+      </dxi-column>
 
-  <dxi-column dataField="orNumber"
-              alignment="center"
-              caption="주문번호">
-  </dxi-column>
+      <dxi-column dataField="orNumber"
+                  alignment="center"
+                  caption="주문번호">
+      </dxi-column>
 
-  <dxi-column dataField="ShDate"
-              dataType="date"
-              alignment="center"
-              caption="출하일자">
-  </dxi-column>
+      <dxi-column dataField="ShDate"
+                  dataType="date"
+                  alignment="center"
+                  caption="출하일자">
+      </dxi-column>
 
-  <dxi-column dataField="ShNumber"
-              alignment="center"
-              caption="출하번호">
-  </dxi-column>
+      <dxi-column dataField="ShNumber"
+                  alignment="center"
+                  caption="출하번호">
+      </dxi-column>
 
-  <dxi-column dataField="foName"
-              caption="출고지명">
-  </dxi-column>
+      <dxi-column dataField="foName"
+                  caption="출고지명">
+      </dxi-column>
 
-  <dxi-column dataField="deName"
-              caption="도착지명">
-  </dxi-column>
+      <dxi-column dataField="deName"
+                  caption="도착지명">
+      </dxi-column>
 
-  <dxi-column dataField="prName"
-              caption="제품명">
-  </dxi-column>
+      <dxi-column dataField="prName"
+                  caption="제품명">
+      </dxi-column>
 
-  <dxi-column dataField="orQuantity"
-              format="#,###"
-              caption="주문량(포)">
-  </dxi-column>
+      <dxi-column dataField="orQuantity"
+                  format="#,###"
+                  caption="주문량(포)">
+      </dxi-column>
 
-  <dxi-column dataField="shVolume"
-              format="#,###"
-              caption="출하량(포)">
-  </dxi-column>
+      <dxi-column dataField="shVolume"
+                  format="#,###"
+                  caption="출하량(포)">
+      </dxi-column>
 
-  <dxi-column dataField="MTVolume"
-              format="#,###"
-              caption="출하량(MT)">
-  </dxi-column>
+      <dxi-column dataField="MTVolume"
+                  format="#,###"
+                  caption="출하량(MT)">
+      </dxi-column>
 
-  <dxi-column dataField="acDate"
-              dataType="date"
-              alignment="center"
-              caption="인수일자">
-  </dxi-column>
+      <dxi-column dataField="acDate"
+                  dataType="date"
+                  alignment="center"
+                  caption="인수일자">
+      </dxi-column>
 
-  <dxi-column dataField="acStatus"
-              caption="인수여부"
-              dataType="boolean"
-              [allowFiltering]="false"
-              [allowSorting]="false"
-              [width]="100"
-              editCellTemplate="Sel1cellTemplate">
-  </dxi-column>
+      <dxi-column dataField="acStatus"
+                  caption="인수여부"
+                  dataType="boolean"
+                  [allowFiltering]="false"
+                  [allowSorting]="false"
+                  [width]="100"
+                  editCellTemplate="Sel1cellTemplate">
+      </dxi-column>
 
-  <dxi-column dataField="foAgent"
-              caption="운송사">
-  </dxi-column>
+      <dxi-column dataField="foAgent"
+                  caption="운송사">
+      </dxi-column>
 
-  <dxi-column dataField="veNumber"
-              caption="차량번호"
-              alignment="center">
-  </dxi-column>
+      <dxi-column dataField="veNumber"
+                  caption="차량번호"
+                  alignment="center">
+      </dxi-column>
 
-  <dxi-column dataField="driver"
-              caption="운전기사">
-  </dxi-column>
+      <dxi-column dataField="driver"
+                  caption="운전기사">
+      </dxi-column>
 
-  <dxi-column dataField="buNumber"
-              alignment="center"
-              caption="사업자번호">
-  </dxi-column>
+      <dxi-column dataField="buNumber"
+                  alignment="center"
+                  caption="사업자번호">
+      </dxi-column>
 
-  <dxi-column dataField="note"
-              caption="비고">
-  </dxi-column>
+      <dxi-column dataField="note"
+                  caption="비고">
+      </dxi-column>
 
-  <dxi-column dataField="aqDate"
-              caption="인수일자"
-              alignment="center">
-  </dxi-column>
+      <dxi-column dataField="aqDate"
+                  caption="인수일자"
+                  alignment="center">
+      </dxi-column>
 
-  <dxi-column dataField="ShClass"
-              alignment="center"
-              caption="출하구분">
-  </dxi-column>
+      <dxi-column dataField="ShClass"
+                  alignment="center"
+                  caption="출하구분">
+      </dxi-column>
 
-  <dxi-column dataField="S_FWD_NUM"
-              alignment="center"
-              caption="S_FWD_NUM">
-  </dxi-column>
+      <dxi-column dataField="S_FWD_NUM"
+                  alignment="center"
+                  caption="S_FWD_NUM">
+      </dxi-column>
 
-  <!-- 셀 템플릿-->
-  <!--Sel1 cellTemplate-->
-  <div *dxTemplate="let cellInfo of 'Sel1cellTemplate'">
-    <dx-check-box [value]="true"
-                  (onValueChanged)="cellInfo.setValue($event.value)">
-    </dx-check-box>
-  </div>
-</dx-data-grid>
+      <!-- 셀 템플릿-->
+      <!--Sel1 cellTemplate-->
+      <div *dxTemplate="let cellInfo of 'Sel1cellTemplate'">
+        <dx-check-box [value]="true"
+                      (onValueChanged)="cellInfo.setValue($event.value)">
+        </dx-check-box>
+      </div>
+      </dx-data-grid>

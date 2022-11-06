@@ -20,6 +20,8 @@ import { Service, Product } from './app.service';
 import { DxDataGridComponent, } from 'devextreme-angular';
 import ArrayStore from 'devextreme/data/array_store';
 import { AuthService } from '../../../shared/services';
+import { AppConfigService } from '../../../shared/services/appconfig.service';
+import { ThemeManager } from '../../../shared/app.utilitys';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -37,6 +39,8 @@ export class WOSTComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
 
   //dataSource: any;
+  //컬럼 리사이즈 모드
+  columnResizeMode: string = ThemeManager.columnResizeMode;
 
   //오더데이터
   orderData: any;
@@ -87,7 +91,7 @@ export class WOSTComponent {
  * @param authService 사용자 인증 서버스
  */
 
-  constructor(private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 진행현황";
 
     //date
@@ -248,7 +252,7 @@ export class WOSTComponent {
     var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", "", "", []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
-    var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
+    var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
     if (resultModel[0].E_TYPE !== "S") {
       alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`);
       return [];
@@ -261,7 +265,7 @@ export class WOSTComponent {
     var zpf0002Model = new ZPMF0002Model("", "", aufnr, []);
     var modelList: ZPMF0002Model[] = [zpf0002Model];
     //Test
-    return await parent.dataService.RefcCallUsingModel<ZPMF0002Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZPMF0002ModelList", modelList, QueryCacheType.None);
+    return await parent.dataService.RefcCallUsingModel<ZPMF0002Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0002ModelList", modelList, QueryCacheType.None);
   }
 
 
@@ -271,7 +275,7 @@ export class WOSTComponent {
     zpf0003Model.ITAB_DATA1.push(new ZPMS0003Model(this.orderInfo.AUFNR, this.orderInfo.KURZTEXT, this.orderInfo.ARBEI, this.orderInfo.MEINH, this.orderInfo.ANZZL));
     var modelList: ZPMF0003Model[] = [zpf0003Model];
 
-    var insertModel = await this.dataService.RefcCallUsingModel<ZPMF0003Model[]>("DS4", "NBPDataModels", "NAMHE.Model.ZPMF0003ModelList", modelList, QueryCacheType.None);
+    var insertModel = await this.dataService.RefcCallUsingModel<ZPMF0003Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0003ModelList", modelList, QueryCacheType.None);
     
     return insertModel[0];
   }

@@ -2,18 +2,18 @@
 <dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>작업일자</b></div>
-      <div class="dx-field-value">
-        <dx-date-box [value]="now" type="date" [width]="150"> </dx-date-box>
+      <!---<div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>작업일자</b></div>-->
+      <div style="float:left; margin-left: 10px;">
+        <dx-date-box [value]="now" type="date" [width]="130" label="작업일자"> </dx-date-box>
       </div>
     </div>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>현재시간</b></div>
-      <div class="dx-field-value">
-        <dx-date-box [value]="now" type="time" [width]="150"> </dx-date-box>
+      <!---<div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>현재시간</b></div>-->
+      <div style="float:left; margin-left: 10px;">
+        <dx-date-box [value]="now" type="time" [width]="130" label="현재시간"> </dx-date-box>
       </div>
     </div>
   </dxi-item>

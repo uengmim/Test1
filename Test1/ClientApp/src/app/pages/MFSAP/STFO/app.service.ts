@@ -1,5 +1,23 @@
 import { Injectable } from '@angular/core';
 
+//팔렛트유형
+export class PalletType {
+  code!: string;
+  name!: string;
+}
+
+//하차정보
+export class UnloadInfo {
+  code!: string;
+  name!: string;
+}
+
+//화물차종
+export class TruckType {
+  code!: string;
+  name!: string;
+}
+
 //데이터 정보
 export class Employee {
   //관할지사
@@ -113,6 +131,52 @@ export class OrderInfo {
   //항차선택
   routeSelection!: string;
 }
+
+const pallettype: PalletType[] = [
+  {
+    code: "P",
+    name: "플라스틱"
+  },
+  {
+    code: "W",
+    name: "목재"
+  }]
+
+const unloadinfo: UnloadInfo[] = [
+  {
+    code: "10",
+    name: "기본"
+  },
+  {
+    code: "20",
+    name: "분산"
+  }]
+
+const trucktype: TruckType[] = [
+  {
+    code: "A1",
+    name: "대형"
+  },
+  {
+    code: "A2",
+    name: "소형"
+  },
+  {
+    code: "A3",
+    name: "덤프"
+  },
+  {
+    code: "A4",
+    name: "택배"
+  },
+  {
+    code: "B1",
+    name: "화공탱크로리"
+  },
+  {
+    code: "C1",
+    name: "유류탱크로리"
+  }]
 
 const employees: Employee[] = [
   {
@@ -493,5 +557,15 @@ export class Service {
     getStates7() {
       return states7;
     }
+  getPalletType() {
+    return pallettype;
+  }
 
+  getUnloadInfo() {
+    return unloadinfo;
+  }
+
+  getTruckType() {
+    return trucktype;
+  }
 }

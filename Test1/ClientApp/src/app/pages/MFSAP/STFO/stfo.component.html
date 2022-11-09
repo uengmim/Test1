@@ -1,0 +1,412 @@
+<!--STO주문-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [value]="startDate" type="date" [width]="150" label="주문기간(From)" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [value]="endDate" type="date" [width]="150" label="주문기간(To)" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <nh-possible-table [codeInfo]="lgortInCode" #lgortInCodeDynamic
+                         valueColumn="LGORT"
+                         valueDisplayFormat="%LGOBE%"
+                         [width]="200"
+                         [gridBoxWidth]="500"
+                         label="입고창고"
+                         (onDataLoaded)="onPEDataLoaded($event)"
+                         (onEntryValueChanged)="onlgortInCodeValueChanged($event)"></nh-possible-table>
+    </div>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <nh-possible-table [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
+                         valueColumn="LGORT"
+                         valueDisplayFormat="%LGOBE%"
+                         [width]="200"
+                         [gridBoxWidth]="500"
+                         label="출고창고"
+                         (onDataLoaded)="onPEDataLoaded($event)"
+                         (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-table>
+    </div>
+  </dxi-item>
+  <dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="주문등록" (onClick)="requestOrder($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+  <dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="취소" (onClick)="saveDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+  <dxi-item location="after"
+            [options]="searchButtonOptions">
+    <div *dxTemplate>
+      <dx-button text="조회" (onClick)="saveDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+</dx-toolbar>
+
+<div>
+  <dx-data-grid id="gridContainer"
+                keyExpr="reqNum"
+                [dataSource]="gridDataSource"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                [columnAutoWidth]="true"
+                [selection]="{ mode: 'multiple' }"
+                (onRowDblClick)="orderDBClick($event)"
+                (onContentReady)="contentReady($event)"
+                height="calc(100vh - 230px)"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [allowColumnResizing]="true">
+
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-builder-popup [position]="popupPosition">
+    </dxo-filter-builder-popup>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+    <dxi-column dataField="competentBranch" caption="관할지사"></dxi-column>
+    <dxi-column dataField="reqNum" caption="요청번호" format="#,###"></dxi-column>
+    <dxi-column dataField="whereOrder" caption="주문처"></dxi-column>
+    <dxi-column dataField="orderClass" caption="주문구분"></dxi-column>
+    <dxi-column dataField="product" caption="제품"></dxi-column>
+    <dxi-column dataField="packaging" caption="포장"></dxi-column>
+    <dxi-column dataField="orderQuantity" caption="주문량" format="#,###"></dxi-column>
+    <dxi-column dataField="output" caption="생산량" format="#,###"></dxi-column>
+    <dxi-column dataField="deliveryDate" caption="납기일자"></dxi-column>
+    <dxi-column dataField="destination" caption="도착지"></dxi-column>
+    <dxi-column dataField="carrier" caption="실제운송사"></dxi-column>
+    <dxi-column dataField="quota" caption="운송배정량" format="#,###"></dxi-column>
+    <dxi-column dataField="releaseQuantity" caption="출고된량" format="#,###"></dxi-column>
+    <dxi-column dataField="dispatchVehicle" caption="배차량" format="#,###"></dxi-column>
+    <dxi-column dataField="dispatchNumber" caption="배차번호" format="#,###"></dxi-column>
+    <dxi-column dataField="takeover" caption="인수도구분"></dxi-column>
+    <dxi-column dataField="releaseConfirm" caption="출고확인"></dxi-column>
+    <dxi-column dataField="transit" caption="운송확인"></dxi-column>
+    <dxi-column dataField="purpose" caption="용도"></dxi-column>
+    <dxi-column dataField="note" caption="비고"></dxi-column>
+    <dxi-column dataField="fwdreqnum" caption="FWDREQ_NUM" format="#,###"></dxi-column>
+    <dxi-column dataField="mainCategory" caption="대분류"></dxi-column>
+    <dxi-column dataField="prod" caption="PROD"></dxi-column>
+    <dxi-column dataField="pack" caption="PACK"></dxi-column>
+    <dxi-column dataField="agri" caption="AGRI"></dxi-column>
+    <dxi-column dataField="release" caption="출고"></dxi-column>
+    <dxi-column dataField="increaseNumber" caption="배차증번호" format="#,###"></dxi-column>
+
+
+
+    <dxo-search-panel [visible]="true"></dxo-search-panel>
+    <dxo-group-panel [visible]="true"></dxo-group-panel>
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+  </dx-data-grid>
+</div>
+
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
+
+
+<dx-popup width="80%"
+          height="calc(80vh - 10px)"
+          [showTitle]="true"
+          title="주문등록"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="popupVisible">
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [disabled]="popupStat"
+                    [options]="saveButtonOptions">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+  <dx-scroll-view width="100%" height="100%">
+
+    <div id="form-container">
+      <dx-form id="orderInfo" [formData]="orderInfo" [colCount]="1" width="100%" style="margin-bottom:40px">
+        <dxi-item itemType="group" caption="" [colCount]="2">
+          <dxi-item>
+            <dxo-label text="주문번호"></dxo-label>
+            <div *dxTemplate>
+              <dx-text-box [disabled]="true"></dx-text-box>
+            </div>
+          </dxi-item>
+          <dxi-item>
+            <dxo-label text="요청번호"></dxo-label>
+            <div *dxTemplate>
+              <dx-text-box [disabled]="true"></dx-text-box>
+            </div>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" caption="주문정보" [colCount]="1" style="margin-top:20px">
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="주문일자"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box [value]="now" type="date" displayFormat="yyyy-MM-dd"> </dx-date-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="납기일자"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box [value]="now" type="date" displayFormat="yyyy-MM-dd"> </dx-date-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="주문처"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="kunnrCode" #kunnrCodeDynamic
+                                   valueColumn="KUNNR"
+                                   valueDisplayFormat="%KUNNR%(%NAME1%)"
+                                   width="auto"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   (onEntryValueChanged)="onkunnrCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="제품명"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="matnrCode" #matnrCodeDynamic
+                                   valueColumn="MATNR"
+                                   valueDisplayFormat="%MAKTX%"
+                                   width="auto"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="주문수량"></dxo-label>
+              <div *dxTemplate>
+                <dx-number-box [disabled]="popupStat" format="#,###"></dx-number-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="판매단위"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat" [width]="60"></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="팔렛트"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box [dataSource]="palletType"
+                               displayExpr="name"
+                               valueExpr="code"
+                               [disabled]="popupStat"></dx-select-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="하차방법"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box [dataSource]="unloadInfo"
+                               displayExpr="name"
+                               valueExpr="code"
+                               [disabled]="popupStat"></dx-select-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="운송방법"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="inco1Code" #matnrCodeDynamic
+                                   valueColumn="INCO1"
+                                   valueDisplayFormat="%BEZEI%"
+                                   width="auto"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item colSpan="3">
+              <dxo-label text="특기사항"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat" width="auto"></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" caption="도착정보" [colCount]="1" style="margin-top:20px">
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="도착지"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="kunweCode" #kunweCodeDynamic
+                                   valueColumn="LGORT"
+                                   valueDisplayFormat="%LGORT%(%LGOBE%)"
+                                   width="auto"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="도착도시"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat"></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item colSpan="3">
+              <dxo-label text="도착주소" colSpan="3"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat" width="auto"></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="Tel"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat"></dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="H.P"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat"></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" caption="운송정보" [colCount]="1" style="margin-top:20px">
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="운송사"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-comm [codeInfo]="tdlnr1Code"
+                                  valueColumn="ZCM_CODE3"
+                                  valueDisplayFormat="%ZCMF01_CH%"
+                                  width="auto"
+                                  [gridBoxWidth]="500"
+                                  (onDataLoaded)="onPEDataLoaded($event)"
+                                  (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="실제운송사"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-comm [codeInfo]="tdlnr2Code"
+                                  valueColumn="ZCM_CODE3"
+                                  valueDisplayFormat="%ZCMF01_CH%"
+                                  width="auto"
+                                  [gridBoxWidth]="500"
+                                  (onDataLoaded)="onPEDataLoaded($event)"
+                                  (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-comm>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="화물차종"></dxo-label>
+              <div *dxTemplate>
+                <dx-select-box [dataSource]="truckType"
+                               displayExpr="name"
+                               valueExpr="code"
+                               [disabled]="popupStat"></dx-select-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="차량번호"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat"></dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="운전기사명"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat"></dx-text-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" caption="출고정보" [colCount]="1" style="margin-top:20px">
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="출고플랜트"></dxo-label>
+              <div *dxTemplate>
+                <dx-text-box [disabled]="popupStat"></dx-text-box>
+              </div>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="출고사업장"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="sublgortOutCode"
+                                   valueColumn="LGORT"
+                                   valueDisplayFormat="%LGORT%(%LGOBE%)"
+                                   width="auto"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item>
+              <dxo-label text="재고유형"></dxo-label>
+              <nh-possible-table [codeInfo]="stockTypeCode"
+                                 valueColumn="DOMNAME"
+                                 valueDisplayFormat="%DDTEXT%(%DOMNAME%)"
+                                 [width]="200"
+                                 [gridBoxWidth]="500"
+                                 [searchPanel]="true"
+                                 (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+            </dxi-item>
+            <dxi-item>
+              <dxo-label text="취소코드"></dxo-label>
+              <nh-possible-table [codeInfo]="cancelCode"
+                                 valueColumn="DOMNAME"
+                                 valueDisplayFormat="%DDTEXT%(%DOMNAME%)"
+                                 [width]="200"
+                                 [gridBoxWidth]="500"
+                                 [searchPanel]="true"
+                                 (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+            </dxi-item>
+            <dxi-item><dxo-label text="STO생성보류"></dxo-label></dxi-item>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+
+  </dx-scroll-view>
+</dx-popup>
+
+
+
+
+
+

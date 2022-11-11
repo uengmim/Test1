@@ -1,17 +1,20 @@
 <h2 class="content-block">Tasks</h2>
 
-<div>
+<div style="margin:10px">
   <nh-possible-comm #cm001Entery
                     [codeInfo]="cm001Code"
                     valueColumn="ZCM_CODE1"
                     valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE1%)"
-                    placeholderText="결재코드"
+                    label="결재코드"
                     [width]="200"
                     [gridBoxWidth]="500"
+                    [showDataLoadingPanel]="showDataLoadingPanel"
                     class="weight-test"
+                    (onDataLoaded)="onPEDataLoaded($event)"
                     (onEntryValueChanged)="onCm001ValueChanged($event)"></nh-possible-comm>
   <nh-possible-comm #dynamicEntery
                     [width]="200"
+                    label="코드선택"
                     [gridBoxWidth]="500"
                     class="weight-test"
                     (onEntryValueChanged)="onDynamicValueChanged($event)"></nh-possible-comm>
@@ -19,62 +22,72 @@
                     [codeInfo]="sd007Code"
                     valueColumn="ZCM_CODE3"
                     valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
-                    placeholderText="주문유형"
+                    label="주문유형"
                     [width]="200"
                     [gridBoxWidth]="500"
+                    [showDataLoadingPanel]="showDataLoadingPanel"
                     [filerExpression]="sd007Filter"
                     class="weight-test"
+                    (onDataLoading)="onSd004DataLoading($event)"
+                    (onDataLoaded)="onPEDataLoaded($event)"
                     (onEntryValueChanged)="onSd004ValueChanged($event)"></nh-possible-comm>
   <nh-possible-table #maraEntery
-                     [codeInfo]="maraCode"
-                     valueColumn="MATNR"
-                     valueDisplayFormat="%MAKTX%(%MATNR%)"
-                     placeholderText="아이템코드"
-                     width="100%"
-                     [gridBoxWidth]="800"
-                     [filerExpression]="maraFilter"
-                     class="weight-test"
-                     (onEntryValueChanged)="onMaraValueChanged($event)"></nh-possible-table>
+                      [codeInfo]="maraCode"
+                      valueColumn="MATNR"
+                      valueDisplayFormat="%MAKTX%(%MATNR%)"
+                      label ="아이템코드"
+                      width="100%"
+                      [parameters]="maraParameters"
+                      [gridBoxWidth]="800"
+                      [showDataLoadingPanel]="showDataLoadingPanel"
+                      [filerExpression]="maraFilter"
+                      class="weight-test"
+                      (onDataLoaded)="onPEDataLoaded($event)"
+                      (onEntryValueChanged)="onMaraValueChanged($event)"></nh-possible-table>
   <div style="clear:both"></div>
 </div>
-<div>
-  <dx-number-box [value]="weight" width="120px" class="weight-test"></dx-number-box>
+
+<div style="margin:10px">
+  <dx-number-box [value]="weight" width="120px" class="weight-test" label="무게" stylingMode="outlined" labelMode="floating"></dx-number-box>
   <dx-button stylingMode="contained"
-             text="모니터링중지"
-             type="normal"
-             [width]="150"
-             class="weight-test"
-             (onClick)="stopMonitorClick($event)">
+              text="모니터링중지"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="stopMonitorClick($event)">
   </dx-button>
   <dx-button stylingMode="contained"
-             text="모니터링시작"
-             type="normal"
-             [width]="150"
-             class="weight-test"
-             (onClick)="startMonitorClick($event)">
+              text="모니터링시작"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="startMonitorClick($event)">
   </dx-button>
   <dx-button stylingMode="contained"
-             text="저울COM 닫기"
-             type="normal"
-             [width]="150"
-             class="weight-test"
-             (onClick)="closeComClick($event)">
+              text="저울COM 닫기"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="closeComClick($event)">
   </dx-button>
   <dx-button stylingMode="contained"
-             text="저울COM 열기"
-             type="normal"
-             [width]="150"
-             class="weight-test"
-             (onClick)="openComClick($event)">
+              text="저울COM 열기"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="openComClick($event)">
   </dx-button>
   <div style="clear:both"></div>
 </div>
+
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="dataSource"
               [showBorders]="false"
               [focusedRowEnabled]="true"
               [focusedRowIndex]="0"
               [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [columnResizingMode]="columnResizeMode"
               [columnHidingEnabled]="true">
 
   <dxo-paging [pageSize]="10"></dxo-paging>
@@ -127,3 +140,14 @@
               [hidingPriority]="0">
   </dxi-column>
 </dx-data-grid>
+
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel
+               [position]="{ of: '#pageContent' }"
+               shadingColor="rgba(0,0,0,0.4)"
+               [(visible)]="loadingVisible"
+               [showIndicator]="true"
+               [showPane]="true"
+               [shading]="true" 
+               [hideOnOutsideClick]="false">
+</dx-load-panel>

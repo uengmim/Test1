@@ -2,15 +2,15 @@
 <dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>출하기간</b></div>
-      <div style="float:left">
-        <dx-date-box [(value)]="startDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
+      <!---<div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>출하기간</b></div>-->
+      <div style="float:left; margin-left: 10px;">
+        <dx-date-box [(value)]="startDate" type="date" [width]="130" displayFormat="yyyy-MM-dd" label="출하기간(From)"></dx-date-box>
       </div>
       <div style="float:left; margin:10px 5px 0px 5px">
-        ~
+
       </div>
       <div style="float:left">
-        <dx-date-box [(value)]="endDate" type="date" [width]="125" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="endDate" type="date" [width]="130" displayFormat="yyyy-MM-dd" label="출하기간(To)"></dx-date-box>
       </div>
     </div>
   </dxi-item>

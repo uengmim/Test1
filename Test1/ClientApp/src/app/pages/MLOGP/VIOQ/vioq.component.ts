@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
-
+import { formatDate } from '@angular/common';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
@@ -35,8 +35,14 @@ export class VIOQComponent {
   searchButtonOptions: any;
 
   //날짜 조회
+  now: Date = new Date();
   startDate: any;
   endDate: any;
+
+  //date box
+  value: Date = new Date(1981, 3, 27);
+  min: Date = new Date(1900, 0, 1);
+  dateClear = new Date(2015, 11, 1, 6);
 
   //필터
   popupPosition: any;
@@ -47,6 +53,11 @@ export class VIOQComponent {
     appInfo.title = AppInfoService.APP_TITLE + " | 차량 입출문 현황";
     //this._dataService = dataService;
     this.data = service.getData();
+
+    //date
+    var now = new Date();
+    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
+    this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
 
     let modelTest01 = this;

@@ -1,20 +1,20 @@
   <!--toolbar-->
 <dx-toolbar style="margin:20px 0px 20px 0px">
-  <dxi-item location="before" locateInMenu="auto">
+  <dxi-item location="before" locateInMenu="auto" style="margin-right:10px;">
     <div *dxTemplate>
-      <div class="dx-field-label" style="width: 100px; margin-left: 20px;">챠랑번호</div>
-      <div class="dx-field-value" style="width: auto; float: left;">
-        <dx-text-box value="text"
+      <div class="dx-field-label" style="width: auto;"></div>
+      <div class="dx-field-value" style="width: 100px; float: left; margin-right: 10px; ">
+        <dx-text-box label="차량번호" labelMode="floating"
                      [maxLength]="40"></dx-text-box>
       </div>
     </div>
   </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto">
+  <dxi-item location="before" locateInMenu="auto" style="margin-right:10px;">
     <div *dxTemplate>
-      <div class="dx-field-label" style="width: 100px; margin-left: 20px;">기사명</div>
-      <div class="dx-field-value" style="width: auto; float: left;">
-        <dx-text-box value="text"
+      <div class="dx-field-label" style="width: auto;"></div>
+      <div class="dx-field-value" style="width: 100px; float: left; margin-right: 10px; ">
+        <dx-text-box label="기사명" labelMode="floating"
                      [maxLength]="40"></dx-text-box>
       </div>
     </div>
@@ -22,7 +22,8 @@
 
   <dxi-item location="before" locateInMenu="auto">
     <dx-select-box [items]="carsnumber"
-                   placeholder="차량종류"
+                   labelMode="floating"
+                   label="차량종류"
                    style="width: auto;
                    margin-left: 10px;
                    margin-right: 10px;">

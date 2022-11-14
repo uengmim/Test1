@@ -4,9 +4,9 @@
 <div style="margin:10px 10px 0px 10px">
 
   <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
-    <dxi-item location="before" locateInMenu="auto" >
+    <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <div style="float:left; " >
+        <div style="float:left; ">
           <dx-date-box [(value)]="startDate"
                        label="시작일"
                        type="date"
@@ -25,9 +25,9 @@
       </div>
     </dxi-item>
 
-    <dxi-item location="before" locateInMenu="auto" >
+    <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <div style="width: 100px; float: left; margin-left: 10px; margin-right: 10px;" >
+        <div style="width: 100px; float: left; margin-left: 10px; margin-right: 10px;">
           <dx-text-box [showClearButton]="true"
                        label="플랜트"
                        labelMode="floating"
@@ -147,6 +147,11 @@
 
   </dx-data-grid>
 
+  <!-- 로딩 패널-->
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>
+
   <dx-popup width="80%"
             height="80%"
             margin="20px"
@@ -265,56 +270,40 @@
         <dxo-filter-row visible="true"></dxo-filter-row>
         <dxo-header-filter visible="true"></dxo-header-filter>
 
-        <dxi-column dataField="AUFNR"
-                    caption="오더번호"
-                    dataType="string"></dxi-column>
-
-        <dxi-column dataField="QMNUM"
+        <dxi-column dataField="NOTIF_NO"
                     caption="통지번호"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="FENUM"
-                    caption="품목번호"
+        <dxi-column dataField="POSNR"
+                    caption="항목번호"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="URNUM"
+        <dxi-column dataField="CAUSE_KEY"
                     caption="원인번호"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="FEKAT"
-                    caption="문제/결함"
+        <dxi-column dataField="KATALOGART"
+                    caption="카탈로그"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="FECOD"
-                    caption="문제/손상코드"
-                    dataType="string"></dxi-column>
-
-        <dxi-column dataField="FEVER"
-                    caption="버전"
-                    dataType="string"></dxi-column>
-
-        <dxi-column dataField="OTKAT"
-                    caption="카달로그유형"
-                    dataType="string"></dxi-column>
-
-        <dxi-column dataField="OTGRP"
-                    caption="오브젝트부분"
-                    dataType="string"></dxi-column>
-
-        <dxi-column dataField="OTEIL"
-                    caption="오브젝트부품"
-                    dataType="string"></dxi-column>
-
-        <dxi-column dataField="FEGRP"
+        <dxi-column dataField="CODEGRUPPE"
                     caption="코드그룹"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="URCOD"
-                    caption="원인코드"
+        <dxi-column dataField="KURZTEXT_GR"
+                    caption="그룹명"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="URTXT"
-                    caption="원인"
+        <dxi-column dataField="CODE"
+                    caption="코드"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="KURZTEXT_CODE"
+                    caption="코드명"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="FETXT"
+                    caption="텍스트"
                     dataType="string"></dxi-column>
 
       </dx-data-grid>
@@ -415,4 +404,4 @@
       </dx-data-grid>
     </dx-scroll-view>
   </dx-popup>
-  </div>
+</div>

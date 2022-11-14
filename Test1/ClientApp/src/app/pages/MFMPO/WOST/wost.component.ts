@@ -83,6 +83,9 @@ export class WOSTComponent {
   popupMode = 'Add';
   customOperations: Array<any>;
 
+  //UI 데이터 로딩 패널
+  loadingVisible: boolean = false;
+
   //_dataService: ImateDataService;
   /**
  * 생성자
@@ -167,8 +170,9 @@ export class WOSTComponent {
   dblClick: any = async (e: any) => {
     //this.showPopup('Add', {}); //change undefined to {}
     //this.dataGrid.instance.saveEditData();
-
+    this.loadingVisible = true;
     var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].AUFNR);
+    this.loadingVisible = false;
     //if (resultModel[0].E_TYPE !== "S") {
     //  alert(`상세 자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`);
     //}
@@ -181,7 +185,7 @@ export class WOSTComponent {
       });
     this.FaultInfo = new ArrayStore(
       {
-        key: ["AUFNR", "QMNUM", "FENUM", "URNUM", "FEKAT", "FECOD", "FEVER", "OTKAT", "OTGRP", "OTEIL", "FEGRP"],
+        key: ["NOTIF_NO", "POSNR", "CAUSE_KEY"],
         data: resultModel[0].ITAB_DATA4
         
       });
@@ -192,7 +196,7 @@ export class WOSTComponent {
       });
     this.TroubleshootingList = new ArrayStore(
       {
-        key: ["QMNUM", "MANUM"],
+        key: ["AUFNR", "EBELN", "EBELP"],
         data: resultModel[0].ITAB_DATA6
       });
     this.showPopup('Add', {}); //change undefined to {}
@@ -233,7 +237,9 @@ export class WOSTComponent {
     this.dataGrid.instance.saveEditData();
   }
   ReqRecords: any = async () => {
+    this.loadingVisible = true;
     var resultModel = await this.datainsert();
+    this.loadingVisible = false;
     if (resultModel.E_TYPE !== "S") {
       alert(`자재요청을 하지 못했습니다.\n\nSAP 메시지: ${resultModel.E_MSG}`);
       return;
@@ -252,11 +258,13 @@ export class WOSTComponent {
     var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", "", "", []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
+    this.loadingVisible = true;
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
+    this.loadingVisible = false;
     if (resultModel[0].E_TYPE !== "S") {
       alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`);
       return [];
-    }
+    } 
     return resultModel[0].ITAB_DATA;
   }
 

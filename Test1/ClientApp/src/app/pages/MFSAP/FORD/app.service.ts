@@ -225,6 +225,11 @@ const simpleProducts6: string[] = [
   '운송',
 ];
 
+const sort: string[] = [
+  '비료',
+  '친환경',
+
+];
 
 export class ProductDiv {
   //주문구분코드
@@ -261,5 +266,8 @@ export class Service {
   }
   getSimpleProducts6(): string[] {
     return simpleProducts6;
+  }
+  getSort(): string[] {
+    return sort;
   }
 }

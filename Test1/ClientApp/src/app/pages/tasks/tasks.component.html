@@ -1,50 +1,87 @@
 <h2 class="content-block">Tasks</h2>
 
 <div style="margin:10px">
-  <nh-possible-comm #cm001Entery
-                    [codeInfo]="cm001Code"
-                    valueColumn="ZCM_CODE1"
-                    valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE1%)"
-                    label="결재코드"
-                    [width]="200"
-                    [gridBoxWidth]="500"
-                    [showDataLoadingPanel]="showDataLoadingPanel"
-                    class="weight-test"
-                    (onDataLoaded)="onPEDataLoaded($event)"
-                    (onEntryValueChanged)="onCm001ValueChanged($event)"></nh-possible-comm>
-  <nh-possible-comm #dynamicEntery
-                    [width]="200"
-                    label="코드선택"
-                    [gridBoxWidth]="500"
-                    class="weight-test"
-                    (onEntryValueChanged)="onDynamicValueChanged($event)"></nh-possible-comm>
-  <nh-possible-comm #sd007Entery
-                    [codeInfo]="sd007Code"
-                    valueColumn="ZCM_CODE3"
-                    valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
-                    label="주문유형"
-                    [width]="200"
-                    [gridBoxWidth]="500"
-                    [showDataLoadingPanel]="showDataLoadingPanel"
-                    [filerExpression]="sd007Filter"
-                    class="weight-test"
-                    (onDataLoading)="onSd004DataLoading($event)"
-                    (onDataLoaded)="onPEDataLoaded($event)"
-                    (onEntryValueChanged)="onSd004ValueChanged($event)"></nh-possible-comm>
-  <nh-possible-table #maraEntery
-                      [codeInfo]="maraCode"
-                      valueColumn="MATNR"
-                      valueDisplayFormat="%MAKTX%(%MATNR%)"
-                      label ="아이템코드"
-                      width="100%"
-                      [parameters]="maraParameters"
-                      [gridBoxWidth]="800"
+  <dx-validation-group name="codeGroup">
+    <nh-possible-comm #cm001Entery
+                      dataStoreKey ="task"
+                      [codeInfo]="cm001Code"
+                      valueColumn="ZCM_CODE1"
+                      valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE1%)"
+                      label="결재코드"
+                      [width]="200"
+                      [gridBoxWidth]="500"
+                       [validationErrors]="[{type:'required', message:'코드1를 입력 하십시오.'}]"
+                      [showClearButton] ="true"
+                      [(selectedValue)]="cm001Value"
                       [showDataLoadingPanel]="showDataLoadingPanel"
-                      [filerExpression]="maraFilter"
                       class="weight-test"
                       (onDataLoaded)="onPEDataLoaded($event)"
-                      (onEntryValueChanged)="onMaraValueChanged($event)"></nh-possible-table>
-  <div style="clear:both"></div>
+                      (onEntryValueChanged)="onCm001ValueChanged($event)">
+      <nbp-validator [adapter]="c001Adapter">
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </nbp-validator>
+     </nh-possible-comm>
+
+    <nh-possible-comm #dynamicEntery
+                      dataStoreKey ="task"
+                      [width]="200"
+                      label="코드선택"
+                      [gridBoxWidth]="500"
+                      [validationErrors]="[{type:'required', message:'코드2를 입력 하십시오.'}]"
+                      [(selectedValue)]="dynamicValue"
+                      class="weight-test"
+                      (onEntryValueChanged)="onDynamicValueChanged($event)">
+      <nbp-validator [adapter]="dynamicAdapter">
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </nbp-validator>
+    </nh-possible-comm>
+
+    <nh-possible-comm #sd007Entery
+                      dataStoreKey ="task"
+                      [codeInfo]="sd007Code"
+                      valueColumn="ZCM_CODE3"
+                      valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                      label="주문유형"
+                      [width]="200"
+                      [gridBoxWidth]="500"
+                      [showDataLoadingPanel]="showDataLoadingPanel"
+                      [filerExpression]="sd007Filter"
+                      class="weight-test"
+                      (onDataLoading)="onSd004DataLoading($event)"
+                      (onDataLoaded)="onPEDataLoaded($event)"
+                      (onEntryValueChanged)="onSd004ValueChanged($event)"></nh-possible-comm>
+
+    <nh-possible-table #maraEntery
+                        dataStoreKey ="task"
+                       [codeInfo]="maraCode"
+                       valueColumn="MATNR"
+                       valueDisplayFormat="%MAKTX%(%MATNR%)"
+                       [(selectedValue)]="maraValue"
+                       label="아이템코드"
+                       width="100%"
+                       [parameters]="maraParameters"
+                       [gridBoxWidth]="800"
+                       [showClearButton] ="true"
+                       [validationErrors]="[{type:'required', message:'자재를 선택하여 주십시오.'}]"
+                       [showDataLoadingPanel]="showDataLoadingPanel"
+                       [filerExpression]="maraFilter"
+                       class="weight-test"
+                       (onDataLoaded)="onPEDataLoaded($event)"
+                       (onEntryValueChanged)="onMaraValueChanged($event)">
+      <nbp-validator [adapter]="maraAdapter">
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </nbp-validator>
+    </nh-possible-table>
+
+    <dx-button stylingMode="contained"
+               text="저장"
+               type="normal"
+               [width]="150"
+               class="weight-test-btn"
+               (onClick)="saveClick($event)">
+    </dx-button>
+    </dx-validation-group>
+    <div style="clear:both"></div>
 </div>
 
 <div style="margin:10px">

@@ -1,38 +1,71 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import 'devextreme/data/odata/store';
 import { Observable, Subscription } from 'rxjs';
 import { CommonCodeInfo, ParameterDictionary, TableCodeInfo, ThemeManager } from '../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../shared/components/comm-possible-entry/comm-possible-entry.component';
+import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../shared/components/possible-entry-datastore';
 import { TablePossibleEntryComponent } from '../../shared/components/table-possible-entry/table-possible-entry.component';
+import { ImateDataService } from '../../shared/imate/imateDataAdapter';
 import { AuthService } from '../../shared/services';
 import { AppConfigService } from '../../shared/services/appconfig.service';
 import { CasResult, NbpAgentservice } from '../../shared/services/nbp.agent.service';
-
 
 @Component({
   templateUrl: 'tasks.component.html',
   styleUrls: ['./tasks.component.scss']
 })
-export class TasksComponent {
-  @ViewChild('c001Entery', { static: false }) cm001Entery!: CommonPossibleEntryComponent;
+export class TasksComponent implements OnDestroy {
+  @ViewChild('cm001Entery', { static: false }) cm001Entery!: CommonPossibleEntryComponent;
   @ViewChild('dynamicEntery', { static: false }) dynamicEntery!: CommonPossibleEntryComponent;
   @ViewChild('sd007Entery', { static: false }) sd007Entery!: CommonPossibleEntryComponent;
   @ViewChild('maraEntery', { static: false }) maraEntery!: TablePossibleEntryComponent;
 
   //---------------------------------------------------------------------------
+  callbacks = [];
 
   //cm001 코드 정보
   cm001Code: CommonCodeInfo;
+  //cm001 선택 값
+  cm001Value: string | null;
+
+  //validation Adapter
+  c001Adapter = {
+    getValue: () => {
+      return this.cm001Value;
+    },
+    applyValidationResults: (e: any) => {
+      this.cm001Entery.validationStatus = e.isValid ? "valid" : "invalid"
+    },
+    validationRequestsCallbacks: this.callbacks
+  };
+
+  //cm001 선택 값
+  dynamicValue: string | null = null;
+  //동적 코드 placeholder 텍스트
+  dynamicPlaceholderText: string = "";
+  dynamicAdapter =
+    {
+      getValue: () => {
+        return this.dynamicValue;
+      },
+      applyValidationResults: (e: any) => {
+        this.dynamicEntery.validationStatus = e.isValid ? "valid" : "invalid"
+      },
+      validationRequestsCallbacks: this.callbacks
+    };
 
   //sd004 값정보
   sd007Code: CommonCodeInfo;
   //sd004 필터 : 처음에 자료가 아무것도 안나오게 한다.
-  sd007Filter: any = ["ZCM_CODE2", "=", "#"];
+  //sd007Filter: any = ["ZCM_CODE2", "=", "#"];
+  sd007Filter: any = undefined;
 
   //자재 코드 값 정보
   maraCode: TableCodeInfo;
   //mara 필터 : 처음에 필터는 자료가 아무것도 안나오게 한다.
-  maraFilter: any = ["MTART", "=", "#"];
+  //maraFilter: any = ["MTART", "=", "#"];
+  maraFilter: any = null;
+  maraValue: string | null;
   maraParameters: ParameterDictionary = {
     "mtart1": "ROH",
     "mtart2": "HALB",
@@ -41,8 +74,16 @@ export class TasksComponent {
     "mtart5": ""
   };
 
-  //동적 코드 placeholder 텍스트
-  dynamicPlaceholderText: string = "";
+  maraAdapter =
+    {
+      getValue: () => {
+        return this.maraValue;
+      },
+      applyValidationResults: (e: any) => {
+        this.maraEntery.validationStatus = e.isValid ? "valid" : "invalid"
+      },
+      validationRequestsCallbacks: this.callbacks
+    };
 
   //파서블 엔트리 로딩 패널 안보이게함
   showDataLoadingPanel = false;
@@ -86,11 +127,29 @@ export class TasksComponent {
    * @param nbpAgetService nbpAgent Service
    * @param authService 사용자 인증 서버스
    */
-  constructor(private appConfig: AppConfigService, private nbpAgetService: NbpAgentservice, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private nbpAgetService: NbpAgentservice, private authService: AuthService, private dataService: ImateDataService) {
     this.cm001Code = appConfig.commonCode("결재코드");
     this.sd007Code = appConfig.commonCode("주문유형");
     this.maraCode = appConfig.tableCode("아이템코드");
 
+    this.cm001Value = "Z00";
+    this.maraValue ="A010110";
+
+    let param1 : ParameterDictionary = {};
+    param1["ZCM_CODE1"] = "1000";
+
+    let param2: ParameterDictionary = {};
+    param2["ZCM_CODE1"] = "AUART";
+
+    let codeInfos = [
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.cm001Code),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.sd007Code, param2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode, this.maraParameters),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.appConfig.commonCode("생산저장창고유형"), param1),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.appConfig.commonCode("계약상태")),
+    ];
+
+    PossibleEntryDataStoreManager.setDataStore("task", codeInfos, appConfig, dataService);
     //데이터 로딩 패널 보이기
     this.loadingVisible = true;
 
@@ -123,10 +182,11 @@ export class TasksComponent {
       { name: 'Low', value: 1 }
     ];
 
-
     //모니터링을 시작 한다.
     //this.runMonitoring();
   }
+
+  //-------------------------------------------------------------------
 
   /**
    * 파서블 엔트리 데이터 로딩 완료
@@ -134,8 +194,16 @@ export class TasksComponent {
    */
   onPEDataLoaded(e: any) {
     this.loadePeCount++;
-    if (this.loadePeCount >= 3)
-      this.loadingVisible = false;
+    if (this.loadePeCount >= 3) {
+      setTimeout(() => { this.loadingVisible = false });
+    }
+  }
+
+  /**
+   * 화면 종료
+   * */
+  ngOnDestroy(): void {
+    PossibleEntryDataStoreManager.removeDataStore("task");
   }
 
   /**
@@ -148,13 +216,16 @@ export class TasksComponent {
       this.dynamicEntery.parameters = {};
       this.dynamicEntery.parameters["ZCM_CODE1"] = "1000";
       this.dynamicEntery.ChangeCodeInfo(this.appConfig.commonCode("생산저장창고유형"), "ZCM_CODE2", "%ZCMF03_CH%(%ZCM_CODE2%)", "생산저장창고유형");
+      setTimeout(() => {
+        this.maraValue = "A010020";
+      });
     }
     else {
       this.dynamicEntery.ChangeCodeInfo(this.appConfig.commonCode("계약상태"), "ZCM_CODE1", "%ZCMF01_CH%(%ZCM_CODE1%)", "계약상태");
     }
 
     this.sd007Entery.ClearSelectedValue();
-    this.maraEntery.ClearSelectedValue();
+    //this.maraEntery.ClearSelectedValue();
   }
 
   /**
@@ -201,7 +272,15 @@ export class TasksComponent {
     return;
   }
 
-
+  saveClick(e: any) {
+    let result = e.validationGroup.validate();
+    if (!result.isValid) {
+      alert("필수값을 입력하여 주십시오.");
+    }
+    else {
+      alert("모든 값이 올바로 입력 되었습니다.");
+    }
+  }
   /**
   * RUN MONITOR
   **/

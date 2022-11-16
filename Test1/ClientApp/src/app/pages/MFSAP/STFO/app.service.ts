@@ -80,7 +80,7 @@ export class Employee {
 export class OrderInfo {
   //주문번호
   orderNum!: string;
-  //납기일자
+  //요청번호
   deliveryDate!: string;
   //주문구분
   orderClass!: string;

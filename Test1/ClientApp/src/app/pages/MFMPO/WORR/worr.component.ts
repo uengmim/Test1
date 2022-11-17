@@ -49,6 +49,7 @@ export class WORRComponent implements OnInit {
   @ViewChild('test3Entery', { static: false }) test3Entery!: TablePossibleEntryComponent;
   @ViewChild('test4Entery', { static: false }) test4Entery!: TablePossibleEntryComponent;
   @ViewChild('popupDataGrid', { static: false }) popupDataGrid!: DxDataGridComponent;
+  @ViewChild('gcMaterialList', { static: false }) gcMaterialList!: DxDataGridComponent;
   @ViewChild('text1', { static: false }) text1!: DxTextBoxComponent;
   @ViewChild('text2', { static: false }) text2!: DxTextBoxComponent;
   @ViewChild('text3', { static: false }) text3!: DxTextBoxComponent;
@@ -102,7 +103,7 @@ export class WORRComponent implements OnInit {
   //작업계약리스트
   workContractList: any;
   //고장원인
-  FaultInfo: any;
+  FaultInfo: ZPMS0009Model[] = [];
   //계약리스트
   contractList: any;
   //고장(사유)추가
@@ -173,6 +174,8 @@ export class WORRComponent implements OnInit {
   workList: ZPMT0020Model[] = [];
   contList: ZPMT0010Model[] = [];
   faultList: ZPMS0009Model[] = [];
+
+  
 
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
@@ -257,6 +260,7 @@ export class WORRComponent implements OnInit {
       text: 'Close',
       onClick(e: any) {
         that.popupVisible = false;
+
       },
     };
 
@@ -271,6 +275,13 @@ export class WORRComponent implements OnInit {
       icon: 'close',
       onClick(e: any) {
         that.faPopupVisible = false;
+        this.test1Entery.ClearSelectedValue();
+        this.test2Entery.ClearSelectedValue();
+        this.test3Entery.ClearSelectedValue();
+        this.test4Entery.ClearSelectedValue();
+        this.text1.value = "";
+        this.text2.value = "";
+        this.text3.value = "";
       },
     };
 
@@ -300,9 +311,15 @@ export class WORRComponent implements OnInit {
           var damPart = this.test2Entery.popupDataGrid.instance.getSelectedRowsData();
           var reaPart = this.test3Entery.popupDataGrid.instance.getSelectedRowsData();
           var actPart = this.test4Entery.popupDataGrid.instance.getSelectedRowsData();
-
-          this.FaultInfo.push(new ZPMS0009Model("", "", "", "B", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, ""));
-          this.FaultInfo.push(new ZPMS0009Model("", "", "", "C", damPart[0].CODEGRUPPE, damPart[0].KURZTEXT_GR, damPart[0].CODE, damPart[0].KURZTEXT_CODE, this.text1.value));
+          if (objPart.length > 0) {
+            // 나중에 원인번호 바꾸기 (this.orderInfo.CAUSE_KEY)
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "B", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, ""));
+            count = count +1;
+          }
+          if (damPart.length > 0) {
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "C", damPart[0].CODEGRUPPE, damPart[0].KURZTEXT_GR, damPart[0].CODE, damPart[0].KURZTEXT_CODE, this.text1.value));
+            count = count + 1;
+          }
 
           console.log(this.ActiInfo);
           console.log(this.ReasonInfo);
@@ -311,18 +328,29 @@ export class WORRComponent implements OnInit {
 
             //var checkData = this.faultList.find(item => item.CODE === row.CODE);
             //if (checkData === undefined) {
-            this.FaultInfo.push(new ZPMS0009Model("", "", "", "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            count = count + 1;
             //}
           });
           this.ReasonInfo.forEach(async (row: ZPMS0009Model) => {
 
             //var checkData = this.faultList.find(item => item.CODE === row.CODE);
             //if (checkData === undefined) {
-            this.FaultInfo.push(new ZPMS0009Model("", "", "", "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            count = count + 1;
             //}
           });
 
         }
+
+        this.test1Entery.ClearSelectedValue();
+        this.test2Entery.ClearSelectedValue();
+        this.test3Entery.ClearSelectedValue();
+        this.test4Entery.ClearSelectedValue();
+        this.text1.value = "";
+        this.text2.value = "";
+        this.text3.value = "";
+
 
         that.faPopupVisible = false;
 
@@ -386,7 +414,7 @@ export class WORRComponent implements OnInit {
     thisObj.workList = resultModel[0].ITAB_DATA6;
     thisObj.contList = resultModel[0].ITAB_DATA5;
 
-    thisObj.FaultInfo = resultModel[0].ITAB_DATA2[0]
+    thisObj.FaultInfo = resultModel[0].ITAB_DATA4
 
     var checkStat = thisObj.contList.find(row => row.STAT === "I" || row.STAT === "C");
 
@@ -405,18 +433,19 @@ export class WORRComponent implements OnInit {
         key: ["AUFNR", "QMNUM"],
         data: thisObj.workList
       });
+
     thisObj.workContractList = new ArrayStore(
       {
         key: ["AUFNR", "PAYITEM"],
         data: thisObj.contList
       });
+    /*
     thisObj.FaultInfo = new ArrayStore(
       {
-        key: ["KATALOGART"],
+        key: ["NOTIF_NO", "POSNR", "CAUSE_KEY", "KATALOGART", "CODEGRUPPE", "CODE"],
         data: thisObj.FaultInfo
-
       });
-
+      */
     thisObj.loadingVisible = false;
 
   }
@@ -482,21 +511,51 @@ export class WORRComponent implements OnInit {
 
   //고장추가 팝업
   addRow2: any = async (e: any) => {
+    var selectData = this.gcMaterialList.instance.getSelectedRowsData();
     this.showPopup2('Add', {}); //change undefined to {}
-    this.loadingVisible = true;
-    this.faultdataload(this);
+    this.orderInfo = { NOTIF_NO: selectData[0].NOTIF_NO, POSNR: selectData[0].POSNR, CAUSE_KEY: selectData[0].CAUSE_KEY };
+
+    /*팝업에 데이터 넣어주기*/
+    //this.test1Value = selectData[0].CODE;
+
+    /*넣어주기 끝*/
+    this.ReasonInfo = [];
+    this.ActiInfo = [];
+
+    this.FaultInfo.forEach(async (row: any) => {
+
+      if (row.NOTIF_NO === selectData[0].NOTIF_NO && row.POSNR === selectData[0].POSNR) {
+        if (row.KATALOGART === "B") {
+          this.test1Value = row.CODE;
+        }
+        else if (row.KATALOGART === "C") {
+          this.test2Value = row.CODE;
+          this.text1.value = row.FETXT;
+        }
+        else if (row.KATALOGART === "5") {
+          this.ReasonInfo.push(new ZPMS0009Model("", "", "", "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+        }
+          else if (row.KATALOGART === "A") {
+          this.ActiInfo.push(new ZPMS0009Model("", "", "", "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+        }
+        
+      }
+    });
+
+
+    this.loadingVisible = true; 
+    //await this.faultdataload(this, selectData[0].NOTIF_NO);
+    this.loadingVisible = false;
 
   }
-  async faultdataload(thisObj: WORRComponent) {
+  async faultdataload(thisObj: WORRComponent, NOTIF_NO : string) {
     thisObj.loadingVisible = true;
-    thisObj.zpmF003Models = await thisObj.faultdataLoad(thisObj, thisObj.selectedFaultInfoItemKeys[0].NOTIF_NO);
+    thisObj.zpmF003Models = await thisObj.faultdataLoad(thisObj, NOTIF_NO);
 
     var faultresultModel = thisObj.zpmF003Models;
 
   
     this.orderInfo = faultresultModel[0].NOTIF_NO[0]
-
-    thisObj.loadingVisible = false;
 
   }
   //검수요청, 작업결과등록 저장
@@ -544,7 +603,7 @@ export class WORRComponent implements OnInit {
 
     var zpmt0010List: ZPMT0010Model[] = thisObj.contList as ZPMT0010Model[];
     var zpmt0020List: ZPMT0020Model[] = thisObj.workList as ZPMT0020Model[];
-    var zpms0009List: ZPMS0009Model[] = thisObj.faultList as ZPMS0009Model[];
+    var zpms0009List: ZPMS0009Model[] = thisObj.FaultInfo as ZPMS0009Model[];
 
   
     var ZPMF0003Modellist = new ZPMF0003Model("", "", thisObj.selectedOrderItemKeys[0].AUFNR, [], zpms0009List, zpmt0010List, zpmt0020List, [], DIMModelStatus.UnChanged);
@@ -663,6 +722,7 @@ export class WORRComponent implements OnInit {
     //검수요청 상태업데이트
     this.contList.forEach(async (row: ZPMT0010Model) => {
       row.STAT = "I";
+
     });
     this.loadingVisible = true;
     var resultModel = await this.datainsert2(this);
@@ -693,14 +753,15 @@ export class WORRComponent implements OnInit {
 
     if (resultModel.E_TYPE === "E")
       alert(resultModel.E_MSG);
-    else
+    else {
       alert("저장완료");
+      this.detaildatareload(this);
+    }
 
     //this.contractList = resultModel.ITAB_DATA3[0]
     //this.contractList = resultModel.ITAB_DATA4[0]
 
     this.isPopupVisible = false;
-    this.detaildatareload(this);
 
   }
 
@@ -794,6 +855,7 @@ export class WORRComponent implements OnInit {
     //Test
     return await parent.dataService.RefcCallUsingModel<ZPMF0002Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0002ModelList", modelList, QueryCacheType.None);
   }
+
   // 상세 데이터 로드
   public async faultdataLoad(parent: WORRComponent, aufnr: string) {
     var zpf0003Model = new ZPMS0009Model("", "", "", "", "", "", "", "", "");
@@ -802,6 +864,7 @@ export class WORRComponent implements OnInit {
     //Test
     return await parent.dataService.RefcCallUsingModel<ZPMS0009Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMS0009ModelList", model3List, QueryCacheType.None);
   }
+
   // 팝업 데이터 로드
   public popupdataLoad = async (iminfo: ImateInfo, dataService: ImateDataService) => {
     var zpf0006Model = new ZPMF0006Model("", "", this.zpmF002Models[0].ITAB_DATA1[0].IDAT1, this.zpmF002Models[0].ITAB_DATA1[0].PARNR, this.zpmF002Models[0].ITAB_DATA1[0].WERKS, []);
@@ -844,7 +907,8 @@ export class WORRComponent implements OnInit {
 
   // 상세 데이터 삽입
   public async codeinsert() {
-    var zpf0003Model = new ZPMF0003Model("", "", this.FaultInfo.AUFNR, []);
+    //var zpf0003Model = new ZPMF0003Model("", "", this.FaultInfo[0].AUFNR, []);
+    var zpf0003Model = new ZPMF0003Model("", "", "", []);
     zpf0003Model.ITAB_DATA2.push(new ZPMS0009Model("", "", "", "", "", "", "", "", ""));
     var modelList: ZPMF0003Model[] = [zpf0003Model];
 
@@ -866,3 +930,4 @@ export class WORRComponent implements OnInit {
       });
   }
 }
+

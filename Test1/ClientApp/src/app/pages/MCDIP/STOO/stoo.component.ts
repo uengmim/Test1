@@ -48,7 +48,7 @@ if (!/localhost/.test(document.location.host)) {
 export class STOOComponent {
   @ViewChild('lgortInCodeDynamic', { static: false }) lgortInCodeDynamic!: TablePossibleEntryComponent;
   @ViewChild('lgortOutCodeDynamic', { static: false }) lgortOutCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('kunnrCodeDynamic', { static: false }) kunnrCodeDynamic!: TablePossibleEntryComponent;
+  /*@ViewChild('kunnrCodeDynamic', { static: false }) kunnrCodeDynamic!: TablePossibleEntryComponent;*/
   @ViewChild('kunweCodeDynamic', { static: false }) kunweCodeDynamic!: TablePossibleEntryComponent;
   @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: TablePossibleEntryComponent;
   @ViewChild('inco1CodeDynamic', { static: false }) inco1CodeDynamic!: TablePossibleEntryComponent;
@@ -61,6 +61,7 @@ export class STOOComponent {
   @ViewChild('truckTypeCodeDynamic', { static: false }) truckTypeCodeDynamic!: TablePossibleEntryComponent;
   /*@ViewChild('unloadInfoCodeDynamic', { static: false }) unloadInfoCodeDynamic!: TablePossibleEntryComponent;*/
   @ViewChild('zvkausCodeDynamic', { static: false }) zvkausCodeDynamic!: TablePossibleEntryComponent;
+  @ViewChild('zproductCodeDynamic', { static: false }) zproductCodeDynamic!: TablePossibleEntryComponent;
 
   @ViewChild(DxDataGridComponent, { static: false })
   dataGrid!: DxDataGridComponent;
@@ -78,7 +79,7 @@ export class STOOComponent {
   //파서블엔트리
   lgortInCode: TableCodeInfo;
   lgortOutCode: TableCodeInfo;
-  kunnrCode: TableCodeInfo;
+  /*kunnrCode: TableCodeInfo;*/
   kunweCode: TableCodeInfo;
   matnrCode: TableCodeInfo;
   inco1Code: TableCodeInfo;
@@ -90,7 +91,8 @@ export class STOOComponent {
   /*palletTypeCode: TableCodeInfo;*/
   truckTypeCode: TableCodeInfo;
   /*unloadInfoCode: TableCodeInfo;*/
-  zvkausCode: TableCodeInfo;
+  /*zvkausCode: TableCodeInfo;*/
+  zproductCode: TableCodeInfo;
 
   //파서블엔트리 선택값
   lgortInValue: string | null = "";
@@ -108,6 +110,7 @@ export class STOOComponent {
   truckTypeValue: string | null = "";
   /*unloadInfoValue: string | null = "";*/
   zvkausValue: string | null = "";
+  zproductValue: string | null = "";
 
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
@@ -181,8 +184,9 @@ export class STOOComponent {
     this.lgortInCode = appConfig.tableCode("유류창고");
     this.lgortOutCode = appConfig.tableCode("유류창고");
 
-    this.kunnrCode = appConfig.tableCode("RFC_유류고객정보");
-    this.kunweCode = appConfig.tableCode("유류창고");
+    /*this.kunnrCode = appConfig.tableCode("RFC_유류고객정보");*/
+    /*this.kunweCode = appConfig.tableCode("유류창고");*/
+    this.kunweCode = appConfig.tableCode("RFC_유류고객정보");
     this.matnrCode = appConfig.tableCode("유류제품명");
     this.inco1Code = appConfig.tableCode("인코텀스");
     this.tdlnr1Code = appConfig.commonCode("운송사");
@@ -193,13 +197,18 @@ export class STOOComponent {
     /*this.palletTypeCode = appConfig.tableCode("RFC_파레트유형");*/
     this.truckTypeCode = appConfig.tableCode("RFC_화물차종");
     /*this.unloadInfoCode = appConfig.tableCode("RFC_하차정보");*/
-    this.zvkausCode = appConfig.tableCode("RFC_용도");
+    //this.zvkausCode = appConfig.tableCode("RFC_용도");
+
+    if(this.selectedGubun.zgubn === "B")
+      this.zproductCode = appConfig.tableCode("RFC_유류취급제품");
+    else
+      this.zproductCode = appConfig.tableCode("RFC_화학취급제품");
 
     let codeInfos = [
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgortInCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgortOutCode),
 
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnrCode),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnrCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunweCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.inco1Code),
@@ -210,7 +219,8 @@ export class STOOComponent {
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.palletTypeCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.truckTypeCode),
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.unloadInfoCode),*/
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zvkausCode)
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zvkausCode),*/
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zproductCode)
     ];
 
     PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
@@ -277,7 +287,20 @@ export class STOOComponent {
   };
 
   onGubunValueChanged(e: any) {
-    this.selectedGubun = e.value as Gubun;
+    setTimeout(() => {
+      var selectedVal: string = e.value;
+      if (selectedVal === "O") {
+        this.zproductCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("RFC_유류취급제품"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "취급제품");
+        this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("유류제품명"), "MATNR", "%MAKTX%(%MATNR%)", "유류제품");
+        this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "C"], false);
+      } else {
+        this.zproductCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("RFC_화학취급제품"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "취급제품");
+        this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("화학제품명"), "MATNR", "%MAKTX%(%MATNR%)", "화학제품");
+        this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "B"], false);
+      }
+      this.truckTypeCodeDynamic.ClearSelectedValue();
+    });
+    return;
   }
 
   onFormSubmit = function (e: any) {
@@ -310,9 +333,22 @@ export class STOOComponent {
     return;
   }
 
+  onzproductCodeValueChanged(e: any) {
+    if(this.selectedGubun.zgubn === "B")
+      this.orderInfo.ZPRODUCT2 = e.selectedItem.DOMVALUE_L;
+    else
+      this.orderInfo.ZPRODUCT1 = e.selectedItem.DOMVALUE_L;
+
+    this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "B"]);
+    return;
+  }
+
   //자재코드변경
   onmatnrCodeValueChanged(e: any) {
-    this.orderInfo.MATNR = e.selectedItem.MATNR;
+    setTimeout(() => {
+      this.orderInfo.MATNR = e.selectedItem.MATNR;
+      this.orderInfo.VRKME = e.selectedItem.MEINS;
+    });
     return;
   }
 
@@ -336,7 +372,15 @@ export class STOOComponent {
 
   //도착지변경
   onlgortCodeValueChanged(e: any) {
-    this.orderInfo.LGORT = e.selectedItem.LGORT;
+    setTimeout(() => {
+      this.orderInfo.LGORT = e.selectedItem.LGORT;
+      this.orderInfo.NAME1 = e.selectedItem.NAME1;
+      this.orderInfo.CITY1 = e.selectedItem.CITY1;
+      this.orderInfo.STREET = e.selectedItem.STREET;
+      this.orderInfo.TELF1 = e.selectedItem.TELF1;
+      this.orderInfo.MOBILENO = e.selectedItem.MOBILENO;
+    });
+
     return;
   }
 
@@ -445,7 +489,7 @@ export class STOOComponent {
   clearPossibleEntrys() {
     //this.lgortInCodeDynamic.ClearSelectedValue();
     //this.lgortOutCodeDynamic.ClearSelectedValue();
-    this.kunnrCodeDynamic.ClearSelectedValue();
+    /*this.kunnrCodeDynamic.ClearSelectedValue();*/
     this.kunweCodeDynamic.ClearSelectedValue();
     this.matnrCodeDynamic.ClearSelectedValue();
     this.inco1CodeDynamic.ClearSelectedValue();
@@ -457,7 +501,7 @@ export class STOOComponent {
     /*this.palletTypeCodeDynamic.ClearSelectedValue();*/
     this.truckTypeCodeDynamic.ClearSelectedValue();
     /*this.unloadInfoCodeDynamic.ClearSelectedValue();*/
-    this.zvkausCodeDynamic.ClearSelectedValue();
+    /*this.zvkausCodeDynamic.ClearSelectedValue();*/
   }
 
   //주문등록
@@ -473,6 +517,11 @@ export class STOOComponent {
 
     this.popupStat = false;
     this.popupVisible = true;
+
+    //0.5초 뒤에 적용(숨김 상태의 컨트롤은 프로퍼티 변동이 안되므로 POPUP창이 보여진 상태에서 변경을 해 주어야 함)
+    setTimeout((that : STOOComponent) => {
+      that.truckTypeCodeDynamic.ApplyFilter();
+    }, 500, this);
   }
 
   //Data refresh
@@ -528,8 +577,11 @@ export class STOOComponent {
    */
   onPEDataLoaded(e: any) {
     this.loadePeCount++;
-    if (this.loadePeCount >= 12)
+    if (this.loadePeCount >= 11)
       this.loadingVisible = false;
+
+    if (e.component.popupTitle === "화물차종")
+      this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "C"]);
   }
 
   //STO주문목록 조회

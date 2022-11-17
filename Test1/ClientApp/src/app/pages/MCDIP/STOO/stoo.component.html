@@ -186,7 +186,7 @@
                 <dx-date-box [value]="now" type="date" displayFormat="yyyy-MM-dd"> </dx-date-box>
               </div>-->
             </dxi-item>
-            <dxi-item dataField="KUNNR">
+            <!--<dxi-item dataField="KUNNR">
               <dxi-validation-rule type="required" message="주문처필수선택"></dxi-validation-rule>
               <dxo-label text="주문처"></dxo-label>
               <div *dxTemplate>
@@ -199,6 +199,20 @@
                                     [gridBoxWidth]="500"
                                     (onDataLoaded)="onPEDataLoaded($event)"
                                     (onEntryValueChanged)="onkunnrCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>-->
+            <dxi-item>
+              <dxo-label text="취급제품"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="zproductCode" #zproductCodeDynamic
+                                   [dataStoreKey]="dataStoreKey"
+                                   [(selectedValue)]="zproductValue"
+                                   valueColumn="DOMVALUE_L"
+                                   valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                   width="auto"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   (onEntryValueChanged)="onzproductCodeValueChanged($event)"></nh-possible-table>
               </div>
             </dxi-item>
           </dxi-item>
@@ -286,7 +300,7 @@
             <!--</dxi-item>
           </dxi-item>-->
           <dxi-item itemType="group" caption="" [colCount]="3">
-            <dxi-item dataField="ZVKAUS" colSpan="1">
+            <!--<dxi-item dataField="ZVKAUS" colSpan="1">
               <dxo-label text="용도"></dxo-label>
               <div *dxTemplate>
                 <nh-possible-table [codeInfo]="zvkausCode" #zvkausCodeDynamic
@@ -300,7 +314,7 @@
                                    (onDataLoaded)="onPEDataLoaded($event)"
                                    (onEntryValueChanged)="onzvkausCodeValueChanged($event)"></nh-possible-table>
               </div>
-            </dxi-item>
+            </dxi-item>-->
             <dxi-item dataField="INCO1">
               <dxo-label text="운송방법"></dxo-label>
               <div *dxTemplate>
@@ -327,7 +341,7 @@
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="kunweValue"
                                    valueColumn="LGORT"
-                                   valueDisplayFormat="%LGOBE%(%LGORT%)"
+                                   valueDisplayFormat="%NAME1%(%LGORT%)"
                                    width="auto"
                                    [gridBoxWidth]="500"
                                    (onDataLoaded)="onPEDataLoaded($event)"

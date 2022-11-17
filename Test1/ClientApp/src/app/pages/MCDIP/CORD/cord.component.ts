@@ -1,31 +1,25 @@
-import { NgModule, Component, enableProdMode, ViewChild } from '@angular/core';
-import CustomStore from 'devextreme/data/custom_store';
-import 'devextreme/data/odata/store';
-import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
-import { ZXNSCRFCDataModel } from '../../../shared/dataModel/ZxnscRfcData';
-import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
-import { AppInfoService } from '../../../shared/services/app-info.service';
+import { formatDate } from '@angular/common';
+import { Component, ViewChild } from '@angular/core';
+import {
+    DxDataGridComponent, DxFormComponent,
+    DxPopupComponent
+} from 'devextreme-angular';
 import ArrayStore from 'devextreme/data/array_store';
-import { AppConfigService } from '../../../shared/services/appconfig.service';
+import 'devextreme/data/odata/store';
+import { alert } from "devextreme/ui/dialog";
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
-import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
-import { formatDate } from '@angular/common';
-import { Service, RequestProcess } from './app.service';
-import { alert } from "devextreme/ui/dialog"
-import {
-  DxDataGridComponent,
-  DxButtonModule,
-  DxFormComponent,
-  DxPopupComponent
-} from 'devextreme-angular';
-import notify from 'devextreme/ui/notify';
-import { ZSDEPSOListModel, ZSDS5000Model, ZSDS5001Model } from '../../../shared/dataModel/MFSAP/ZSDEpSoListProxy';
-import dxForm from 'devextreme/ui/form';
-import { AuthService } from '../../../shared/services';
-import { ZSDEPSOENTRYInfoModel, ZSDS3013Model, ZSDS3014Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoEntryInfoProxy';
-import { ZSDCREATESODoModel, ZSDS3100Model, ZSDS6001Model, ZSDS6002Model } from '../../../shared/dataModel/MFSAP/ZsdCreateSodoProxy';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
+import { ZSDCREATESODoModel, ZSDS3100Model, ZSDS6001Model, ZSDS6002Model } from '../../../shared/dataModel/MFSAP/ZsdCreateSodoProxy';
+import { ZSDEPSOENTRYInfoModel, ZSDS3013Model, ZSDS3014Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoEntryInfoProxy';
+import { ZSDEPSOListModel, ZSDS5000Model, ZSDS5001Model } from '../../../shared/dataModel/MFSAP/ZSDEpSoListProxy';
+import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
+import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
+import { AuthService } from '../../../shared/services';
+import { AppInfoService } from '../../../shared/services/app-info.service';
+import { AppConfigService } from '../../../shared/services/appconfig.service';
+import { Service } from './app.service';
 
 /*고객주문처리(액상) Component*/
 
@@ -400,6 +394,7 @@ export class CORDComponent {
       icon: 'close',
       onClick: async () => {
         this.popupVisible = false;
+        this.clearEntery();
       }
     }
 
@@ -568,8 +563,6 @@ export class CORDComponent {
   //고객주문 정보 조회 RFC
   public async infoDataLoad(flag: string) {
 
-    this.clearEntery();
-
     var selectData = this.dataGrid.instance.getSelectedRowsData();
     //참조추가는 고객번호가 지워져야함
     var sendData = new ZSDS5001Model("", selectData[0].MATNR, selectData[0].MAKTX, selectData[0].MATKL, selectData[0].MATKL_N, selectData[0].MVGR1, selectData[0].MVGR2, selectData[0].MVGR3, selectData[0].MVGR1_N,
@@ -683,7 +676,6 @@ export class CORDComponent {
     this.loadingVisible = true;
     this.popupVisible = !this.popupVisible;
 
-    this.clearEntery();
 
     
   }

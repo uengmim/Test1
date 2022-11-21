@@ -445,6 +445,7 @@ export class FORDComponent {
       var result = await this.detailDataLoad();
       if (result.E_RETURN.MVGR3 !== "1") {
         alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
+        this.kunnrEntery.ClearSelectedValue();
         return;
       }
     });
@@ -471,6 +472,8 @@ export class FORDComponent {
       //변경시 마다 RFC 2번 조회 (파라미터 중 주문유형)
       this.loadingVisible2 = true;
       this.detailDataLoad();
+      this.kunnrEntery.ClearSelectedValue();
+
       if (e.selectedValue.startsWith("Z2")) {
         //edit막고
         this.auartFlag = true;
@@ -484,6 +487,7 @@ export class FORDComponent {
         this.auartFlag = false;
         alert(`주문처를 직접 설정해주세요.`, "알림");
       }
+
     });
   }
   onTvlvCodeValueChanged(e: any) {
@@ -532,11 +536,11 @@ export class FORDComponent {
 
 
 
-   
+
   //고객주문리스트 조회 RFC
   public async dataLoad() {
     this.dataLoading = false;
-    var zps5000Model = new ZSDS5000Model("","", this.startDate, this.endDate, "",this.sd007Entery1.selectedValue ? this.sd007Entery1.selectedValue : "", this.maEntery.selectedValue ? this.maEntery.selectedValue : "", this.maktEntery.selectedValue ? this.maktEntery.selectedValue : "");
+    var zps5000Model = new ZSDS5000Model("", "", this.startDate, this.endDate, "10", this.sd007Entery1.selectedValue ? this.sd007Entery1.selectedValue : "", this.maEntery.selectedValue ? this.maEntery.selectedValue : "", this.maktEntery.selectedValue ? this.maktEntery.selectedValue : "");
     var modelList: ZSDS5001Model[] = [];
     var zpsModel = new ZSDEPSOListModel(zps5000Model, modelList);
 

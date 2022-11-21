@@ -242,7 +242,7 @@ export class STFOComponent {
     //저장버튼 이벤트
     this.saveButtonOptions = {
       text: 'Save',
-      useSubmitBehavior: true,
+      useSubmitBehavior: false,
       onClick: async (e: any) => {
         let vali = e.validationGroup.validate();
 
@@ -277,6 +277,11 @@ export class STFOComponent {
     };
   };
 
+  asyncValidation(params: any) {
+    var ad = params;
+    return;
+  }
+
   onFormSubmit = function (e: any) {
    
 
@@ -309,7 +314,10 @@ export class STFOComponent {
 
   //자재코드변경
   onmatnrCodeValueChanged(e: any) {
-    this.orderInfo.MATNR = e.selectedItem.MATNR;
+    setTimeout(() => {
+      this.orderInfo.MATNR = e.selectedItem.MATNR;
+      this.orderInfo.VRKME = e.selectedItem.MEINS;
+    });
     return;
   }
 
@@ -525,6 +533,9 @@ export class STFOComponent {
     this.loadePeCount++;
     if (this.loadePeCount >= 14)
       this.loadingVisible = false;
+
+    if (e.component.popupTitle === "화물차종")
+      this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "A"]);
   }
 
   //STO주문목록 조회

@@ -20,35 +20,50 @@
                          [gridBoxWidth]="500"
                          label="입고창고"
                          (onDataLoaded)="onPEDataLoaded($event)"
-                         (onEntryValueChanged)="onlgortInCodeValueChanged($event)"></nh-possible-table>
+                         [(selectedValue)]="lgortValue"
+                         [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]"
+                         [showClearButton]="true">
+        <nbp-validator [adapter]="lgortAdapter">
+          <dxi-validation-rule type="required"></dxi-validation-rule>
+        </nbp-validator>
+      </nh-possible-table>
     </div>
 
   </dxi-item>
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <nh-possible-table [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
+      <nh-possible-table [codeInfo]="matnrCode" #matnrCodeDynamic
                          [dataStoreKey]="dataStoreKey"
-                         valueColumn="LGORT"
-                         valueDisplayFormat="%LGOBE%"
-                         [width]="200"
+                         [(selectedValue)]="matnrValue"
+                         valueColumn="MATNR"
+                         valueDisplayFormat="%MAKTX%(%MATNR%)"
+                         width="200"
                          [gridBoxWidth]="500"
-                         label="출고창고"
-                         (onDataLoaded)="onPEDataLoaded($event)"
-                         (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-table>
+                         label="자재"
+                         [showClearButton]="true"
+                         (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
     </div>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-text-box #ebelnText
+                 label="문서번호"
+                 labelMode="floating"
+                 [maxLength]="15"></dx-text-box>
   </dxi-item>
   <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
-      <dx-button text="입고" >
+      <dx-button text="입고" (onClick)="receiveOrder($event)">
       </dx-button>
     </div>
   </dxi-item>
+  <!--
   <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button text="취소" (onClick)="cancelDataGrid($event)">
       </dx-button>
     </div>
   </dxi-item>
+    -->
   <dxi-item location="after"
             [options]="searchButtonOptions">
     <div *dxTemplate>
@@ -64,9 +79,8 @@
                 [showBorders]="true"
                 [focusedRowIndex]="0"
                 [columnAutoWidth]="true"
-                [selection]="{ mode: 'single' }"
+                [selection]="{ mode: 'multiple' }"
                 [(selectedRowKeys)]="selectedRows"
-                (onRowDblClick)="orderDBClick($event)"
                 (onContentReady)="contentReady($event)"
                 height="calc(100vh - 230px)"
                 [allowColumnReordering]="true"
@@ -85,27 +99,17 @@
     </dxo-filter-builder-popup>
     <dxo-filter-row [visible]="true"></dxo-filter-row>
 
-    <dxi-column dataField="ZCANCEL" caption="취소가능여부" type="string"></dxi-column>
-    <dxi-column dataField="ZSTVBELN" caption="STO주문번호" type="string"></dxi-column>
     <dxi-column dataField="EBELN" caption="문서번호" type="string"></dxi-column>
     <dxi-column dataField="EBELP" caption="품번" type="string"></dxi-column>
-    <dxi-column dataField="BSART" caption="문서유형" type="string"></dxi-column>
-    <dxi-column dataField="ZSTATS" caption="진행상태" type="string"></dxi-column>
+    <dxi-column dataField="VBELN_ST" caption="납품문서" type="string"></dxi-column>
+    <dxi-column dataField="VBELP_ST" caption="납품품목" type="string"></dxi-column>
     <dxi-column dataField="LGORT" caption="입고창고" type="string"></dxi-column>
     <dxi-column dataField="RESLO" caption="출고창고" type="string"></dxi-column>
-    <dxi-column dataField="AEDAT" caption="주문일" type="date" format="yyyy-MM-dd"></dxi-column>
-    <dxi-column dataField="EINDT" caption="납품일자" type="date" format="yyyy-MM-dd"></dxi-column>
-    <dxi-column dataField="TXZ01" caption="제품/자재명"></dxi-column>
-    <dxi-column dataField="ZMENGE1" caption="주문수량" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="ZMENGE2" caption="납품수량" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="ZMENGE3" caption="출고수량" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="ZTRANSITQTY" caption="운송중수량" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="NAME1" caption="도착회사" type="string"></dxi-column>
-    <dxi-column dataField="CITY1" caption="도착도시" type="string"></dxi-column>
-    <dxi-column dataField="STREET" caption="도착주소" type="string"></dxi-column>
-    <dxi-column dataField="ZSHIPMENT_NO" caption="배차번호" type="string"></dxi-column>
-    <dxi-column dataField="ZCARNO" caption="차량번호" type="string"></dxi-column>
-    <dxi-column dataField="ZDRIVER" caption="운전기사명" type="string"></dxi-column>
+    <dxi-column dataField="MATNR" caption="자재"></dxi-column>
+    <dxi-column dataField="MENGE" caption="수량" type="number" format="#,###"></dxi-column>
+    <dxi-column dataField="MEINS" caption="기본단위" type="string"></dxi-column>
+    <dxi-column dataField="TYPE" caption="상태" type="string"></dxi-column>
+    <dxi-column dataField="MSG" caption="메세지" type="string"></dxi-column>
 
     <dxo-search-panel [visible]="true"></dxo-search-panel>
     <dxo-group-panel [visible]="true"></dxo-group-panel>
@@ -118,7 +122,7 @@
                [shading]="true" [hideOnOutsideClick]="true">
 </dx-load-panel>
 
-
+<!-- 20221116 미사용
 <dx-popup width="50%"
           height="calc(80vh - 200px)"
           [showTitle]="false"
@@ -132,7 +136,7 @@
                     location="after"
                     [options]="closeButtonOptions">
   </dxi-toolbar-item>
-  <dx-scroll-view width="100%" height="100%">
+  <dx-scroll-view width="100%" height="100%" style="padding-left:30px; padding-right:30px;">
     <div style="text-align:center;">
       <h3>재고이동 정보</h3>
     </div>
@@ -141,6 +145,7 @@
                [formData]="orderInfo"
                [colCount]="3"
                width="100%"
+               [disabled]="true"
                style="margin-bottom:20px; margin-top:50px;">
         <dxi-item itemType="group">
           <dxi-item itemType="group" caption="문서정보">
@@ -150,45 +155,82 @@
             <dxi-item dataField="EBELP" editorType="dxTextBox">
               <dxo-label text="구매문서품번"></dxo-label>
             </dxi-item>
-            <dxi-item dataField="VBELN_VL" editorType="dxTextBox">
+            <dxi-item dataField="VBELN_ST" editorType="dxTextBox">
               <dxo-label text="납품문서"></dxo-label>
             </dxi-item>
-            <dxi-item dataField="POSNR_VL" editorType="dxTextBox">
+            <dxi-item dataField="VBELP_ST" editorType="dxTextBox">
               <dxo-label text="납품품목"></dxo-label>
             </dxi-item>
           </dxi-item>
         </dxi-item>
 
         <dxi-item itemType="group" [colSpan]="2">
-            <dxi-item itemType="group" caption="입고정보" [colCount]="2">
-              <dxi-item dataField="LGORT_D" editorType="dxTextBox">
-                <dxo-label text="출고창고"></dxo-label>
-              </dxi-item>
-              <dxi-item itemType="empty">
-              </dxi-item>
-              <dxi-item dataField="RESLO" editorType="dxTextBox">
-                <dxo-label text="입고창고"></dxo-label>
-              </dxi-item>
-              <dxi-item itemType="empty">
-              </dxi-item>
-              <dxi-item dataField="MATNR" editorType="dxTextBox">
-                <dxo-label text="자재"></dxo-label>
-              </dxi-item>
-              <dxi-item itemType="empty">
-              </dxi-item>
-              <dxi-item dataField="MENGE_D" editorType="dxTextBox">
-                <dxo-label text="수량"></dxo-label>
-              </dxi-item>
-              <dxi-item dataField="MEINS" editorType="dxTextBox">
-                <dxo-label text="단위"></dxo-label>
-              </dxi-item>
+          <dxi-item itemType="group" caption="입고정보" [colCount]="3">
+            <dxi-item dataField="LGORT" [colSpan]="2">
+              <dxo-label text="출고창고"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="lgortOutCode" #lgortCodeDynamic
+                                   [dataStoreKey]="dataStoreKey"
+                                   [(selectedValue)]="lgortOutValue"
+                                   valueColumn="LGORT"
+                                   valueDisplayFormat="%LGOBE%(%LGORT%)"
+                                   [width]="220"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item itemType="empty">
+            </dxi-item>
+            <dxi-item dataField="RESLO" [colSpan]="2">
+              <dxo-label text="입고창고"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="lgortInCode" #lgortCodeDynamic2
+                                   [dataStoreKey]="dataStoreKey"
+                                   valueColumn="LGORT"
+                                   valueDisplayFormat="%LGOBE%(%LGORT%)"
+                                   [width]="220"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [(selectedValue)]="lgortInValue">
+                </nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item itemType="empty">
+            </dxi-item>
+            <dxi-item dataField="MATNR" [colSpan]="2">
+              <dxo-label text="자재"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="matnrCode" #matnrCodeDynamic
+                                   [dataStoreKey]="dataStoreKey"
+                                   [(selectedValue)]="matnrValue"
+                                   valueColumn="MATNR"
+                                   valueDisplayFormat="%MAKTX%(%MATNR%)"
+                                   width="220"
+                                   [gridBoxWidth]="500"
+                                   (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item itemType="empty">
+            </dxi-item>
+            <dxi-item dataField="MENGE" editorType="dxTextBox" [editorOptions]="{ width : 220 }" [colSpan]="2">
+              <dxo-label text="수량"></dxo-label>
+            </dxi-item>
+            <dxi-item dataField="MEINS" editorType="dxTextBox">
+              <dxo-label text="단위"></dxo-label>
             </dxi-item>
           </dxi-item>
+        </dxi-item>
       </dx-form>
     </div>
 
   </dx-scroll-view>
 </dx-popup>
+  -->
+
+
+<dx-load-panel #popLoadPanel [position]="{ of: '.dx-viewport' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="popupLoading" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
 
 
 

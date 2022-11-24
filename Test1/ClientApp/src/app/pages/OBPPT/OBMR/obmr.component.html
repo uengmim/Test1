@@ -1,0 +1,258 @@
+<!--
+  회원가입 요청
+  -->
+<div style="margin:10px 10px 0px 10px">
+
+  <dx-form id="form"
+           [formData]="register"
+           width="80%"
+           style="margin-left:180px">
+    <dxi-item itemType="button"
+              widget="dxButton"
+              horizontalAlignment="right"
+              name="applyBtn"
+              [buttonOptions]="saveButtonOptions">
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="LOGID" [label]="{text: '아이디(ID)'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="ID is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item location="after"
+                widget="dxButton"
+                horizontalAlignment="center"
+                locateInMenu="center">
+        <dx-button stylingMode="contained"
+                   text="중복 검사"
+                   type="normal"
+                   (onClick)="Duplication()"
+                   [width]="150">
+        </dx-button>
+      </dxi-item>
+      <dxi-item location="after">
+        <div class="label"><b>아이디(ID)는 영어와 숫자로 조합하여 5자~20자 이내 입력하세요</b></div>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="LOGPW" [label]="{text: '비밀번호'}" [editorOptions]="{ mode: 'password'}">
+        <dxi-validation-rule type="required" message="Password is required">
+        </dxi-validation-rule>
+      </dxi-item>
+      <dxi-item editorType="dxTextBox" [editorOptions]="{ mode: 'password' }">
+        <dxo-label text="비밀번호 확인"> </dxo-label>
+        <dxi-validation-rule type="required"
+                             message="Confirm Password is required">
+        </dxi-validation-rule>
+        <dxi-validation-rule type="compare"
+                             [comparisonTarget]="passwordComparison"
+                             message="Password and Confirm Password do not match">
+        </dxi-validation-rule>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="BIZNO" [label]="{text: '사업자등록번호'}" [colCount]="1" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="사업자등록번호 is required">></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="NAME1" [label]="{text: '회사명'}" [colCount]="2" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="회사명 is required"></dxi-validation-rule>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="J_1KFREPRE" [label]="{text: '대표자'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="사용컴퓨터MAC is required"></dxi-validation-rule>
+      </dxi-item>
+
+
+      <dxi-item dataField="MACID" [label]="{text: '컴퓨터 식별 ID'}" [editorOptions]="{ height: 30, readonly: true }">
+      </dxi-item>
+
+      <dxi-item location="after">
+        <div class="label"><b>업체별 1대만 등록 가능</b></div>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="ADDHQ" [label]="{text: '거래처주소'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="거래처주소 is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="HOUSE_NO" [label]="{text: '건물번호'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="건물번호 is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="POSTL_COD1" [label]="{text: '우편번호'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="우편번호 is required"></dxi-validation-rule>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="J_1KFTIND" [label]="{text: '업태'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="업태 is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="J_1KFTBUS" [label]="{text: '종목'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="종목 is required"></dxi-validation-rule>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="BIZPM" [label]="{text: '취급품목'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="취급품목 is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="LICNO" [label]="{text: '면허'}" [editorOptions]="{ height: 30 }">
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="OFFNM" [label]="{text: '담당자'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="담당자 is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="TELF1" [label]="{text: '사무실번호'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="사무실번호 is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="TELF2" [label]="{text: '핸드폰'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="핸드폰 is required"></dxi-validation-rule>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="FAX" [label]="{text: 'FAX'}" [colCount]="1" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="FAX is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item dataField="E_Mail" [label]="{text: 'E-Mail'}" [colCount]="2" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="Email is required">
+        </dxi-validation-rule>
+        <dxi-validation-rule type="email" message="Email is invalid">
+        </dxi-validation-rule>
+        <dxi-validation-rule type="async"
+                             message="Email is already registered"
+                             [validationCallback]="asyncValidation">
+        </dxi-validation-rule>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="BRANCH" [label]="{text: '국내 대리점'}" [editorOptions]="{ height: 30 }">
+      </dxi-item>
+      <dxi-item dataField="BIZTY" [label]="{text: '사업자구분'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="사업자구분 is required"></dxi-validation-rule>
+        <div style="float: left; width:100%">
+          <nh-possible-comm #businessClassEntery
+                            dataStoreKey="obmr"
+                            [codeInfo]="businessClassCode"
+                            valueColumn="ZCM_CODE1"
+                            valueDisplayFormat="%ZCMF01_CH%"
+                            [gridBoxWidth]="500"
+                            width="100%"
+                            [showClearButton]="true"
+                            [(selectedValue)]="businessClassValue"
+                            placeholderText="사업자구분을 선택하여 주십시오."
+                            (onDataLoaded)="onBIZTYEDataLoaded($event)"
+                            [validationErrors]="[{type:'required', message:'사업자구분을 선택하여 주십시오.'}]"
+                            (onEntryValueChanged)="onBusinessClassCodeValueChanged($event)">
+            <nbp-validator [adapter]="businessAdapter">
+              <dxi-validation-rule type="required" message="사업자구분 is required"></dxi-validation-rule>
+            </nbp-validator>
+          </nh-possible-comm>
+        </div>
+      </dxi-item>
+      <dxi-item dataField="LIFTY" [label]="{text: '거래처구분'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="거래처구분 is required"></dxi-validation-rule>
+        <div style="float: left; width:100%">
+          <nh-possible-comm #accountClassEntery
+                            dataStoreKey="obmr"
+                            [codeInfo]="accountClassCode"
+                            valueColumn="ZCM_CODE1"
+                            valueDisplayFormat="%ZCMF01_CH%"
+                            [gridBoxWidth]="500"
+                            width="100%"
+                            [showClearButton]="true"
+                            [(selectedValue)]="accountClassValue"
+                            (onDataLoaded)="onLIFTYDataLoaded($event)"
+                            placeholderText="거래처구분을 선택하여 주십시오."
+                            [validationErrors]="[{type:'required', message:'거래처구분을 선택하여 주십시오.'}]"
+                            (onEntryValueChanged)="onAccountClassCodeValueChanged($event)">
+            <nbp-validator [adapter]="accountAdapter">
+              <dxi-validation-rule type="required" message="거래처구분 is required"></dxi-validation-rule>
+            </nbp-validator>
+          </nh-possible-comm>
+        </div>
+      </dxi-item>
+    </dxi-item>
+
+
+    <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
+      <dxi-item dataField="COUNTRY" [label]="{text: '국가'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="국가 is required"></dxi-validation-rule>
+        <div style="float: left; width:100%">
+          <nh-possible-table #countryEntery
+                             dataStoreKey="obmr"
+                             [codeInfo]="countryCode"
+                             valueColumn="LAND1"
+                             valueDisplayFormat="%LAND1%-%LANDX%"
+                             [gridBoxWidth]="500"
+                             width="100%"
+                             [showClearButton]="true"
+                             [searchPanel]="true"
+                             [(selectedValue)]="countryValue"
+                             placeholderText="국가를 선택하여 주십시오."
+                             [validationErrors]="[{type:'required', message:'국가를 선택하여 주십시오.'}]"
+                             (onEntryValueChanged)="onCountryCodeValueChanged($event)">
+            <nbp-validator [adapter]="countryAdapter">
+              <dxi-validation-rule type="required" message="국가 is required"></dxi-validation-rule>
+            </nbp-validator>
+          </nh-possible-table>
+        </div>
+
+      </dxi-item>
+      <dxi-item dataField="QSTION" [label]="{text: '질문'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="질문 is required"></dxi-validation-rule>
+        <div style="float: left; width:100%">
+          <nh-possible-comm #questionCodeEntery
+                            dataStoreKey="obmr"
+                            [codeInfo]="questionCode"
+                            valueColumn="ZCM_CODE1"
+                            valueDisplayFormat="%ZCMF01_CH%"
+                            [gridBoxWidth]="500"
+                            width="100%"
+                            [showClearButton]="true"
+                            [(selectedValue)]="questionCodeValue"
+                            (onDataLoaded)="onQSTIONDataLoaded($event)"
+                            placeholderText="질문을 선택하여 주십시오."
+                            [validationErrors]="[{type:'required', message:'질문을 선택하여 주십시오.'}]"
+                            (onEntryValueChanged)="onQuestionCodeCodeValueChanged($event)">
+            <nbp-validator [adapter]="questionAdapter">
+              <dxi-validation-rule type="required" message="질문 is required"></dxi-validation-rule>
+            </nbp-validator>
+          </nh-possible-comm>
+        </div>
+      </dxi-item>
+      <dxi-item dataField="ANSWER" [label]="{text: '답변'}" [editorOptions]="{ height: 30 }">
+        <dxi-validation-rule type="required" message="답변 is required"></dxi-validation-rule>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+      <dxi-item dataField="BIZUPJ" [label]="{text: '취급업종'}" style="margin-top:5px">
+        <dx-tag-box #bizpmtagbox
+                    [dataSource]="categorydataSource"
+                    displayExpr="Name"
+                    placeholder="취급업종을 선택하여 주십시오."
+                    valueExpr="Id">
+        </dx-tag-box>
+        <dxi-validation-rule type="required" message="취급업종 is required"></dxi-validation-rule>
+      </dxi-item>
+      <dxi-item location="after">
+        <dx-file-uploader selectButtonText="자료첨부"
+                          labelText=""
+                          accept="image/*"
+                          width="150px"
+                          uploadMode="useForm">
+        </dx-file-uploader>
+      </dxi-item>
+    </dxi-item>
+    <dxi-item>
+      <div style="background-color: rgba(191, 191, 191, 0.15);">
+        <div class="dx-fieldset">
+          <div class="dx-fieldset-header" style=" color:black;">1. 아이디 찾기</div>
+          <div class="dx-field">
+            <div class="dx-field-value-static">비밀번호 재설정 또는 휴면계정 복구는 2번 또는 3번 항목 중 택일하십시오.</div>
+          </div>
+          <div class="dx-field">
+            <div class="dx-field-label">- 사업자등록번호, 이메일을 입력 후 [ID 찾기] 클릭시 [아이디] 항목에 표시됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </dxi-item>
+  </dx-form>
+
+</div>

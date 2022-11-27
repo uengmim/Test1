@@ -1,0 +1,131 @@
+ <!--toolbar-->
+<div style="margin:20px 10px 10px 20px">
+
+
+  <dx-data-grid  [dataSource]="forestData"
+                [remoteOperations]="false"
+                [focusedRowIndex]="0"
+                [allowColumnReordering]="true"
+                [allowColumnResizing]="true"
+                [rowAlternationEnabled]="true"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                height="calc(100vh - 155px)"
+                [columnResizingMode]="columnResizeMode">
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+    <dxo-selection mode="single"></dxo-selection>
+    <dxo-filter-row visible="true"></dxo-filter-row>
+    <dxo-header-filter visible="true"></dxo-header-filter>
+
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
+
+
+    <!--Data column-->
+    <dxi-column dataField="MTART"
+                caption="자재유형코드">
+    </dxi-column>
+
+    <dxi-column dataField="MATNR"
+                caption="자재코드">
+    </dxi-column>
+
+    <dxi-column dataField="MAKTX"
+                caption="자재명칭">
+    </dxi-column>
+
+    <dxi-column dataField="SPART"
+                caption="재품군 코드">
+    </dxi-column>
+
+    <dxi-column dataField="VTEXT"
+                caption="제품군 코드내역">
+    </dxi-column>
+
+    <dxi-column dataField="MATKL"
+                caption="자재그룹코드">
+    </dxi-column>
+
+    <dxi-column dataField="WGBEZ"
+                caption="자재그룹내역">
+    </dxi-column>
+
+    <dxi-column dataField="ZZDEPT_CD"
+                caption="운영부서코드">
+    </dxi-column>
+
+    <dxi-column dataField="ZZDEPT_NM"
+                caption="부서명">
+    </dxi-column>
+
+    <dxi-column dataField="ZZBIN"
+                caption="저장빈 코드">
+    </dxi-column>
+
+    <dxi-column dataField="MEINS"
+                caption="기본 단위">
+    </dxi-column>
+
+    <dxi-column dataField="SOBKZ"
+                caption="특별재고지시자">
+    </dxi-column>
+
+    <dxi-column dataField="SOTXT"
+                caption="특별재고유형">
+    </dxi-column>
+
+    <dxi-column dataField="PARTNER"
+                caption="BP코드">
+    </dxi-column>
+
+    <dxi-column dataField="NAME1"
+                caption="BP명칭">
+    </dxi-column>
+
+    <dxi-column dataField="LABST"
+                caption="가용재고 수량">
+    </dxi-column>
+
+    <dxi-column dataField="INSME"
+                caption="품질검사 수량">
+    </dxi-column>
+
+    <dxi-column dataField="SPEME"
+                caption="보류재고 수량">
+    </dxi-column>
+
+    <dxi-column dataField="UMLME"
+                caption="이동중/운송중">
+    </dxi-column>
+
+    <dxi-column dataField="LABST_MT"
+                caption="가용재고MT">
+    </dxi-column>
+
+    <dxi-column dataField="INSME_MT"
+                caption="품질검사MT">
+    </dxi-column>
+
+    <dxi-column dataField="SPEME_MT"
+                caption="보류재고MT">
+    </dxi-column>
+
+    <dxi-column dataField="UMLME_MT"
+                caption="이동중/운송중 MT">
+    </dxi-column>
+
+    <dxi-column dataField="VPRSV"
+                caption="가격지시자">
+    </dxi-column>
+
+    <dxi-column dataField="PEINH"
+                caption="단가단위">
+    </dxi-column>
+
+    <dxi-column dataField="VERPR"
+                caption="단가">
+    </dxi-column>
+  </dx-data-grid>
+</div>

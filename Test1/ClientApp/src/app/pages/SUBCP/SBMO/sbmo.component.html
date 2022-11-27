@@ -1,0 +1,191 @@
+ <!--toolbar-->
+<div style="margin:20px 10px 10px 20px">
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>생산기간</b></div>
+        <div style="float:left;width:auto">
+          <dx-date-box [(value)]="startDate" type="date" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+        <div style="float:left; margin-left:10px; margin-right:10px;">
+          ~
+        </div>
+        <div style="float: left; margin-right: 10px; width: auto">
+          <dx-date-box [(value)]="endDate" type="date" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
+      <dx-select-box placeholder="거래처"></dx-select-box>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
+      <dx-select-box placeholder="잔행상태"></dx-select-box>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
+      <dx-select-box placeholder="제품"></dx-select-box>
+    </dxi-item>
+
+    <dxi-item location="left"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="width: auto;
+              margin-left: 5px;
+              margin-right: 5px;">
+      <dx-button stylingMode="contained"
+                 text="생산지시접수"
+                 type="normal">
+      </dx-button>
+    </dxi-item>
+
+    <dxi-item location="left"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="width: auto;
+              margin-left: 5px;
+              margin-right: 5px;">
+      <dx-button stylingMode="contained"
+                 text="구성품확인"
+                 type="normal">
+      </dx-button>
+    </dxi-item>
+
+    <dxi-item location="left"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="width: auto;
+              margin-left: 5px;
+              margin-right: 5px;">
+      <dx-button stylingMode="contained"
+                 text="생산결과등록"
+                 type="normal">
+      </dx-button>
+    </dxi-item>
+  </dx-toolbar>
+
+  <div class="dx-field">
+    <div class="dx-field-label" style="width: 100px; margin-left: 20px; margin-bottom: 10px;">접수일자</div>
+    <div class="dx-field-value" style="width: auto; float: left;">
+      <dx-text-box value="text"
+                   [maxLength]="40"></dx-text-box>
+    </div>
+
+    <div class="dx-field-label" style="width: 100px; margin-left: 100px; margin-bottom: 10px;">접수자</div>
+    <div class="dx-field-value" style="width: auto; float: left;">
+      <dx-text-box value="text"
+                   [maxLength]="40"></dx-text-box>
+    </div>
+  </div>
+
+  <dx-data-grid [dataSource]="productData"
+                [remoteOperations]="false"
+                [focusedRowIndex]="0"
+                [allowColumnReordering]="true"
+                [allowColumnResizing]="true"
+                [rowAlternationEnabled]="true"
+                [showBorders]="true"
+                [selection]="{ mode: 'multiple' }"
+                [columnAutoWidth]="true"
+                height="calc(100vh - 155px)"
+                [columnResizingMode]="columnResizeMode">
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+    <dxo-selection mode="single"></dxo-selection>
+    <dxo-filter-row visible="true"></dxo-filter-row>
+    <dxo-header-filter visible="true"></dxo-header-filter>
+
+
+    <!--Data column-->
+    <dxi-column dataField="MTART"
+                caption="PO번호">
+    </dxi-column>
+
+    <dxi-column dataField="MATNR"
+                caption="PO항목번호">
+    </dxi-column>
+
+    <dxi-column dataField="MAKTX"
+                caption="지시일자">
+    </dxi-column>
+
+    <dxi-column dataField="SPART"
+                caption="지시자">
+    </dxi-column>
+
+    <dxi-column dataField="VTEXT"
+                caption="요청부서명">
+    </dxi-column>
+
+    <dxi-column dataField="MATKL"
+                caption="제품번호">
+    </dxi-column>
+
+    <dxi-column dataField="WGBEZ"
+                caption="제품명">
+    </dxi-column>
+
+    <dxi-column dataField="ZZDEPT_CD"
+                caption="생산시작일">
+    </dxi-column>
+
+    <dxi-column dataField="생산종료일"
+                caption="부서명">
+    </dxi-column>
+
+    <dxi-column dataField="ZZBIN"
+                caption="지시량(포)">
+    </dxi-column>
+
+    <dxi-column dataField="MEINS"
+                caption="지시량(톤)">
+    </dxi-column>
+
+    <dxi-column dataField="SOBKZ"
+                caption="제립형태">
+    </dxi-column>
+
+    <dxi-column dataField="SOTXT"
+                caption="비고">
+    </dxi-column>
+
+    <dxi-column dataField="PARTNER"
+                caption="접수일자">
+    </dxi-column>
+
+    <dxi-column dataField="NAME1"
+                caption="접수자">
+    </dxi-column>
+
+    <dxi-column dataField="LABST"
+                caption="생산일자">
+    </dxi-column>
+
+    <dxi-column dataField="INSME"
+                caption="생산량(포)">
+    </dxi-column>
+
+    <dxi-column dataField="SPEME"
+                caption="요청자">
+    </dxi-column>
+
+    <dxi-column dataField="UMLME"
+                caption="요청량">
+    </dxi-column>
+
+    <dxi-column dataField="LABST_MT"
+                caption="입고일자">
+    </dxi-column>
+
+    <dxi-column dataField="INSME_MT"
+                caption="입고자">
+    </dxi-column>
+
+    <dxi-column dataField="SPEME_MT"
+                caption="입고수량">
+    </dxi-column>
+  </dx-data-grid>
+</div>
+

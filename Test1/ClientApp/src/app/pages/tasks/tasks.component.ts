@@ -3,8 +3,9 @@ import 'devextreme/data/odata/store';
 import { Observable, Subscription } from 'rxjs';
 import { CommonCodeInfo, ParameterDictionary, TableCodeInfo, ThemeManager } from '../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../shared/components/comm-possible-entry/comm-possible-entry.component';
-import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../shared/components/possible-entry-datastore';
+import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../shared/components/possible-entry-datastore';
 import { TablePossibleEntryComponent } from '../../shared/components/table-possible-entry/table-possible-entry.component';
+import { ZCMT0020Model } from '../../shared/dataModel/common/zcmt0020';
 import { ImateDataService } from '../../shared/imate/imateDataAdapter';
 import { AuthService } from '../../shared/services';
 import { AppConfigService } from '../../shared/services/appconfig.service';
@@ -192,10 +193,25 @@ export class TasksComponent implements OnDestroy {
    * 파서블 엔트리 데이터 로딩 완료
    * @param e
    */
-  onPEDataLoaded(e: any) {
+  async onPEDataLoaded(e: any) {
     this.loadePeCount++;
     if (this.loadePeCount >= 3) {
       setTimeout(() => { this.loadingVisible = false });
+
+      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("task", this.appConfig, this.cm001Code);
+      let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
+
+      console.info(resultModel);
+
+      //---------------------------------------------------------------------------------
+      dataSet = await this.dataService.dbSelectToDataSet(
+        PossibleEntryDataStore.createCommQueryMessage(this.appConfig, this.cm001Code, null)
+      );
+
+      resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
+
+      console.info(resultModel);
+
     }
   }
 

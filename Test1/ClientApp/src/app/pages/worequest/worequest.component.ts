@@ -1,15 +1,17 @@
-import { Component, NgModule, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, NgModule, ChangeDetectorRef, ChangeDetectionStrategy, ViewChild } from '@angular/core';
 import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../shared/imate/imateDataAdapter';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
-import { QueryCacheType } from '../../shared/imate/imateCommon';
+import { QueryCacheType, QueryParameter } from '../../shared/imate/imateCommon';
 import { AppInfoService } from '../../shared/services/app-info.service';
 import { Service, Product } from './app.service';
-import { CommonCodeInfo } from '../../shared/app.utilitys';
+import { CommonCodeInfo, TableCodeInfo } from '../../shared/app.utilitys';
 import { AppConfigService } from '../../shared/services/appconfig.service';
+import { CommonPossibleEntryComponent } from '../../shared/components/comm-possible-entry/comm-possible-entry.component';
+import { TablePossibleEntryComponent } from '../../shared/components/table-possible-entry/table-possible-entry.component';
 
 @Component({
   templateUrl: './worequest.component.html',
@@ -18,6 +20,9 @@ import { AppConfigService } from '../../shared/services/appconfig.service';
 })
 
 export class WORequestComponent {
+  @ViewChild('sd007Dynamic', { static: false }) sd007Dynamic!: CommonPossibleEntryComponent;
+  @ViewChild('t023tDynamic', { static: false }) t023tDynamic!: TablePossibleEntryComponent;
+  @ViewChild('t023tDynamic2', { static: false }) t023tDynamic2!: TablePossibleEntryComponent;
   //dataSource: any;
 
   selectedItem: Product;
@@ -36,6 +41,26 @@ export class WORequestComponent {
 
   sd007Code: CommonCodeInfo;
 
+  t023tCode: TableCodeInfo
+
+  maraCode: TableCodeInfo
+
+  cCode: TableCodeInfo
+
+  dCode: TableCodeInfo
+
+  oCode: TableCodeInfo
+
+  aCode: TableCodeInfo
+
+  cartypeCode: TableCodeInfo
+
+  selectedLike: string;
+
+  localappConfig: AppConfigService;
+
+  selectedValue: string;
+
   //_dataService: ImateDataService;
 
   constructor(private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, private ref: ChangeDetectorRef, private appConfig: AppConfigService) {
@@ -53,6 +78,26 @@ export class WORequestComponent {
     this.simpleProducts = service.getSimpleProducts();
 
     this.sd007Code = appConfig.commonCode("주문유형");
+
+    this.t023tCode = appConfig.tableCode("제품구분");
+
+    this.maraCode = appConfig.tableCode("비료납품처")
+
+    this.cCode = appConfig.tableCode("오브젝트파트")
+
+    this.dCode = appConfig.tableCode("손상")
+
+    this.oCode = appConfig.tableCode("사유")
+
+    this.aCode = appConfig.tableCode("액티비티")
+
+    this.cartypeCode = appConfig.tableCode("RFC_화물차종")
+
+    this.selectedValue = "Z100";
+
+    this.selectedLike = "A%";
+
+    this.localappConfig = appConfig;
 
     let model = this;
     model.displayExpr = "";
@@ -89,9 +134,30 @@ export class WORequestComponent {
   }
 
   onCodeValueChanged(e: any) {
+    if (e.selectedValue == "Z100")
+      this.selectedLike = "A";
+    else if (e.selectedValue == "Z110")
+      this.selectedLike = "B";
+    else if (e.selectedValue == "Z120")
+      this.selectedLike = "C";
+    else
+      this.selectedLike = "D";
+
+    var selectLike = this.selectedLike;
+    this.t023tCode.queryParams.forEach(function (value) {
+      if (value.name == "like")
+        value.value = selectLike;
+    });
+
+    this.t023tDynamic.ChangeCodeInfo(this.appConfig.tableCode("비료제품구분"), "MATKL", "%WGBEZ%", "제품구분");
+    this.t023tDynamic2.SetDataFilter(["MATKL", "startswith", this.selectedLike]);
+    this.t023tDynamic2.ClearSelectedValue();
     return;
   }
 
+  ont023tCodeValueChanged(e: any) {
+    return;
+  }
 
   public async dataLoad(dataService: ImateDataService) {
     

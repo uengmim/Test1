@@ -73,7 +73,104 @@
                       valueDisplayFormat="%ZCMF01_CH%"
                       [width]="200"
                       [gridBoxWidth]="500"
+                      label="주문유형"
                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-comm>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table #t023tDynamic
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="제품구분"
+                       (onEntryValueChanged)="ont023tCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="t023tCode" #t023tDynamic2
+                       valueColumn="MATKL"
+                       valueDisplayFormat="%WGBEZ%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="제품구분"
+                       (onEntryValueChanged)="ont023tCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="maraCode"
+                       valueColumn="KUNNR"
+                       valueDisplayFormat="%NAME1%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="제품구분"
+                       groupFiled="SPART"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="cCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="오브젝트파트"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="dCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="손상"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="oCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="사유"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="aCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="액티비티"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="cartypeCode"
+                       valueColumn="DOMNAME"
+                       valueDisplayFormat="%DDTEXT%(%DOMNAME%)"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="화물차종"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
 
   </div>
 </div>

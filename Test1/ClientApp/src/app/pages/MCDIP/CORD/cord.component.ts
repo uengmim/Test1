@@ -6,14 +6,14 @@ import {
 } from 'devextreme-angular';
 import ArrayStore from 'devextreme/data/array_store';
 import 'devextreme/data/odata/store';
-import { alert } from "devextreme/ui/dialog";
+import { confirm, alert } from "devextreme/ui/dialog";
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { ZSDCREATESODoModel, ZSDS3100Model, ZSDS6001Model, ZSDS6002Model } from '../../../shared/dataModel/MFSAP/ZsdCreateSodoProxy';
 import { ZSDEPSOENTRYInfoModel, ZSDS3013Model, ZSDS3014Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoEntryInfoProxy';
-import { ZSDEPSOListModel, ZSDS5000Model, ZSDS5001Model } from '../../../shared/dataModel/MFSAP/ZSDEpSoListProxy';
+import { ZSDEPSOListModel, ZSDS5000Model, ZSDS5001Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoListProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { AuthService } from '../../../shared/services';
@@ -560,7 +560,7 @@ export class CORDComponent {
     
   }
 
-  //고객주문 정보 조회 RFC
+  //고객주문 정보 조회 RFC 
   public async infoDataLoad(flag: string) {
 
     var selectData = this.dataGrid.instance.getSelectedRowsData();
@@ -572,8 +572,8 @@ export class CORDComponent {
                                      selectData[0].TDLNR, selectData[0].TDLNR_N, selectData[0].TDLNR2, selectData[0].TDLNR2_N, selectData[0].ZCARTYPE, selectData[0].ZCARTYPE_N, selectData[0].ZCARNO, selectData[0].ZDRIVER,
                                      selectData[0].ZPHONE, selectData[0].ERDAT, selectData[0].ZUNLOAD, selectData[0].ZUNLOAD_N, selectData[0].ZEXID, selectData[0].ZEXIDNAME, selectData[0].DOLOG, selectData[0].TEXT);
 
-    var zsd3013Model = new ZSDS3013Model(selectData[0].KUNNR, selectData[0].KUNWE, "20", selectData[0].MATNR, selectData[0].AUART);
-    var zsd3014Model = new ZSDS3014Model(0, 0, 0, "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+    var zsd3013Model = new ZSDS3013Model(selectData[0].KUNNR, selectData[0].KUNWE, "20", selectData[0].MATNR, selectData[0].AUART, selectData[0].LGORT);
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
 
 
     var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model ,zsd3013Model);
@@ -605,8 +605,8 @@ export class CORDComponent {
   public async detailDataLoad() {
     var selectData = this.popupData;
 
-    var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, "20", selectData.MATNR, selectData.AUART);
-    var zsd3014Model = new ZSDS3014Model(0, 0, 0, "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+    var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, "20", selectData.MATNR, selectData.AUART, selectData.LGORT);
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
 
 
     var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
@@ -626,8 +626,8 @@ export class CORDComponent {
     let fixData = { VKORG: "1000", VTWEG: "10", SPART: "20", ZLOGFLG: "X", ZDOFLG: "", POSNR: "10", WERKS: "1000" };
     let userInfo = this.authService.getUser().data; // 나중에 고객번호 가져올때 사용(업무포탈도)
 
-    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, fixData.SPART, "", "", data.VDATU, new Date, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", "", "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, fixData.ZDOFLG, "", "", "", "");
-    var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS);
+    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, fixData.SPART,"", "", "", data.VDATU, new Date, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", "", "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, fixData.ZDOFLG, "", "", "", "");
+    var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS,"", "", "");
     var zsds6002Model = new ZSDS6002Model(data.TEXT);
 
     var zsds6001List: ZSDS6001Model[] = [zsds6001Model];
@@ -657,8 +657,8 @@ export class CORDComponent {
   }
   addOrder(e: any) {
     // 고객번호 -> 현재 로그인 값으로 세팅해줘야함 꼭 수정!! (입력시 2번 조회할때 필요한 값)
-    var model1 = new ZSDS3100Model("", "", "", "", "", "", new Date, new Date, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
-    var model2 = new ZSDS6001Model("", "", 0, "", "", "", 0, 0, "", "");
+    var model1 = new ZSDS3100Model("", "", "", "", "", "", "", new Date, new Date, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+    var model2 = new ZSDS6001Model("", "", 0, "", "", "", 0, 0, "", "", "", "", "");
     var model3 = new ZSDS6002Model("");
 
 
@@ -676,6 +676,11 @@ export class CORDComponent {
     this.loadingVisible = true;
     this.popupVisible = !this.popupVisible;
 
+    setTimeout((that: CORDComponent) => {
+
+      that.incoEntery.ApplyFilter();
+
+    }, 500, this);
 
     
   }
@@ -683,9 +688,6 @@ export class CORDComponent {
   public clearEntery() {
 
     //팝업화면에 사용되는 엔트리 초기화
-
-    //ClrarSelectedValue 시 필터가 초기화되고 있어 다시 설정
-    this.incoEntery.SetDataFilter(["ZCM_CODE2", "<>", "NH"]);
 
     this.sd007Entery2.ClearSelectedValue();
     this.maktEntery2.ClearSelectedValue();
@@ -712,6 +714,12 @@ export class CORDComponent {
     this.saveVisible = true;
     this.loadingVisible = true;
     this.popupVisible = !this.popupVisible;
+
+    setTimeout((that: CORDComponent) => {
+
+      that.incoEntery.ApplyFilter();
+
+    }, 500, this);
     //this.popupData.VBELN = "";
   }
 

@@ -11,6 +11,7 @@ import { ImateInfo, QueryCacheType, QueryDataType, QueryMessage, QueryParameter,
 import { Service, Employee, State, State2, State3, State4, State5, State6, State7, OrderInfo, PalletType, UnloadInfo, TruckType } from './app.service';
 import { formatDate } from '@angular/common';
 import ArrayStore from 'devextreme/data/array_store';
+import { confirm, alert } from "devextreme/ui/dialog";
 import {
   DxDataGridComponent,
   DxRangeSelectorModule,
@@ -250,9 +251,9 @@ export class STFOComponent {
         var result: ZSDSTOORDERReceiveModel = await this.createOrder(appConfig);
         this.loadingVisible = false;
         if (result.MTY === "E")
-          alert(result.MSG);
+          alert(result.MSG, "알림");
         else
-          alert("저장완료");
+          alert("저장완료", "알림");
 
         this.orderInfo.ZSTVBELN = result.T_DATA[0].ZSTVBELN;
         this.orderInfo.EBELN = result.T_DATA[0].EBELN;
@@ -413,7 +414,7 @@ export class STFOComponent {
       keyValue = key.ZSTVBELN;
       if (selectedRow.ZCANCEL === "N") {
         ynCheck = false;
-        alert("배치가 진행되었거나, 취소가 완료된 문건은 체크할 수 없습니다.");
+        alert("배치가 진행되었거나, 취소가 완료된 문건은 체크할 수 없습니다.", "알림");
         return;
       }
 
@@ -430,9 +431,9 @@ export class STFOComponent {
       this.loadingVisible = true;
       var result: ZSDSTOORDERManageModel = Object.assign(await this.cancelData(this.appConfig, cancelModelList, keyValue)) as ZSDSTOORDERManageModel;
       if (result.MTY === "E")
-        alert(result.MSG);
+        alert(result.MSG, "알림");
       else
-        alert("취소완료");
+        alert("취소완료", "알림");
     }
     this.loadingVisible = false;
     this.dataGrid.instance.refresh();
@@ -477,6 +478,11 @@ export class STFOComponent {
 
     this.popupStat = false;
     this.popupVisible = true;
+
+    //0.5초 뒤에 적용(숨김 상태의 컨트롤은 프로퍼티 변동이 안되므로 POPUP창이 보여진 상태에서 변경을 해 주어야 함)
+    setTimeout((that: STFOComponent) => {
+      that.truckTypeCodeDynamic.ApplyFilter();
+    }, 500, this);
   }
 
   //Data refresh

@@ -20,7 +20,7 @@ import {
   DxPopupComponent
 } from 'devextreme-angular';
 import notify from 'devextreme/ui/notify';
-import { ZSDEPSOListModel, ZSDS5000Model, ZSDS5001Model } from '../../../shared/dataModel/MFSAP/ZSDEpSoListProxy';
+import { ZSDEPSOListModel, ZSDS5000Model, ZSDS5001Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoListProxy';
 import dxForm from 'devextreme/ui/form';
 import { AuthService } from '../../../shared/services';
 import { ZSDEPSOENTRYInfoModel, ZSDS3013Model, ZSDS3014Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoEntryInfoProxy';
@@ -88,7 +88,8 @@ export class FORDComponent {
   maktCode2: TableCodeInfo;
   //도착지 정보
   kunnCode: TableCodeInfo;
-  kunnCode2: CommonCodeInfo;
+  /*kunnCode2: CommonCodeInfo;*/
+  kunnCode2: TableCodeInfo;
   //용도 정보
   tvlvCode: TableCodeInfo;
   //하차 방법
@@ -162,7 +163,7 @@ export class FORDComponent {
   orderDataRow: any;
 
   auartFlag: boolean;
-
+  auartFlag2: boolean;
   incoFilter: any = ["ZCM_CODE2", "<>", "NH"];
 
 
@@ -221,8 +222,9 @@ export class FORDComponent {
     this.maktCode = appConfig.tableCode("비료제품명");
     this.maktCode2 = appConfig.tableCode("비료제품명");
     this.kunnCode = appConfig.tableCode("비료납품처");
-    this.kunnCode2 = appConfig.commonCode("비료고객번호");
-    this.tvlvCode = appConfig.tableCode("용도구분");
+    /*this.kunnCode2 = appConfig.commonCode("비료고객번호");*/
+    this.kunnCode2 = appConfig.tableCode("비료납품처");
+    this.tvlvCode = appConfig.tableCode("RFC_용도");
     this.dd07tCode = appConfig.tableCode("하차정보");
     this.dd07tCarCode = appConfig.tableCode("화물차종");
     this.tdlnr1Code = appConfig.commonCode("운송사");
@@ -237,7 +239,7 @@ export class FORDComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maktCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maktCode2),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.kunnCode2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnCode2),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tvlvCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCarCode),
@@ -267,7 +269,8 @@ export class FORDComponent {
     this.labelLocation = 'left';
     this.readOnly = false;
     this.showColon = true;
-    this.auartFlag = false;
+    this.auartFlag = true;
+    this.auartFlag2 = true;
     this.minColWidth = 300;
     this.colCount = 2;
     let page = this;
@@ -341,14 +344,14 @@ export class FORDComponent {
       },
     };
 
+    //팝업닫기
     this.closeButtonOptions = {
-      icon: 'close',
-      onClick: async () => {
-        this.clearEntery();
+      text: '닫기',
+      onClick(e: any) {
+
         that.popupVisible = false;
-        this.dataLoad();
-      }
-    }
+      },
+    };
 
     //삭제버튼
     this.deleteButtonOptions = {
@@ -369,6 +372,17 @@ export class FORDComponent {
         //this.dataGrid.instance.saveEditData();
         var result = await this.createOrder();
         this.loadingVisible2 = false;
+        //var result2 = await this.detailDataLoad();
+        //if (result2.E_RETURN.MVGR3 !== "1") {
+        //  alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
+        //  this.kunnrEntery.ClearSelectedValue();
+        //  return;
+        //}
+        if (this.popupData.possible < this.popupData.KWMENG) {
+          alert(`주문가능량을 초과하였습니다.`, "알림");
+          return;
+        }
+
         if (result.E_TYPESO === "E") {
           alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGESO}`, "알림");
           return;
@@ -440,22 +454,43 @@ export class FORDComponent {
       this.popupData.KUNNR = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 고객번호)
       this.loadingVisible2 = true;
-      this.detailDataLoad();
       //유효성점검
       var result = await this.detailDataLoad();
       if (result.E_RETURN.MVGR3 !== "1") {
-        alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
+       alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
         this.kunnrEntery.ClearSelectedValue();
-        return;
+       return;
       }
     });
   }
   onKunweCodeValueChanged(e: any) {
-    setTimeout(() => {
+    setTimeout(async () => {
       this.popupData.KUNWE = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 납품처)
       this.loadingVisible2 = true;
-      this.detailDataLoad();
+
+      //block 조건
+      var result = await this.detailDataLoad();
+      if (result.E_RETURN.BLOCK === "X") {     //블락x면 입력불가
+        this.auartFlag2 = true;
+      }
+      else if (result.E_RETURN.UNBLOCK === "X") {  //언블락x면 입력가능
+        this.auartFlag2 = false;
+      }
+      else if (result.E_RETURN.UNBLOCK === "" && this.popupData.REVQTY !== 0) {  //언블락이 공백이고 예약수량이면 예약수량-출고수량만큼 입력가능
+        this.auartFlag2 = false;
+        this.popupData.possible = (this.popupData.REVQTY - this.popupData.ACTQTY)
+      }
+
+      if (result.E_RETURN.AVAILCHECK === "Y") {      //점검대상여부가 Y면 예약수량-출고수량 이랑 가용수량 중 더 작은값 이하로 입력가능
+        /*this.auartFlag = false;*/
+        if ((this.popupData.REVQTY - this.popupData.GIOTY) < this.popupData.AVAILQTY) {
+          this.popupData.possible = this.popupData.REVQTY - this.popupData.GIOTY
+        }
+        else {
+          this.popupData.possible=this.popupData.AVAILQTY
+        }
+      }
     });
   }
   onMatnrCodeValueChanged(e: any) {
@@ -474,17 +509,24 @@ export class FORDComponent {
       this.detailDataLoad();
       this.kunnrEntery.ClearSelectedValue();
 
-      if (e.selectedValue.startsWith("Z2")) {
-        //edit막고
-        this.auartFlag = true;
-        //기본값 넣어주고
-        this.kunnrValue2 = "0000100028";
+      if (e.selectedValue.startsWith('Z1')) {
+        this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료고객코드"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
+
         //안내문
-        alert(`값에 맞는 주문처 삽입 완료.`, "알림");
+        alert(`주문처목록을 재설정 했습니다.`, "알림");
+
+        ////edit막고
+        //this.auartFlag = true;
+        ////기본값 넣어주고
+        //this.kunnrValue2 = "0000100028";
+        //임시로직
+        /*this.popupData.KUNNR = this.kunnrValue2;*/
+
         //2번rfc조회
         this.detailDataLoad();
       } else {
         this.auartFlag = false;
+        this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
         alert(`주문처를 직접 설정해주세요.`, "알림");
       }
 
@@ -569,8 +611,8 @@ export class FORDComponent {
     var selectData = this.dataGrid.instance.getSelectedRowsData();
 
 
-    var zsd3013Model = new ZSDS3013Model(selectData[0].KUNNR, selectData[0].KUNWE, "10", selectData[0].MATNR, selectData[0].AUART);
-    var zsd3014Model = new ZSDS3014Model(0, 0, 0, "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+    var zsd3013Model = new ZSDS3013Model(selectData[0].KUNNR, selectData[0].KUNWE, "10", selectData[0].MATNR, selectData[0].AUART, selectData[0].LGORT);
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
 
 
     var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
@@ -603,14 +645,16 @@ export class FORDComponent {
   public async detailDataLoad() {
     var selectData = this.popupData;
 
-
-
-    var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, "10", selectData.MATNR, selectData.AUART);
-    var zsd3014Model = new ZSDS3014Model(0, 0, 0, "", "", "", "", "", "", "", "", "", "", "", "", "", "");
-
+    var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, "10", selectData.MATNR, selectData.AUART, selectData.LGORT);
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
 
     var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
     var zsdList: ZSDEPSOENTRYInfoModel[] = [zsdModel];
+
+    
+    //if (selectData.KUNNR === "" || selectData.KUNWE === "" || selectData.MATNR === "" || selectData.AUART === "") {
+    //  return zsdList[0];
+    //}
 
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDEPSOENTRYInfoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDEPSOENTRYInfoModelList", zsdList, QueryCacheType.None);
 
@@ -627,9 +671,8 @@ export class FORDComponent {
     var data = this.popupData;
     let fixData = { VKORG: "1000", VTWEG: "10", SPART: "10", ZLOGFLG: "X", ZDOFLG: "", POSNR: "10", WERKS: "1000" };
     let userInfo = this.authService.getUser().data; // 나중에 고객번호 가져올때 사용(업무포탈도)
-
-    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, fixData.SPART, "", "", data.VDATU, new Date, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", data.VSBED, "", "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, fixData.ZDOFLG, "", "", "", "");
-    var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS);
+    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, fixData.SPART, "", "", "", data.VDATU, new Date, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", "", "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, fixData.ZDOFLG, "", "", "", "");
+    var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS, "", "", "");
     var zsds6002Model = new ZSDS6002Model(data.TEXT);
 
     var zsds6001List: ZSDS6001Model[] = [zsds6001Model];
@@ -666,8 +709,8 @@ export class FORDComponent {
   addOrder(e: any) {
 
 
-    var model1 = new ZSDS3100Model("", "", "", "", "", "", new Date, new Date, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
-    var model2 = new ZSDS6001Model("", "", 0, "", "", "", 0, 0, "", "");
+    var model1 = new ZSDS3100Model("", "", "", "", "", "", "", new Date, new Date, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "");
+    var model2 = new ZSDS6001Model("", "", 0, "", "", "", 0, 0, "", "", "", "", "");
     var model3 = new ZSDS6002Model("");
 
 
@@ -694,7 +737,7 @@ export class FORDComponent {
   public clearEntery() {
     //팝업화면에 사용되는 엔트리 초기화
     this.sd007Entery2.ClearSelectedValue();
-    this.sd007Entery3.ClearSelectedValue();
+    //this.sd007Entery3.ClearSelectedValue();
     this.maktEntery2.ClearSelectedValue();
     this.kunnEntery.ClearSelectedValue();
     this.dd07tEntery.ClearSelectedValue();

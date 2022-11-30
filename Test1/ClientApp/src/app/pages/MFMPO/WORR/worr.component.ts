@@ -28,6 +28,7 @@ import { ThemeManager } from '../../../shared/app.utilitys';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import dxTextBox from 'devextreme/ui/text_box';
+import { async } from '@angular/core/testing';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -175,7 +176,8 @@ export class WORRComponent implements OnInit {
   contList: ZPMT0010Model[] = [];
   faultList: ZPMS0009Model[] = [];
 
-  
+  //선택된 통지번호
+  qmnum: string = "";
 
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
@@ -185,6 +187,8 @@ export class WORRComponent implements OnInit {
 
   //그리드 수정제한
   isEditing: boolean = true;
+
+  private loadePeCount: number = 0;
 
   //_dataService: ImateDataService;
   /**
@@ -304,21 +308,42 @@ export class WORRComponent implements OnInit {
           alert("필수값을 입력하여 주십시오.");
         }
         else {
-          var count: number = 0;
+          /*var count: number = 1;*/
+          var objCount: number = 1;
+          var damCount: number = 1;
+          var reaCount: number = 1;
+          var actCount: number = 1;
 
-          this.FaultInfo = [];
+          var deleteIndex: number[] = [];
+
+          var selectedValue = this.orderInfo;
+
+          //선택된 키에 해당하는 데이터 이동
+          this.FaultInfo.forEach(async (row: any, index) => {
+            if (row.POSNR === selectedValue.POSNR) deleteIndex.push(index);
+          });
+
+          //역순으로 정렬
+          deleteIndex.sort((a, b) => (a > b ? -1 : 1));
+
+          //선택한 키에 해당하는 데이터 삭제
+          deleteIndex.forEach(async (index: number) => {
+            this.FaultInfo.splice(index, 1);
+          });
+
+          /*this.FaultInfo = [];*/
           var objPart = this.test1Entery.popupDataGrid.instance.getSelectedRowsData();
           var damPart = this.test2Entery.popupDataGrid.instance.getSelectedRowsData();
           var reaPart = this.test3Entery.popupDataGrid.instance.getSelectedRowsData();
           var actPart = this.test4Entery.popupDataGrid.instance.getSelectedRowsData();
           if (objPart.length > 0) {
             // 나중에 원인번호 바꾸기 (this.orderInfo.CAUSE_KEY)
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "B", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, ""));
-            count = count +1;
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, objCount.toString().padStart(4, '0'), "B", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, ""));
+            objCount = objCount +1;
           }
           if (damPart.length > 0) {
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "C", damPart[0].CODEGRUPPE, damPart[0].KURZTEXT_GR, damPart[0].CODE, damPart[0].KURZTEXT_CODE, this.text1.value));
-            count = count + 1;
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, damCount.toString().padStart(4, '0'), "C", damPart[0].CODEGRUPPE, damPart[0].KURZTEXT_GR, damPart[0].CODE, damPart[0].KURZTEXT_CODE, this.text1.value));
+            damCount = damCount + 1;
           }
 
           console.log(this.ActiInfo);
@@ -328,16 +353,16 @@ export class WORRComponent implements OnInit {
 
             //var checkData = this.faultList.find(item => item.CODE === row.CODE);
             //if (checkData === undefined) {
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
-            count = count + 1;
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, actCount.toString().padStart(4, '0'), "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            actCount = actCount + 1;
             //}
           });
           this.ReasonInfo.forEach(async (row: ZPMS0009Model) => {
 
             //var checkData = this.faultList.find(item => item.CODE === row.CODE);
             //if (checkData === undefined) {
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, count.toString(), "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
-            count = count + 1;
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, reaCount.toString().padStart(4, '0'), "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            reaCount = reaCount + 1;
             //}
           });
 
@@ -366,6 +391,25 @@ export class WORRComponent implements OnInit {
 
   }
 
+  /**
+ * 파서블 엔트리 데이터 로딩 완료
+ * @param e
+ */
+  onPEDataLoaded(e: any) {
+    this.loadePeCount++;
+    console.info(`DATA LOAD COUNT: ${this.loadePeCount}`);
+    /*
+     if (e.component.ClearSelectedValue != undefined) {
+       setTimeout(() => {
+         e.component.ClearSelectedValue();
+       });
+     }
+     */
+    if (this.loadePeCount >= 5) {
+      this.loadingVisible = false;
+      this.loadePeCount = 0;
+    }
+  }
 
   /**
    * Angular 초가화
@@ -395,6 +439,7 @@ export class WORRComponent implements OnInit {
     this.showPopup('Add', {}); //change undefined to {}
     this.isPopupVisible = false;
     this.faPopupVisible = false;
+    this.qmnum = e.data.QMNUM;
     this.detaildatareload(this);
 
     //this.showPopup('Add', {}); //change undefined to {}
@@ -511,9 +556,33 @@ export class WORRComponent implements OnInit {
 
   //고장추가 팝업
   addRow2: any = async (e: any) => {
+    if (this.qmnum === "") {
+      alert("통지번호가 없습니다.");
+      return;
+    }
+
+    var posnr: string = "";
+    var causeKey: string = "";
+      
     var selectData = this.gcMaterialList.instance.getSelectedRowsData();
+    if (selectData.length === 0) {
+      if (this.FaultInfo.length === 0) {
+        posnr = "1".padStart(4, '0');
+        causeKey = "1".padStart(4, '0');
+      } else {
+        var iPosnr = Number(this.FaultInfo.reduce((op, item: any) => op = op > item.POSNR ? op : item.POSNR, "0")) + 1;
+        var iCauseKey = Number(this.FaultInfo.reduce((op, item: any) => op = op > item.CAUSE_KEY ? op : item.CAUSE_KEY, "0")) + 1;
+        posnr = iPosnr.toString().padStart(4, '0');
+        causeKey = iCauseKey.toString().padStart(4, '0');
+      }
+    } else {
+      posnr = selectData[0].POSNR;
+      causeKey = selectData[0].CAUSE_KEY
+    }
+        
+
     this.showPopup2('Add', {}); //change undefined to {}
-    this.orderInfo = { NOTIF_NO: selectData[0].NOTIF_NO, POSNR: selectData[0].POSNR, CAUSE_KEY: selectData[0].CAUSE_KEY };
+    this.orderInfo = { NOTIF_NO: this.qmnum, POSNR: posnr, CAUSE_KEY: causeKey };
 
     /*팝업에 데이터 넣어주기*/
     //this.test1Value = selectData[0].CODE;
@@ -522,7 +591,7 @@ export class WORRComponent implements OnInit {
     this.ReasonInfo = [];
     this.ActiInfo = [];
 
-    this.FaultInfo.forEach(async (row: any) => {
+    this.FaultInfo.forEach(async (row: ZPMS0009Model) => {
 
       if (row.NOTIF_NO === selectData[0].NOTIF_NO && row.POSNR === selectData[0].POSNR) {
         if (row.KATALOGART === "B") {
@@ -533,19 +602,19 @@ export class WORRComponent implements OnInit {
           this.text1.value = row.FETXT;
         }
         else if (row.KATALOGART === "5") {
-          this.ReasonInfo.push(new ZPMS0009Model("", "", "", "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+          this.ReasonInfo.push(new ZPMS0009Model(this.qmnum, posnr, row.CAUSE_KEY, "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
         }
           else if (row.KATALOGART === "A") {
-          this.ActiInfo.push(new ZPMS0009Model("", "", "", "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+          this.ActiInfo.push(new ZPMS0009Model(this.qmnum, posnr, row.CAUSE_KEY, "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
         }
         
       }
     });
 
 
-    this.loadingVisible = true; 
+    /*this.loadingVisible = true; */
     //await this.faultdataload(this, selectData[0].NOTIF_NO);
-    this.loadingVisible = false;
+    /*this.loadingVisible = false;*/
 
   }
   async faultdataload(thisObj: WORRComponent, NOTIF_NO : string) {
@@ -622,7 +691,11 @@ export class WORRComponent implements OnInit {
     }
     var objPart = this.test3Entery.popupDataGrid.instance.getSelectedRowsData();
 
-    this.ReasonInfo.push(new ZPMS0009Model("", "", "", "5", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, this.text2.value));
+    var model: ZPMS0009Model[] = this.ReasonInfo;
+
+    var causeKey = (model.length + 1).toString().padStart(4, '0');
+
+    this.ReasonInfo.push(new ZPMS0009Model(this.orderInfo, this.orderInfo.POSNR, causeKey, "5", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, this.text2.value));
 
 
   }
@@ -634,7 +707,11 @@ export class WORRComponent implements OnInit {
     }
     var objPart = this.test4Entery.popupDataGrid.instance.getSelectedRowsData();
 
-    this.ActiInfo.push(new ZPMS0009Model("", "", "", "A", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, this.text3.value));
+    var model: ZPMS0009Model[] = this.ActiInfo;
+
+    var causeKey = (model.length + 1).toString().padStart(4, '0');
+
+    this.ActiInfo.push(new ZPMS0009Model(this.orderInfo, this.orderInfo.POSNR, causeKey, "A", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, this.text3.value));
 
 
   }

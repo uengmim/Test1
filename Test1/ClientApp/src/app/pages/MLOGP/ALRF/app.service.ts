@@ -82,6 +82,48 @@ const data: Data[] = [{
 
 ]
 
+
+const sort2: string[] = [
+  '1차운송사',
+  '2차운송사',
+
+];
+
+export class Data2 {
+  code!: string;
+
+  name!: string;
+}
+
+const data2: Data2[] = [
+  {
+    code: '1000',
+    name: '비료'
+  },
+
+  {
+    code: '2000',
+    name: '화학'
+  },
+];
+
+
+export class CarSeq {
+  code!: string;
+  name!: string;
+}
+
+const carSeq: CarSeq[] = [
+  {
+    code: "1",
+    name: "1차운송사"
+  },
+  {
+    code: "2",
+    name: "2차운송사"
+  }
+]
+
 @Injectable()
 export class Service {
   getData() {
@@ -89,5 +131,14 @@ export class Service {
   }
   getclient(): string[] {
     return clients;
+  }
+  getData2(): Data2[] {
+    return data2;
+  }
+  getSort2(): string[] {
+    return sort2;
+  }
+  getCarSeq(): CarSeq[] {
+    return carSeq;
   }
 }

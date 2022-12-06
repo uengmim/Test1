@@ -1,0 +1,140 @@
+<!--입찰신청투찰-->
+
+<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-text-box #bizNoText
+                   [showClearButton]="true"
+                   label="사업자등록번호"
+                   [(value)]="biznoValue"
+                   labelMode="floating"
+                   [maxLength]="40"
+                   [disabled]="true"
+                   [width]="180"></dx-text-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-date-box label="검색기간 기준일" [(value)]="biddtDate" type="date" [width]="130"
+                   displayFormat="yyyy-MM-dd">
+      </dx-date-box>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after">
+    <div *dxTemplate>
+      <dx-button text="조회" (onClick)="searchData($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+
+</dx-toolbar>
+
+
+<dx-data-grid id="grid"
+              [dataSource]="bidList"
+              keyExpr="BIDNO"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'single' }"
+              height="calc(100vh - 230px)"
+              [columnAutoWidth]="true"
+              [allowColumnReordering]="true"
+              columnResizingMode="widget"
+              [allowColumnResizing]="true">
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+  <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+
+
+
+  <!--Data column-->
+  <dxi-column dataField=""
+              caption="순번">
+  </dxi-column>
+  <dxi-column dataField="BIDNO"
+              caption="공고번호">
+  </dxi-column>
+  <dxi-column dataField="BIDNM"
+              caption="공고명">
+  </dxi-column>
+  <dxi-column dataField="BIDTY"
+              caption="공고일자">
+  </dxi-column>
+  <dxi-column dataField="BIDRUL"
+              caption="입찰방법">
+  </dxi-column>
+  <dxi-column dataField="BIDKD"
+              caption="입찰종류">
+  </dxi-column>
+  <dxi-column dataField="ANDT"
+              caption="현장설명회일자">
+  </dxi-column>
+  <dxi-column dataField="ANDTH"
+              caption="현장설명회시간">
+  </dxi-column>
+  <dxi-column dataField="ANLOC"
+              caption="현장설명회장소">
+  </dxi-column>
+  <dxi-column dataField="RFQDT"
+              caption="견적마감일자">
+  </dxi-column>
+  <dxi-column dataField="RFQDTH"
+              caption="견적마감시간">
+  </dxi-column>
+  <dxi-column dataField="QTADT"
+              caption="신청마감일자">
+  </dxi-column>
+  <dxi-column dataField="QTADTH"
+              caption="신청마감시간">
+  </dxi-column>
+  <dxi-column dataField="BISDT"
+              caption="입찰개시일자">
+  </dxi-column>
+  <dxi-column dataField="BISDTH"
+              caption="입찰개시시간">
+  </dxi-column>
+  <dxi-column dataField="BIFDT"
+              caption="입찰마감일자">
+  </dxi-column>
+  <dxi-column dataField="BIFDTH"
+              caption="입찰마감시간">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="견적차수">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="견적제출일시">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="견적금액">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="견적결과">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="입찰신청일시">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="입찰신청결과">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="입찰차수">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="입찰일시">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="입찰금액">
+  </dxi-column>
+  <dxi-column dataField=""
+              caption="입찰결과">
+  </dxi-column>
+
+</dx-data-grid>
+
+
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" [(visible)]="loadingVisible" shadingColor="rgba(0,0,0,0.4)" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
+

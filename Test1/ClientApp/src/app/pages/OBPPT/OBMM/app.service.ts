@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 export class Category {
-  Id!: number;
+  Id!: string;
 
   Name!: string;
 }
@@ -12,31 +12,31 @@ export class Role {
 }
 
 const category: Category[] = [{
-    Id: 1,
+    Id: "1",
     Name: '수리공사'
   }, {
-    Id: 2,
+  Id: "2",
     Name: '고정자산구매'
   }, {
-    Id: 3,
+  Id: "3",
     Name: '고정자산매각'
   }, {
-    Id: 4,
+  Id: "4",
     Name: '판촉물'
   }, {
-    Id: 5,
+  Id: "5",
     Name: '폐기물'
   }, {
-    Id: 6,
+  Id: "6",
     Name: '저장품내자'
   }, {
-    Id: 7,
+  Id: "7",
     Name: '저장품외자'
   }, {
-    Id: 8,
+  Id: "8",
     Name: '원재료'
   }, {
-    Id: 9,
+  Id: "9",
     Name: '상품'
   }]
 

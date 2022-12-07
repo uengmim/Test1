@@ -13,7 +13,8 @@ import { AppInfoService } from '../../../shared/services/app-info.service';
 import { Service, Role, Category } from './app.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
-  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent } from 'devextreme-angular';
+  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent
+} from 'devextreme-angular';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { ZCMT0020Model } from '../../../shared/dataModel/common/zcmt0020';
 import { AuthService } from '../../../shared/services';
@@ -28,6 +29,7 @@ import { formatDate } from '@angular/common';
 import { NbpAgentservice, DeviceInfo } from '../../../shared/services/nbp.agent.service'
 import notify from 'devextreme/ui/notify';
 import { async } from 'rxjs';
+import { deepCopy } from '../../../shared/imate/utility/object-copy';
 
 const sendRequest = function (value: any) {
   const invalidEmail = 'test@dx-email.com';
@@ -46,7 +48,7 @@ const sendRequest = function (value: any) {
 
 
 
-export class OBMMComponent  {
+export class OBMMComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) form!: DxFormComponent;
   @ViewChild('#gcContractList', { static: false }) gcContractList!: DxDataGridComponent;
@@ -56,10 +58,10 @@ export class OBMMComponent  {
   @ViewChild('businessClassEntery', { static: false }) businessClassEntery!: CommonPossibleEntryComponent;
   @ViewChild('accountClassEntery', { static: false }) accountClassEntery!: CommonPossibleEntryComponent;
   @ViewChild('questionCodeEntery', { static: false }) questionCodeEntery!: CommonPossibleEntryComponent;
-
+  @ViewChild('IDText', { static: false }) IDText!: DxTextBoxComponent;
   @ViewChild('countryEntery', { static: false }) countryEntery!: TablePossibleEntryComponent;
   @ViewChild('bizpmtagbox', { static: false }) bizpmtagbox!: DxTagBoxComponent;
-
+  //clearselectvalue
   callbacks = [];
 
   /**
@@ -80,8 +82,12 @@ export class OBMMComponent  {
   selectedLike: string;
   localappConfig: AppConfigService;
   selectedValue: string;
-  //팝업 닫기
-  compopupcloseButtonOptions: any;
+  //데이터 조회 버튼
+  searchButtonOptions: any;
+  //데이터 삭제 버튼
+  deleteButtonOptions: any;
+  //로딩
+  loadPanelOption: any;
 
   //국가 파서블엔트리 값
   countryValue: string | null = null;
@@ -90,7 +96,7 @@ export class OBMMComponent  {
   businessClassValue: string | null = null;
   accountClassValue: string | null = null;
   questionCodeValue: string | null = null;
-
+  key: any;
   //국가 파서블 엔트리 유효성 체크
   countryAdapter =
     {
@@ -128,7 +134,9 @@ export class OBMMComponent  {
   questionAdapter =
     {
       getValue: () => {
+
         return this.questionCodeValue;
+
       },
       applyValidationResults: (e: any) => {
         this.questionCodeEntery.validationStatus = e.isValid ? "valid" : "invalid"
@@ -141,7 +149,10 @@ export class OBMMComponent  {
   //데이터 저장 버튼
   saveButtonOptions: any;
   //회원가입
-  register: any;
+  zmmt8100: ZMMT8100Model;
+  //취급업종
+  zmmt8110: ZMMT8110Model;
+
   //취급업종
   categorydataSource: any;
 
@@ -179,12 +190,18 @@ export class OBMMComponent  {
 
   deviceInfo: any;
   casResult: any;
+  //이메일 룰
+  emailPattern: any = /^[^0-9]+$/;
 
+
+  selectItems: string[] = [];
   //버튼 제한
   isDisabled: boolean = false;
 
   //그리드 수정제한
   isEditing: boolean = true;
+
+  private orginCatagory: any = [];
 
   /**
  * 로딩된 PeCount
@@ -212,25 +229,27 @@ export class OBMMComponent  {
 
     //사업자구분
     this.roles = service.getRoles();
+
+    let me = this;
     //취급업종
     this.categorydataSource = new ArrayStore({
       data: service.getcategory(),
       key: 'Id',
+      onLoaded: function (result) {
+        // Your code goes here
+        me.orginCatagory = deepCopy(result)
+      }
     });
+
     this.rowCount1 = 0;
     this.rowCount2 = 0;
     //회원가입 폼 데이터
-    this.register = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", "if_imate", new Date, "", "if_imate", new Date, "", DIMModelStatus.UnChanged);
+    this.zmmt8100 = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", this.appConfig.interfaceId, new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
+    //취급업종 폼 데이터
+    this.zmmt8110 = new ZMMT8110Model(this.appConfig.mandt, "", "", this.appConfig.interfaceId, new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
 
-    setTimeout(async (that:OBMMComponent) => {
-      //mac 가져오기
-      let deviceInfo = await that.nbpAgetService.getDeviceInfo();
-      that.register.MACID = deviceInfo?.mac;
-    }, 0, this);
-    
-    //회원가입 폼 데이터
-    //this.register = new ZMMT8110Model(this.appConfig.mandt, "", "", "", new Date, "", "", new Date,"", DIMModelStatus.UnChanged);
+
 
     this._dataService = dataService;
     this.imInfo = imInfo;
@@ -266,9 +285,6 @@ export class OBMMComponent  {
     //저장버튼
     this.saveButtonOptions = {
       text: "저장",
-
-      type: 'success',
-      useSubmitBehavior: true,
       onClick: (e: any) => {
 
         this.dataInsert(this)
@@ -278,7 +294,7 @@ export class OBMMComponent  {
           alert("필수값을 입력하여 주십시오.");
         }
         else {
-          alert("회원가입이 되었습니다.");
+          alert("회원 정보가 수정되었습니다.");
         }
       },
     };
@@ -291,13 +307,18 @@ export class OBMMComponent  {
 
       }
     }
-    //팝업닫기버튼
-    this.compopupcloseButtonOptions = {
-      icon: 'close',
-      onClick(e: any) {
-        that.comPopupVisible = false;
+    //조회버튼
+    this.searchButtonOptions = {
+      text: "조회",
+
+      onClick: async () => {
+        this.loadPanelOption = { enabled: true };
+        this.dataLoad(this.imInfo, this.dataService, this);
+
       },
     };
+
+
   }
 
   /**
@@ -378,45 +399,22 @@ export class OBMMComponent  {
     PossibleEntryDataStoreManager.removeDataStore("obmr");
   }
 
-  //중복 검사
-  async Duplication() {
-    var result = await this.dataLoad(this.imInfo, this.dataService, this);
-    console.log(result);
 
-    if (result.length > 0) {
-      alert("중복된 아이디가 있습니다.");
-    } else {
-      alert("사용 가능한 아이디입니다.")
-    }
-  }
-  //컴퓨터등록
-  ComRegister() {
-    this.showPopup('Add', {});
-    this.loadingVisible = true;
-    this.loadingVisible = false; 
-
+  deleteRecords() {
+    if (confirm("삭제하시겠습니까?"))
+      this.dataDelete(this.key, this.dataService, this);
   }
 
 
-  //팝업이벤트
-  showPopup(popupMode: any, data: any): void {
-    this.formData = {};
-    console.log(data);
-    console.log(this.formData);
-
-    this.formData = data;
-    this.popupMode = popupMode;
-    this.comPopupVisible = true;
-  }
   //국가 코드 값 변경
   onCountryCodeValueChanged(e: any) {
-    this.register.COUNTRY = e.selectedValue
+    this.zmmt8100.COUNTRY = e.selectedValue
 
     return;
   }
   //취급업종 코드 값 변경
   onCategoryCodeValueChanged(e: any) {
-    this.register.BIZUPJ = e.selectedValue
+    this.zmmt8110.BIZUPJ = e.selectedValue
 
     return;
   }
@@ -426,40 +424,109 @@ export class OBMMComponent  {
   }
   //사업자구분 코드 값 변경
   onBusinessClassCodeValueChanged(e: any) {
-    this.register.BIZTY = e.selectedValue
+    this.zmmt8100.BIZTY = e.selectedValue
 
     return;
   }
   //거래처구분 코드 값 변경
   onAccountClassCodeValueChanged(e: any) {
-    this.register.LIFTY = e.selectedValue
+    this.zmmt8100.LIFTY = e.selectedValue
 
     return;
   }
   //질문코드 코드 값 변경
   onQuestionCodeCodeValueChanged(e: any) {
-    this.register.QSTION = e.selectedValue
+    this.zmmt8100.QSTION = e.selectedValue
 
     return;
   }
 
   //사업자 구분 값 변경
   onBiztyValueChanged(e: any) {
-    this.register.BIZTY = e.value[0]
+    this.zmmt8100.BIZTY = e.value[0]
   }
   //사용여부 값 변경
   onEVAYNValueChanged(e: any) {
-    this.register.EVAYN = e.value[0]
+    this.zmmt8100.EVAYN = e.value[0]
   }
   // 데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMMComponent) {
+    //Main Data Form 데이터 조회
+    var Zmmt8100result = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
+      `LOGID = '${thisObj.IDText.value}'`, "", QueryCacheType.None);
 
-    var resultModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
-      `LOGID = '${thisObj.register.LOGID}'`, "", QueryCacheType.None);
+    if (Zmmt8100result.length == 0) {
+      alert(" 조회하시는 회원 ID가 없습니다.")
+    } else {
+      thisObj.zmmt8100 = Zmmt8100result[0];
+      //파서블엔트리 값 조회
+      this.businessClassValue = Zmmt8100result[0].BIZTY;
+      this.accountClassValue = Zmmt8100result[0].LIFTY;
+      this.countryValue = Zmmt8100result[0].COUNTRY;
+      this.questionCodeValue = Zmmt8100result[0].QSTION;
 
-    return resultModel;
+      //Sub Data Form 데이터 조회
+      var Zmmt8110result = await dataService.SelectModelData<ZMMT8110Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8110ModelList", [],
+        `BIZNO = '${thisObj.zmmt8100.BIZNO}'`, "", QueryCacheType.None);
+
+      thisObj.zmmt8110 = Zmmt8110result[0];
+      //루프 돌면서 값 받아오기
+      Zmmt8110result.forEach((array: ZMMT8110Model) => {
+        this.selectItems.push(array.BIZUPJ);
+      })
+    }
+
+    
+
   }
+  //데이터 삭제
+  public async dataDelete(key: any, dataService: ImateDataService, thisObj: OBMMComponent) {
+    try {
 
+
+      //var DeleteData = new ZMMT8100Model(key, key, key.LIFNR, key.NAME1, key.APPST, key.LOGID, key.LOGPW, key.MACID, key.INTIP, key.J_1KFREPRE, key.ADDHQ, key.HOUSE_NO,
+      //  key.SEARCHTERM1, key.J_1KFTIND, key.J_1KFTBUS, key.POSTL_COD1, key.BIZPM, key.LICNO, key.OFFNM, key.TELF1, key.TELF2, key.FAX, key.E_MAIL, key.BRANCH,
+      //  key.BIZTY, key.LIFTY, key.COUNTRY, key.QSTION, key.ANSWER, key.REQDT, key.IUPDT, key.INVDT, key.CREDT, key.CREGD, key.EVAYN, key.LSTDT, key.LSTID, key.STODT,
+      //  key.STOID, key.DUEDT, key.ZWELS, key.ZTERM, key.KALSK, key.REMARK, key.ERNAM, key.ERDAT, key.ERZET, key.AENAM, key.AEDAT, key.AEZET, DIMModelStatus.Delete);
+
+      thisObj.zmmt8100.ModelStatus = DIMModelStatus.Delete;  
+      var modelList: ZMMT8100Model[] = [thisObj.zmmt8100];
+      this.rowCount1 = await this.dataService.ModifyModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", modelList);
+
+      var selectResult = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
+        `BIZNO = '${thisObj.zmmt8100.BIZNO}'`, "", QueryCacheType.None);
+
+      if (selectResult.length > 0 ) {
+        alert("삭제되지 않았습니다.");
+      } else {
+        alert("회원ID가 삭제되었습니다.");
+        this.zmmt8100 = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+          "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", this.appConfig.interfaceId,
+          new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
+        thisObj.accountClassEntery.ClearSelectedValue();
+        thisObj.accountClassEntery.ClearDataSource();
+
+        thisObj.businessClassEntery.ClearSelectedValue();
+        thisObj.businessClassEntery.ClearDataSource();
+
+        thisObj.accountClassEntery.ClearSelectedValue();
+        thisObj.accountClassEntery.ClearDataSource();
+
+        thisObj.questionCodeEntery.ClearSelectedValue();
+        thisObj.questionCodeEntery.ClearDataSource();
+
+        thisObj.countryEntery.ClearSelectedValue();
+        thisObj.countryEntery.ClearDataSource();
+
+        thisObj.bizpmtagbox.instance.reset();
+
+      }
+
+    }
+    catch (error) {
+      alert(error);
+    }
+  }
   //  데이터 삽입
   public async dataInsert(thisObj: OBMMComponent) {
     try {
@@ -467,8 +534,7 @@ export class OBMMComponent  {
       let minDate = new Date("0001-01-01");
       let nowTime = formatDate(new Date(), "HH:mm:ss", "en-US");
 
-      var maininsertData = thisObj.register as ZMMT8100Model;
-      var subinsertData = thisObj.register as ZMMT8110Model;
+      var maininsertData = thisObj.zmmt8100 as ZMMT8100Model;
 
       maininsertData.REQDT = now;
       maininsertData.IUPDT = now;
@@ -480,25 +546,29 @@ export class OBMMComponent  {
       maininsertData.LSTDT = minDate;
       maininsertData.DUEDT = minDate;
 
-      maininsertData.ModelStatus = DIMModelStatus.Add;
+      maininsertData.ModelStatus = DIMModelStatus.Modify;
 
       var mainmodelList: ZMMT8100Model[] = [maininsertData];
- 
+
       var select1: boolean = false;
       var select2: boolean = false;
 
       var submodelList: ZMMT8110Model[] = [];
+      for (let org of thisObj.orginCatagory) {
+        let orgData = org as Category;
+        submodelList.push(new ZMMT8110Model("600", this.zmmt8100.BIZNO, orgData.Id, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
+      }
+
       this.bizpmtagbox.value.forEach((value: any) => {
         if (value === 1)
           select1 = true;
 
-        if (value === 2)
+        if (value === 3)
           select2 = true;
 
-        submodelList.push(new ZMMT8110Model("600", this.register.BIZNO, value, "POT01", now, nowTime, "POT01", now, nowTime, DIMModelStatus.Add));
+        submodelList.push(new ZMMT8110Model("600", this.zmmt8100.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
       });
 
-      subinsertData.ModelStatus = DIMModelStatus.Add;
 
       maininsertData.EVAYN = select1 || select2 ? "X" : ""
 
@@ -513,10 +583,10 @@ export class OBMMComponent  {
   //비밀번호 확인
   passwordComparison = () => this.form.instance.option('formData').LOGPW;
   //이메일 확인
-  asyncValidation(params:any) {
+  asyncValidation(params: any) {
     return sendRequest(params.value);
   }
-  BIZTYonGridBoxOptionChanged(e:any) {
+  BIZTYonGridBoxOptionChanged(e: any) {
     if (e.name === 'value') {
       this.roleGridBoxOpened = false;
       this.ref.detectChanges();
@@ -528,5 +598,10 @@ export class OBMMComponent  {
       this.statusGridBoxOpened = false;
       this.ref.detectChanges();
     }
+  }
+
+  onTagValueChanged(e: any) {
+    this.zmmt8110.BIZUPJ = e.value;
+
   }
 }

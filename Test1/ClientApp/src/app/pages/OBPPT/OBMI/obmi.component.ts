@@ -14,7 +14,8 @@ import { AppInfoService } from '../../../shared/services/app-info.service';
 import { Service, Role, Category } from './app.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
-  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxButtonComponent } from 'devextreme-angular';
+  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxButtonComponent
+} from 'devextreme-angular';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AuthService } from '../../../shared/services';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
@@ -45,7 +46,7 @@ const sendRequest = function (value: any) {
 
 
 
-export class OBMIComponent  {
+export class OBMIComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) form!: DxFormComponent;
   @ViewChild('#gcContractList', { static: false }) gcContractList!: DxDataGridComponent;
@@ -135,7 +136,7 @@ export class OBMIComponent  {
     this.rowCount2 = 0;
     //회원가입 폼 데이터
     this.searchID = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", "", new Date, "", "", new Date, "", DIMModelStatus.UnChanged);
+      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", this.appConfig.interfaceId, new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
 
     this._dataService = dataService;
     this.imInfo = imInfo;
@@ -157,7 +158,7 @@ export class OBMIComponent  {
       text: "재설정",
       type: 'success',
       useSubmitBehavior: true,
-      disabled : true,
+      disabled: true,
       onClick: (e: any) => {
 
         this.dataInsert(this)
@@ -203,7 +204,7 @@ export class OBMIComponent  {
     var resultModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
       `BIZNO = '${thisObj.searchID.BIZNO}'
        AND LOGID = '${thisObj.searchID.LOGID}'
-       AND E_Mail = '${thisObj.searchID.E_Mail}'
+       AND E_MAIL = '${thisObj.searchID.E_MAIL}'
        AND QSTION = '${thisObj.searchID.QSTION}'
        AND ANSWER = '${thisObj.searchID.ANSWER}' `, "", QueryCacheType.None);
 
@@ -234,7 +235,7 @@ export class OBMIComponent  {
       maininsertData.ModelStatus = DIMModelStatus.Modify;
 
       var mainmodelList: ZMMT8100Model[] = [maininsertData];
- 
+
       var select1: boolean = false;
       var select2: boolean = false;
 
@@ -274,7 +275,7 @@ export class OBMIComponent  {
   //비밀번호 확인
   passwordComparison = () => this.form.instance.option('formData').LOGPW;
   //이메일 확인
-  asyncValidation(params:any) {
+  asyncValidation(params: any) {
     return sendRequest(params.value);
   }
 

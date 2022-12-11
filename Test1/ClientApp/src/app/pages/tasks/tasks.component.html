@@ -51,7 +51,7 @@
                       (onDataLoaded)="onPEDataLoaded($event)"
                       (onEntryValueChanged)="onSd004ValueChanged($event)"></nh-possible-comm>
 
-    <nh-possible-table #maraEntery
+    <nh-possible-comm #maraEntery
                         dataStoreKey ="task"
                        [codeInfo]="maraCode"
                        valueColumn="MATNR"
@@ -71,7 +71,7 @@
       <nbp-validator [adapter]="maraAdapter">
         <dxi-validation-rule type="required"></dxi-validation-rule>
       </nbp-validator>
-    </nh-possible-table>
+    </nh-possible-comm>
 
     <dx-button stylingMode="contained"
                text="저장"

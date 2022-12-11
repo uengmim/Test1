@@ -40,6 +40,7 @@ const sendRequest = function (value: any) {
 
 @Component({
   templateUrl: './obmr.component.html',
+  styleUrls: ['./obmr.component.scss'],
   providers: [ImateDataService, Service],
   //  changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -90,6 +91,10 @@ export class OBMRComponent  {
   businessClassValue: string | null = null;
   accountClassValue: string | null = null;
   questionCodeValue: string | null = null;
+
+
+  //이메일 룰
+  emailPattern: any = /^[^0-9]+$/;
 
   //국가 파서블 엔트리 유효성 체크
   countryAdapter =
@@ -221,7 +226,7 @@ export class OBMRComponent  {
     this.rowCount2 = 0;
     //회원가입 폼 데이터
     this.register = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", "if_imate", new Date, "", "if_imate", new Date, "", DIMModelStatus.UnChanged);
+      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", this.appConfig.interfaceId, new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
 
     setTimeout(async (that:OBMRComponent) => {
       //mac 가져오기
@@ -392,13 +397,6 @@ export class OBMRComponent  {
 
     }
   }
-  //컴퓨터등록
-  ComRegister() {
-    this.showPopup('Add', {});
-    this.loadingVisible = true;
-    this.loadingVisible = false; 
-
-  }
 
 
   //팝업이벤트
@@ -495,10 +493,10 @@ export class OBMRComponent  {
         if (value === 1)
           select1 = true;
 
-        if (value === 2)
+        if (value === 3)
           select2 = true;
 
-        submodelList.push(new ZMMT8110Model("600", this.register.BIZNO, value, "POT01", now, nowTime, "POT01", now, nowTime, DIMModelStatus.Add));
+        submodelList.push(new ZMMT8110Model("600", this.register.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
       });
 
       subinsertData.ModelStatus = DIMModelStatus.Add;

@@ -1,0 +1,159 @@
+<!--구매계약확인-->
+<div style="margin:10px 10px 0px 10px">
+  <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <div style="float: left; width: auto; margin-right: 10px; ">
+          <dx-date-box label="계약기간(From)" [(value)]="startDate" type="date" [width]="130"
+                       displayFormat="yyyy-MM-dd" (onValueChanged)="onDateChange($event)">
+          </dx-date-box>
+        </div>
+        <div style="float: left; width: auto">
+          <dx-date-box label="계약기간(To)" [(value)]="endDate" type="date" [width]="130"
+                       displayFormat="yyyy-MM-dd" (onValueChanged)="onDateChange($event)">
+          </dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
+      <div *dxTemplate style="margin-top:7px;">
+        <dx-select-box placeholder="접수구분"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-text-box #bizNoText
+                     [showClearButton]="true"
+                     label="사업자등록번호"
+                     labelMode="floating"
+                     [maxLength]="40"
+                     [disabled]="true"
+                     [width]="180"></dx-text-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-text-box #companyText
+                     [showClearButton]="true"
+                     label="회사명"
+                     [disabled]="true"
+                     labelMode="floating"
+                     [maxLength]="40"
+                     [width]="230"></dx-text-box>
+      </div>
+    </dxi-item>
+  </dx-toolbar>
+
+
+  <dx-data-grid #dataList
+                [dataSource]="gridList"
+                keyExpr="CONNO"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                [selection]="{ mode: 'single' }"
+                (onSelectionChanged)="selectedChanged($event)"
+                height="calc(100vh - 300px)"
+                [columnAutoWidth]="true"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [allowColumnResizing]="true">
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+
+
+
+    <!--Data column-->
+    <dxi-column dataField="CONDT"
+                caption="계약일자">
+    </dxi-column>
+
+    <dxi-column dataField="CONNO"
+                caption="계약번호">
+    </dxi-column>
+    <dxi-column dataField="CONNM"
+                caption="계약건명">
+    </dxi-column>
+    <dxi-column dataField="DUEDT1"
+                caption="납기일자">
+    </dxi-column>
+    <dxi-column dataField="BIZDT"
+                caption="거래처\n접수일자">
+    </dxi-column>
+    <dxi-column dataField="자재 납품일자"
+                caption="자재 납품일자">
+    </dxi-column>
+    <dxi-column dataField="BIDNO"
+                caption="구매공고번호">
+    </dxi-column>
+    <dxi-column dataField="MOMDT"
+                caption="구매부서 각서접수일">
+    </dxi-column>
+
+
+
+  </dx-data-grid>
+
+  <!-- 하단 계약 폼 -->
+  <div>
+
+    <dx-form id="form"
+             [formData]="conFormData"
+             width="100%"
+             style="margin:20px 10px 20px 10px" [colCount]="4">
+
+      <dxi-item itemType="group" [colCount]="3" [colSpan]="3" style="margin-top:5px">
+        <dxi-item dataField="CONNM" [colSpan]="3" [disabled]="true">
+          <dxo-label text="계약명"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="CONDT"  editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date'}" [disabled]="true">
+          <dxo-label text="계약일자"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="CONNO" [disabled]="true">
+          <dxo-label text="계약번호"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="BIZDT"  editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date'}" [disabled]="true">
+          <dxo-label text="계약서 접수일자"></dxo-label>
+        </dxi-item>
+
+      </dxi-item>
+
+      <dxi-item itemType="group" [colCount]="1" style="margin-top:5px">
+        <dxi-item dataField="Notes" [editorOptions]="{ height: 90 }" [colSpan]="1">
+          <dxo-label text="계약서접수버튼" [visible]="false"></dxo-label>
+          <div *dxTemplate>
+            <dx-button template="applyTemplate"
+                       [text]="applyButtonText"
+                      (onClick)="apply()"
+                       [width]="80" [height]="70" type="success">
+              <div *dxTemplate="let data of 'applyTemplate'">
+                <div [innerHtml]="data.text" style="height: 90px; line-height: 30px;"></div>
+              </div>
+            </dx-button>
+          </div>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item style="min-height:50px;" [colSpan]="4">
+        <div style="background-color: rgba(191, 191, 191, 0.15); height: 50px; width: 82%; font-size:12pt; text-align:center; line-height:50px; color:midnightblue">
+          <div>
+            계약서 / 청렴계약이행각서 / 계약보증금 지급각서 등을 출력할 수 있습니다.
+          </div>
+        </div>
+      </dxi-item>
+
+    </dx-form>
+
+  </div>
+
+</div>
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>
+

@@ -22,6 +22,7 @@ import { Service, Product } from './app.service';
 import { DxDataGridComponent, DxTextBoxComponent, } from 'devextreme-angular';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import ArrayStore from 'devextreme/data/array_store';
+import { confirm, alert } from "devextreme/ui/dialog";
 import { AuthService } from '../../../shared/services';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { ThemeManager } from '../../../shared/app.utilitys';
@@ -305,7 +306,7 @@ export class WORRComponent implements OnInit {
 
         let result = e.validationGroup.validate();
         if (!result.isValid) {
-          alert("필수값을 입력하여 주십시오.");
+          alert("필수값을 입력하세요.", "알림");
         }
         else {
           /*var count: number = 1;*/
@@ -557,7 +558,7 @@ export class WORRComponent implements OnInit {
   //고장추가 팝업
   addRow2: any = async (e: any) => {
     if (this.qmnum === "") {
-      alert("통지번호가 없습니다.");
+      alert("통지번호가 없습니다.", "알림");
       return;
     }
 
@@ -796,50 +797,52 @@ export class WORRComponent implements OnInit {
   ReqRecords2: any = async () => {
 
     var check: number = 0;
-    //검수요청 상태업데이트
-    this.contList.forEach(async (row: ZPMT0010Model) => {
-      row.STAT = "I";
+    if (await confirm("요청하시겠습니까?", "알림")) {
+      //검수요청 상태업데이트
+      this.contList.forEach(async (row: ZPMT0010Model) => {
+        row.STAT = "I";
 
-    });
-    this.loadingVisible = true;
-    var resultModel = await this.datainsert2(this);
-    this.loadingVisible = false;
-    if (resultModel === null)
-      return;
+      });
+      this.loadingVisible = true;
+      var resultModel = await this.datainsert2(this);
+      this.loadingVisible = false;
+      if (resultModel === null)
+        return;
 
-    if (resultModel.E_TYPE === "E")
-      alert(resultModel.E_MSG);
-    else
-      alert("저장완료");
+      if (resultModel.E_TYPE === "E")
+        alert(resultModel.E_MSG, "오류");
+      else
+        alert("요청되었습니다.", "알림");
 
-    //this.contractList = resultModel.ITAB_DATA3[0]
-    //this.contractList = resultModel.ITAB_DATA4[0]
+      //this.contractList = resultModel.ITAB_DATA3[0]
+      //this.contractList = resultModel.ITAB_DATA4[0]
 
-    this.isPopupVisible = false;
-    this.detaildatareload(this);
-
+      this.isPopupVisible = false;
+      this.detaildatareload(this);
+    }
   }
 
   //작업결과등록 버튼
   ReqRecords3: any = async () => {
-    this.loadingVisible = true;
-    var resultModel = await this.datainsert2(this);
-    this.loadingVisible = false;
-    if (resultModel === null)
-      return;
+    if (await confirm("저장하시겠습니까?", "알림")) {
+      this.loadingVisible = true;
+      var resultModel = await this.datainsert2(this);
+      this.loadingVisible = false;
+      if (resultModel === null)
+        return;
 
-    if (resultModel.E_TYPE === "E")
-      alert(resultModel.E_MSG);
-    else {
-      alert("저장완료");
-      this.detaildatareload(this);
+      if (resultModel.E_TYPE === "E")
+        alert(resultModel.E_MSG, "오류");
+      else {
+        alert("저장되었습니다.", "알림");
+        this.detaildatareload(this);
+      }
+
+      //this.contractList = resultModel.ITAB_DATA3[0]
+      //this.contractList = resultModel.ITAB_DATA4[0]
+
+      this.isPopupVisible = false;
     }
-
-    //this.contractList = resultModel.ITAB_DATA3[0]
-    //this.contractList = resultModel.ITAB_DATA4[0]
-
-    this.isPopupVisible = false;
-
   }
 
   onCodeValueChanged(e: any) {
@@ -917,7 +920,7 @@ export class WORRComponent implements OnInit {
 
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
     if (resultModel[0].E_TYPE !== "S") {
-      alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`);
+      alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
       return [];
     }
 
@@ -949,7 +952,7 @@ export class WORRComponent implements OnInit {
 
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0006Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0006ModelList", modelList, QueryCacheType.None);
     if (resultModel[0].E_TYPE === "E") {
-      alert(`데이터가 없습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`);
+      alert(`데이터가 없습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
       return [];
     }
     return resultModel[0].ITAB_DATA;
@@ -976,7 +979,8 @@ export class WORRComponent implements OnInit {
       return insertModel[0];
     }
     catch (error) {
-      alert(error);
+      var errorData = error as Error
+      alert(errorData.message, "알림");
       return null;
     }
   }

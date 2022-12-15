@@ -42,6 +42,8 @@
                      displayExpr="name"
                      valueExpr="code"
                      value="O"
+                     label="액상구분"
+                     labelMode="floating"
                      (onValueChanged)="onGubunValueChanged($event)"></dx-select-box>
     </div>
   </dxi-item>
@@ -387,8 +389,8 @@
                 <nh-possible-comm [codeInfo]="tdlnr1Code" #tdlnr1CodeDynamic
                                   [dataStoreKey]="dataStoreKey"
                                   [(selectedValue)]="tdlnr1Value"
-                                  valueColumn="ZCM_CODE3"
-                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                  valueColumn="LIFNR"
+                                  valueDisplayFormat="%NAME1%(%LIFNR%)"
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   (onDataLoaded)="onPEDataLoaded($event)"
@@ -401,8 +403,8 @@
                 <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2CodeDynamic
                                   [dataStoreKey]="dataStoreKey"
                                   [(selectedValue)]="tdlnr2Value"
-                                  valueColumn="ZCM_CODE3"
-                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                  valueColumn="LIFNR"
+                                  valueDisplayFormat="%NAME1%(%LIFNR%)"
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   (onDataLoaded)="onPEDataLoaded($event)"
@@ -411,6 +413,31 @@
             </dxi-item>
           </dxi-item>
           <dxi-item itemType="group" caption="" [colCount]="3">
+            <dxi-item dataField="ZCARNO" editorType="dxTextBox">
+              <dxo-label text="차량번호"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table #zcarnoCodeDynamic
+                                   [dataStoreKey]="dataStoreKey"
+                                   [codeInfo]="zcarnoCode"
+                                   valueColumn="ZCARNO"
+                                   [showClearButton]="true"
+                                   valueDisplayFormat="%ZCARNO%"
+                                   width="auto"
+                                   [(selectedValue)]="zcarnoValue"
+                                   [gridBoxWidth]="500"
+                                   class="weight-test"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [showDataLoadingPanel]="showDataLoadingPanel"
+                                   (onEntryValueChanged)="onZcarnoCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ZDRIVER" editorType="dxTextBox">
+              <dxo-label text="운전기사명"></dxo-label>
+              <!--<div *dxTemplate>
+      <dx-text-box [disabled]="popupStat"></dx-text-box>
+    </div>-->
+            </dxi-item>
+
             <dxi-item dataField="ZCARTYPE">
               <dxo-label text="화물차종"></dxo-label>
               <div *dxTemplate>
@@ -426,18 +453,7 @@
                                    (onEntryValueChanged)="onzcartypeCodeValueChanged($event)"></nh-possible-table>
               </div>
             </dxi-item>
-            <dxi-item dataField="ZCARNO" editorType="dxTextBox">
-              <dxo-label text="차량번호"></dxo-label>
-              <!--<div *dxTemplate>
-                <dx-text-box [disabled]="popupStat"></dx-text-box>
-              </div>-->
-            </dxi-item>
-            <dxi-item dataField="ZDRIVER" editorType="dxTextBox">
-              <dxo-label text="운전기사명"></dxo-label>
-              <!--<div *dxTemplate>
-                <dx-text-box [disabled]="popupStat"></dx-text-box>
-              </div>-->
-            </dxi-item>
+
           </dxi-item>
         </dxi-item>
 

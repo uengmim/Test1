@@ -19,6 +19,7 @@ import { AppInfoService } from '../../../shared/services/app-info.service';
 import { Service, Product } from './app.service';
 import { DxDataGridComponent, } from 'devextreme-angular';
 import ArrayStore from 'devextreme/data/array_store';
+import { confirm, alert } from "devextreme/ui/dialog";
 import { AuthService } from '../../../shared/services';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { ThemeManager } from '../../../shared/app.utilitys';
@@ -237,17 +238,18 @@ export class WOSTComponent {
     this.dataGrid.instance.saveEditData();
   }
   ReqRecords: any = async () => {
-    this.loadingVisible = true;
-    var resultModel = await this.datainsert();
-    this.loadingVisible = false;
-    if (resultModel.E_TYPE !== "S") {
-      alert(`자재요청을 하지 못했습니다.\n\nSAP 메시지: ${resultModel.E_MSG}`);
-      return;
+    if (await confirm("요청하시겠습니까?", "알림")) {
+      this.loadingVisible = true;
+      var resultModel = await this.datainsert();
+      this.loadingVisible = false;
+      if (resultModel.E_TYPE !== "S") {
+        alert(`자재요청을 하지 못했습니다.\n\nSAP 메시지: ${resultModel.E_MSG}`, "오류");
+        return;
+      }
+      this.orderInfo = resultModel.ITAB_DATA1[0]
+
+      alert(`자재요청 하였습니다.`, "알림");
     }
-    this.orderInfo = resultModel.ITAB_DATA1[0]
-
-    alert(`자재요청 하였습니다.`);
-
   }
 
   //데이터 로드
@@ -262,7 +264,7 @@ export class WOSTComponent {
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
     this.loadingVisible = false;
     if (resultModel[0].E_TYPE !== "S") {
-      alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`);
+      alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
       return [];
     } 
     return resultModel[0].ITAB_DATA;

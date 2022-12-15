@@ -22,8 +22,12 @@ import {
   DxTextBoxModule,
   DxTemplateModule,
 } from 'devextreme-angular';
-import { AppInfoService } from '../../../shared/services';
-
+import { AppInfoService, AuthService } from '../../../shared/services';
+import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
+import { CodeInfoType, TableCodeInfo } from '../../../shared/app.utilitys';
+import { AppConfigService } from '../../../shared/services/appconfig.service';
+import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { ZSDIFPORTALSAPSDNHISPSndModel, ZSDS5050Model } from '../../../shared/dataModel/MFSAP/ZsdIfPortalSapSdNhispSndProxy';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -40,20 +44,29 @@ if (!/localhost/.test(document.location.host)) {
 export class KSREComponent {
   @ViewChild(DxDataGridComponent, { static: false })
   dataGrid!: DxDataGridComponent;
-  states: string[];
-  states2!: State2[];
-  states3!: State3[];
-  states4!: State4[];
-  states5!: State5[];
-  states6!: State6[];
-  states7!: State7[];
+  @ViewChild('kunnrEntery3', { static: false }) kunnrEntery3!: TablePossibleEntryComponent;
+  @ViewChild('lgEntery', { static: false }) lgEntery!: TablePossibleEntryComponent;
+  //UI 데이터 로딩 패널
+
+  loadingVisible: boolean = false;
+  kunnCode: TableCodeInfo;
+  lgCode: TableCodeInfo;
+
   orderInfo: any;
   dataSource: any;
+  orderData: any;
   //조회버튼
   searchButtonOptions: any;
   data: any;
   backButtonOption: any;
-
+  private loadePeCount: number = 0;
+  dataLoading: boolean = false;
+  enteryLoading: boolean = false;
+  loadPanelOption: any;
+  /**
+ * 데이터 스토어 키
+ * */
+  dataStoreKey: string = "ksre";
   //insert,modify,delete 
   rowCount: number;
   _dataService: ImateDataService;
@@ -72,39 +85,36 @@ export class KSREComponent {
   popupVisible = false;
   collapsed: any;
 
-  //multiseletbox
-  gridBoxValue1: string[] = [];
-  gridBoxValue2: string[] = [];
-  gridBoxValue3: string[] = [];
-  gridBoxValue4: string[] = [];
-  gridBoxValue5: string[] = [];
-  gridBoxValue6: string[] = [];
-  gridBoxValue7: string[] = [];
-  gridBoxValue8: string[] = [];
-  gridBoxValue9: string[] = [];
-  gridBoxValue10: string[] = [];
-  formEmployee!: Employee;
-  
+  /*Entery value 선언*/
+  kunnrValue!: string | null;
+  //비료창고
+  lgValue!: string | null;
 
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | 보관검수대비 실출고량";
     this.dataSource = this.makeAsyncDataSource(service);
+    this.kunnCode = appConfig.tableCode("비료납품처");
+    this.lgCode = appConfig.tableCode("비료창고");
+    //----------------------------------------------------------------------------------------------------------
+    let codeInfos = [
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgCode),
 
+    ];
+
+    PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
+    //---------------------------------------------------------------------------------------------------------
+
+    this.kunnrValue = "";
+    this.lgValue = "";
     const that = this;
     //insert,modify,delete 
     this._dataService = dataService;
     this.rowCount = 0;
     let modelTest01 = this;
-
-    this.states = service.getStates();
-    this.states2 = service.getStates2();
-    this.states3 = service.getStates3();
-    this.states4 = service.getStates4();
-    this.states5 = service.getStates5();
-    this.states6 = service.getStates6();
-    this.states7 = service.getStates7();
-
+    this.loadingVisible = true;
+    this.loadPanelOption = { enabled: false };
       this.closeButtonOptions = {
         text: 'Close',
         onClick(e: any) {
@@ -113,9 +123,9 @@ export class KSREComponent {
     }
     //조회버튼
     this.searchButtonOptions = {
-      icon: 'search',
+      text: '조회',
       onClick: async () => {
-        this.dataGrid.instance.refresh();
+        this.dataLoad();
       },
     };
     };
@@ -143,7 +153,41 @@ export class KSREComponent {
     this.dataGrid.instance.saveEditData();
   }
 
+  //데이터로드
+  public async dataLoad() {
+    var zsds5050: ZSDS5050Model[] = [];
+    var zsdsIf = new ZSDIFPORTALSAPSDNHISPSndModel("", "", this.startDate, new Date(), "", "", this.kunnrEntery3.selectedValue ?? "", "", this.lgEntery.selectedValue ?? "", "",  "", "", "", "", "", "", "", "", "", "", "", "", "", "", zsds5050);
+    var model: ZSDIFPORTALSAPSDNHISPSndModel[] = [zsdsIf];
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSDNHISPSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSDNHISPSndModelList", model, QueryCacheType.None);
 
+    this.orderData = new ArrayStore(
+      {
+        key: ["VBELN", "POSNR"],
+        data: resultModel[0].T_DATA
+      });
+  }
+
+  /**
+   * 파서블 엔트리 데이터 로딩 완료
+   * @param e
+   */
+  onPEDataLoaded(e: any) {
+    this.loadePeCount++;
+    console.info(`DATA LOAD COUNT: ${this.loadePeCount}`);
+    /*
+     if (e.component.ClearSelectedValue != undefined) {
+       setTimeout(() => {
+         e.component.ClearSelectedValue();
+       });
+     }
+     */
+    if (this.loadePeCount >= 2) {
+      this.enteryLoading = true;
+      this.loadePeCount = 0;
+      this.dataLoad();
+
+    }
+  }
 
   //Data refresh
   public refreshDataGrid(e: Object) {

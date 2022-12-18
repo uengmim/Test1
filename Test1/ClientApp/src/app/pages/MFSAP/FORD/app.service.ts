@@ -182,6 +182,35 @@ const requestprocess: RequestProcess[] = [{
     TEXT: ''
   },
 ]
+
+export class Data2 {
+  code!: string;
+
+  name!: string;
+}
+
+const data2: Data2[] = [
+  {
+    code: '10',
+    name: '비료'
+  },
+
+  {
+    code: '20',
+    name: '화학'
+  },
+
+  {
+    code: '30',
+    name: '유류'
+  },
+
+  {
+    code: '40',
+    name: '친환경'
+  },
+];
+
 const clients: string[] = [
   '영업관리담당',
   '생산관리담당',
@@ -239,6 +268,21 @@ export class ProductDiv {
 }
 
 
+
+export class Product {
+  ID!: number;
+  Name!: string;
+}
+
+const products: Product[] = [{
+    ID: 1,
+    Name: "과세"
+  },
+  {
+    ID: 2,
+    Name: "영세"
+  },
+]
 @Injectable()
 export class Service {
 
@@ -269,5 +313,13 @@ export class Service {
   }
   getSort(): string[] {
     return sort;
+  }
+
+  getProducts(): Product[] {
+    return products;
+  }
+
+  getData2(): Data2[] {
+    return data2;
   }
 }

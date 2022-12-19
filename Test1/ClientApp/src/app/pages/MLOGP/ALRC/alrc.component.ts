@@ -20,7 +20,7 @@ import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } f
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { AuthService } from '../../../shared/services';
 import ArrayStore from 'devextreme/data/array_store';
-import { confirm } from "devextreme/ui/dialog";
+import { confirm, alert } from "devextreme/ui/dialog";
 import { ZSDS6430Model, ZSDIFPORTALSAPLELIQSndModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLeLiqSnd';
 import { ZSDS6440Model, ZSDIFPORTALSAPLELIQRcvModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLeLiqRcv';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
@@ -270,7 +270,7 @@ export class ALRCComponent {
     };
     //배차등록 저장
     this.saveButtonOptions = {
-      text: "등록",
+      text: "저장",
       onClick: async () => {
         /*this.orderData.push(this.popupData);*/
 
@@ -291,61 +291,87 @@ export class ALRCComponent {
         });
 
         if (!zeroCheck) {
-          alert("배차수량 0은 지정할 수 없습니다.");
+          alert("배차수량 0은 지정할 수 없습니다.", "알림");
           return;
         }
 
         if (!carCheck) {
-          alert("차량정보 및 운전기사정보는 필수입니다.");
+          alert("차량정보 및 운전기사정보는 필수입니다.", "알림");
           return;
         }
 
-        //Ascending
-        this.popupData.sort((a, b) => (a.ZSEQUENCY > b.ZSEQUENCY ? 1 : -1));
+        if (await confirm("저장하시겠습니까?", "알림")) {
 
-        var fillterData = this.orderGridData.filter(item => item.VBELN === this.popupData2.VBELN && item.POSNR === this.popupData2.POSNR && item.ZSEQUENCY !== "000000000");
-
-        //Descending
-        fillterData.sort((a, b) => (a.ZSEQUENCY > b.ZSEQUENCY ? -1 : 1));
-
-        fillterData.forEach(async (row: ZSDS6430Model, index) => {
-          var checkVal = this.orderGridData.findIndex(item => item.VBELN === row.VBELN && item.POSNR === item.POSNR && item.ZSEQUENCY === row.ZSEQUENCY);
-          delete this.orderGridData[checkVal];
-        });
-
-        var setCount = this.orderGridData.findIndex(item => item.VBELN === this.popupData2.VBELN && item.POSNR === this.popupData2.POSNR && item.ZSEQUENCY === "000000000");
-
-        if (this.popupData2.ZMENGE2 >= sum) {
-          var mainModel: ZSDS6430Model[] = [];
-          this.popupData.forEach(async (row: ZSDS6440Model) => {
-          
-            //mainModel.push(new ZSDS6430Model(row.VBELN, row.POSNR, row.ZSEQUENCY, row.KZPOD, row.VGBEL, row.VGPOS, row.INCO1, row.VSBED, row.TDDAT, row.MATNR, row.ARKTX,
-            //  row.ZMENGE1, row.ZMENGE2, row.VRKME, row.VSTEL, row.ZMENGE4, row.ZMENGE3, row.WADAT_IST, row.BRGEW, row.GEWEI, row.LGORT, row.ZLGORT, row.KUNNR, row.NAME1,
-            //  row.CITY1, row.STREET, row.TELF1, row.MOBILENO, row.KUNAG, row.NAME1_AG, row.SPART, row.WERKS, row.LFART, row.Z3PARVW, row.Z4PARVW, row.ZCARTYPE,
-            //  row.ZCARNO, row.ZDRIVER, row.ZDRIVER1, row.ZPHONE, row.ZPHONE1, row.ZSHIPMENT, row.ZSHIPSTATUS, row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT,
-            //  row.ZTEXT, row.MTY, row.MSG, DIMModelStatus.UnChanged));
-            var model = new ZSDS6430Model(row.VBELN, row.POSNR, row.ZSEQUENCY, row.KZPOD, row.VGBEL, row.VGPOS, row.INCO1, row.VSBED, row.TDDAT, row.MATNR, row.ARKTX,
-              row.ZMENGE1, row.ZMENGE2, row.VRKME, row.VSTEL, row.ZMENGE4, row.ZMENGE3, row.WADAT_IST, row.BRGEW, row.GEWEI, row.LGORT, row.ZLGORT, row.KUNNR, row.NAME1,
-              row.CITY1, row.STREET, row.TELF1, row.MOBILENO, row.KUNAG, row.NAME1_AG, row.SPART, row.WERKS, row.LFART, row.Z3PARVW, row.Z4PARVW, row.ZCARTYPE,
-              row.ZCARNO, row.ZDRIVER, row.ZDRIVER1, row.ZPHONE, row.ZPHONE1, row.ZSHIPMENT, row.ZSHIPSTATUS, row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT,
-              row.ZTEXT, row.MTY, row.MSG, DIMModelStatus.UnChanged);
-
-            var checkVal = this.orderGridData.findIndex(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR && item.ZSEQUENCY === row.ZSEQUENCY);
-            
-            if (checkVal === -1) {
-              this.orderGridData.splice(setCount, 0, model);
-            } else {
-              this.orderGridData.splice(setCount, 1, model);
-            }
-
-            setCount = setCount + 1;
+          this.loadingVisible = true;
+          var result = await this.createOrder();
+          this.loadingVisible = false;
+          var reMSG = "";
+          result.T_DATA.forEach(async (row: ZSDS6440Model) => {
+            if (row.MTY === "E")
+              reMSG = row.MSG;
           });
 
-          this.orderData = new ArrayStore(
-            {
-              key: ["VBELN", "POSNR", "ZSEQUENCY"],
-              data: this.orderGridData
-            });
+          if (reMSG !== "") {
+            alert(`배차등록 실패,\n\n오류 메세지: ${reMSG}`, "알림");
+            return;
+          }
+          else if ((result.E_MTY === "S")) {
+            alert("등록완료되었습니다.", "알림");
+            this.popupVisible = false;
+            /*            this.orderData.push(this.popupData);*/
+            this.dataLoad();
+
+          } else {
+            alert("2차운송사 정보를 저장행을 선택하세요.", "알림");
+          }
+        }
+
+        ////Ascending
+        //this.popupData.sort((a, b) => (a.ZSEQUENCY > b.ZSEQUENCY ? 1 : -1));
+
+        //var fillterData = this.orderGridData.filter(item => item.VBELN === this.popupData2.VBELN && item.POSNR === this.popupData2.POSNR && item.ZSEQUENCY !== "000000000");
+
+        ////Descending
+        //fillterData.sort((a, b) => (a.ZSEQUENCY > b.ZSEQUENCY ? -1 : 1));
+
+        //fillterData.forEach(async (row: ZSDS6430Model, index) => {
+        //  var checkVal = this.orderGridData.findIndex(item => item.VBELN === row.VBELN && item.POSNR === item.POSNR && item.ZSEQUENCY === row.ZSEQUENCY);
+        //  delete this.orderGridData[checkVal];
+        //});
+
+        //var setCount = this.orderGridData.findIndex(item => item.VBELN === this.popupData2.VBELN && item.POSNR === this.popupData2.POSNR && item.ZSEQUENCY === "000000000");
+
+        //if (this.popupData2.ZMENGE2 >= sum) {
+        //  var mainModel: ZSDS6430Model[] = [];
+        //  this.popupData.forEach(async (row: ZSDS6440Model) => {
+          
+        //    //mainModel.push(new ZSDS6430Model(row.VBELN, row.POSNR, row.ZSEQUENCY, row.KZPOD, row.VGBEL, row.VGPOS, row.INCO1, row.VSBED, row.TDDAT, row.MATNR, row.ARKTX,
+        //    //  row.ZMENGE1, row.ZMENGE2, row.VRKME, row.VSTEL, row.ZMENGE4, row.ZMENGE3, row.WADAT_IST, row.BRGEW, row.GEWEI, row.LGORT, row.ZLGORT, row.KUNNR, row.NAME1,
+        //    //  row.CITY1, row.STREET, row.TELF1, row.MOBILENO, row.KUNAG, row.NAME1_AG, row.SPART, row.WERKS, row.LFART, row.Z3PARVW, row.Z4PARVW, row.ZCARTYPE,
+        //    //  row.ZCARNO, row.ZDRIVER, row.ZDRIVER1, row.ZPHONE, row.ZPHONE1, row.ZSHIPMENT, row.ZSHIPSTATUS, row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT,
+        //    //  row.ZTEXT, row.MTY, row.MSG, DIMModelStatus.UnChanged));
+        //    var model = new ZSDS6430Model(row.VBELN, row.POSNR, row.ZSEQUENCY, row.KZPOD, row.VGBEL, row.VGPOS, row.INCO1, row.VSBED, row.TDDAT, row.MATNR, row.ARKTX,
+        //      row.ZMENGE1, row.ZMENGE2, row.VRKME, row.VSTEL, row.ZMENGE4, row.ZMENGE3, row.WADAT_IST, row.BRGEW, row.GEWEI, row.LGORT, row.ZLGORT, row.KUNNR, row.NAME1,
+        //      row.CITY1, row.STREET, row.TELF1, row.MOBILENO, row.KUNAG, row.NAME1_AG, row.SPART, row.WERKS, row.LFART, row.Z3PARVW, row.Z4PARVW, row.ZCARTYPE,
+        //      row.ZCARNO, row.ZDRIVER, row.ZDRIVER1, row.ZPHONE, row.ZPHONE1, row.ZSHIPMENT, row.ZSHIPSTATUS, row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT,
+        //      row.ZTEXT, row.MTY, row.MSG, DIMModelStatus.UnChanged);
+
+        //    var checkVal = this.orderGridData.findIndex(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR && item.ZSEQUENCY === row.ZSEQUENCY);
+            
+        //    if (checkVal === -1) {
+        //      this.orderGridData.splice(setCount, 0, model);
+        //    } else {
+        //      this.orderGridData.splice(setCount, 1, model);
+        //    }
+
+        //    setCount = setCount + 1;
+        //  });
+
+        //  this.orderData = new ArrayStore(
+        //    {
+        //      key: ["VBELN", "POSNR", "ZSEQUENCY"],
+        //      data: this.orderGridData
+        //    });
           this.popupVisible = false;
           
           //this.loadingVisible = true;
@@ -367,29 +393,30 @@ export class ALRCComponent {
           //  /*            this.orderData.push(this.popupData);*/
           //  this.dataLoad();
           //}
-        } else {
-          alert("배차수량은 납품총수량을 넘을 수 없습니다.");
-        }
+        //} else {
+        //  alert("배차수량은 납품총수량을 넘을 수 없습니다.");
+
+        //}
       },
     };
 
     //분할저장
     this.saveButtonOptions2 = {
-      text: "저장",
+      text: "등록",
       onClick: () => {
         if (this.popupData3.possible < this.addFormData.ZMENGE4) {
-          alert("분할가능수량을 넘을 수 없습니다.");
+          alert("분할가능수량을 넘을 수 없습니다.", "알림");
           this.addFormData.ZMENGE4 = this.popupData3.possible;
           return;
         }
 
         if (this.addFormData.ZMENGE4 === 0) {
-          alert("배차수량을 입력해야합니다.");
+          alert("배차수량을 입력해야합니다.", "알림");
           return;
         }
 
         if (this.addFormData.ZCARTYPE === "" || this.addFormData.ZCARNO === "" || this.addFormData.ZDRIVER === "") {
-          alert("차량정보 및 운전기사정보를 입력해야합니다.");
+          alert("차량정보 및 운전기사정보를 입력해야합니다.", "알림");
           return;
         }
 
@@ -408,22 +435,22 @@ export class ALRCComponent {
     };
     //수정 저장
     this.saveButtonOptions4 = {
-      text: "저장",
+      text: "등록",
       onClick: () => {
 
         if (this.popupData4.possible < this.addFormData2.ZMENGE4) {
-          alert("분할가능수량을 넘을 수 없습니다.");
+          alert("분할가능수량을 넘을 수 없습니다.", "알림");
           this.addFormData2.ZMENGE4 = this.popupData4.possible;
           return;
         }
 
         if (this.addFormData2.ZMENGE4 === 0) {
-          alert("배차수량을 입력해야합니다.");
+          alert("배차수량을 입력해야합니다.", "알림");
           return;
         }
 
         if (this.addFormData2.ZCARTYPE === "" || this.addFormData2.ZCARNO === "" || this.addFormData2.ZDRIVER === "") {
-          alert("차량정보 및 운전기사정보를 입력해야합니다.");
+          alert("차량정보 및 운전기사정보를 입력해야합니다.", "알림");
           return;
         }
 
@@ -562,26 +589,34 @@ export class ALRCComponent {
 
   //배차등록
   public async createOrder() {
-    var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
-    var modelList: ZSDS6440Model[] = [];
-    selectData.forEach(async (row: ZSDS6430Model) => {
-      modelList.push(new ZSDS6440Model(row.VBELN, row.POSNR, row.ZSEQUENCY, row.KZPOD, row.VGBEL, row.VGPOS,
-        row.TDDAT, row.MATNR, row.ARKTX, row.ZMENGE1, row.ZMENGE2, row.VRKME, row.VSTEL,
-        row.ZMENGE4, row.ZMENGE3, row.WADAT_IST, row.BRGEW, row.GEWEI, row.LGORT, row.ZLGORT,
-        row.INCO1, row.VSBED, row.KUNNR, row.NAME1, row.CITY, row.STREET, row.TELF1,
-        row.MOBILENO, row.KUNAG, row.NAME1_AG, row.SPART, row.WERKS, row.LFART, row.Z3PARVW,
-        row.Z4PARVW, row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, row.ZDRIVER1, row.ZPHONE, row.ZPHONE1,
-        row.ZSHIPMENT, "30", row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT, row.ZTEXT,
-        row.MTY, row.MSG, DIMModelStatus.UnChanged));
-    });
-
-    //var zsd6440list: ZSDS6440Model[] = this.popupData;
-
-    //zsd6440list.forEach(async (row: ZSDS6440Model) => {
-    //  row.ZSHIPSTATUS = "30";
+    //var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
+    //var modelList: ZSDS6440Model[] = [];
+    //selectData.forEach(async (row: ZSDS6430Model) => {
+    //  modelList.push(new ZSDS6440Model(row.VBELN, row.POSNR, row.ZSEQUENCY, row.KZPOD, row.VGBEL, row.VGPOS,
+    //    row.TDDAT, row.MATNR, row.ARKTX, row.ZMENGE1, row.ZMENGE2, row.VRKME, row.VSTEL,
+    //    row.ZMENGE4, row.ZMENGE3, row.WADAT_IST, row.BRGEW, row.GEWEI, row.LGORT, row.ZLGORT,
+    //    row.INCO1, row.VSBED, row.KUNNR, row.NAME1, row.CITY, row.STREET, row.TELF1,
+    //    row.MOBILENO, row.KUNAG, row.NAME1_AG, row.SPART, row.WERKS, row.LFART, row.Z3PARVW,
+    //    row.Z4PARVW, row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, row.ZDRIVER1, row.ZPHONE, row.ZPHONE1,
+    //    row.ZSHIPMENT, "30", row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT, row.ZTEXT,
+    //    row.MTY, row.MSG, DIMModelStatus.UnChanged));
     //});
 
-    var createModel = new ZSDIFPORTALSAPLELIQRcvModel("", "", modelList);
+    var zsd6440list: ZSDS6440Model[] = this.popupData;
+
+    //배차 키 생성 년 + 월 + 일 + 시간 + 차량뒷번호 4자리
+    var now = new Date();
+    var key = now.getFullYear().toString().substr(2, 2).padStart(2, '0') + now.getMonth().toString().padStart(2, '0') + now.getDay().toString().padStart(2, '0')
+      + now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0') + now.getSeconds().toString().padStart(2, '0');
+
+    zsd6440list.forEach(async (row: ZSDS6440Model) => {
+      row.ZSHIPSTATUS = "30";
+      var carkey = row.ZCARNO.substr(row.ZCARNO.length - 4, row.ZCARNO.length - 1);
+      row.ZSHIPMENT_NO = row.ZSHIPMENT_NO.concat(key, carkey)
+      row.WADAT_IST = new Date("9999-12-31");
+    });
+
+    var createModel = new ZSDIFPORTALSAPLELIQRcvModel("", "", zsd6440list);
     var createModelList: ZSDIFPORTALSAPLELIQRcvModel[] = [createModel];
 
     var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQRcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQRcvModelList", createModelList, QueryCacheType.None);
@@ -626,17 +661,17 @@ export class ALRCComponent {
           });
 
           if (reMSG !== "") {
-            alert(`배차등록 실패,\n\n오류 메세지: ${reMSG}`);
+            alert(`배차등록 실패,\n\n오류 메세지: ${reMSG}`, "알림");
             return;
           }
           else if ((result.E_MTY === "S")) {
-            alert("배차등록완료");
+            alert("등록완료되었습니다.", "알림");
             this.popupVisible = false;
             /*            this.orderData.push(this.popupData);*/
             this.dataLoad();
           }
       } else {
-        alert("2차운송사 정보를 저장행을 선택하세요.");
+        alert("2차운송사 정보를 저장행을 선택하세요.", "알림");
       }
     }
   }

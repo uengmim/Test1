@@ -9,11 +9,12 @@ import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { formatDate } from '@angular/common';
+import { alert, confirm } from "devextreme/ui/dialog";
 import { Service, Data, Data2, CarSeq } from '../ALRF/app.service';
 import {
   DxDataGridComponent,
   DxDateBoxModule,
-  DxFormComponent, 
+  DxFormComponent,
   DxPopupComponent,
   DxSelectBoxComponent,
 } from 'devextreme-angular';
@@ -257,11 +258,12 @@ export class ALRFComponent {
         this.dataGrid.instance.deselectAll();
       },
     };
-  //배차등록 저장
+    //배차등록 저장
     this.saveButtonOptions = {
       text: "저장",
       onClick: async () => {
         /*this.orderData.push(this.popupData);*/
+        if (await confirm("저장하시겠습니까?", "알림")) { 
         var sum = 0;
         this.popupData.forEach((array: any) => {
           sum = sum + parseInt(array.ZMENGE4);
@@ -279,42 +281,43 @@ export class ALRFComponent {
           });
 
           if (reMSG !== "") {
-            alert(`배차등록 실패,\n\n오류 메세지: ${reMSG}`);
+            alert(`배차등록 실패,\n\n오류 메세지: ${reMSG}`,"알림");
             return;
           }
-          else if ((result.E_MTY === "S")){
-            alert("배차등록완료");
+          else if ((result.E_MTY === "S")) {
+            alert("배차등록완료", "알림");
             this.popupVisible = false;
-/*            this.orderData.push(this.popupData);*/
+            /*            this.orderData.push(this.popupData);*/
             this.dataLoad();
           }
         }
         else {
-          alert("납품총수량과 배차수량을 맞춰주세요.");
+          alert("납품총수량과 배차수량을 맞춰주세요.", "알림");
+          }
         }
       },
     };
 
     //분할저장
     this.saveButtonOptions2 = {
-      text: "저장",
+      text: "등록",
       onClick: () => {
 
-        var maxIndex = this.popupData.length -1 ;
+        var maxIndex = this.popupData.length - 1;
         //분할번호 +1 
         var znumber = this.popupData[maxIndex].ZSEQUENCY;
         this.addFormData.ZSEQUENCY = (parseInt(znumber) + 1).toString().padStart(9, '0');
 
         if (this.addFormData.ZCARNO == "") {
-          alert("차량번호를 입력해주세요.");
+          alert("차량번호를 입력해주세요.", "알림");
           return;
         }
         else if (this.addFormData.ZDRIVER == "") {
-          alert("기사명1을 입력해주세요.");
+          alert("기사명1을 입력해주세요.", "알림");
           return;
         }
         else if (this.addFormData.ZPHONE == "") {
-          alert("전화번호1을 입력해주세요..");
+          alert("전화번호1을 입력해주세요..", "알림");
           return;
         }
         console.log(this.popupData);
@@ -322,28 +325,28 @@ export class ALRFComponent {
         this.popupData.push(this.addFormData);
         that.popupVisible2 = false;
 
-        
+
       },
     };
     //수정 저장
     this.saveButtonOptions4 = {
-      text: "저장",
+      text: "등록",
       onClick: () => {
 
         if (this.addFormData2.ZCARNO == "") {
-          alert("차량번호를 입력해주세요.");
+          alert("차량번호를 입력해주세요.", "알림");
           return;
         }
         else if (this.addFormData2.ZDRIVER == "") {
-          alert("기사명1을 입력해주세요.");
+          alert("기사명1을 입력해주세요.", "알림");
           return;
         }
         else if (this.addFormData2.ZPHONE == "") {
-          alert("전화번호1을 입력해주세요..");
+          alert("전화번호1을 입력해주세요..", "알림");
           return;
         }
         if (this.popupData4.possible < this.addFormData2.ZMENGE4) {
-          alert("분할가능수량을 넘을 수 없습니다.");
+          alert("분할가능수량을 넘을 수 없습니다.", "알림");
           this.addFormData2.ZMENGE4 = this.popupData4.possible;
           return;
         }
@@ -357,7 +360,7 @@ export class ALRFComponent {
     //취소버튼
     this.cancelEditButtonOptions =
     {
-      text: '닫기', 
+      text: '닫기',
       onClick: async () => {
         this.dataGrid.instance.cancelEditData()
       },
@@ -412,7 +415,7 @@ export class ALRFComponent {
 
   }
 
-  selectedChanged(e:any) {
+  selectedChanged(e: any) {
     this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
   }
 
@@ -454,7 +457,7 @@ export class ALRFComponent {
   public async dataLoad() {
     let fixData = { I_ZSHIPSTATUS: this.selectStatus };
     var zsds6410: ZSDS6410Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, "", "", this.selectData2, "", this.tdlnrValue??"", "", fixData.I_ZSHIPSTATUS, zsds6410);
+    var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, "", "", this.selectData2, "", this.tdlnrValue ?? "", "", fixData.I_ZSHIPSTATUS, zsds6410);
 
     var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
 
@@ -472,22 +475,37 @@ export class ALRFComponent {
     //var data = this.popupData
     //let fixData = {ZSHIPSTATUS: "30" };
     //var zsd6420 = new ZSDS6420Model("", "", "", "", 0, 0, this.startDate, "", "", "", "", "", "", "", "", "", "", fixData.ZSHIPSTATUS, "", this.endDate, "", "", 0, "", "", "");
-    this.popupData.forEach(async (row: ZSDS6420Model) => {
-      row.ZSHIPSTATUS = "30";
-    });
-    this.popupData.forEach(async (row: ZSDS6420Model) => {
-      row.ZSHIPSTATUS = "30";
-    });
+
+    //배차 키 생성 년 + 월 + 일 + 시간 + 차량뒷번호 4자리
+    var now = new Date();
+    var key = now.getFullYear().toString().substr(2, 2).padStart(2, '0') + now.getMonth().toString().padStart(2, '0') + now.getDay().toString().padStart(2, '0')
+      + now.getHours().toString().padStart(2, '0') + now.getMinutes().toString().padStart(2, '0') + now.getSeconds().toString().padStart(2, '0');
+
     var zsd6420list: ZSDS6420Model[] = this.popupData;
+
+    zsd6420list.forEach(async (row: ZSDS6420Model) => {
+      row.ZSHIPSTATUS = "30";
+      var carkey = row.ZCARNO.substr(row.ZCARNO.length - 4, row.ZCARNO.length - 1);
+      row.ZSHIPMENT_NO = row.ZSHIPMENT_NO.concat(key, carkey)
+      row.WADAT_IST = new Date("9999-12-31");
+    });
+
+    //this.popupData.forEach(async (row: ZSDS6420Model) => {
+    //  row.ZSHIPSTATUS = "30";
+    //});
+    //this.popupData.forEach(async (row: ZSDS6420Model) => {
+    //  row.ZSHIPSTATUS = "30";
+    //});
+
 
     var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
     var createModelList: ZSDIFPORTALSAPLE028RcvModel[] = [createModel];
 
     var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
     return insertModel[0];
-    
+
   }
-  
+
 
 
   /**
@@ -523,7 +541,7 @@ export class ALRFComponent {
     this.popupData.push(new ZSDS6420Model(selectData[0].VBELN, selectData[0].POSNR, selectData[0].ZSEQUENCY, selectData[0].VRKME, selectData[0].ZMENGE4, selectData[0].ZMENGE3, selectData[0].WADAT_IST, selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE, selectData[0].ZCARNO, selectData[0].ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZVKAUS, selectData[0].ZUNLOAD, selectData[0].ZSHIPSTATUS, selectData[0].ZSHIPMENT_NO, new Date(), selectData[0].ZPALLTP, selectData[0].ZPALLETQTY, 0, selectData[0].ZTEXT, selectData[0].MTY, selectData[0].MSG));
     // this.popupData = this.orderGrid.instance.getSelectedRowsData();
     this.popupVisible = !this.popupVisible;
-/*   this.clearEntery();*/
+    /*   this.clearEntery();*/
   }
   //분할버튼
   refAddOrder2(e: any) {

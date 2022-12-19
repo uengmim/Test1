@@ -94,7 +94,6 @@ export class ALOQComponent {
   orderData: any;
   orderList: ZSDS6410Model[] = [];
 
-
   //날짜 조회
   startDate: any;
   endDate: any;
@@ -247,6 +246,8 @@ export class ALOQComponent {
 
   selectedChanged(e:any) {
     this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
+
+    this.orderGrid.instance.filter(['VBELN', '=', '0080002938']); 
   }
 
 
@@ -275,6 +276,8 @@ export class ALOQComponent {
         data: resultModel[0].IT_DATA
       });
 
+
+
     this.loadingVisible = false;
   }
 
@@ -283,7 +286,7 @@ export class ALOQComponent {
     var zsd6420list: ZSDS6420Model[] = [];
 
     this.orderGrid.instance.getSelectedRowsData().forEach((array: any) => {
-      zsd6420list.push(new ZSDS6420Model(array.VBELN, array.POSNR, array.ZSEQUENCY, array.VRKME, array.ZMENGE4, array.ZMENG3, array.WADAT_IST, array.Z3PARVW, array.Z4PARVW,
+      zsd6420list.push(new ZSDS6420Model(array.VBELN, array.POSNR, array.ZSEQUENCY, array.VRKME, array.ZMENGE4, array.ZMENG3, new Date("9999-12-31"), array.Z3PARVW, array.Z4PARVW,
                       array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1, array.ZVKAUS, array.ZUNLOAD, array.ZSHIPSTATUS, array.ZSHIPMENT_NO,
                       array.ZSHIPMENT_DATE, array.ZPALLTP, array.ZPALLETQTY, array.ZCONFIRM_CUT, array.ZTEXT, array.MTY, array.MSG));
     });

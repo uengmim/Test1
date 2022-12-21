@@ -1,80 +1,102 @@
- <!--toolbar-->
+<!--
+정문 공차/중량계근 I/F
+  -->
 <dx-toolbar style="margin:20px 0px 20px 0px">
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <!---<div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>작업일자</b></div>-->
       <div style="float:left; margin-left: 10px;">
-        <dx-date-box [value]="now" type="date" [width]="130" label="작업일자"> </dx-date-box>
+        <dx-date-box [value]="now"
+                     type="date"
+                     [disabled]="true"
+                     displayFormat="yyyy-MM-dd"
+                     label="작업일자">
+        </dx-date-box>
       </div>
     </div>
   </dxi-item>
 
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <!---<div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>현재시간</b></div>-->
       <div style="float:left; margin-left: 10px;">
-        <dx-date-box [value]="now" type="time" [width]="130" label="현재시간"> </dx-date-box>
+        <dx-date-box [value]="now"
+                     type="time"
+                     [disabled]="true"
+                     label="현재시간">
+        </dx-date-box>
       </div>
     </div>
   </dxi-item>
+  <dxi-item location="before"
+            widget="dxButton"
+            horizontalAlignment="center"
+            locateInMenu="center"
+            style="margin-right: 5px;">
+    <div *dxTemplate style="margin-left:15px;">
+      <dx-button stylingMode="contained"
+                 text="조회"
+                 (onClick)="refreshDataGrid($event)"
+                 [width]="100"
+                 [height]="25"
+                 style="margin-top:3px">
+      </dx-button>
+    </div>
+  </dxi-item>
 
-  <dxi-item location="left"
+  <dxi-item location="after"
             locateInMenu="auto"
             style="width: auto;
-            margin-left: 5px;
             margin-right: 5px;">
     <dx-button (onClick)="deleteRecords()"
                [disabled]="!selectedItemKeys.length"
-               icon="trash">
+               [width]="100"
+               text="삭제">
     </dx-button>
   </dxi-item>
 
-  <dxi-item location="left"
+  <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
             style="width: auto;
-            margin-left: 5px;
             margin-right: 5px;">
     <dx-button stylingMode="contained"
                text="수동 등록"
+               (onClick)="manualRegis()"
+               [width]="100"
                type="normal">
     </dx-button>
   </dxi-item>
 
-  <dxi-item location="left"
+  <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
             style="width: auto;
-            margin-left: 5px;
             margin-right: 5px;">
     <dx-button stylingMode="contained"
                text="계근 시작"
+               (onClick)="weightStart()"
+               [width]="100"
                type="normal">
     </dx-button>
   </dxi-item>
 
-  <dxi-item location="left"
-            widget="dxButton"
-            locateInMenu="auto"
-            [options]="searchButtonOptions">
-  </dxi-item>
+
 </dx-toolbar>
 
 <dx-data-grid class="dx-card wide-card"
-              [dataSource]="data"
+              [dataSource]="dataSource"
               keyExpr="turn"
               [showBorders]="false"
               [focusedRowEnabled]="true"
               [focusedRowIndex]="0"
               [columnAutoWidth]="true"
               [allowColumnResizing]="true"
-              columnResizingMode="widget"
+              [columnResizingMode]="columnResizeMode"
               [columnHidingEnabled]="true"
               [allowColumnReordering]="true"
               (onSelectionChanged)="selectionChanged($event)"
               (onRowDblClick)="orderDBClick($event)"
               [selection]="{ mode: 'multiple' }"
-              height="calc(100vh - 230px)">
+              height="calc(100vh - 155px)">
 
   <!--Datagrid Option-->
   <dxo-paging [enabled]="false"></dxo-paging>
@@ -93,9 +115,6 @@
   <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
 
-  <!--Grouping Option-->
-  <dxo-group-panel [visible]="true"></dxo-group-panel>
-  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
 
   <!--Data column-->
   <dxi-column dataField="turn"
@@ -140,70 +159,155 @@
 
 </dx-data-grid>
 
-<!--Popup-->
-<dx-popup [width]="900"
-          [height]="600"
+<!--수동등록-->
+<dx-popup width="40%"
+          height="50%"
           margin="20px"
           [showTitle]="true"
-          title="계근정보"
           [dragEnabled]="false"
           [showCloseButton]="false"
           container=".dx-viewport"
-          [(visible)]="popupVisible">
+          [(visible)]="manualRegisPopupVisible">
 
   <dxi-toolbar-item widget="dxButton"
-                    toolbar="bottom"
+                    toolbar="top"
                     location="after"
-                    [options]="closeButtonOptions">
+                    [options]="manualRegisPopupClose">
   </dxi-toolbar-item>
+  <dxi-toolbar-item text="계근 정보"
+                    toolbar="top"
+                    location="center">
+  </dxi-toolbar-item>
+
 
   <dx-scroll-view width="100%" height="100%">
     <div id="form-container">
-      <div style="margin-bottom:20px"></div>
-      <dx-form id="seasonalInfo" [formData]="seasonalInfo" [colCount]="1" width="80%">
+      <dx-form id="manualRegisData" [formData]="manualRegisData" [colCount]="1" width="100%">
         <dxi-item itemType="group" caption="">
-          <dxi-item dataField="seasonalWe" [disabled]="true"><dxo-label text="계근중량"></dxo-label></dxi-item>
-          <dxi-item dataField="grossWe" [disabled]="true"><dxo-label text="총중량"></dxo-label></dxi-item>
-          <dxi-item dataField="toleranceWe" [disabled]="true"><dxo-label text="공차중량"></dxo-label></dxi-item>
-          <dxi-item dataField="actualWe" [disabled]="true"><dxo-label text="실중량"></dxo-label></dxi-item>
-          <dxi-item dataField="vehicleNu" [disabled]="true"><dxo-label text="차량번호"></dxo-label></dxi-item>
-          <dxi-item dataField="driver" [disabled]="true"><dxo-label text="기사명"></dxo-label></dxi-item>
+          <dxi-item dataField="seasonalWe"><dxo-label text="계근 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="grossWe"><dxo-label text="총 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="toleranceWe"><dxo-label text="공차 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="actualWe"><dxo-label text="실 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="vehicleNu"><dxo-label text="차량 번호"></dxo-label></dxi-item>
+          <dxi-item dataField="driver"><dxo-label text="기사 명"></dxo-label></dxi-item>
+          <dxi-item dataField="company"><dxo-label text="거래처"></dxo-label></dxi-item>
+          <dxi-item dataField="thProduct"><dxo-label text="제품"></dxo-label></dxi-item>
+          <dxi-item dataField="person"><dxo-label text="검량자"></dxo-label></dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="3" ma>
+          <dxi-item location="after"
+                    widget="dxButton"
+                    horizontalAlignment="center"
+                    locateInMenu="center">
+            <dx-button stylingMode="contained"
+                       text="전표출력"
+                       type="normal"
+                       (onClick)="manualStatementOutput()"
+                       style="margin-left: 60px; margin-top: 30px;"
+                       [width]="150">
+            </dx-button>
+          </dxi-item>
+          <dxi-item location="after"
+                    widget="dxButton"
+                    horizontalAlignment="center"
+                    locateInMenu="center">
+            <dx-button stylingMode="contained"
+                       text="입문등록"
+                       type="normal"
+                       (onClick)="test()"
+                       style="margin-top: 30px;"
+                       [width]="150">
+            </dx-button>
+          </dxi-item>
+          <dxi-item location="after"
+                    widget="dxButton"
+                    horizontalAlignment="center"
+                    locateInMenu="center">
+            <dx-button stylingMode="contained"
+                       text="출문등록"
+                       type="normal"
+                       (onClick)="test()"
+                       style="margin-top: 30px;"
+                       [width]="150">
+            </dx-button>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+  </dx-scroll-view>
+</dx-popup>
+
+
+<!--계근시작-->
+<dx-popup width="40%"
+          height="50%"
+          margin="20px"
+          [showTitle]="true"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="weightStartPopupVisible">
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="weightStartPopupClose">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item text="계근 정보"
+                    toolbar="top"
+                    location="center">
+  </dxi-toolbar-item>
+
+
+  <dx-scroll-view width="100%" height="100%">
+    <div id="form-container">
+      <dx-form id="manualRegisData" [formData]="weightStartData" [colCount]="1" width="100%">
+        <dxi-item itemType="group" caption="">
+          <dxi-item dataField="seasonalWe" [disabled]="true"><dxo-label text="계근 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="grossWe" [disabled]="true"><dxo-label text="총 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="toleranceWe" [disabled]="true"><dxo-label text="공차 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="actualWe" [disabled]="true"><dxo-label text="실 중량"></dxo-label></dxi-item>
+          <dxi-item dataField="vehicleNu" [disabled]="true"><dxo-label text="차량 번호"></dxo-label></dxi-item>
+          <dxi-item dataField="driver" [disabled]="true"><dxo-label text="기사 명"></dxo-label></dxi-item>
           <dxi-item dataField="company" [disabled]="true"><dxo-label text="거래처"></dxo-label></dxi-item>
           <dxi-item dataField="thProduct" [disabled]="true"><dxo-label text="제품"></dxo-label></dxi-item>
           <dxi-item dataField="person" [disabled]="true"><dxo-label text="검량자"></dxo-label></dxi-item>
         </dxi-item>
-      </dx-form>
-
-      <!--FOrm-->
-      <dx-form>
         <dxi-item itemType="group" [colCount]="3" [colSpan]="3">
-          <dxi-item location="before"
+          <dxi-item location="after"
                     widget="dxButton"
-                    locateInMenu="auto">
+                    horizontalAlignment="center"
+                    locateInMenu="center">
             <dx-button stylingMode="contained"
                        text="전표출력"
                        type="normal"
-                       style="margin-top: 20px;">
+                       (onClick)="weightStatementOutput()"
+                       style="margin-left: 60px; margin-top: 30px;"
+                       [width]="150">
             </dx-button>
           </dxi-item>
-
-          <dxi-item location="before"
+          <dxi-item location="after"
                     widget="dxButton"
-                    locateInMenu="auto">
+                    horizontalAlignment="center"
+                    locateInMenu="center">
             <dx-button stylingMode="contained"
                        text="입문등록"
                        type="normal"
-                       style="margin-top: 20px;">
+                       (onClick)="test()"
+                       style="margin-top: 30px;"
+                       [width]="150">
             </dx-button>
           </dxi-item>
-
-          <dxi-item location="before"
+          <dxi-item location="after"
                     widget="dxButton"
-                    locateInMenu="auto">
+                    horizontalAlignment="center"
+                    locateInMenu="center">
             <dx-button stylingMode="contained"
                        text="출문등록"
                        type="normal"
-                       style="margin-top: 20px; margin-left: 3px;">
+                       (onClick)="test()"
+                       style="margin-top: 30px;"
+                       [width]="150">
             </dx-button>
           </dxi-item>
         </dxi-item>

@@ -230,7 +230,7 @@ export class Modeltest03Component {
     return new CustomStore({
       loadMode: 'raw',
       key: 'ID',
-      load() {
+      load: (loadOptions) => {
         return lastValueFrom(http.get(`data/${jsonFile}`));
       },
     });

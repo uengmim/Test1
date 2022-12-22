@@ -259,6 +259,8 @@ export class SHPCComponent {
             alert(result.E_MSG, "알림");
           else
             alert("저장되었습니다.", "알림");
+
+          await this.dataLoad();
         } 
       },
     };
@@ -290,6 +292,8 @@ export class SHPCComponent {
   //화학, 유류 구분
   onCSpartValueChanged(e: any) {
     setTimeout(() => {
+      this.loadingVisible = true;
+
       this.selectCSpart = e.value;
 
       if (this.selectCSpart === "20") {
@@ -340,6 +344,8 @@ export class SHPCComponent {
         key: ["VBELN", "POSNR", "ZSEQUENCY"],
         data: this.orderGridData
       });
+
+    this.loadingVisible = false;
   }
 
   //데이터 저장로직
@@ -349,15 +355,20 @@ export class SHPCComponent {
     var oilDepotData = thisObj.popOilDepotData;
     var model: ZSDIFPORTALSAPGIYCLIQRcvModel[] = [];
 
+    if (selectData[0].VSBED === "Z4") {
+      await alert("온도기준 출고수량은 정산량으로 설정됩니다.", "알림");
+      GIData.ZMENGE3 = GIData.Z_N_WEI_NET;
+    }
+
     if (GIData.ZMENGE3 === 0) {
       model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고수량입력은 필수입니다.", "E"));
       return model[0];
     }
       
-    if (GIData.ZMENGE3 > selectData[0].ZMENGE3) {
-      model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고수량은 납품수량을 넘을 수 없습니다.", "E"));
-      return model[0];
-    }
+    //if (GIData.ZMENGE3 > selectData[0].ZMENGE3) {
+    //  model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고수량은 납품수량을 넘을 수 없습니다.", "E"));
+    //  return model[0];
+    //}
 
     var rfcOilModel: ZSDT6460Model = new ZSDT6460Model(thisObj.appConfig.mandt, GIData.VBELN, GIData.POSNR, GIData.ZSHIPMENT_NO, GIData.ZCARNO, GIData.KUNAG, GIData.VRKME,
       "", 0, 0, 0, "00000", "00000",
@@ -517,33 +528,45 @@ export class SHPCComponent {
   }
 
   //메인데이터 더블클릭 이벤트
-  mainDBClick(e: any) {
+  async mainDBClick(e: any) {
     //파서블엔트리 초기화
     this.clearEntery();
 
-    var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
+    setTimeout((
+    ) => {
+      var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
 
-    //팝업 헤더정보 입력
-    this.popHeaderData.VBELN = selectData[0].VBELN;
-    this.popHeaderData.POSNR = selectData[0].POSNR;
-    this.popHeaderData.ZMENGE2 = selectData[0].ZMENGE2;
-    this.popHeaderData.ZMENGE4 = selectData[0].ZMENGE4;
+      //팝업 헤더정보 입력
+      this.popHeaderData.VBELN = selectData[0].VBELN;
+      this.popHeaderData.POSNR = selectData[0].POSNR;
+      this.popHeaderData.ZMENGE2 = selectData[0].ZMENGE2;
+      this.popHeaderData.ZMENGE4 = selectData[0].ZMENGE4;
 
-    //팝업 아이템정보 입력
-    this.popItemData = new ZSDS6450Model(selectData[0].VBELN, selectData[0].POSNR, "", selectData[0].ZSHIPSTATUS, selectData[0].KZPOD, selectData[0].VGBEL,
-      selectData[0].VGPOS, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE3,
-      selectData[0].WADAT_IST, selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART,
-      selectData[0].WERKS, selectData[0].LFART, 0, 0, 0, 0, "", "", "", "", "000000", "000000", selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE,
-      selectData[0].ZCARNO, selectData[0].ZDRIVER, selectData[0].ZDRIVER1, "", selectData[0].ZPHONE, selectData[0].ZPHONE1, "", "", selectData[0].ZSHIPMENT_NO,
-      selectData[0].ZSHIPMENT_DATE, "", "", DIMModelStatus.UnChanged);
+      //팝업 아이템정보 입력
+      this.popItemData = new ZSDS6450Model(selectData[0].VBELN, selectData[0].POSNR, "", selectData[0].ZSHIPSTATUS, selectData[0].KZPOD, selectData[0].VGBEL,
+        selectData[0].VGPOS, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE3,
+        selectData[0].WADAT_IST, selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART,
+        selectData[0].WERKS, selectData[0].LFART, 0, 0, 0, 0, "", "", "", "", "000000", "000000", selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE,
+        selectData[0].ZCARNO, selectData[0].ZDRIVER, selectData[0].ZDRIVER1, "", selectData[0].ZPHONE, selectData[0].ZPHONE1, "", "", selectData[0].ZSHIPMENT_NO,
+        selectData[0].ZSHIPMENT_DATE, "", "", DIMModelStatus.UnChanged);
 
-    //파서블엔트리 값설정
-    this.matnrValue = selectData[0].MATNR;
-    this.zcarnoValue = selectData[0].ZCARNO;
-    this.tdlnrValue = selectData[0].Z4PARVW;
-    this.truckTypeValue = selectData[0].ZCARTYPE;
+      //파서블엔트리 값설정
+      this.matnrValue = selectData[0].MATNR;
+      this.zcarnoValue = selectData[0].ZCARNO;
+      this.tdlnrValue = selectData[0].Z4PARVW;
+      this.truckTypeValue = selectData[0].ZCARTYPE;
 
-    this.popupVisible = true;
+      //유창정보 초기화
+      this.popOilDepotData = [];
+
+      this.popOilDepot = new ArrayStore(
+        {
+          key: ["C_PART"],
+          data: this.popOilDepotData
+        });
+
+      this.popupVisible = true;
+    }, 100);
   }
 
   async getOilDepot() {
@@ -588,7 +611,7 @@ export class SHPCComponent {
   onTdlnrCodeValueChanged(e: any) {
     setTimeout(() => {
       this.popItemData.Z4PARVW = e.selectedValue;
-      this.tdlnrValue = e.selectedValue;
+      /*this.tdlnrValue = e.selectedValue;*/
     });
   }
 
@@ -596,14 +619,14 @@ export class SHPCComponent {
   onzunloadCodeValueChanged(e: any) {
     setTimeout(() => {
       this.popItemData.ZUNLOAD = e.selectedValue;
-      this.unloadInfoValue = e.selectedValue;
+      /*this.unloadInfoValue = e.selectedValue;*/
     });
   }
   //화물차종
   onzcartypeCodeValueChanged(e: any) {
     setTimeout(() => {
       this.popItemData.ZCARTYPE = e.selectedValue;
-      this.truckTypeValue = e.selectedValue;
+      /*this.truckTypeValue = e.selectedValue;*/
     });
   }
 
@@ -611,19 +634,19 @@ export class SHPCComponent {
   onmatnrCodeValueChanged(e: any) {
     setTimeout(() => {
       this.popItemData.MATNR = e.selectedValue;
-      this.matnrValue = e.selectedValue;
+      /*this.matnrValue = e.selectedValue;*/
     });
   }
 
   //차량번호 선택이벤트
   onZcarnoCodeValueChanged(e: any) {
-    setTimeout(() => {
-      this.zcarnoValue = e.selectedValue;
+/*    setTimeout(() => {*/
+      /*this.zcarnoValue = e.selectedValue;*/
       this.popItemData.ZCARNO = e.selectedValue;
       this.popItemData.ZDRIVER = e.selectedItem.ZDERIVER1;
       this.popItemData.ZPHONE = e.selectedItem.ZPHONE1;
       this.popItemData.ZCARTYPE = e.selectedItem.ZCARTYPE1;
-    });
+/*    });*/
   }
 
   //팝업화면에 사용되는 엔트리 초기화

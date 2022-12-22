@@ -23,7 +23,7 @@ import { AuthService } from '../../../shared/services';
 import ArrayStore from 'devextreme/data/array_store';
 import { ZSDS6410Model, ZSDIFPORTALSAPLE028SndModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Snd';
 import { ZSDS6400Model, ZSDIFPORTALSAPGIRcvModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapGiRcvProxy';
-
+import { confirm, alert } from "devextreme/ui/dialog";
 //필터
 const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
@@ -260,24 +260,25 @@ export class SHPQComponent {
     this.shipmentProcessing = {
       text: "출고처리",
       onClick: async () => {
-        var result = await this.release();
+        if (await confirm("출고처리 하시겠습니까?", "알림")) {
+          var result = await this.release();
 
-        if (this.popupData.ZMENGE4 < this.addFormData.ZMENGE3) {
-          alert("출고수량은 배차수량을 넘길 수 없습니다.");
-          return;
-        }
+          //if (this.popupData.ZMENGE4 < this.addFormData.ZMENGE3) {
+          //  alert("출고수량은 배차수량을 넘길 수 없습니다.");
+          //  return;
+          //}
 
-        if (result.EV_TYPE === "E") {
-          alert(`출고처리 실패,\n\n오류 메세지: ${result.EV_MESSAGE}`);
-          return;
-        }
-        else if (result.EV_TYPE === "S") {
-          
-          alert("출고처리 완료");
-          this.popupVisible = false;
-       /*   this.dataLoad();*/
-        }
+          if (result.EV_TYPE === "E") {
+            alert(`출고처리 실패,\n\n오류 메세지: ${result.EV_MESSAGE}`, "알림");
+            return;
+          }
+          else if (result.EV_TYPE === "S") {
 
+            alert("출고처리 완료", "알림");
+            this.popupVisible = false;
+            /*   this.dataLoad();*/
+          }
+        }
       },
     };
 
@@ -410,7 +411,7 @@ export class SHPQComponent {
        });
      }
      */
-    if (this.loadePeCount >= 8) {
+    if (this.loadePeCount >= 7) {
       this.enteryLoading = true;
       this.loadePeCount = 0;
       this.dataLoad();

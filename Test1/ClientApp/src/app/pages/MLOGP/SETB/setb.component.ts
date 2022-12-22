@@ -300,7 +300,7 @@ export class SETBComponent {
     this.orderGrid.instance.getSelectedRowsData().forEach((array: any) => {
       zsd6440list.push(new ZSDS6440Model(array.VBELN, array.POSNR, array.ZSEQUENCY, array.KZPOD, array.VGBEL, array.VGPOS,
         array.TDDAT, array.MATNR, array.ARKTX, array.ZMENGE1, array.ZMENGE2, array.VRKME, array.VSTEL,
-        array.ZMENGE4, array.ZMENGE3, array.WADAT_IST, array.BRGEW, array.GEWEI, array.LGORT, array.ZLGORT,
+        array.ZMENGE4, array.ZMENGE3, new Date("9999-12-31"), array.BRGEW, array.GEWEI, array.LGORT, array.ZLGORT,
         array.INCO1, array.VSBED, array.KUNNR, array.NAME1, array.CITY, array.STREET, array.TELF1,
         array.MOBILENO, array.KUNAG, array.NAME1_AG, array.SPART, array.WERKS, array.LFART, array.Z3PARVW,
         array.Z4PARVW, array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1,

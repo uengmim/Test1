@@ -28,6 +28,7 @@ import { NbpAgentservice, DeviceInfo } from '../../../shared/services/nbp.agent.
 import notify from 'devextreme/ui/notify';
 import { async } from 'rxjs';
 import { DxiItemComponent } from 'devextreme-angular/ui/nested';
+import { alert, confirm } from "devextreme/ui/dialog";
 
 const sendRequest = function (value: any) {
   const invalidEmail = 'test@dx-email.com';
@@ -159,10 +160,13 @@ export class OBMIComponent {
       type: 'success',
       useSubmitBehavior: true,
       disabled: true,
-      onClick: (e: any) => {
+      onClick: async  (e: any) => {
 
-        this.dataInsert(this)
-        alert("비밀번호가 변경되었습니다.");
+        if (await confirm("비밀번호를 변경하시겠습니까?", "알림")) {
+          this.dataInsert(this)
+          alert("비밀번호가 변경되었습니다.", "알림");
+        }
+
 
       },
     };
@@ -179,12 +183,31 @@ export class OBMIComponent {
   async SearchIDButton() {
 
     var result = await this.dataLoad(this.imInfo, this.dataService, this);
-
+    if (this.searchID.BIZNO == "") {
+      alert("사업자번호를 입력해주세요.","알림");
+      return;
+    }
+    else if (this.searchID.LOGID == "") {
+      alert("ID를 입력해주세요.", "알림");
+      return;
+    }
+    else if (this.searchID.E_MAIL == "") {
+      alert("이메일을 입력해주세요.", "알림");
+      return;
+    }
+    else if (this.searchID.QSTION == "") {
+      alert("질문을 입력해주세요.", "알림");
+      return;
+    }
+    else if (this.searchID.ANSWER == "") {
+      alert("답변을 입력해주세요.", "알림");
+      return;
+    }
     if (result.length > 0) {
-      alert("변경하실 비밀번호를 입력해주세요.");
+      alert("변경하실 비밀번호를 입력해주세요.", "알림");
       this.form.instance.getButton("applyBtn")?.option("disabled", false);
     } else {
-      alert("입력하신 정보가 다릅니다.")
+      alert("입력하신 정보가 다릅니다.", "알림")
       this.form.instance.getButton("applyBtn")?.option("disabled", true);
     }
 
@@ -245,7 +268,7 @@ export class OBMIComponent {
 
     }
     catch (error) {
-      alert(error);
+      alert("error", "알림");
     }
   }
 

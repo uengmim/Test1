@@ -30,6 +30,7 @@ import { NbpAgentservice, DeviceInfo } from '../../../shared/services/nbp.agent.
 import notify from 'devextreme/ui/notify';
 import { async } from 'rxjs';
 import { deepCopy } from '../../../shared/imate/utility/object-copy';
+import { alert, confirm } from "devextreme/ui/dialog";
 
 const sendRequest = function (value: any) {
   const invalidEmail = 'test@dx-email.com';
@@ -285,18 +286,22 @@ export class OBMMComponent {
     //저장버튼
     this.saveButtonOptions = {
       text: "저장",
-      onClick: (e: any) => {
+      onClick: async (e: any) => {
+        if (await confirm("저장하시겠습니까?", "알림")) {
 
-        this.dataInsert(this)
 
-        let result = e.validationGroup.validate();
-        if (!result.isValid) {
-          alert("필수값을 입력하여 주십시오.");
+          let result = e.validationGroup.validate();
+          if (!result.isValid) {
+            alert("필수값을 입력하여 주십시오.", "알림");
+          }
+          else {
+            this.dataInsert(this)
+            alert("회원 정보가 수정되었습니다.", "알림");
+
+          }
         }
-        else {
-          alert("회원 정보가 수정되었습니다.");
-        }
-      },
+        },
+
     };
     //적용 버튼
     this.applyPopupButton = {
@@ -400,9 +405,11 @@ export class OBMMComponent {
   }
 
 
-  deleteRecords() {
-    if (confirm("삭제하시겠습니까?"))
-      this.dataDelete(this.key, this.dataService, this);
+  deleteRecords: any = async (thisObj: OBMMComponent) => {
+    if (await confirm("삭제하시겠습니까?", "알림")) { 
+      thisObj.dataDelete(this.key, this.dataService, this);
+
+    }
   }
 
 
@@ -456,7 +463,7 @@ export class OBMMComponent {
       `LOGID = '${thisObj.IDText.value}'`, "", QueryCacheType.None);
 
     if (Zmmt8100result.length == 0) {
-      alert(" 조회하시는 회원 ID가 없습니다.")
+      alert(" 조회하시는 회원 ID가 없습니다.", "알림")
     } else {
       thisObj.zmmt8100 = Zmmt8100result[0];
       //파서블엔트리 값 조회
@@ -497,9 +504,9 @@ export class OBMMComponent {
         `BIZNO = '${thisObj.zmmt8100.BIZNO}'`, "", QueryCacheType.None);
 
       if (selectResult.length > 0 ) {
-        alert("삭제되지 않았습니다.");
+        alert("삭제되지 않았습니다.", "알림");
       } else {
-        alert("회원ID가 삭제되었습니다.");
+        alert("회원ID가 삭제되었습니다.", "알림");
         this.zmmt8100 = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
           "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", this.appConfig.interfaceId,
           new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
@@ -524,7 +531,7 @@ export class OBMMComponent {
 
     }
     catch (error) {
-      alert(error);
+      alert("error", "알림");
     }
   }
   //  데이터 삽입
@@ -539,12 +546,13 @@ export class OBMMComponent {
       maininsertData.REQDT = now;
       maininsertData.IUPDT = now;
       maininsertData.INVDT = now;
+      maininsertData.CREDT = minDate;
+      maininsertData.LSTDT = minDate;
+      maininsertData.STODT = minDate;
+      maininsertData.DUEDT = minDate;
       maininsertData.ERDAT = now;
       maininsertData.AEZET = nowTime;
       maininsertData.ERZET = nowTime;
-      maininsertData.CREDT = minDate;
-      maininsertData.LSTDT = minDate;
-      maininsertData.DUEDT = minDate;
 
       maininsertData.ModelStatus = DIMModelStatus.Modify;
 
@@ -556,7 +564,7 @@ export class OBMMComponent {
       var submodelList: ZMMT8110Model[] = [];
       for (let org of thisObj.orginCatagory) {
         let orgData = org as Category;
-        submodelList.push(new ZMMT8110Model("600", this.zmmt8100.BIZNO, orgData.Id, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
+        submodelList.push(new ZMMT8110Model(this.appConfig.mandt, this.zmmt8100.BIZNO, orgData.Id, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
       }
 
       this.bizpmtagbox.value.forEach((value: any) => {
@@ -566,7 +574,7 @@ export class OBMMComponent {
         if (value === 3)
           select2 = true;
 
-        submodelList.push(new ZMMT8110Model("600", this.zmmt8100.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
+        submodelList.push(new ZMMT8110Model(this.appConfig.mandt, this.zmmt8100.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
       });
 
 
@@ -577,7 +585,7 @@ export class OBMMComponent {
 
     }
     catch (error) {
-      alert(error);
+      alert("error", "알림");
     }
   }
   //비밀번호 확인

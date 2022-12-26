@@ -17,12 +17,12 @@
               [options]="searchButtonOptions">
     </dxi-item>
 
-    <!--<dxi-item location="after"
+    <dxi-item location="after"
               locateInMenu="auto">
-      <dx-button (onClick)="deleteRecords()"
+      <dx-button (onClick)="deleteRecords(this)"
                  text="삭제">
       </dx-button>
-    </dxi-item>-->
+    </dxi-item>
 
     <dxi-item widget="dxButton"
               location="after"
@@ -35,7 +35,7 @@
            width="80%"
            style="margin-left:180px">
     <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
-      <dxi-item dataField="LOGID" [label]="{text: '아이디(ID)'}" [editorOptions]="{ height: 30 }">
+      <dxi-item dataField="LOGID" [label]="{text: '아이디(ID)'}" [editorOptions]="{ height: 30, readOnly: true }">
         <dxi-validation-rule type="required" message="ID를 입력해주십시오."></dxi-validation-rule>
       </dxi-item>
     </dxi-item>
@@ -59,7 +59,7 @@
       </dxi-item>
 
       
-      <dxi-item dataField="MACID" [label]="{text: '컴퓨터 식별 ID'}" [editorOptions]="{ height: 30, readonly: true }">
+      <dxi-item dataField="MACID" [label]="{text: '컴퓨터 식별 ID'}" [editorOptions]="{ height: 30, readOnly: true }">
         <dxi-validation-rule type="required" message="컴퓨터 식별 ID를 입력해주십시오."></dxi-validation-rule>
       </dxi-item>
 
@@ -174,7 +174,7 @@
 
 
     <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
-      <dxi-item dataField="COUNTRY" [label]="{text: '국가'}" [editorOptions]="{ height: 30 }">
+      <dxi-item dataField="COUNTRY" [label]="{text: '국가'}" [editorOptions]="{ height: 30, readOnly: true}">
         <dxi-validation-rule type="required" message="국가를 입력해주십시오."></dxi-validation-rule>
         <div style="float: left; width:100%">
           <nh-possible-table #countryEntery

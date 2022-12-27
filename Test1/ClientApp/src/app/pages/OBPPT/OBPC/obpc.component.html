@@ -18,7 +18,14 @@
 
     <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
       <div *dxTemplate style="margin-top:7px;">
-        <dx-select-box placeholder="접수구분"></dx-select-box>
+          <dx-select-box #ynSelect
+                         [dataSource]="ynList"
+                         displayExpr="name"
+                         valueExpr="code"
+                         (onValueChanged)="selectApply($event)"
+                         label="접수구분"
+                         labelMode="floating"
+                         [(value)]="selectBoxValue"></dx-select-box>
       </div>
     </dxi-item>
 
@@ -30,6 +37,7 @@
                      labelMode="floating"
                      [maxLength]="40"
                      [disabled]="true"
+                     [(value)]="bizNoValue"
                      [width]="180"></dx-text-box>
       </div>
     </dxi-item>
@@ -42,6 +50,7 @@
                      [disabled]="true"
                      labelMode="floating"
                      [maxLength]="40"
+                     [(value)]="comNmValue"
                      [width]="230"></dx-text-box>
       </div>
     </dxi-item>
@@ -77,13 +86,13 @@
     <dxi-column dataField="CONNM"
                 caption="계약건명">
     </dxi-column>
-    <dxi-column dataField="DUEDT1"
+    <dxi-column dataField="DUEDT"
                 caption="납기일자">
     </dxi-column>
     <dxi-column dataField="BIZDT"
-                caption="거래처\n접수일자">
+                caption="거래처접수일자">
     </dxi-column>
-    <dxi-column dataField="자재 납품일자"
+    <dxi-column dataField="GRDATE"
                 caption="자재 납품일자">
     </dxi-column>
     <dxi-column dataField="BIDNO"
@@ -131,6 +140,7 @@
             <dx-button template="applyTemplate"
                        [text]="applyButtonText"
                       (onClick)="apply()"
+                       [disabled]="btnDisabledValue"
                        [width]="80" [height]="70" type="success">
               <div *dxTemplate="let data of 'applyTemplate'">
                 <div [innerHtml]="data.text" style="height: 90px; line-height: 30px;"></div>

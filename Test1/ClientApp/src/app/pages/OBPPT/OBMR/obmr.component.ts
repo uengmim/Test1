@@ -10,10 +10,10 @@ import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, Role, Category } from './app.service';
+import { Service, Category } from './app.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
-  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent } from 'devextreme-angular';
+  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxCheckBoxComponent } from 'devextreme-angular';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { ZCMT0020Model } from '../../../shared/dataModel/common/zcmt0020';
 import { AuthService } from '../../../shared/services';
@@ -28,6 +28,7 @@ import { formatDate } from '@angular/common';
 import { NbpAgentservice, DeviceInfo } from '../../../shared/services/nbp.agent.service'
 import notify from 'devextreme/ui/notify';
 import { async } from 'rxjs';
+import { alert, confirm } from "devextreme/ui/dialog";
 
 const sendRequest = function (value: any) {
   const invalidEmail = 'test@dx-email.com';
@@ -60,6 +61,7 @@ export class OBMRComponent  {
 
   @ViewChild('countryEntery', { static: false }) countryEntery!: TablePossibleEntryComponent;
   @ViewChild('bizpmtagbox', { static: false }) bizpmtagbox!: DxTagBoxComponent;
+  @ViewChild('chkgbox', { static: false }) chkgbox!: DxCheckBoxComponent;;
 
   callbacks = [];
 
@@ -161,8 +163,7 @@ export class OBMRComponent  {
   rolegridBoxValue: string[] = [];
   statusgridBoxValue: string[] = [];
 
-  //사업자구분
-  roles: Role[];
+
   //사용여부
   roleGridBoxOpened: boolean;
   statusGridBoxOpened: boolean;
@@ -184,6 +185,8 @@ export class OBMRComponent  {
 
   deviceInfo: any;
   casResult: any;
+  //텍스트박스 데이터
+  value: string;
 
   //버튼 제한
   isDisabled: boolean = false;
@@ -213,10 +216,9 @@ export class OBMRComponent  {
     this.localappConfig = appConfig;
     this.selectedValue = "Z100";
     this.selectedLike = "A%";
+      //텍스트박스 데이터
+    this.value = service.getContent();
 
-
-    //사업자구분
-    this.roles = service.getRoles();
     //취급업종
     this.categorydataSource = new ArrayStore({
       data: service.getcategory(),
@@ -225,8 +227,8 @@ export class OBMRComponent  {
     this.rowCount1 = 0;
     this.rowCount2 = 0;
     //회원가입 폼 데이터
-    this.register = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", this.appConfig.interfaceId, new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
+    this.register = new ZMMT8100Model("500", "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+      "", "", "", "", "", "", "", new Date(), new Date(), new Date(), new Date(), "", "", new Date(), "", new Date(), "", new Date(), "", "", "", "", this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
 
     setTimeout(async (that:OBMRComponent) => {
       //mac 가져오기
@@ -270,20 +272,29 @@ export class OBMRComponent  {
 
     //저장버튼
     this.saveButtonOptions = {
-      text: "저장",
+      text: "회원가입",
       disabled: true,
       type: 'success',
       useSubmitBehavior: true,
-      onClick: (e: any) => {
+      onClick: async (e: any) => {
 
-        this.dataInsert(this)
-
+        var value = this.chkgbox.value;
         let result = e.validationGroup.validate();
         if (!result.isValid) {
-          alert("필수값을 입력하여 주십시오.");
+          alert("필수값을 입력하여 주십시오.", "알림");
         }
         else {
-          alert("회원가입이 되었습니다.");
+          if (value == true) {
+            if (await confirm("회원가입하시겠습니까?", "알림")) {
+
+              this.dataInsert(this)
+              alert("회원가입이 되었습니다.", "알림");
+
+            }
+          } else {
+            alert("동의를 눌러주세요.", "알림");
+
+          }
         }
       },
     };
@@ -389,10 +400,10 @@ export class OBMRComponent  {
     console.log(result);
 
     if (result.length > 0) {
-      alert("중복된 아이디가 있습니다.");
+      alert("중복된 아이디가 있습니다.", "알림");
       this.form.instance.getButton("applyBtn")?.option("disabled", true);
     } else {
-      alert("사용 가능한 아이디입니다.")
+      alert("사용 가능한 아이디입니다.", "알림")
       this.form.instance.getButton("applyBtn")?.option("disabled", false);
 
     }
@@ -467,19 +478,29 @@ export class OBMRComponent  {
       let now = new Date();
       let minDate = new Date("0001-01-01");
       let nowTime = formatDate(new Date(), "HH:mm:ss", "en-US");
-
       var maininsertData = thisObj.register as ZMMT8100Model;
       var subinsertData = thisObj.register as ZMMT8110Model;
-
+      //등록 요청 일자
       maininsertData.REQDT = now;
+      //정보 수정 일자
       maininsertData.IUPDT = now;
+      //개인 정보 동의일
       maininsertData.INVDT = now;
-      maininsertData.ERDAT = now;
-      maininsertData.AEZET = nowTime;
-      maininsertData.ERZET = nowTime;
+      //신용 평가 기간
       maininsertData.CREDT = minDate;
+      //최종 승인 일자
       maininsertData.LSTDT = minDate;
+      //사용 중지 일자
+      maininsertData.STODT = minDate;
+      //유효 일자
       maininsertData.DUEDT = minDate;
+      //레코드 생성일
+      maininsertData.ERDAT = now;
+      //입력시간
+      maininsertData.AEZET = nowTime;
+      //최종 변경 시간
+      maininsertData.ERZET = nowTime;
+
 
       maininsertData.ModelStatus = DIMModelStatus.Add;
 
@@ -496,7 +517,7 @@ export class OBMRComponent  {
         if (value === 3)
           select2 = true;
 
-        submodelList.push(new ZMMT8110Model("600", this.register.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
+        submodelList.push(new ZMMT8110Model("500", this.register.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
       });
 
       subinsertData.ModelStatus = DIMModelStatus.Add;
@@ -508,7 +529,7 @@ export class OBMRComponent  {
 
     }
     catch (error) {
-      alert(error);
+      alert("error", "알림");
     }
   }
   //비밀번호 확인

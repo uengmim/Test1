@@ -1,13 +1,14 @@
 /*
  * 구매공고확인
  */
-import { Component, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, OnInit, Output } from '@angular/core';
+import { Component, ViewChild, ChangeDetectorRef, ChangeDetectionStrategy, OnInit, Output, Input } from '@angular/core';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import 'devextreme/data/odata/store';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ZCMT0020Model } from '../../../shared/dataModel/common/zcmt0020';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
+import { IUser } from '../../../shared/services/auth.service';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { Service, Role, Category } from './app.service';
@@ -23,9 +24,10 @@ import { CommonPossibleEntryComponent } from '../../../shared/components/comm-po
 import { ZMMBIDMstModel, ZMMS8030Model, ZMMS9000Model, RSISSRangeModel } from '../../../shared/dataModel/OBPPT/ZmmBidMst';
 import { ZMMT8360Model } from '../../../shared/dataModel/OBPPT/Zmmt8360';
 import { ZMMT8370Model } from '../../../shared/dataModel/OBPPT/Zmmt8370';
+import { ZMMT8320Model } from '../../../shared/dataModel/OBPPT/Zmmt8320';
 import { EbanModel } from '../../../shared/dataModel/OBPPT/Eban';
 import { ZMMTDETAILModel } from '../../../shared/dataModel/OBPPT/ZmmtDetail';
-
+import { alert, confirm } from "devextreme/ui/dialog";
 import { formatDate } from '@angular/common';
 import { DxiItemComponent } from 'devextreme-angular/ui/nested';
 import ArrayStore from 'devextreme/data/array_store';
@@ -45,10 +47,9 @@ const getOrderDay = function (rowData: any): number {
   //  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
-
-
 export class OBPIComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
+  @ViewChild(DxFormComponent, { static: false }) form!: DxFormComponent;
   @ViewChild('popupForm', { static: false }) popupForm!: DxFormComponent;
   @ViewChild('#gcContractList', { static: false }) gcContractList!: DxDataGridComponent;
   @ViewChild('PrgstatusEntry', { static: false }) PrgstatusEntry!: CommonPossibleEntryComponent;
@@ -65,19 +66,23 @@ export class OBPIComponent {
   callbacks = [];
 
 
+
+
   //현재날짜
   now: Date = new Date();
   startDate: any;
   endDate: any;
+  gretdDat: any;
 
   /**
  * 선택한 코드의 전체 키 값
  */
   @Output()
+
   selectedCodes: string[] = [];
   products: any;
   displayExpr: string;
-  gridColumns: any = [ '그룹명', '코드', '코드명'];
+  gridColumns: any = ['그룹명', '코드', '코드명'];
   PrgstatusCode: CommonCodeInfo;
   RegulationCode: CommonCodeInfo;
   BusinessCategoryCode: TableCodeInfo;
@@ -99,6 +104,8 @@ export class OBPIComponent {
 
   // 선택값
   selectGridData: ZMMS8030Model[] = [];
+  // 선택값
+  estselectGridData: ZMMT8370Model[] = [];
   //팝업 선택값
   popupGridData: ZMMS8020Model[] = [];
   //상세폼
@@ -106,7 +113,7 @@ export class OBPIComponent {
   //견적폼
   estimateFormData: any;
   //견적-디테일폼
-  estimateDetailFormData: any;
+  estimateDetailFormData: any = {};
   //저장품구매 상세정보 팝업
   statuspopupVisible = false;
   //견적제출 상세정보 팝업
@@ -144,7 +151,7 @@ export class OBPIComponent {
   popupcloseButtonOptions: any;
   //팝업 조회 버튼
   popupinquiryButtonOptions: any;
-    //팝업 엑셀 버튼
+  //팝업 엑셀 버튼
   exportSelectedData: any;
 
   //견적팝업 닫기 버튼
@@ -155,7 +162,8 @@ export class OBPIComponent {
   estimatepopupsaveButtonOptions: any;
   //견적팝업 엑셀 버튼
   estimateexportSelectedData: any;
-
+  //견적팝업 삭제 버튼
+  estimateDeleteSelectedData: any;
   //회원가입
   searchID: any;
 
@@ -169,7 +177,11 @@ export class OBPIComponent {
   rowCount1: number;
   rowCount2: number;
 
+
+  RFQSEQdata: string = "";
   _dataService: ImateDataService;
+  zmmt8360: ZMMT8360Model;
+  zmmt8370!: ZMMT8370Model[];
 
   dataSource: any;
 
@@ -187,9 +199,11 @@ export class OBPIComponent {
   //줄 선택
   selectedRowIndex = -1;
   selectedItemKeys: any[] = [];
-
+  estselectedRowIndex = -1;
+  estselectedItemKeys: any[] = [];
   tableresultModel: any;
 
+  btnVisible: boolean = false;
   /**
  * 로딩된 PeCount
  * */
@@ -202,7 +216,7 @@ export class OBPIComponent {
  * @param authService 사용자 인증 서버스
  */
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService,
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, private authService: AuthService,
     service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private router: Router) {
     appInfo.title = AppInfoService.APP_TITLE + " | 구매공고현황";
 
@@ -212,15 +226,18 @@ export class OBPIComponent {
     let test = this;
 
     this.PrgstatusCodeValue = "1";
-    this.RegulationValue = "1";
+    //this.RegulationValue = "1";
 
-    //this.popupData8360 = new ZMMT8360Model(this.appConfig.mandt, "", "", "", "", new Date, "", new Date, "", 0, 0, 0, "", "", "", "", "", new Date, "", "", new Date, "", DIMModelStatus.UnChanged)
-    //this.popupData8370 = new ZMMT8370Model(this.appConfig.mandt, this.popupData8360.BIDNO, "", "", "", "", 0, "", "", "", "", new Date, "", "", new Date, "",  DIMModelStatus.UnChanged)
+    if (!(authService.getUser().data?.pin == "" || authService.getUser().data?.pin == null || authService.getUser().data?.pin == undefined)) {
+      this.btnVisible = !this.btnVisible;
+    }
+    this.zmmt8360 = new ZMMT8360Model(this.appConfig.mandt, "", "", "", "", new Date, "", new Date, "", 0, 0, 0, "", "", "", "", "", new Date, "", "", new Date, "", DIMModelStatus.UnChanged);
 
     //date
     var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 93), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(now.setDate(now.getDate() - 90), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
+    //this.gretdDat = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
     this.rowCount1 = 0;
     this.rowCount2 = 0;
@@ -253,8 +270,6 @@ export class OBPIComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.PrgstatusCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.BusinessCategoryCode),
       new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.RegulationCode),
-
-
     ];
     PossibleEntryDataStoreManager.setDataStore("obpi", codeInfos, appConfig, dataService);
 
@@ -280,7 +295,9 @@ export class OBPIComponent {
     this.exportSelectedData = {
       text: '엑셀 다운',
       onClick(e: any, thisObj: OBPIComponent) {
-        that.popupDataGrid.instance.exportToExcel(true);
+        that.popupDataGrid.export.enabled = true;
+        that.popupDataGrid.export.fileName = 'Report';
+        that.popupDataGrid.instance.exportToExcel(false);
       },
     };
     //팝업 닫기 버튼
@@ -294,12 +311,27 @@ export class OBPIComponent {
     //견적팝업 조회 버튼
     this.estimatepopupinquiryButtonOptions = {
       text: '조회',
-      onClick: async (e: any) => {
+      onClick: async (e: any, thisObj: OBPIComponent) => {
         this.loadingVisible = true;
+        //mst
         this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
-
         this.estimateFormData = this.selectGridData[0];
-        await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+        //8360
+        let userInfo = this.authService.getUser().data;
+        var bidno = thisObj.estimateFormData.BIDNO.padStart(15, '0');
+        var lifnr = userInfo?.deptId ?? "";
+        var select8360Result = await dataService.SelectModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
+          `BIDNO = '${bidno}' AND LIFNR = '${lifnr}'`, "RFQSEQ DESC", QueryCacheType.None);
+
+        this.estimateDetailFormData = select8360Result;
+        //8370
+        var select8370Result = await dataService.SelectModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", [],
+          `BIDNO = '${bidno}' AND LIFNR = '${lifnr}' AND RFQSEQ = '${select8360Result[0].RFQSEQ}'`, "RFQSEQ DESC", QueryCacheType.None);
+        this.estpopupData = new ArrayStore(
+          {
+            key: ["BIDNO"],
+            data: select8370Result
+          });
         this.loadingVisible = false;
 
       },
@@ -307,29 +339,70 @@ export class OBPIComponent {
     //견적팝업 저장 버튼
     this.estimatepopupsaveButtonOptions = {
       text: '저장',
-      onClick: async (e: any) => {
-        var znumber = this.estimateDetailFormData.RFQSEQ.padStart(3, '0');
-        this.estimateDetailFormData.RFQSEQ = (parseInt(znumber) + 1)
+      onClick: async (e: any, thisObj: OBPIComponent) => {
 
-        this.loadingVisible = true;
-        var resultModel = await this.datainsert(this);
+        if (await confirm("저장하시겠습니까?", "알림")) {
 
-        this.loadingVisible = false;
-        if (resultModel.ES_RESULT.TYPE !== "S") {
-          alert(`등록을 하지 못했습니다.\n\nSAP 메시지: ${resultModel.ES_RESULT.MESSAGE}`);
-        } else {
-          alert(`등록 하였습니다.\n\nSAP 메시지: ${resultModel.ES_RESULT.MESSAGE}`);
+          this.loadingVisible = true;
+          var makeYn = false;
+          var estmakeYn = false;
+          //메이커 여부가 X일때
+          if (this.estimateFormData.MAKERYN == "X") {
+            this.estpopupData._array.forEach((array: any) => {
+              //8370에서 MAKER가 빈값이면 alert
+              if (array.MAKER == "" || array.MAKER == null) {
+                makeYn = true;
+                return;
 
-          return;
+              }
+            });
+            if (makeYn) {
+              alert(`메이커를 필수로 입력해주세요.`, "알림");
+            }
+
+          }
+       
+            //단가가 빈값이면 alert
+          this.estpopupData._array.forEach((array: any) => {
+              if (array.CONPR == "" || array.CONPR == null || array.CONPR == "0") {
+                estmakeYn = true;
+                return;
+              }
+            });
+          if (estmakeYn) {
+              alert(`단가를 필수로 입력해주세요.`, "알림");
+          }
+          if (!makeYn && !estmakeYn) { 
+            var resultModel = await this.datainsert(this);
+            if (resultModel?.ES_RESULT.TYPE !== "S") {
+              alert(`저장을 하지 못했습니다.\n\nSAP 메시지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
+            } else {
+              alert(`저장 하였습니다.\n\nSAP 메시지: ${resultModel.ES_RESULT.MESSAGE}`, "알림");
+            }
+            }
+          
+
+
+          this.loadingVisible = false;
         }
-      }
+      },
+
     }
 
     //견적팝업 엑셀 버튼
     this.estimateexportSelectedData = {
       text: '엑셀 다운',
       onClick(e: any, thisObj: OBPIComponent) {
-        that.estimateDataGrid.instance.exportToExcel(true);
+        that.estimateDataGrid.export.enabled = true;
+        that.estimateDataGrid.export.fileName = 'Report';
+        that.estimateDataGrid.instance.exportToExcel(false);
+      },
+    };
+    //견적팝업 삭제 버튼
+    this.estimateDeleteSelectedData = {
+      text: '삭제',
+      onClick: async (e: any) => {
+        await this.dataDelete(this.dataService, this);
       },
     };
     //견적팝업 닫기 버튼
@@ -356,17 +429,32 @@ export class OBPIComponent {
 
 
   //}
+  //공고참가업체
+  public async userdata(dataService: ImateDataService) {
+    let userInfo = this.authService.getUser().data;
 
+    var LIFNR = userInfo?.deptId ?? "";
+    var BIZNO = userInfo?.pin ?? "";
+
+    var zmmt8320Model = new ZMMT8320Model(this.appConfig.mandt, "", LIFNR, BIZNO, "", "", new Date(), "", new Date(), "00:00:00", "", new Date(), "00:00:00", DIMModelStatus.UnChanged)
+    var modelList: ZMMT8320Model[] = [zmmt8320Model];
+    this.loadingVisible = true;
+    var resultModel = await dataService.RefcCallUsingModel<ZMMT8320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8320ModelList", modelList, QueryCacheType.None);
+    this.loadingVisible = false;
+    return resultModel[0];
+
+  }
 
 
   //데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
     var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
     var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
+    var userdata = await this.userdata(this.dataService);
 
     var zmms9000Model = new ZMMS9000Model("", "");
 
-    var zmmbidmstModel = new ZMMBIDMstModel(zmms9000Model, this.startDate, this.endDate, this.PrgstatusEntry.selectedValue ?? "", "0000600033", [], []);
+    var zmmbidmstModel = new ZMMBIDMstModel(zmms9000Model, this.startDate, this.endDate, this.PrgstatusEntry.selectedValue ?? "", userdata.LIFNR, [], []);
 
     var modelList: ZMMBIDMstModel[] = [zmmbidmstModel];
 
@@ -374,37 +462,29 @@ export class OBPIComponent {
     var resultModel = await dataService.RefcCallUsingModel<ZMMBIDMstModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDMstModelList", modelList, QueryCacheType.None);
     this.loadingVisible = false;
 
-    //let model: Array<any> = this.tableresultModel;
-
-    //resultModel[0].ET_DATA.forEach((array: any) => {
-
-    //  model.find(array => array.BIDTY == "PRM");
-
-
-    //});
-
-
-
     if (resultModel[0].ES_RESULT.TYPE !== "S") {
-      alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].ES_RESULT.MESSAGE}`);
+      alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].ES_RESULT.MESSAGE}`, "알림");
       return [];
-    } 
+    }
 
     return resultModel[0].ET_DATA;
 
   }
 
   // 상세 데이터 로드
-  public async detaildataLoad(parent: OBPIComponent, BIDNO:string) {
+  public async detaildataLoad(parent: OBPIComponent, BIDNO: string) {
+
+    var userdata = await this.userdata(this.dataService);
+
+    var zmms9000Model = new ZMMS9000Model("", "");
+
+    var zmmbiddtlModel = new ZMMBIDDtlModel(zmms9000Model, BIDNO, userdata.LIFNR, "", []);
+
+    var modeldtlList: ZMMBIDDtlModel[] = [zmmbiddtlModel];
 
 
-      var zmms9000Model = new ZMMS9000Model("", "");
 
-    var zmmbiddtlModel = new ZMMBIDDtlModel(zmms9000Model, BIDNO, "0000600033", "", []);
-
-      var modeldtlList: ZMMBIDDtlModel[] = [zmmbiddtlModel];
-
-      return await parent.dataService.RefcCallUsingModel<ZMMBIDDtlModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDDtlModelList", modeldtlList, QueryCacheType.None);
+    return await parent.dataService.RefcCallUsingModel<ZMMBIDDtlModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDDtlModelList", modeldtlList, QueryCacheType.None);
 
   }
 
@@ -412,21 +492,25 @@ export class OBPIComponent {
   public async formdataLoad(dataService: ImateDataService, thisObj: OBPIComponent) {
 
     var bidno = thisObj.estimateFormData.BIDNO.padStart(15, '0');
+    let userInfo = this.authService.getUser().data;
 
-    var resultModel = await dataService.SelectModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
-      `BIDNO = '${bidno}' AND LIFNR =  '0000600033'`, "", QueryCacheType.None);
+    var lifnr = userInfo?.deptId ?? "";
+    var result8360Model = await dataService.SelectModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
+      `BIDNO = '${bidno}' AND LIFNR =  '${lifnr}'`, "", QueryCacheType.None);
 
-    return resultModel;
+    return result8360Model;
 
   }
 
   // 8370 견적 로드
   public async datagridLoad(dataService: ImateDataService, thisObj: OBPIComponent) {
 
+    let userInfo = this.authService.getUser().data;
 
-    var bidno = thisObj.estimateFormData.BIDNO.padStart(15, '0');
-    var resultModel = await dataService.SelectModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", [],
-      `BIDNO = '${bidno}' AND LIFNR =  '0000600033'`, "", QueryCacheType.None);
+    var bidno = thisObj.statusData.BIDNO
+    var lifnr = userInfo?.deptId ?? "";
+    var result8370Model = await dataService.SelectModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", [],
+      `BIDNO = '${bidno}' AND LIFNR =  '${lifnr}'`, "", QueryCacheType.None);
 
 
     //var dataList: any = [];
@@ -435,51 +519,314 @@ export class OBPIComponent {
     //  dataList.push({ BIDNO: array.BIDNO, NO: index });
     //});
     //return dataList;
-    return resultModel;
+    return result8370Model;
 
   }
 
 
   // 데이터 저장
   public async datainsert(thisObj: OBPIComponent) {
+    try {
+      var zmms9000Model = new ZMMS9000Model("", "");
+      let now = new Date().toISOString().substring(0, 10).replace(/-/g, '');
+      let nowTime = formatDate(new Date(), "HHmmss", "en-US");
+      var userInfo = thisObj.authService.getUser().data;
+      var gretdDate = formatDate(thisObj.estimateDetailFormData.GRETD, "yyyyMMdd", "en-US")
 
-    var zmms9000Model = new ZMMS9000Model("", "");
-    let now = new Date();
-    let minDate = new Date("0001-01-01");
-    thisObj.estimateDetailFormData.RFQDTH = now;
-    thisObj.estimateDetailFormData.GRETD = minDate;
-    var zmms8031Model = new ZMMS8031Model("I", thisObj.estimateDetailFormData.BIDNO, thisObj.estimateDetailFormData.LIFNR, thisObj.estimateDetailFormData.RFQSEQ, thisObj.estimateDetailFormData.BIDNO,
-      thisObj.estimateDetailFormData.RFQDTH, thisObj.estimateDetailFormData.RFGDTT, thisObj.estimateDetailFormData.GRETD, thisObj.estimateDetailFormData.PAYTY, thisObj.estimateDetailFormData.RFQCST,
-      thisObj.estimateDetailFormData.RFQVAT, thisObj.estimateDetailFormData.RFQAMT, thisObj.estimateFormData.RFQPYN, DIMModelStatus.UnChanged);
+      var lifnr = userInfo?.deptId ?? "";
 
-    var zmms8032Model = new ZMMS8032Model(thisObj.estpopupData[0].BANFN, thisObj.estpopupData[0].BNFPO, thisObj.estpopupData[0].RFQCST, thisObj.estpopupData[0].MAKER, thisObj.estpopupData[0].REMARK, DIMModelStatus.UnChanged);
+      var zmms8031Model = new ZMMS8031Model("I", thisObj.estimateFormData.BIDNO, lifnr, thisObj.estimateDetailFormData.RFQSEQ, thisObj.estimateFormData.BIZNO, gretdDate,
+        thisObj.estimateDetailFormData.PAYTY, thisObj.estimateDetailFormData.RFQCST, thisObj.estimateDetailFormData.RFQVAT, thisObj.estimateDetailFormData.RFQAMT,
+        thisObj.estimateFormData.RFQPYN, DIMModelStatus.Add);
 
-    var zmmrgqrtnModel = new ZMMRFQRtnModel(zmms9000Model, zmms8031Model, [zmms8032Model]);
+      this.estselectGridData = this.estpopupData._array;
 
-    var modelList: ZMMRFQRtnModel[] = [zmmrgqrtnModel];
+      var zmms8032ModelList: ZMMS8032Model[] = [];
+      this.estselectGridData.forEach(async (array: any) => {
 
-    var insertModel = await this.dataService.RefcCallUsingModel<ZMMRFQRtnModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMRFQRtnModelList", modelList, QueryCacheType.None);
 
-    return insertModel[0];
+        zmms8032ModelList.push(new ZMMS8032Model(array.BANFN, array.BNFPO, array.CONPR, array.MAKER, array.REMARK, DIMModelStatus.Add));
+
+      });
+
+
+      var zmmrgqrtnModel = new ZMMRFQRtnModel(zmms9000Model, zmms8031Model, zmms8032ModelList);
+
+      var modelList: ZMMRFQRtnModel[] = [zmmrgqrtnModel];
+
+      var insertModel = await this.dataService.RefcCallUsingModel<ZMMRFQRtnModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMRFQRtnModelList", modelList, QueryCacheType.None);
+
+      return insertModel[0];
+    }
+    catch (error: any) {
+      alert(error, " 오류");
+      return null;
+    }
+
+  }
+
+  //데이터 삭제
+  public async dataDelete(dataService: ImateDataService, thisObj: OBPIComponent) {
+    try {
+      let userInfo = this.authService.getUser().data;
+
+      var bidno = thisObj.estimateFormData.BIDNO.padStart(15, '0');
+      var lifnr = userInfo?.deptId ?? "";
+
+      //해당 공고의 마지막 견적을 선택
+      var select8360Result = await dataService.SelectModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
+        `BIDNO = '${bidno}' AND LIFNR = '${lifnr}'`, "RFQSEQ DESC", QueryCacheType.None);
+
+
+      if (select8360Result.length == 0) {
+        alert("삭제할 데이터가 없습니다.", "알림");
+      } else {
+        // 견적결과가 빈값이 아니라면 , 삭제 X
+        if (select8360Result[0].RFQRST !== "") {
+          alert("견적결과가 나온 것은 삭제할 수 없습니다.", "알림");
+        }
+        //견적 결과가 빈값이면 , 삭제
+        else {
+          this.zmmt8360 = select8360Result[0];
+          this.zmmt8360.ModelStatus = DIMModelStatus.Delete;
+
+          var select8370Result = await dataService.SelectModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", [],
+            `BIDNO = '${bidno}' AND LIFNR = '${lifnr}' AND RFQSEQ = '${select8360Result[0].RFQSEQ}'`, "RFQSEQ DESC", QueryCacheType.None);
+
+          this.zmmt8370 = select8370Result;
+          this.zmmt8370.forEach((array: any) => {
+            array.ModelStatus = DIMModelStatus.Delete;
+          })
+          alert("견적 제출이 삭제되었습니다.", "알림");
+        }
+      }
+      var model8360List: ZMMT8360Model[] = [thisObj.zmmt8360];
+
+      this.rowCount1 = await this.dataService.ModifyModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", model8360List);
+      this.rowCount2 = await this.dataService.ModifyModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", this.zmmt8370);
+
+
+      this.estimateDetailFormData.resetValues();
+    }
+    catch (error) {
+      alert("error", "알림");
+    }
+  }
+
+
+  //전체 버튼
+  allCategory(thisObj: OBPIComponent) {
+    thisObj.bizpmtagbox.instance.reset();
+    thisObj.statusDataGrid.instance.clearFilter();
+
+  }
+  //결제조건코드 값 변경
+  onRegulationCodeValueChanged(e: any) {
+
+    setTimeout(() => {
+      this.estimateDetailFormData.PAYTY = e.selectedValue
+    });
+  }
+
+
+  //Data refresh 날짜 새로고침 이벤트
+  public refreshDataGrid(e: Object) {
+    this.dataGrid.instance.refresh();
+  }
+  //날짜 클릭
+  dateCheck(e: any) {
+    var staDate = new Date(this.startDate);
+    var endDate = new Date(this.endDate);
+
+    var diffDay = Math.floor(Math.abs((staDate.getTime() - endDate.getTime()) / (24 * 60 * 60 * 1000)));
+
+    if (diffDay > 90) {
+      alert("조회기간을 최대 3개월 이내로 설정해주세요.", "알림");
+    } else {
+      this.dataLoad(this.imInfo, this.dataService);
+    }
+  }
+
+  //상세내용 버튼 이벤트
+  statusDetailData: any = async (e: any) => {
+    this.selectedItemKeys.forEach(async (key: any) => {
+
+      this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+
+      this.detailFormData = this.selectGridData[0];
+
+
+      this.loadingVisible = true;
+      var result8370Model = await this.datagridLoad(this.dataService, this);
+      var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+      this.loadingVisible = false;
+
+
+      result8370Model.forEach((array: any) => {
+        var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+        if (resultData != undefined) {
+          Object.assign(array, {
+            MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
+            MEINS: resultData.MEINS, CONPR: resultData.CONPR, MAKER: resultData.MAKER, REMARK: resultData.REMARK
+          });
+        }
+      });
+
+
+      this.popupData = new ArrayStore(
+        {
+          key: ["BIDNO"],
+          data: resultModel[0].ET_DATA
+        });
+      this.statuspopupVisible = !this.statuspopupVisible;
+
+    });
+
+  }
+  //견적제출
+  Duplication: any = async (thisObj: OBPIComponent) => {
+
+    var checkFlag = false;
+    this.selectedItemKeys.forEach(async (key: any) => {
+
+
+      var userInfo = this.authService.getUser().data;
+
+      this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+
+      this.estimateFormData = this.selectGridData[0];
+
+      Object.assign(this.estimateFormData, { BIZNO: userInfo?.pin, NAME1: userInfo?.deptName });
+
+      var result8360Model = await this.formdataLoad(this.dataService, this);
+
+      if (result8360Model.length > 0) {
+        if (result8360Model[result8360Model.length - 1].RFQRST == "C" && this.selectGridData[0].BIDST == "2") {
+          checkFlag = true;
+
+          this.estimateDetailFormData = result8360Model[result8360Model.length - 1];
+
+          this.estimateDetailFormData.RFQSEQ = (parseInt(result8360Model[result8360Model.length - 1].RFQSEQ) + 1).toString().padStart(3, '0');
+
+          this.RegulationValue = result8360Model[result8360Model.length - 1].PAYTY;
+
+        } else {
+          checkFlag = false;
+        }
+      } else {
+        checkFlag = true;
+
+        this.estimateDetailFormData.RFQSEQ = "001";
+        this.RegulationValue = "1";
+      }
+      if (checkFlag) {
+        this.estimatepopupVisible = !this.estimatepopupVisible;
+
+        this.loadingVisible = true;
+        var result8370Model = await this.datagridLoad(this.dataService, this);
+        var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+        this.loadingVisible = false;
+
+
+        result8370Model.forEach((array: any) => {
+          var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+          if (resultData != undefined) {
+            Object.assign(array, {
+              MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
+              MEINS: resultData.MEINS, CONPR: resultData.CONPR, MAKER: resultData.MAKER, REMARK: resultData.REMARK
+            });
+          }
+        });
+
+        this.estpopupData = new ArrayStore(
+          {
+            key: ["BIDNO","BNFPO"],
+            data: resultModel[0].ET_DATA
+          });
+        //this.estpopupData = new ArrayStore(
+        //  {
+        //    key: ["BIDNO", "RFQSEQ"],
+        //    data: result8370Model
+        //  });
+
+      }
+      else {
+        alert("견적결과가 재견적일 경우에만 견적제출이 가능합니다.", "알림");
+      }
+    });
 
 
   }
 
+  movePage(e: any) {
+    this.router.navigate(['obmr']);
+  }
+  //자료첨부
+  test() {
 
-  //// 상세 데이터 로드
-  //public async detaildataLoad(dataService: ImateDataService, thisObj: OBPIComponent) {
+  }
+  selectionChanged(data: any) {
+    this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
+    this.selectedItemKeys = data.currentSelectedRowKeys;
 
-  //  try {
-  //    return await dataService.SelectModelData<ZMMTDETAILModel[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMTDETAILModelList",
-  //      [thisObj.selectedItemKeys[0].BIDNO], "", "", QueryCacheType.None);
+  }
+  estselectionChanged(data: any) {
+    this.estselectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
+    this.estselectedItemKeys = data.currentSelectedRowKeys;
 
- 
-  //  } catch (error: any) {
-  //    alert(error.message);
-  //    return null;
-  //  }
+  }
+  //조회필터조건
+  selectStatus(data: any) {
+    this.statusDataGrid.instance.filter(['BIZUPJ', '=', data.value]);
+  }
+  onEstEditorPreparing(e: any) {
+    //this.estselectGridData = this.estimateDataGrid.instance.getSelectedRowsData();
+    //this.estpopupData = this.estselectGridData[0];
+    var row = this.estimateDataGrid.instance.getSelectedRowsData();
 
-  //}
+
+
+    if (row.length > 0) {
+      if (this.estimateFormData.BIDRUL == "A") {
+
+        row[0].RFQCST = parseInt(row[0].MENGE) * parseInt(row[0].CONPR);
+        row[0].RFQVAT = parseInt(row[0].RFQCST) * 0.1
+        row[0].RFQAMT = parseInt(row[0].RFQCST) + parseInt(row[0].RFQVAT)
+      }else {
+        row[0].RFQCST = parseInt(row[0].MENGE) * parseInt(row[0].CONPR);
+        if (this.estimateFormData.VATTY == "OUT") {
+          //견적 부가세 = 견적 공급가 * 0.1
+          row[0].RFQVAT = parseInt(row[0].RFQCST) * 0.1
+          // 부가세가 IN이면
+        } else {
+          // 견적 부가세 = 0
+          row[0].RFQVAT = "0"
+        }
+        row[0].RFQAMT = parseInt(row[0].RFQCST) + parseInt(row[0].RFQVAT)
+
+      }
+    }
+      //데이터 그리드 총액 더하기
+      var rfgcst = 0;
+      var rfgvat = 0;
+      var rfgamt = 0;
+
+      var data: Array<any> = this.estpopupData._array;
+
+      data.forEach(async (array: any) => {
+        rfgcst = rfgcst + parseInt(array.RFQCST);
+        rfgvat = rfgvat + parseInt(array.RFQVAT);
+        rfgamt = rfgamt + parseInt(array.RFQAMT);
+
+      });
+    Object.assign(this.estimateDetailFormData, { RFQCST: rfgcst, RFQVAT: rfgvat, RFQAMT: rfgamt });
+
+    
+
+
+  }
 
 
   async onPrgstatusDataLoaded(e: any) {
@@ -526,116 +873,4 @@ export class OBPIComponent {
 
     }
   }
-  //전체 버튼
-  allCategory(thisObj: OBPIComponent) {
-    thisObj.bizpmtagbox.instance.reset();
-    thisObj.statusDataGrid.instance.clearFilter();
-   
-  }
-  //결제조건코드 값 변경
-  onRegulationCodeValueChanged(e: any) {
-    this.estimateFormData.PAYTY = e.selectedValue
-
-    return;
-  }
-
-
-  //Data refresh 날짜 새로고침 이벤트
-  public refreshDataGrid(e: Object) {
-    this.dataGrid.instance.refresh();
-  }
-  //날짜 클릭
-  dateCheck(e: any) {
-    var staDate = new Date(this.startDate);
-    var endDate = new Date(this.endDate);
-
-    var diffDay = Math.floor(Math.abs((staDate.getTime() - endDate.getTime()) / (24 * 60 * 60 * 1000)));
-
-    if (diffDay > 90) {
-      alert("조회기간을 최대 3개월 이내로 설정해주세요.");
-    } else {
-      this.dataLoad(this.imInfo, this.dataService);
-    }
-  }
-
-  //상세내용 버튼 이벤트
-  statusDetailData : any = async (e: any) => {
-    this.selectedItemKeys.forEach(async (key: any) => {
-      this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
-
-      this.detailFormData = this.selectGridData[0];
-
-      this.loadingVisible = true;
-      var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
-      this.loadingVisible = false;
-
-
-      this.popupData = new ArrayStore(
-        {
-          key: ["BIDNO", "BANFN", "BNFPO"],
-          data: resultModel[0].ET_DATA
-        });
-
-    });
-    this.statuspopupVisible = !this.statuspopupVisible;
-
-  }
-  //견적제출
-  Duplication: any = async (thisObj: OBPIComponent) => {
-    this.selectedItemKeys.forEach(async (key: any) => {
-      this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
-
-      this.estimateFormData = this.selectGridData[0];
-
-      var result8360Model = await this.formdataLoad(this.dataService, this);
-
-
-      this.estimateDetailFormData = result8360Model[0];
-
-      this.loadingVisible = true;
-      var result8370Model = await this.datagridLoad(this.dataService, this);
-      var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
-      this.loadingVisible = false;
-
-
-      result8370Model.forEach((array: any) => {
-        var resultData = resultModel[0].ET_DATA.find(obj => obj.BANFN == array.BANFN);
-
-        if (resultData != undefined) {
-          Object.assign(array, {
-            MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-            MEINS: resultData.MEINS, CONPR: resultData.CONPR, MAKER: resultData.MAKER, REMARK: resultData.REMARK
-          });
-        }
-      });
-
-      this.estpopupData = new ArrayStore(
-        {
-          key: ["BIDNO"],
-          data: result8370Model
-        });
-
-    });
-    this.estimatepopupVisible = !this.estimatepopupVisible;
-
-  }
-  //회원가입 버튼 페이지 이동 이벤트
-  movePage(e: any) {
-    this.router.navigate(['obmr']);
-  }
-  //자료첨부
-  test() {
-
-  }
-  selectionChanged(data: any) {
-    this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
-    this.selectedItemKeys = data.currentSelectedRowKeys;
-
-  }
-
-  //조회필터조건
-  selectStatus(data: any) {
-    this.statusDataGrid.instance.filter(['BIZUPJ', '=', data.value]);
-  }
-
 }

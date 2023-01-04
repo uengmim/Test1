@@ -1,0 +1,132 @@
+  <!--toolbar-->
+<dx-toolbar style="height: 40px; margin-top: 5px;">
+
+  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>주문기간</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div *dxTemplate>
+
+      <div style="float:left">
+
+        <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+      </div>
+      <div style="float:left; margin-left:10px; margin-right:10px;">
+        ~
+      </div>
+      <div style="float:left">
+        <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+<dx-data-grid class="master"
+              [dataSource]="data"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              keyExpr="Num"
+              [columnHidingEnabled]="true"
+              [selection]="{ mode: 'multiple' }"
+              [allowColumnReordering]="true">
+  <!--Datagrid Option-->
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+  <!--Filtering Option-->
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-builder-popup [position]="popupPosition">
+  </dxo-filter-builder-popup>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+
+  <!--Batch Option-->
+  <dxo-editing mode="batch"
+                     [allowUpdating]="true"
+               [selectTextOnEditStart]="selectTextOnEditStart"
+               [startEditAction]="startEditAction">
+  </dxo-editing>
+
+
+  <!--Data column-->
+  <dxi-column dataField="SmDate"
+              caption="출하일자"
+              dataType="date">
+  </dxi-column>
+
+  <dxi-column dataField="Num"
+              caption="순번">
+  </dxi-column>
+  <dxi-column dataField="VehNum"
+              caption="차량번호">
+  </dxi-column>
+  <dxi-column dataField="Product"
+              caption="제품">
+  </dxi-column>
+  <dxi-column dataField="Destination"
+              caption="도착지">
+  </dxi-column>
+  <dxi-column dataField="CliName"
+              caption="거래처명">
+  </dxi-column>
+  <dxi-column dataField="IndQuan"
+              caption="지시량">
+  </dxi-column>
+  <dxi-column dataField="TolWei"
+              caption="공차중량">
+  </dxi-column>
+  <dxi-column dataField="GroWei"
+              caption="총중량"
+              format="currency"
+              dataType="number">
+    <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+  </dxi-column>
+  <dxi-column dataField="Temper"
+              caption="온도">
+  </dxi-column>
+  <dxi-column dataField="Tank"
+              caption="TANK">
+  </dxi-column>
+  <dxi-column dataField="Rack"
+              caption="RACK">
+  </dxi-column>
+  <dxi-column dataField="RelTim"
+              caption="출고시간">
+  </dxi-column>
+  <dxi-column dataField="RelClass"
+              caption="출하구분">
+  </dxi-column>
+  <dxi-column dataField="DriverName"
+              caption="기사명">
+  </dxi-column>
+  <dxi-column dataField="CliClass"
+              caption="거래처구분">
+  </dxi-column>
+  <dxi-column dataField="CliPho"
+              caption="거래처전화">
+  </dxi-column>
+  <dxi-column dataField="RelNum"
+              caption="출하번호">
+  </dxi-column>
+  <dxi-column dataField="OilChe"
+              caption="유류/화학">
+  </dxi-column>
+  <dxo-export [enabled]="true" [allowExportSelectedData]="true"></dxo-export>
+
+</dx-data-grid>
+

@@ -205,11 +205,11 @@ export class STOOComponent {
 
     if (this.selectedGubun.zgubn === "B") {
       this.zproductCode = appConfig.tableCode("RFC_유류취급제품");
-      this.zcarnoCode = appConfig.tableCode("화학차량");
+      this.zcarnoCode = appConfig.tableCode("유류차량");
     }
     else {
       this.zproductCode = appConfig.tableCode("RFC_화학취급제품");
-      this.zcarnoCode = appConfig.tableCode("유류차량");
+      this.zcarnoCode = appConfig.tableCode("화학차량");
     }
 
     let codeInfos = [
@@ -245,14 +245,14 @@ export class STOOComponent {
     this._dataService = dataService;
     this.rowCount = 0;
 
-    this.orderList = Object.assign(page.dataLoad(imInfo, dataService, appConfig)) as ZSDS0060Model[];
+    this.orderList = Object.assign(page.dataLoad(imInfo, dataService, appConfig, that)) as ZSDS0060Model[];
 
     //메인데이터
     this.gridDataSource = new CustomStore(
       {
         key: ["ZSTVBELN", "EBELN"],
         load: function (loadOptions) {
-          return page.dataLoad(imInfo, dataService, appConfig);
+          return page.dataLoad(imInfo, dataService, appConfig, that);
         }
       });
 
@@ -398,13 +398,13 @@ export class STOOComponent {
 
   //운송사변경
   ontdlnr1CodeValueChanged(e: any) {
-    this.orderInfo.TDLNR1 = e.selectedItem.ZCM_CODE3;
+    this.orderInfo.TDLNR1 = e.selectedItem.LIFNR;
     return;
   }
 
   //실제운송사변경
   ontdlnr2CodeValueChanged(e: any) {
-    this.orderInfo.TDLNR2 = e.selectedItem.ZCM_CODE3;
+    this.orderInfo.TDLNR2 = e.selectedItem.LIFNR;
     return;
   }
 
@@ -444,7 +444,7 @@ export class STOOComponent {
     /*this.zcarnoValue = e.selectedValue;*/
     this.orderInfo.ZCARNO = e.selectedValue;
     this.orderInfo.ZDRIVER = e.selectedItem.ZDERIVER1;
-    this.truckTypeValue = e.selectedItem.ZCARTYPE1;
+    this.orderInfo.ZCARTYPE = this.truckTypeValue = e.selectedItem.ZCARTYPE1;
     /*    });*/
   }
 
@@ -615,7 +615,7 @@ export class STOOComponent {
   }
 
   //STO주문목록 조회
-  public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, appConfig: AppConfigService) {
+  public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, appConfig: AppConfigService, thisObj: STOOComponent) {
     //var queryParams: QueryParameter[] = [];
 
     //queryParams.push(new QueryParameter("mandt", QueryDataType.String, "600", "", "", "", ""));
@@ -631,8 +631,8 @@ export class STOOComponent {
 
     //return dataSet.tables["ZSDT6030"].getDataObjectAny();
 
-    var condiModel = new ZSDSTOORDERManageModel("", "", this.startDate, this.endDate, "",
-      this.lgortInCodeDynamic.selectedValue ?? "", "D", this.lgortOutCodeDynamic.selectedValue ?? "", this.selectedGubun.werks, "", this.selectedGubun.werks, "", [], [], DIMModelStatus.UnChanged);
+    var condiModel = new ZSDSTOORDERManageModel("", "", thisObj.startDate, thisObj.endDate, "",
+      thisObj.lgortInCodeDynamic.selectedValue ?? "", "D", thisObj.lgortOutCodeDynamic.selectedValue ?? "", thisObj.selectedGubun.werks, "", thisObj.selectedGubun.werks, "", [], [], DIMModelStatus.UnChanged);
 
     var condiModelList = [condiModel];
 

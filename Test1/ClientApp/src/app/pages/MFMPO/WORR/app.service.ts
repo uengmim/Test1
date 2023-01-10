@@ -18,6 +18,17 @@ const product: Product[] = [
   { GCODE: 'G02', GCODENM: '그룹2', SCODE: 'S04', SCODENM: '코드4' },
 ];
 
+export class AppStatus {
+  CODE?: string;
+  NAME?: string;
+}
+
+const appStatus: AppStatus[] = [
+  { CODE: "", NAME: "전체" },
+  { CODE: "I", NAME: "검수요청" },
+  { CODE: "C", NAME: "검수완료" }
+];
+
 //오더데이터
 export class OrderData {
   //오더번호
@@ -168,6 +179,13 @@ export class TroubleshootingList {
   FYFCY?: string;
   //상태
   STATE?: string;
+}
+
+export class ConHeadFormData {
+  NETWR: number = 0;
+  WRBTR_BAS: number = 0;
+  WRBTR_TOT: number = 0;
+  WRBTR_MNS: number = 0;
 }
 
 //오더데이터 테스트데이터
@@ -428,5 +446,9 @@ export class Service {
 
   getTroubleshootingList() {
     return TroubleshootingLists;
+  }
+
+  getAppStatusList() {
+    return appStatus;
   }
 }

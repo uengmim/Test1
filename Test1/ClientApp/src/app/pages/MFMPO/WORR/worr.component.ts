@@ -12,13 +12,13 @@ import { ZPMF0001Model, ZPMS0002Model } from '../../../shared/dataModel/MFMPO/ZP
 import { ZPMF0002Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
 import { ZPMF0004Model } from '../../../shared/dataModel/MFMPO/ZPmF0004Proxy';
 import { ZPMF0003Model, ZPMT0010Model, ZPMT0020Model, ZPMS0009Model, ZPMS0012Model } from '../../../shared/dataModel/MFMPO/ZPmF0003Proxy';
-import { ZPMF0006Model, ZPMS0008Model } from '../../../shared/dataModel/MFMPO/ZPmF0006Proxy';
+import { ZPMF0006Model, ZPMS0008Model, ZPMS0024Model } from '../../../shared/dataModel/MFMPO/ZPmF0006Proxy';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, Product } from './app.service';
+import { Service, Product, ConHeadFormData, AppStatus } from './app.service';
 import { DxDataGridComponent, DxTextBoxComponent, } from 'devextreme-angular';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import ArrayStore from 'devextreme/data/array_store';
@@ -106,12 +106,20 @@ export class WORRComponent implements OnInit {
   workContractList: any;
   //고장원인
   FaultInfo: ZPMS0009Model[] = [];
+  //고장원인 그리드
+  FaultInfoList: any;
   //계약리스트
   contractList: any;
+  //작업계약헤더리스트
+  contHeadList: ZPMS0024Model[] = [];
   //고장(사유)추가
   ReasonInfo: any;
   //고장(액티비티)추가
   ActiInfo: any;
+
+  appStatus: AppStatus[] = [];
+
+  selectedAppStatus: string = "";
 
   //버튼
   exportSelectedData: any;
@@ -208,6 +216,8 @@ export class WORRComponent implements OnInit {
     this.selectedValue = "Z100";
     this.selectedLike = "A%";
 
+    this.appStatus = service.getAppStatusList();
+
     let usrInfo = authService.getUser();
     console.info(usrInfo);
     console.info();
@@ -247,7 +257,7 @@ export class WORRComponent implements OnInit {
     this.exportSelectedData = {
       icon: 'export',
       onClick: () => {
-        this.dataGrid.instance.exportToExcel(true);
+        //this.dataGrid.instance.exportToExcel(true);
 
       },
     };
@@ -339,11 +349,11 @@ export class WORRComponent implements OnInit {
           var actPart = this.test4Entery.popupDataGrid.instance.getSelectedRowsData();
           if (objPart.length > 0) {
             // 나중에 원인번호 바꾸기 (this.orderInfo.CAUSE_KEY)
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, objCount.toString().padStart(4, '0'), "B", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, ""));
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, objCount.toString().padStart(4, '0'), "B", objPart[0].CODEGRUPPE, objPart[0].KURZTEXT_GR, objPart[0].CODE, objPart[0].KURZTEXT_CODE, "", "위치"));
             objCount = objCount +1;
           }
           if (damPart.length > 0) {
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, damCount.toString().padStart(4, '0'), "C", damPart[0].CODEGRUPPE, damPart[0].KURZTEXT_GR, damPart[0].CODE, damPart[0].KURZTEXT_CODE, this.text1.value));
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, damCount.toString().padStart(4, '0'), "C", damPart[0].CODEGRUPPE, damPart[0].KURZTEXT_GR, damPart[0].CODE, damPart[0].KURZTEXT_CODE, this.text1.value, "손상"));
             damCount = damCount + 1;
           }
 
@@ -354,7 +364,7 @@ export class WORRComponent implements OnInit {
 
             //var checkData = this.faultList.find(item => item.CODE === row.CODE);
             //if (checkData === undefined) {
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, actCount.toString().padStart(4, '0'), "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, actCount.toString().padStart(4, '0'), "A", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT, "해결"));
             actCount = actCount + 1;
             //}
           });
@@ -362,7 +372,7 @@ export class WORRComponent implements OnInit {
 
             //var checkData = this.faultList.find(item => item.CODE === row.CODE);
             //if (checkData === undefined) {
-            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, reaCount.toString().padStart(4, '0'), "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT));
+            this.FaultInfo.push(new ZPMS0009Model(this.orderInfo.NOTIF_NO, this.orderInfo.POSNR, reaCount.toString().padStart(4, '0'), "5", row.CODEGRUPPE, row.KURZTEXT_GR, row.CODE, row.KURZTEXT_CODE, row.FETXT, "원인"));
             reaCount = reaCount + 1;
             //}
           });
@@ -412,12 +422,33 @@ export class WORRComponent implements OnInit {
     }
   }
 
+  //단가항목등록 데이터 변경이벤트
+  async gridDataUpdating(e: any) {
+    var inputTotpay = e.oldData.NETPR * Number(e.newData.QTY_REQ);
+    var changeHeadData = this.contHeadList.find(item => item.EBELN === e.oldData.EBELN);
+    var wrbtr_bas = changeHeadData?.WRBTR_BAS ?? 0;
+    var netwr = changeHeadData?.RLWRT ?? 0;
+    /*var wrbtr_m =  Number(changeItemData?.ZZPAY_MENGE ?? 0) * Number(changeItemData?.ZZPAY_NETPR ?? 0) + wrbtr_bas;*/
+    var mnsPay = netwr - wrbtr_bas;
+
+    var addData = { QTY_BPREI_TOT: inputTotpay };
+
+    if (mnsPay < inputTotpay) {
+      alert("남은 계약금액보다 크게 입력할 수 없습니다. 남은금액 : " + mnsPay.toString(), "오류")
+      addData = { QTY_BPREI_TOT: 0 };
+      e.newData.QTY_REQ = "0";
+    }
+
+    e.newData = Object.assign(e.newData, addData);
+  }
+
   /**
    * Angular 초가화
    **/
   async ngOnInit() {
     this.loadingVisible = true;
     var orderData = await this.dataLoad(this.imInfo, this.dataService);
+
     this.loadingVisible = false;
     this.orderData = new ArrayStore(
       {
@@ -472,8 +503,6 @@ export class WORRComponent implements OnInit {
       thisObj.isEditing = true;
     }
 
-
-
     thisObj.workOrderList = new ArrayStore(
       {
         key: ["AUFNR", "QMNUM"],
@@ -485,13 +514,20 @@ export class WORRComponent implements OnInit {
         key: ["AUFNR", "PAYITEM"],
         data: thisObj.contList
       });
-    /*
-    thisObj.FaultInfo = new ArrayStore(
+
+    thisObj.FaultInfo.forEach(async (row: ZPMS0009Model) => {
+      if (row.KATALOGART === "C") row.KATALNAME = "손상";
+      else if (row.KATALOGART === "B") row.KATALNAME = "위치";
+      else if (row.KATALOGART === "5") row.KATALNAME = "원인";
+      else if (row.KATALOGART === "A") row.KATALNAME = "해결";
+    });
+    
+    thisObj.FaultInfoList = new ArrayStore(
       {
         key: ["NOTIF_NO", "POSNR", "CAUSE_KEY", "KATALOGART", "CODEGRUPPE", "CODE"],
         data: thisObj.FaultInfo
       });
-      */
+      
     thisObj.loadingVisible = false;
 
   }
@@ -520,6 +556,11 @@ export class WORRComponent implements OnInit {
     console.log(this.formData);
   }
 
+  //검수구분 변경 이벤트
+  onAppStatusChanged(e: any) {
+    this.selectedAppStatus = e.value;
+  }
+
   //날짜
   get diffInDay() {
     return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
@@ -544,15 +585,23 @@ export class WORRComponent implements OnInit {
 
   //계약추가 팝업
   addRow: any = async (e: any) => {
-    this.showPopup('Add', {}); //change undefined to {}
     this.loadingVisible = true;
-    var resultModel = await this.popupdataLoad(this.imInfo, this.dataService);
+    var resultModel = await this.popupdataLoad(this.imInfo, this.dataService) as ZPMF0006Model;
     this.loadingVisible = false;
+
+    if (resultModel.ITAB_DATA.length === 0) {
+      alert("해당 W/O에 단가항목정보가 없습니다.", "알림");
+      return;
+    }
+
+    this.contHeadList = resultModel.ITAB_DATA1;
     this.contractList = new ArrayStore(
       {
         key: ["EBELN", "EBELP"],
-        data: resultModel
+        data: resultModel.ITAB_DATA
       });
+
+    this.showPopup('Add', {}); //change undefined to {}
   }
 
   //고장추가 팝업
@@ -737,8 +786,32 @@ export class WORRComponent implements OnInit {
 
     this.contList = [];
     this.workList = [];
+    var checkNetwr = true;
+    var checkPay = true;
+    var checkEBELN = true;
+
+    if (this.gcMaterialListSelectedRows.length) {
+      await alert("한개 이상의 행을 선택한 후 실행하세요.", "알림")
+      return;
+    }
 
     this.gcMaterialListSelectedRows.forEach(async (row: ZPMS0008Model) => {
+
+      var headData = this.contHeadList.find(item => item.EBELN === row.EBELN);
+      if (headData?.RLWRT === 0)
+        checkNetwr = false;
+
+      var netwr = headData?.RLWRT ?? 0;
+      var wrbtr = headData?.WRBTR_BAS ?? 0;
+
+      if (netwr - wrbtr < Number(row.ZZPAY_NETPR))
+        checkPay = false;
+
+      var checkEbeln = this.contList.find(item => item.EBELN !== row.EBELN);
+      if (checkEbeln !== undefined) {
+        checkEBELN = false;
+        return;
+      }
 
       var checkData = this.contList.find(item => item.EBELN === row.EBELN);
       if (checkData === undefined) {
@@ -748,10 +821,26 @@ export class WORRComponent implements OnInit {
       }
 
       this.workList.push(new ZPMT0020Model(this.appConfig.mandt, this.selectedOrderItemKeys[0].AUFNR, "01",
-        row.EBELN, row.EBELP, row.PAYITEM, "0", "0", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged));
+        row.EBELN, row.EBELP, row.PAYITEM, "1", "0", Number(row.ZZPAY_NETPR), Number(row.ZZPAY_NETPR), row.WAERS, "", new Date(), "000000", "", new Date(), "000000", row.TXZ01, DIMModelStatus.UnChanged));
     });
 
     this.isPopupVisible = false;
+
+    if (!checkEBELN) {
+      await alert("서로다른 계약번호데이터는 입력할 수 없습니다.", "알림")
+      return;
+    }
+
+    if (!checkNetwr) {
+      await alert("총금액이 없습니다.", "알림")
+      return;
+    }
+
+    //임시로 수행되지 않게 수정
+    //if (!checkPay) {
+    //  await alert("남은 계약금액보다 많은 금액은 입력할 수 없습니다.", "알림")
+    //  return;
+    //}
 
     this.workOrderList = new ArrayStore(
       {
@@ -915,7 +1004,7 @@ export class WORRComponent implements OnInit {
     var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
     var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
 
-    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", "", "", []);
+    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", this.selectedAppStatus, "", "", []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
@@ -924,12 +1013,17 @@ export class WORRComponent implements OnInit {
       return [];
     }
 
+    resultModel[0].ITAB_DATA.forEach(async (row: ZPMS0002Model) => {
+      if (row.STAT === "REL") row.STATNAME = "요청";
+      else if (row.STAT === "TECO") row.STATNAME = "완료";
+    });
+
     return resultModel[0].ITAB_DATA;
   }
 
   // 상세 데이터 로드
   public async detaildataLoad(parent: WORRComponent, aufnr: string) {
-    var zpf0002Model = new ZPMF0002Model("", "", aufnr, []);
+    var zpf0002Model = new ZPMF0002Model("", "", aufnr, [], [], [], [], [], []);
 
     var modelList: ZPMF0002Model[] = [zpf0002Model];
     //Test
@@ -947,7 +1041,11 @@ export class WORRComponent implements OnInit {
 
   // 팝업 데이터 로드
   public popupdataLoad = async (iminfo: ImateInfo, dataService: ImateDataService) => {
-    var zpf0006Model = new ZPMF0006Model("", "", this.zpmF002Models[0].ITAB_DATA1[0].IDAT1, this.zpmF002Models[0].ITAB_DATA1[0].PARNR, this.zpmF002Models[0].ITAB_DATA1[0].WERKS, []);
+    var idat1 = this.zpmF002Models[0].ITAB_DATA1[0].IDAT1;
+    if (idat1 === null)
+      idat1 = new Date("9999-12-31");
+
+    var zpf0006Model = new ZPMF0006Model("", "", idat1, this.zpmF002Models[0].ITAB_DATA1[0].PARNR, this.zpmF002Models[0].ITAB_DATA1[0].WERKS, []);
     var modelList: ZPMF0006Model[] = [zpf0006Model];
 
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0006Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0006ModelList", modelList, QueryCacheType.None);
@@ -955,34 +1053,37 @@ export class WORRComponent implements OnInit {
       alert(`데이터가 없습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
       return [];
     }
-    return resultModel[0].ITAB_DATA;
+    return resultModel[0];
   }
 
   // 계약추가 데이터 삽입
   public async datainsert(thisObj: WORRComponent, key: any) {
-    try {
-      var contract = await (thisObj.contractList as ArrayStore).byKey(key) as ZPMS0008Model;
+    //try {
+    //  var contract = await (thisObj.contractList as ArrayStore).byKey(key) as ZPMS0008Model;
 
-      var order = await (thisObj.orderData as ArrayStore).byKey(thisObj.selectedOrderItemKeys[0]) as ZPMS0002Model;
-      var currDate = new Date();
-      var currTim = formatDate(currDate, "HH:mm:ss", "en-US");
+    //  var order = await (thisObj.orderData as ArrayStore).byKey(thisObj.selectedOrderItemKeys[0]) as ZPMS0002Model;
+    //  var currDate = new Date();
+    //  var currTim = formatDate(currDate, "HH:mm:ss", "en-US");
 
 
-      var zpf0003Model = new ZPMF0003Model("", "", thisObj.selectedOrderItemKeys[0].AUFNR, []);
-      zpf0003Model.ITAB_DATA3.push(new ZPMT0010Model(thisObj.appConfig.mandt, order.AUFNR, "", currDate, undefined, undefined, contract!.EBELN, "", contract!.PARNR, "", "", "", currDate, currTim, "", currDate, currTim));
-      zpf0003Model.ITAB_DATA4.push(new ZPMT0020Model(thisObj.appConfig.mandt, order.AUFNR, "", contract!.EBELN, contract!.EBELP, contract!.PAYITEM, contract!.MENGE.toString(), "", "", currDate, currTim, "", currDate, currTim));
+    //  var zpf0003Model = new ZPMF0003Model("", "", thisObj.selectedOrderItemKeys[0].AUFNR, []);
+    //  zpf0003Model.ITAB_DATA3.push(new ZPMT0010Model(thisObj.appConfig.mandt, order.AUFNR, "", currDate, undefined, undefined,
+    //    contract!.EBELN, "", contract!.PARNR, "", "", "", currDate, currTim, "", currDate, currTim));
 
-      var modelList: ZPMF0003Model[] = [zpf0003Model];
+    //  zpf0003Model.ITAB_DATA4.push(new ZPMT0020Model(thisObj.appConfig.mandt, order.AUFNR, "", contract!.EBELN, contract!.EBELP,
+    //    contract!.PAYITEM, contract!.MENGE.toString(), "", "", currDate, currTim, "", currDate, currTim));
 
-      var insertModel = await thisObj.dataService.RefcCallUsingModel<ZPMF0003Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0003ModelList", modelList, QueryCacheType.None);
+    //  var modelList: ZPMF0003Model[] = [zpf0003Model];
 
-      return insertModel[0];
-    }
-    catch (error) {
-      var errorData = error as Error
-      alert(errorData.message, "알림");
-      return null;
-    }
+    //  var insertModel = await thisObj.dataService.RefcCallUsingModel<ZPMF0003Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0003ModelList", modelList, QueryCacheType.None);
+
+    //  return insertModel[0];
+    //}
+    //catch (error) {
+    //  var errorData = error as Error
+    //  alert(errorData.message, "알림");
+    //  return null;
+    //}
   }
 
 

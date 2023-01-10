@@ -8,9 +8,9 @@ import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import 'devextreme/data/odata/store';
 import { BrowserModule } from '@angular/platform-browser';
 import { formatDate } from '@angular/common';
-import { ZPMF0001Model } from '../../../shared/dataModel/MFMPO/ZPmF0001Proxy';
+import { ZPMF0001Model, ZPMS0002Model } from '../../../shared/dataModel/MFMPO/ZPmF0001Proxy';
 import { ZPMF0002Model, ZPMS0003Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
-import { ZPMF0003Model } from '../../../shared/dataModel/MFMPO/ZPmF0003Proxy';
+import { ZPMF0003Model, ZPMS0009Model } from '../../../shared/dataModel/MFMPO/ZPmF0003Proxy';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
@@ -23,6 +23,7 @@ import { confirm, alert } from "devextreme/ui/dialog";
 import { AuthService } from '../../../shared/services';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { ThemeManager } from '../../../shared/app.utilitys';
+import { AppStatus } from '../WORR/app.service';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -87,6 +88,10 @@ export class WOSTComponent {
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
 
+  selectedAppStatus: string = "";
+
+  appStatus: AppStatus[] = [];
+
   //_dataService: ImateDataService;
   /**
  * 생성자
@@ -97,6 +102,8 @@ export class WOSTComponent {
 
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 진행현황";
+
+    this.appStatus = service.getAppStatusList();
 
     //date
     var now = new Date();
@@ -131,7 +138,7 @@ export class WOSTComponent {
     this.exportSelectedData = {
       icon: 'export',
       onClick: () => {
-        this.dataGrid.instance.exportToExcel(true);
+        //this.dataGrid.instance.exportToExcel(true);
 
       },
     };
@@ -184,6 +191,14 @@ export class WOSTComponent {
         key: ["AUFNR", "RSNUM", "WERKS", "LGORT", "MATNR"],
         data: resultModel[0].ITAB_DATA3
       });
+
+    resultModel[0].ITAB_DATA4.forEach(async (row: ZPMS0009Model) => {
+      if (row.KATALOGART === "C") row.KATALNAME = "손상";
+      else if (row.KATALOGART === "B") row.KATALNAME = "위치";
+      else if (row.KATALOGART === "5") row.KATALNAME = "원인";
+      else if (row.KATALOGART === "A") row.KATALNAME = "해결";
+    });
+
     this.FaultInfo = new ArrayStore(
       {
         key: ["NOTIF_NO", "POSNR", "CAUSE_KEY"],
@@ -257,11 +272,17 @@ export class WOSTComponent {
     var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
     var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
 
-    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", "", "", []);
+    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", this.selectedAppStatus, "", "", []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
     this.loadingVisible = true;
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
+
+    resultModel[0].ITAB_DATA.forEach(async (row: ZPMS0002Model) => {
+      if (row.STAT === "REL") row.STATNAME = "요청";
+      else if (row.STAT === "TECO") row.STATNAME = "완료";
+    });
+
     this.loadingVisible = false;
     if (resultModel[0].E_TYPE !== "S") {
       alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
@@ -290,8 +311,10 @@ export class WOSTComponent {
     return insertModel[0];
   }
 
-
-
+  //검수구분 변경 이벤트
+  onAppStatusChanged(e: any) {
+    this.selectedAppStatus = e.value;
+  }
 
   //Data refresh 날짜 새로고침 이벤트
   public refreshDataGrid(e: Object) {

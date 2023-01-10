@@ -27,15 +27,15 @@
 
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <div style="width: 100px; float: left; margin-left: 10px; margin-right: 10px;">
-          <dx-text-box [showClearButton]="true"
-                       label="플랜트"
+        <dx-select-box [dataSource]="appStatus"
+                       displayExpr="NAME"
+                       valueExpr="CODE"
+                       value=""
+                       label="검수구분"
                        labelMode="floating"
-                       [maxLength]="40"></dx-text-box>
-        </div>
+                       (onValueChanged)="onAppStatusChanged($event)"></dx-select-box>
       </div>
     </dxi-item>
-
 
     <dxi-item location="before">
       <div *dxTemplate>
@@ -89,7 +89,7 @@
                       [highlightCaseSensitive]="true"></dxo-search-panel>
 
     <!--<dxo-group-panel [visible]="true"></dxo-group-panel>
-    <dxo-grouping [autoExpandAll]="false"></dxo-grouping>-->
+  <dxo-grouping [autoExpandAll]="false"></dxo-grouping>-->
 
     <dxi-column dataField="AUFNR"
                 caption="오더번호"
@@ -103,19 +103,23 @@
                 caption="내역"
                 dataType="string"></dxi-column>
 
-    <dxi-column dataField="BUKRS"
-                caption="회사번호"
-                dataType="string"></dxi-column>
+    <!--<dxi-column dataField="BUKRS"
+              caption="회사번호"
+              dataType="string"></dxi-column>
 
-    <dxi-column dataField="WERKS_DESC"
-                caption="플랜트"
-                dataType="string"></dxi-column>
+  <dxi-column dataField="WERKS_DESC"
+              caption="플랜트"
+              dataType="string"></dxi-column>-->
 
     <dxi-column dataField="GSBER_DESC"
                 caption="사업영역"
                 dataType="string"></dxi-column>
 
-    <dxi-column dataField="STAT"
+    <!--<dxi-column dataField="STAT"
+              caption="상태"
+              dataType="string"></dxi-column>-->
+
+    <dxi-column dataField="STATNAME"
                 caption="상태"
                 dataType="string"></dxi-column>
 
@@ -215,9 +219,9 @@
                     caption="예약번호"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="WERKS"
+        <!--<dxi-column dataField="WERKS"
                     caption="플랜트"
-                    dataType="string"></dxi-column>
+                    dataType="string"></dxi-column>-->
 
         <dxi-column dataField="LGORT"
                     caption="저장위치"
@@ -274,15 +278,18 @@
                     caption="통지번호"
                     dataType="string"></dxi-column>
 
-        <dxi-column dataField="POSNR"
-                    caption="항목번호"
-                    dataType="string"></dxi-column>
+        <!--<dxi-column dataField="POSNR"
+              caption="항목번호"
+              dataType="string"></dxi-column>
 
         <dxi-column dataField="CAUSE_KEY"
-                    caption="원인번호"
-                    dataType="string"></dxi-column>
+              caption="원인번호"
+              dataType="string"></dxi-column>-->
+        <!--<dxi-column dataField="KATALOGART"
+              caption="카탈로그"
+              dataType="string"></dxi-column>-->
 
-        <dxi-column dataField="KATALOGART"
+        <dxi-column dataField="KATALNAME"
                     caption="카탈로그"
                     dataType="string"></dxi-column>
 

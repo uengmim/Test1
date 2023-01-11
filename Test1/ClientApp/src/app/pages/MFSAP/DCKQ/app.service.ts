@@ -2,120 +2,120 @@ import { Injectable } from '@angular/core';
 
 export class Data {
   //ID
-  ID!: number;
+  ID: number = 0;
   //등록일자
-  registDate!: string;
+  registDate: string = "";
   //관할지사
-  competentBranch!: string;
+  competentBranch: string = "";
   //거래처
-  account!: string;
+  account: string = "";
   //대표자
-  representative!: string;
+  representative: string = "";
   //사용유무
-  use!: string;
+  use: string = "";
   //비고
-  note!: string;
+  note: string = "";
 }
 
 export class Inquiry {
   //팝업데이터(작성일자=등록일자, 거래처 = 업체명, 대표자=대표자)
   //확인자
-  checker!: string;
+  checker: string = "";
   //업체명
-  account!: string;
+  account: string = "";
   //대표자
-  representative!: string;
+  representative: string = "";
   //자가차량
-  privateVehicle!: string;
+  privateVehicle: string = "";
   //부지면적
-  landArea!: string;
+  landArea: string = "";
   //용차계약
-  leaseAgreement!: string;
+  leaseAgreement: string = "";
   //비축가능량
-  stockpileAmount!: string;
+  stockpileAmount: string = "";
   //지게차
-  forkLift!: string;
+  forkLift: string = "";
   //부지소유
-  landOwnership!: string;
+  landOwnership: string = "";
   //1. 제품 보관 창고(그늘막)
-  productStorage!: string;
+  productStorage: string = "";
   //야적
-  barbarian!: string;
+  barbarian: string = "";
   //2. 고결/파포 수량
-  integrtiy!: string;
+  integrtiy: string = "";
   //3. 복포 작업 상태
-  workState!: string;
+  workState: string = "";
   //4. 복포 상태(구벙, 이물질)
-  state!: string;
+  state: string = "";
   //5. 제품 먼지, 이물질 청결 상태
-  cleanliness!: string;
+  cleanliness: string = "";
   //6. 바닥 물고임이나 파인 곳
-  floor!: string;
+  floor: string = "";
   //7. 차량 및 지게차 청결 상태
-  vehicle!: string;
+  vehicle: string = "";
   //8. 비료 재고 차이
-  fertilizer!: string;
+  fertilizer: string = "";
   //9. 파렛트 재고 차이(KPP대사결과)
-  palette!: string;
+  palette: string = "";
   //10. 제품 고결/흡습 상태
-  moistureAbsorption!: string;
+  moistureAbsorption: string = "";
   //11. 판매가 어려운 정상 제품(10톤이상)
-  hradSale!: string;
+  hradSale: string = "";
   //12. 민원 발생 내용 및 경과사항(발생시)
-  coplain!: string;
+  coplain: string = "";
   //13. 기타(수급포함) 건의 사항
-  tendinous!: string;
-  note!: string;
+  tendinous: string = "";
+  note: string = "";
 }
 
 const data: Data[] = [
 {
  //ID
- ID!: 1,
+ ID: 1,
  //등록일자
- registDate!: '2022-09-03',
+ registDate: '2022-09-03',
  //관할지사
- competentBranch!: '강원',
+ competentBranch: '강원',
  //거래처
- account!: '원주(물)',
+ account: '원주(물)',
  //대표자
- representative!: '박기훈',
+ representative: '박기훈',
  //사용유무
- use!: '사용',
+ use: '사용',
  //비고
- note!: '',
+ note: '',
 },
 {
  //ID
- ID!: 2,
+ ID: 2,
  //등록일자
- registDate!: '2022-10-02',
+ registDate: '2022-10-02',
  //관할지사
- competentBranch!: '강원',
+ competentBranch: '강원',
  //거래처
- account!: '횡설(물,대)',
+ account: '횡설(물,대)',
  //대표자
- representative!: '김기호',
+ representative: '김기호',
  //사용유무
- use!: '사용',
+ use: '사용',
  //비고
- note!: '',
+ note: '',
 },
 {
  //ID
- ID!: 3,
+ ID: 3,
  //등록일자
- registDate!: '2022-10-11',
+ registDate: '2022-10-11',
  //관할지사
- competentBranch!: '경기',
+ competentBranch: '경기',
  //거래처
- account!: '용인(물)',
+ account: '용인(물)',
  //대표자
- representative!: '김성주',
+ representative: '김성주',
  //사용유무
- use!: '사용',
+ use: '사용',
  //비고
- note!: '',
+ note: '',
 }
 ];
 
@@ -172,8 +172,8 @@ const inquiry: Inquiry =
 
 //콤보박스
 export class Product {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const simpleProducts: string[] = [
@@ -184,8 +184,8 @@ const simpleProducts: string[] = [
 
 
 export class PriorityEntity {
-  id!: number;
-  text!: string;
+  id: number = 0;
+  text: string = "";
 }
 
 const priorityEntities: PriorityEntity[] = [
@@ -194,8 +194,8 @@ const priorityEntities: PriorityEntity[] = [
 ];
 
 export class Absence {
-  id!: number;
-  text!: string;
+  id: number = 0;
+  text: string = "";
 }
 
 const absence: Absence[] = [

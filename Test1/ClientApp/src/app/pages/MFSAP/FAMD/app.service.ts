@@ -3,274 +3,274 @@ import { Injectable } from '@angular/core';
 //데이터 정보
 export class Employee {
   //ID
-  ID!: number;
+  ID: number = 0;
   //구분
-  division!: string;
+  division: string = "";
   //관할지사
-  competentBracnh!: string;
+  competentBracnh: string = "";
   //주문처
-  whereOrder!: string;
+  whereOrder: string = "";
   //등록일자
-  registrationDate!: string;
+  registrationDate: string = "";
   //제품
-  product!: string;
+  product: string = "";
   //포장
-  packaging!: string;
+  packaging: string = "";
   //등록수량
-  registeredQuantity!: number;
+  registeredQuantity: number = 0;
   //처리수량
-  throughput!: number;
+  throughput: number = 0;
   //발생처
-  origin!: string;
+  origin: string = "";
   //처리예정일
-  processingDate!: string;
+  processingDate: string = "";
   //상태
-  situation!: string;
+  situation: string = "";
   //비고
-  note!: string;
+  note: string = "";
   //차량번호
-  carNumber!: string;
+  carNumber: string = "";
   //차종
-  carType!: string;
+  carType: string = "";
   //기사
-  driver!: string;
+  driver: string = "";
   //전화번호
-  phoneNumber!: string;
+  phoneNumber: string = "";
   //승인
-  approval!: string;
+  approval: string = "";
   //등록번호
-  registrationNumber!: string;
+  registrationNumber: string = "";
   //순번
-  turn!: number;
+  turn: number = 0;
   //SECT
-  sect!: string;
+  sect: string = "";
   //제품명
-  productName!: string;
+  productName: string = "";
   //검수구분
-  inspectionClass!: string;
+  inspectionClass: string = "";
   //도착지
-  destination!: string;
+  destination: string = "";
 }
 
 export class OrderInfo {
    //주문처
-  whereOrder!: string;
+  whereOrder: string = "";
   //제품명
-  productName!: string;
+  productName: string = "";
   //발생장소
-  origin!: string;
+  origin: string = "";
   //특기사항
-  remarks!: string;
+  remarks: string = "";
   //포장명
-  packagingName!: string;
+  packagingName: string = "";
   //차량번호
-  carNumber!: string;
+  carNumber: string = "";
   //등록일자
-  registrationDate!: string;
+  registrationDate: string = "";
   //등록수량
-  registeredQuantity!: string;
+  registeredQuantity: string = "";
   //기사명
-  driver!: string;
+  driver: string = "";
   //생산/완료일
-  dueDate!: string;
+  dueDate: string = "";
   //처리수량
-  throughput!: string;
+  throughput: string = "";
   //전화번호
-  phoneNumber!: string;
+  phoneNumber: string = "";
   //완료여부
-  completed!: string;
+  completed: string = "";
   //소분류
-  subCategory!: string;
+  subCategory: string = "";
 }
 
 const employees: Employee[] =[
   {
     //ID
-    ID!: 1,
+    ID: 1,
     //구분
-    division!: '농가배송',
+    division: '농가배송',
     //관할지사
-    competentBracnh!: '경북',
+    competentBracnh: '경북',
     //주문처
-    whereOrder!: '(주)농협물류(안동)',
+    whereOrder: '(주)농협물류(안동)',
     //등록일자
-    registrationDate!: '2022-08-03',
+    registrationDate: '2022-08-03',
     //제품
-    product!: '맞춤17호',
+    product: '맞춤17호',
     //포장
-    packaging!: '20KG 표준백',
+    packaging: '20KG 표준백',
     //등록수량
-    registeredQuantity!: 28,
+    registeredQuantity: 28,
     //처리수량
-    throughput!:100,
+    throughput:100,
     //발생처
-    origin!: '우표농협(구매처)',
+    origin: '우표농협(구매처)',
     //처리예정일
-    processingDate!: '2022-08-03',
+    processingDate: '2022-08-03',
     //상태
-    situation!: '미처리',
+    situation: '미처리',
     //비고
-    note!: '농가배송',
+    note: '농가배송',
     //차량번호
-    carNumber!: '경북86거 5042',
+    carNumber: '경북86거 5042',
     //차종
-    carType!: 'Y',
+    carType: 'Y',
     //기사
-    driver!: '신현학',
+    driver: '신현학',
     //전화번호
-    phoneNumber!: '010-3331-2222',
+    phoneNumber: '010-3331-2222',
     //승인
-    approval!: '승인' ,
+    approval: '승인' ,
     //등록번호
-    registrationNumber!: '12-11',
+    registrationNumber: '12-11',
     //순번
-    turn!: 2,
+    turn: 2,
     //SECT
-    sect!: 'sect',
+    sect: 'sect',
     //제품명
-    productName!: '골드측조',
+    productName: '골드측조',
     //검수구분
-    inspectionClass!: '검수완료',
+    inspectionClass: '검수완료',
     //도착지
-    destination!: '용인'
+    destination: '용인'
   },
   {
     //ID
-    ID!: 2,
+    ID: 2,
     //구분
-    division!: '농가배송',
+    division: '농가배송',
     //관할지사
-    competentBracnh!: '천안',
+    competentBracnh: '천안',
     //주문처
-    whereOrder!: '(주)농협물류(천안)',
+    whereOrder: '(주)농협물류(천안)',
     //등록일자
-    registrationDate!: '2022-01-03',
+    registrationDate: '2022-01-03',
     //제품
-    product!: '맞춤17호',
+    product: '맞춤17호',
     //포장
-    packaging!: '20KG 표준백',
+    packaging: '20KG 표준백',
     //등록수량
-    registeredQuantity!: 10000,
+    registeredQuantity: 10000,
     //처리수량
-    throughput!: 100,
+    throughput: 100,
     //발생처
-    origin!: '우표농협(구매처)',
+    origin: '우표농협(구매처)',
     //처리예정일
-    processingDate!: '2022-01-03',
+    processingDate: '2022-01-03',
     //상태
-    situation!: '미처리',
+    situation: '미처리',
     //비고
-    note!: '농가배송',
+    note: '농가배송',
     //차량번호
-    carNumber!: '경북84거 2242',
+    carNumber: '경북84거 2242',
     //차종
-    carType!: 'Y',
+    carType: 'Y',
     //기사
-    driver!: '김하영',
+    driver: '김하영',
     //전화번호
-    phoneNumber!: '010-1322-1242',
+    phoneNumber: '010-1322-1242',
     //승인
-    approval!: '승인',
+    approval: '승인',
     //등록번호
-    registrationNumber!: '12-12',
+    registrationNumber: '12-12',
     //순번
-    turn!: 3,
+    turn: 3,
     //SECT
-    sect!: 'sect',
+    sect: 'sect',
     //제품명
-    productName!: '골드측조',
+    productName: '골드측조',
     //검수구분
-    inspectionClass!: '검수완료',
+    inspectionClass: '검수완료',
     //도착지
-    destination!: '서울'
+    destination: '서울'
   },
   {
     //ID
-    ID!: 3,
+    ID: 3,
     //구분
-    division!: '농가배송',
+    division: '농가배송',
     //관할지사
-    competentBracnh!: '아산',
+    competentBracnh: '아산',
     //주문처
-    whereOrder!: '(주)농협물류(아산)',
+    whereOrder: '(주)농협물류(아산)',
     //등록일자
-    registrationDate!: '2022-05-03',
+    registrationDate: '2022-05-03',
     //제품
-    product!: '맞춤17호',
+    product: '맞춤17호',
     //포장
-    packaging!: '20KG 표준백',
+    packaging: '20KG 표준백',
     //등록수량
-    registeredQuantity!: 100000,
+    registeredQuantity: 100000,
     //처리수량
-    throughput!: 1000,
+    throughput: 1000,
     //발생처
-    origin!: '우표농협(구매처)',
+    origin: '우표농협(구매처)',
     //처리예정일
-    processingDate!: '2022-02-03',
+    processingDate: '2022-02-03',
     //상태
-    situation!: '미처리',
+    situation: '미처리',
     //비고
-    note!: '농가배송',
+    note: '농가배송',
     //차량번호
-    carNumber!: '경북84거 3242',
+    carNumber: '경북84거 3242',
     //차종
-    carType!: 'Y',
+    carType: 'Y',
     //기사
-    driver!: '김하영',
+    driver: '김하영',
     //전화번호
-    phoneNumber!: '010-1322-1242',
+    phoneNumber: '010-1322-1242',
     //승인
-    approval!: '승인',
+    approval: '승인',
     //등록번호
-    registrationNumber!: '12-13',
+    registrationNumber: '12-13',
     //순번
-    turn!: 4,
+    turn: 4,
     //SECT
-    sect!: 'sect',
+    sect: 'sect',
     //제품명
-    productName!: '골드측조',
+    productName: '골드측조',
     //검수구분
-    inspectionClass!: '검수완료',
+    inspectionClass: '검수완료',
     //도착지
-    destination!: '아산'
+    destination: '아산'
   },
 ]
 
 const orderInfo: OrderInfo = {
   //주문처
-  whereOrder!: '(주)농협물류(안동)',
+  whereOrder: '(주)농협물류(안동)',
   //제품명
-  productName!: '맞춤17호',
+  productName: '맞춤17호',
   //발생장소
-  origin!: '우표농협(구매처)',
+  origin: '우표농협(구매처)',
   //특기사항
-  remarks!: '22.1.24 영암 박성연 농가배송',
+  remarks: '22.1.24 영암 박성연 농가배송',
   //포장명
-  packagingName!: '0020A',
+  packagingName: '0020A',
   //차량번호
-  carNumber!: '경북86거5042',
+  carNumber: '경북86거5042',
   //등록일자
-  registrationDate!: '2022-12-16',
+  registrationDate: '2022-12-16',
   //등록수량
-  registeredQuantity!: '15',
+  registeredQuantity: '15',
   //기사명
-  driver!: '김하영',
+  driver: '김하영',
   //생산/완료일
-  dueDate!: '2022-12-22',
+  dueDate: '2022-12-22',
   //처리수량
-  throughput!: '0',
+  throughput: '0',
   //전화번호
-  phoneNumber!: '010-2324-8475',
+  phoneNumber: '010-2324-8475',
   //완료여부
-  completed!: '완료',
+  completed: '완료',
   //소분류
-  subCategory!: 'A',
+  subCategory: 'A',
 }
 
 //콤보박스
 export class State11 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states11: string[] = [
@@ -280,8 +280,8 @@ const states11: string[] = [
 
 
 export class State {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 const states: State[] = [
   {
@@ -296,8 +296,8 @@ const states: State[] = [
 
 
 export class State2 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states2: State2[] = [
@@ -312,8 +312,8 @@ const states2: State2[] = [
 ];
 
 export class State3 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states3: State3[] = [
@@ -328,8 +328,8 @@ const states3: State3[] = [
 ];
 
 export class State4 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states4: State4[] = [
@@ -344,8 +344,8 @@ const states4: State4[] = [
 ];
 
 export class State5 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states5: State5[] = [
@@ -360,8 +360,8 @@ const states5: State5[] = [
 ];
 
 export class State6 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states6: State6[] = [
@@ -376,8 +376,8 @@ const states6: State6[] = [
 ];
 
 export class State7 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states7: State7[] = [
@@ -392,8 +392,8 @@ const states7: State7[] = [
 ];
 
 export class State8 {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const states8: State8[] = [

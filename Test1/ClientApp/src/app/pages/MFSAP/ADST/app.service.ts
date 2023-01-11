@@ -2,248 +2,248 @@ import { Injectable } from '@angular/core';
 
 export class Employee {
   //ID
-  ID!: number;
+  ID: number = 0;
   //출고일자
-  releaseDate!: string;
+  releaseDate: string = "";
   //출고지
-  releasePlace!: string;
+  releasePlace: string = "";
   //관할지사
-  competentBranch!: string;
+  competentBranch: string = "";
   //주문처
-  orderCompany!: string;
+  orderCompany: string = "";
   //배송처
-  shippingCompnay!: string;
+  shippingCompnay: string = "";
   //배송전표
-  deliverySlip!: string;
+  deliverySlip: string = "";
   //제품구분
-  productCategory!: string;
+  productCategory: string = "";
   //제품
-  product!: string;
+  product: string = "";
   //출고수량
-  releaseNumber!: number;
+  releaseNumber: number = 0;
   //출고톤
-  releaseTon!: number;
+  releaseTon: number = 0;
   //전송사태
-  transmissionState!: string;
+  transmissionState: string = "";
   //검수상태
-  inspectionState!: string;
+  inspectionState: string = "";
   //삭제여부
-  delete!: string;
+  delete: string = "";
   //차량번호
-  carNumber!: string;
+  carNumber: string = "";
   //하차방법
-  quit!: string;
+  quit: string = "";
   //도서구분
-  bookClass!: string;
+  bookClass: string = "";
   //농협제품
-  nhProduct!: string;
+  nhProduct: string = "";
   //농협사무소
-  nhOffice!: string;
+  nhOffice: string = "";
   //인수도구분
-  takeover!: string;
+  takeover: string = "";
   //검수번호
-  inspectionNumber!: number;
+  inspectionNumber: number = 0;
   //검수일자
-  inspectionDate!: string;
+  inspectionDate: string = "";
   //검수수량
-  inspectionQuantity!: number;
+  inspectionQuantity: number = 0;
   //검수단가
-  inspectionPrice!: number;
+  inspectionPrice: number = 0;
   //공급가
-  supplyPrice!: number;
+  supplyPrice: number = 0;
   //P-수량
-  pQuantity!: number;
+  pQuantity: number = 0;
   //W-수량
-  wQuantity!: number;
+  wQuantity: number = 0;
   //세무구분
-  tax!: string;
+  tax: string = "";
   //관할대리
-  jurisdiction!: string;
+  jurisdiction: string = "";
   //시군명
-  address!: string;
+  address: string = "";
   //주문구분
-  orderClass!: string;
+  orderClass: string = "";
   //운송사
-  carrier!: string;
+  carrier: string = "";
   //담당자
-  manager!: string;
+  manager: string = "";
   //비고
-  note!: string;
+  note: string = "";
   //CUST
-  cust!: string;
+  cust: string = "";
   //DEST
-  dest!: string;
+  dest: string = "";
   //PROD
-  prod!: string;
+  prod: string = "";
   //농협코드
-  nhCode!: string;
+  nhCode: string = "";
   //주문번호
-  orderNumber!: number;
+  orderNumber: number = 0;
   //출하요청
-  shipmentReq!: string;
+  shipmentReq: string = "";
   //order
-  order!: string;
+  order: string = "";
   //사번
-  companyNumber!: number;
+  companyNumber: number = 0;
   //color
-  color!: string;
+  color: string = "";
   //lock
-  lock!: string;
+  lock: string = "";
   //전표번호
-  slipNumber!: number;
+  slipNumber: number = 0;
 }
 
 export class Task {
   //ID
-  ID!: number;
+  ID: number = 0;
   //출하지
-  shipmentPlace!: string;
+  shipmentPlace: string = "";
   //출하일자
-  shipmentDate!: string;
+  shipmentDate: string = "";
   //순번
-  turn!: string;
+  turn: string = "";
   //지사
-  prefect!: string;
+  prefect: string = "";
   //거래처명
-  accountName!: string;
+  accountName: string = "";
   //도착지
-  destination!: string;
+  destination: string = "";
   //제품
-  product!: string;
+  product: string = "";
   //포장
-  packaging!: string;
+  packaging: string = "";
   //주문량
-  orderQuantity!: string;
+  orderQuantity: string = "";
   //출고량
-  releaseVolume!: string;
+  releaseVolume: string = "";
   //주문구분
-  orderClass!: string;
+  orderClass: string = "";
   //인수여부
-  takeOver!: string;
+  takeOver: string = "";
   //주문번호
-  orderNumber!: string;
+  orderNumber: string = "";
   //출하요청번호
-  shipmentReq!: string;
+  shipmentReq: string = "";
   //배송예정서번호
-  dsNumber!: string;
+  dsNumber: string = "";
   //검수상태(출하)
-  shipmentInspectionState!: string;
+  shipmentInspectionState: string = "";
   //검수상태(매입)
-  purchaseInspectionState!: string;
+  purchaseInspectionState: string = "";
   //검수일자
-  inspectionDate!: string;
+  inspectionDate: string = "";
   //검수물량
-  inspectionQuantity!: string;
+  inspectionQuantity: string = "";
   //검수FLAG
-  inspectionFlag!: string;
+  inspectionFlag: string = "";
   //검수상태
-  inspectionState!: string;
+  inspectionState: string = "";
   //차량번호
-  carNumber!: string;
+  carNumber: string = "";
   //기사
-  driver!: string;
+  driver: string = "";
   //비고
-  note!: string;
+  note: string = "";
   //출고지
-  releasePlace!: string;
+  releasePlace: string = "";
   //지사장승인
-  managerApproval!: string;
+  managerApproval: string = "";
   //EmployeeID
-  EmployeeID!: number;
+  EmployeeID: number = 0;
 }
 
 export class OrderInfo {
   //주문번호
-  orderNumber!: string;
+  orderNumber: string = "";
   //주문일자
-  orderDate!: string;
+  orderDate: string = "";
   //제품명
-  productName!: string;
+  productName: string = "";
   //주문처
-  whereOrder!: string;
+  whereOrder: string = "";
   //운송사
-  carrier!: string;
+  carrier: string = "";
   //납기일자
-  deliveryDate!: string;
+  deliveryDate: string = "";
   //포장명
-  packName!: string;
+  packName: string = "";
   //출고지
-  shipPlace!: string;
+  shipPlace: string = "";
   //주문구분
-  orderClass!: string;
+  orderClass: string = "";
   //수량(포)
-  pack!: string;
+  pack: string = "";
   //도착지
-  destination!: string;
+  destination: string = "";
   //특기사항
-  remarks!: string;
+  remarks: string = "";
   //승인구분
-  approval!: string;
+  approval: string = "";
   //수량(톤)
-  ton!: string;
+  ton: string = "";
   //승인자
-  approver!: string;
+  approver: string = "";
 }
 
 export class Management {
   //전표코드
-  slipCode!: string;
+  slipCode: string = "";
   //농협코드
-  nhCode!: string;
+  nhCode: string = "";
   //농협이름
-  nhName!: string;
+  nhName: string = "";
   //제품코드
-  prductCode!: string;
+  prductCode: string = "";
   //농협제품
-  nhProduct!: string;
+  nhProduct: string = "";
   //대분류
-  mainCategory!: string;
+  mainCategory: string = "";
   //계통구분
-  phylogeny!: string;
+  phylogeny: string = "";
   //주관사업장
-  hostBusiness!: string;
+  hostBusiness: string = "";
   //응답코드
-  reponseCode!: string;
+  reponseCode: string = "";
   //응답결과
-  responseResult!: string;
+  responseResult: string = "";
   //사업구분
-  businessClass!: string;
+  businessClass: string = "";
   //세무구분
-  taxClass!: string;
+  taxClass: string = "";
   //검수여부
-  inspection!: string;
+  inspection: string = "";
   //검수일자
-  inspectionDate!: string;
+  inspectionDate: string = "";
   //거래구분
-  transClass!: string;
+  transClass: string = "";
   //수량
-  Quantity!: string;
+  Quantity: string = "";
   //단가
-  unitPrice!: string;
+  unitPrice: string = "";
   //금액
-  amount!: string;
+  amount: string = "";
   //부가세
-  vat!: string;
+  vat: string = "";
   //검수상태
-  inspectionState!: string;
+  inspectionState: string = "";
   //삭제여부
-  deleteWhether!: string;
+  deleteWhether: string = "";
   //전송상태
-  transState!: string;
+  transState: string = "";
   //등록구분
-  registration!: string;
+  registration: string = "";
   //공급처
-  supply!: string;
+  supply: string = "";
   //수주처
-  order!: string;
+  order: string = "";
   //정산처
-  calculate!: string;
+  calculate: string = "";
   //비고(남해+1)
-  note!: string;
+  note: string = "";
   //인수도구분
-  division!: string;
+  division: string = "";
   //인수여부
-  whether!: string;
+  whether: string = "";
 }
 
 const employees: Employee[] = [
@@ -424,53 +424,53 @@ const tasks: Task[] = [
 ];
 
 const orderInfo: OrderInfo = {
-    orderNumber!: '111011',
-    orderDate!: '2022-11-11',
-    productName!: 'abcd',
-    whereOrder!: '삼성',
-    carrier!: '쿠팡',
-    deliveryDate!: '2022-11-25',
-    packName!:'AB00',
-    shipPlace!: '용인',
-    orderClass!: '주문완료',
-    pack!: '10' ,
-    destination!: '서울',
-    remarks!: '없음',
-    approval!: '승인완료',
-    ton!: '10',
-    approver!: '홍인호',
+    orderNumber: '111011',
+    orderDate: '2022-11-11',
+    productName: 'abcd',
+    whereOrder: '삼성',
+    carrier: '쿠팡',
+    deliveryDate: '2022-11-25',
+    packName:'AB00',
+    shipPlace: '용인',
+    orderClass: '주문완료',
+    pack: '10' ,
+    destination: '서울',
+    remarks: '없음',
+    approval: '승인완료',
+    ton: '10',
+    approver: '홍인호',
   }
 
 const management: Management = {
-  slipCode!: '120010110',
-  nhCode!: '808088044',
-  nhName!: '강진농업협동조합',
-  prductCode!: '212425661',
-  nhProduct!: '엔케이플러스인',
-  mainCategory!: '원예용비료',
-  phylogeny!: '본부계통',
-  hostBusiness!: '자재부(구매)',
-  reponseCode!: '',
-  responseResult!: '',
-  businessClass!: '수탁매취',
-  taxClass!: '영세',
-  inspection!: '매입',
-  inspectionDate!: '2022-08-03',
-  transClass!: '매입',
-  Quantity!: '360',
-  unitPrice!: '16,030',
-  amount!: '5,770,800',
-  vat!: '0',
-  inspectionState!: '검수완료',
-  deleteWhether!: '정상',
-  transState!: '전송완료',
-  registration!: '주문등록',
-  supply!: '2910000',
-  order!: '2910000',
-  calculate!: '29100000',
-  note!: '',
-  division!: '지역농협창고인수도',
-  whether!: '예',
+  slipCode: '120010110',
+  nhCode: '808088044',
+  nhName: '강진농업협동조합',
+  prductCode: '212425661',
+  nhProduct: '엔케이플러스인',
+  mainCategory: '원예용비료',
+  phylogeny: '본부계통',
+  hostBusiness: '자재부(구매)',
+  reponseCode: '',
+  responseResult: '',
+  businessClass: '수탁매취',
+  taxClass: '영세',
+  inspection: '매입',
+  inspectionDate: '2022-08-03',
+  transClass: '매입',
+  Quantity: '360',
+  unitPrice: '16,030',
+  amount: '5,770,800',
+  vat: '0',
+  inspectionState: '검수완료',
+  deleteWhether: '정상',
+  transState: '전송완료',
+  registration: '주문등록',
+  supply: '2910000',
+  order: '2910000',
+  calculate: '29100000',
+  note: '',
+  division: '지역농협창고인수도',
+  whether: '예',
 }
 
 
@@ -480,8 +480,8 @@ const management: Management = {
 
 //콤보박스
 export class Product {
-  ID!: number;
-  Name!: string;
+  ID: number = 0;
+  Name: string = "";
 }
 
 const simpleProducts: string[] = [

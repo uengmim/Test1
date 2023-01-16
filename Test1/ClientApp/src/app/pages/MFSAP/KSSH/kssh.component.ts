@@ -193,20 +193,27 @@ export class KSSHComponent {
     this.saveButtonOptions = {
       text: '저장',
       onClick: async () => {
-        var checkModel = this.addFormData;
 
-        if (checkModel.ZMENGE3 > checkModel.ZMENGE4) {
-          alert("출고잔량 이상 출고할 수 없습니다.", "오류");
-          return;
-        }
 
 
         if (await confirm("저장하시겠습니까?", "알림")) {
+
+          var checkModel = this.addFormData;
+          if (this.addFormData.WADAT_IST === null || this.addFormData === undefined) {
+            alert("출고일자는 필수입니다.", "오류");
+            return;
+          }
+
+          if (checkModel.ZMENGE3 > checkModel.ZMENGE4) {
+            alert("출고잔량 이상 출고할 수 없습니다.", "오류");
+            return;
+          }
           this.loadingVisible = true;
           var result = await this.createOrder();
           this.loadingVisible = false;
           if (result.E_MTY === "S") {
             alert("저장 완료되었습니다.", "알림");
+            await this.dataLoad();
             this.popupVisible = false;
           }
           else if (result.E_MTY === "E") {
@@ -246,15 +253,20 @@ export class KSSHComponent {
   public async createOrder() {
     
     var selectData = this.orderGrid.instance.getSelectedRowsData();
+
+    let zerdat = new Date("0001-01-01");
+    let zaedat = new Date("0001-01-01");
+    let zshipmentDate = new Date("0001-01-01");
+
     var zsds5050 = new ZSDS5050Model(selectData[0].VBELN, selectData[0].POSNR, selectData[0].FKDAT, selectData[0].AUBEL, selectData[0].VGBEL, selectData[0].VGPOS,
       this.addFormData.MATNR, selectData[0].ARKTX, selectData[0].FKIMG, selectData[0].VRKME, selectData[0].NETWR, selectData[0].MWSBP, selectData[0].WAERK,
       this.addFormData.LGORT, this.addFormData.KUNWE, this.addFormData.NAME1, selectData[0].CITY1, selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO,
       this.addFormData.KUNAG, this.addFormData.NAME1_AG, this.addFormData.SPART, selectData[0].WERKS, selectData[0].VKBUR, selectData[0].BZIRK, selectData[0].ZVGBEL,
-      selectData[0].ZVGPOS, this.addFormData.ZMENGE3, this.addFormData.ZMENGE4, new Date(), this.addFormData.Z3PARVW, this.addFormData.Z4PARVW, this.addFormData.ZKUNWE,
-      this.addFormData.NAME1, selectData[0].ZCITY1, this.addFormData.ZSTREET, selectData[0].TELF1, selectData[0].MOBILENO, this.addFormData.ZCARTYPE, this.addFormData.ZCARNO,
+      selectData[0].ZVGPOS, this.addFormData.ZMENGE3, this.addFormData.ZMENGE4, this.addFormData.WADAT_IST, this.addFormData.Z3PARVW, this.addFormData.Z4PARVW, this.addFormData.ZKUNWE,
+      this.addFormData.NAME1, this.addFormData.ZCITY1, this.addFormData.ZSTREET, selectData[0].TELF1, selectData[0].MOBILENO, this.addFormData.ZCARTYPE, this.addFormData.ZCARNO,
       this.addFormData.ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZVKAUS, selectData[0].ZUNLOAD, selectData[0].ZSHIPSTATUS,
-      selectData[0].ZSHIPMENT_NO, new Date(), this.addFormData.ZPALLETQTY, this.addFormData.ZPALLTP, this.addFormData.ZTEXT, selectData[0].ZEXID, selectData[0].ZDELETE,
-      selectData[0].ZIFMESSAGE, selectData[0].ZIFSTATUS, selectData[0].ZIFDELETE, selectData[0].ZERDAT, selectData[0].ZERZET, selectData[0].ZERNAM, selectData[0].ZAEDAT,
+      selectData[0].ZSHIPMENT_NO, zshipmentDate, this.addFormData.ZPALLETQTY, this.addFormData.ZPALLTP, this.addFormData.ZTEXT, selectData[0].ZEXID, selectData[0].ZDELETE,
+      selectData[0].ZIFMESSAGE, selectData[0].ZIFSTATUS, selectData[0].ZIFDELETE, zerdat, selectData[0].ZERZET, selectData[0].ZERNAM, zaedat,
       selectData[0].ZAEZET, selectData[0].ZAENAM, "", "");
 
     var zsdsList: ZSDS5050Model = zsds5050;

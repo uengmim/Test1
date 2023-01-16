@@ -201,145 +201,144 @@
         <dxi-item dataField="ZSHIPMENT_NO" [disabled]="true"><dxo-label text="베송예정서 번호"></dxo-label></dxi-item>
       </dxi-item>
     </dx-form>
-
-    <dx-scroll-view width="100%" height="90%">
-      <dx-form id="popupForm2" [formData]="addFormData" style=" margin-top: 20px; ">
-        <dxi-item itemType="group" caption="납품정보" [colCount]="4">
-          <dxi-item dataField="NAME1_AG" [disabled]="true"><dxo-label text="판매처"></dxo-label></dxi-item>
-          <dxi-item dataField="NAME1" [disabled]="true"><dxo-label text="납품처"></dxo-label></dxi-item>
-          <dxi-item dataField="ZCITY1"><dxo-label text="도시"></dxo-label></dxi-item>
-          <dxi-item dataField="ZSTREET"><dxo-label text="주소"></dxo-label></dxi-item>
-        </dxi-item>
-
-        <dxi-item itemType="group" caption="제품정보" [colCount]="4">
-          <dxi-item dataField="MATNR" [disabled]="true">
-            <dxo-label text="제품코드"></dxo-label>
-            <div *dxTemplate>
-              <nh-possible-table #matnrCodeDynamic
-                                  [dataStoreKey]="dataStoreKey"
-                                  [codeInfo]="matnrCode"
-                                  valueColumn="MATNR"
-                                  valueDisplayFormat="%MAKTX%(%MATNR%)"
-                                  width="auto"
-                                  [(selectedValue)]="matnrValue"
-                                  [gridBoxWidth]="500"
-                                  class="weight-test"
-                                  (onDataLoaded)="onPEDataLoaded($event)"
-                                  (onEntryValueChanged)="onMatnrCodeValueChanged($event)"></nh-possible-table>
-            </div>
-          </dxi-item>
-
-          <dxi-item dataField="VRKME" [disabled]="true"><dxo-label text="단위"></dxo-label></dxi-item>
-          <dxi-item dataField="ZTEXT" [colSpan]="2"><dxo-label text="비고"></dxo-label></dxi-item>
-
-
-          <dxi-item dataField="FKIMG" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true}"><dxo-label text="검수수량"></dxo-label></dxi-item>
-          <dxi-item dataField="ZMENGE3" editorType="dxNumberBox" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true, onValueChanged :onZmenge3keyDown }"><dxo-label text="보관출고수량"></dxo-label></dxi-item>
-          <dxi-item dataField="ZMENGE4" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true}"><dxo-label text="보관출고잔량"></dxo-label></dxi-item>
-          <dxi-item dataField="WADAT_IST" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="출고일자"></dxo-label></dxi-item>
-
-        </dxi-item>
-
-        <dxi-item itemType="group" caption="운송업체정보" [colCount]="4">
-          <dxi-item dataField="Z3PARVW">
-            <dxo-label text="1차 운송업체"></dxo-label>
-            <div *dxTemplate>
-              <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
-                                [dataStoreKey]="dataStoreKey"
-                                valueColumn="LIFNR"
-                                valueDisplayFormat="%NAME1%(%LIFNR%)"
-                                width="auto"
-                                label="운송사"
-                                labelMode="floating"
-                                [showClearButton]="true"
-                                [(selectedValue)]="tdlnrValue"
-                                [gridBoxWidth]="500"
-                                (onDataLoaded)="onPEDataLoaded($event)"
-                                (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
-            </div>
-          </dxi-item>
-          <dxi-item dataField="Z4PARVW">
-            <dxo-label text="2차 운송업체"></dxo-label>
-            <div *dxTemplate>
-              <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
-                                [dataStoreKey]="dataStoreKey"
-                                valueColumn="LIFNR"
-                                valueDisplayFormat="%NAME1%(%LIFNR%)"
-                                width="auto"
-                                label="운송사"
-                                labelMode="floating"
-                                [showClearButton]="true"
-                                [(selectedValue)]="tdlnr2Value"
-                                [gridBoxWidth]="500"
-                                (onDataLoaded)="onPEDataLoaded($event)"
-                                (onEntryValueChanged)="onTdlnr2CodeValueChanged($event)"></nh-possible-comm>
-            </div>
-          </dxi-item>
-        </dxi-item>
-
-        <dxi-item itemType="group" caption="차량정보" [colCount]="4">
-          <dxi-item dataField="ZCARNO">
-            <dxo-label text="차량번호"></dxo-label>
-            <div *dxTemplate>
-              <nh-possible-table #zcarnoModiCodeEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="zcarnoModiCode"
-                                 valueColumn="ZCARNO"
-                                 [showClearButton]="true"
-                                 valueDisplayFormat="%ZCARNO%"
-                                 width="auto"
-                                 [(selectedValue)]="zcarnoModiValue"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-table>
-            </div>
-          </dxi-item>
-          <dxi-item dataField="ZCARTYPE">
-            <dxo-label text="차종"></dxo-label>
-            <div *dxTemplate>
-              <nh-possible-table #dd07tCarEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="dd07tCarCode"
-                                 valueColumn="DOMVALUE_L"
-                                 [showClearButton]="true"
-                                 valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
-                                 width="auto"
-                                 [(selectedValue)]="zcarValue"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-table>
-            </div>
-          </dxi-item>
-
-          <dxi-item dataField="ZDRIVER"><dxo-label text="운전기사명"></dxo-label></dxi-item>
-          <dxi-item dataField="ZPHONE"><dxo-label text="전화번호"></dxo-label></dxi-item>
-
-          <dxi-item dataField="ZSHIPMENT_DATE" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="배차일자"></dxo-label></dxi-item>
-
-          <dxi-item dataField="ZPALLTP">
-            <dxo-label text="파렛트 종류"></dxo-label>
-            <div *dxTemplate>
-              <nh-possible-table #zpalEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="zpalCode"
-                                 valueColumn="DOMVALUE_L"
-                                 valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
-                                 width="auto"
-                                 [(selectedValue)]="zpalValue"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZpalltpCodeValueChanged($event)"></nh-possible-table>
-            </div>
-          </dxi-item>
-          <dxi-item dataField="ZPALLETQTY" editorType="dxNumberBox" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true}"><dxo-label text="파렛트 수량"></dxo-label></dxi-item>
-        </dxi-item>
-      </dx-form>    
-    </dx-scroll-view>
   </div>
+  <dx-scroll-view width="100%" height="90%">
+    <dx-form id="popupForm2" [formData]="addFormData" style=" margin-top: 20px; ">
+      <dxi-item itemType="group" caption="납품정보" [colCount]="4">
+        <dxi-item dataField="NAME1_AG" [disabled]="true"><dxo-label text="판매처"></dxo-label></dxi-item>
+        <dxi-item dataField="NAME1" [disabled]="true"><dxo-label text="납품처"></dxo-label></dxi-item>
+        <dxi-item dataField="ZCITY1"><dxo-label text="도시"></dxo-label></dxi-item>
+        <dxi-item dataField="ZSTREET"><dxo-label text="주소"></dxo-label></dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="제품정보" [colCount]="4">
+        <dxi-item dataField="MATNR" [disabled]="true">
+          <dxo-label text="제품코드"></dxo-label>
+          <div *dxTemplate>
+            <nh-possible-table #matnrCodeDynamic
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="matnrCode"
+                                valueColumn="MATNR"
+                                valueDisplayFormat="%MAKTX%(%MATNR%)"
+                                width="auto"
+                                [(selectedValue)]="matnrValue"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                (onEntryValueChanged)="onMatnrCodeValueChanged($event)"></nh-possible-table>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="VRKME" [disabled]="true"><dxo-label text="단위"></dxo-label></dxi-item>
+        <dxi-item dataField="ZTEXT" [colSpan]="2"><dxo-label text="비고"></dxo-label></dxi-item>
+
+
+        <dxi-item dataField="FKIMG" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true}"><dxo-label text="검수수량"></dxo-label></dxi-item>
+        <dxi-item dataField="ZMENGE3" editorType="dxNumberBox" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true, onValueChanged :onZmenge3keyDown }"><dxo-label text="보관출고수량"></dxo-label></dxi-item>
+        <dxi-item dataField="ZMENGE4" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true}"><dxo-label text="보관출고잔량"></dxo-label></dxi-item>
+        <dxi-item dataField="WADAT_IST" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="출고일자"></dxo-label></dxi-item>
+
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="운송업체정보" [colCount]="4">
+        <dxi-item dataField="Z3PARVW">
+          <dxo-label text="1차 운송업체"></dxo-label>
+          <div *dxTemplate>
+            <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
+                              [dataStoreKey]="dataStoreKey"
+                              valueColumn="LIFNR"
+                              valueDisplayFormat="%NAME1%(%LIFNR%)"
+                              width="auto"
+                              label="운송사"
+                              labelMode="floating"
+                              [showClearButton]="true"
+                              [(selectedValue)]="tdlnrValue"
+                              [gridBoxWidth]="500"
+                              (onDataLoaded)="onPEDataLoaded($event)"
+                              (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="Z4PARVW">
+          <dxo-label text="2차 운송업체"></dxo-label>
+          <div *dxTemplate>
+            <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
+                              [dataStoreKey]="dataStoreKey"
+                              valueColumn="LIFNR"
+                              valueDisplayFormat="%NAME1%(%LIFNR%)"
+                              width="auto"
+                              label="운송사"
+                              labelMode="floating"
+                              [showClearButton]="true"
+                              [(selectedValue)]="tdlnr2Value"
+                              [gridBoxWidth]="500"
+                              (onDataLoaded)="onPEDataLoaded($event)"
+                              (onEntryValueChanged)="onTdlnr2CodeValueChanged($event)"></nh-possible-comm>
+          </div>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="차량정보" [colCount]="4">
+        <dxi-item dataField="ZCARNO">
+          <dxo-label text="차량번호"></dxo-label>
+          <div *dxTemplate>
+            <nh-possible-table #zcarnoModiCodeEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zcarnoModiCode"
+                                valueColumn="ZCARNO"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%ZCARNO%"
+                                width="auto"
+                                [(selectedValue)]="zcarnoModiValue"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-table>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="ZCARTYPE">
+          <dxo-label text="차종"></dxo-label>
+          <div *dxTemplate>
+            <nh-possible-table #dd07tCarEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="dd07tCarCode"
+                                valueColumn="DOMVALUE_L"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="zcarValue"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-table>
+          </div>
+        </dxi-item>
+
+        <dxi-item dataField="ZDRIVER"><dxo-label text="운전기사명"></dxo-label></dxi-item>
+        <dxi-item dataField="ZPHONE"><dxo-label text="전화번호"></dxo-label></dxi-item>
+
+        <dxi-item dataField="ZSHIPMENT_DATE" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="배차일자"></dxo-label></dxi-item>
+
+        <dxi-item dataField="ZPALLTP">
+          <dxo-label text="파렛트 종류"></dxo-label>
+          <div *dxTemplate>
+            <nh-possible-table #zpalEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zpalCode"
+                                valueColumn="DOMVALUE_L"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="zpalValue"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZpalltpCodeValueChanged($event)"></nh-possible-table>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="ZPALLETQTY" editorType="dxNumberBox" [editorOptions]="{ displayFormat: '#,###', type: 'number', useMaskBehavior : true}"><dxo-label text="파렛트 수량"></dxo-label></dxi-item>
+      </dxi-item>
+    </dx-form>    
+  </dx-scroll-view>
 </dx-popup>

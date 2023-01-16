@@ -125,7 +125,7 @@
 </dx-toolbar>
 
 
-<dx-data-grid id="grid"
+<dx-data-grid id="grid" #orderGrid
               [dataSource]="orderData"
               keyExpr="VBELN"
               [showBorders]="true"
@@ -182,7 +182,7 @@
 
   <dxi-column dataField="NETPR"
               caption="주문단가"
-              format="currency"
+              format='#,##0'
               dataType="number">
     <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
   </dxi-column>
@@ -250,8 +250,8 @@
         <dx-form id="popupForm" [formData]="popupData" [disabled]="editFlag">
           <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
             <dxi-item dataField="VBELN" [disabled]="true"><dxo-label text="주문번호"></dxo-label></dxi-item>
-            <dxi-item dataField="CREDIT_LIMIT" [disabled]="true"><dxo-label text="여신금액"></dxo-label></dxi-item>
-            <dxi-item dataField="ARAMOUNT" [disabled]="true"><dxo-label text="미수채권"></dxo-label></dxi-item>
+            <dxi-item dataField="CREDIT_LIMIT" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}"><dxo-label text="여신금액"></dxo-label></dxi-item>
+            <dxi-item dataField="ARAMOUNT" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}"><dxo-label text="미수채권"></dxo-label></dxi-item>
           </dxi-item>
 
           <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
@@ -299,16 +299,16 @@
               <dxo-label text="주문처"></dxo-label>
               <div *dxTemplate>
                 <!--<nh-possible-comm [codeInfo]="kunnCode2" #kunnrEntery
-          [dataStoreKey]="dataStoreKey"
-          valueColumn="ZCMF01_CH"
-          valueDisplayFormat="%ZCMF02_CH%(%ZCMF01_CH%)"
-          width="auto"
-          [gridBoxWidth]="500"
-          [showClearButton]="true"
-          [(selectedValue)]="kunnrValue2"
-          (onDataLoaded)="onPEDataLoaded($event)"
-          [showDataLoadingPanel]="showDataLoadingPanel"
-          (onEntryValueChanged)="onKunnrCodeValueChanged($event)"></nh-possible-comm>-->
+      [dataStoreKey]="dataStoreKey"
+      valueColumn="ZCMF01_CH"
+      valueDisplayFormat="%ZCMF02_CH%(%ZCMF01_CH%)"
+      width="auto"
+      [gridBoxWidth]="500"
+      [showClearButton]="true"
+      [(selectedValue)]="kunnrValue2"
+      (onDataLoaded)="onPEDataLoaded($event)"
+      [showDataLoadingPanel]="showDataLoadingPanel"
+      (onEntryValueChanged)="onKunnrCodeValueChanged($event)"></nh-possible-comm>-->
                 <nh-possible-table [codeInfo]="kunnCode2" #kunnrEntery
                                    [dataStoreKey]="dataStoreKey"
                                    valueColumn="KUNNR"
@@ -322,7 +322,7 @@
                                    (onEntryValueChanged)="onKunnrCodeValueChanged($event)"></nh-possible-table>
               </div>
             </dxi-item>
-            <dxi-item dataField="VDATU" [disabled]="false" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}">
+            <dxi-item dataField="VDATU" [disabled]="false" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true}">
               <dxi-validation-rule type="required" message="출하요청일필수입력"></dxi-validation-rule>
               <dxo-label text="출하요청일"></dxo-label>
             </dxi-item>
@@ -366,19 +366,20 @@
             </dxi-item>
 
 
-            <dxi-item dataField="AVAILQTY" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
               <dxo-label text="주문가능량"></dxo-label>
             </dxi-item>
             <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
               <dxi-validation-rule type="required" message="주문수량필수입력"></dxi-validation-rule>
               <dxo-label text="주문수량"></dxo-label>
             </dxi-item>
-
+            <dxi-item dataField="MEINS" [disabled]="true"><dxo-label text="단위"></dxo-label></dxi-item>
 
 
 
             <dxi-item dataField="VKAUS" [disabled]="false">
-              <dxi-validation-rule type="required" message="용도구분필수입력"></dxi-validation-rule>
+                <!--<dxi-validation-rule type="required" message="용도구분필수입력"></dxi-validation-rule>-->
+
               <dxo-label text="용도구분"></dxo-label>
               <div *dxTemplate>
                 <nh-possible-table #tvlvEntery
@@ -416,6 +417,7 @@
             </dxi-item>
             <dxi-item dataField="INCO1" [disabled]="false">
               <dxo-label text="운송방법"></dxo-label>
+              <dxi-validation-rule type="required" message="운송방법 필수입력"></dxi-validation-rule>
               <div *dxTemplate>
                 <nh-possible-comm [codeInfo]="inco1Code" #incoEntery
                                   [dataStoreKey]="dataStoreKey"
@@ -432,11 +434,27 @@
               </div>
             </dxi-item>
             <dxi-item dataField="TEXT" [colSpan]="2" [editorOptions]="{height:60}" [disabled]="false"><dxo-label text="특기사항"></dxo-label></dxi-item>
-
-            <dxi-item dataField="REVQTY" [disabled]="true"><dxo-label text="예약물량"></dxo-label></dxi-item>
-            <dxi-item dataField="GIQTY" [disabled]="true"><dxo-label text="출고물량"></dxo-label></dxi-item>
+            <dxi-item dataField="ZCARNO" [disabled]="false">
+              <dxo-label text="차량번호"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table #zcarnoModiCodeEntery
+                                   [dataStoreKey]="dataStoreKey"
+                                   [codeInfo]="zcarnoModiCode"
+                                   valueColumn="ZCARNO"
+                                   [showClearButton]="true"
+                                   valueDisplayFormat="%ZCARNO%"
+                                   width="auto"
+                                   [(selectedValue)]="zcarnoModiValue"
+                                   [gridBoxWidth]="500"
+                                   class="weight-test"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [showDataLoadingPanel]="showDataLoadingPanel"
+                                   (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
             <dxi-item dataField="TDLNR" [disabled]="false">
-              <dxo-label text="운송사"></dxo-label>
+              <dxo-label text="1차 운송사"></dxo-label>
+              <dxi-validation-rule type="required" message="1차 운송사 필수입력"></dxi-validation-rule>
               <div *dxTemplate>
                 <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
                                   [dataStoreKey]="dataStoreKey"
@@ -453,7 +471,7 @@
               </div>
             </dxi-item>
             <dxi-item dataField="TDLNR2" [disabled]="false">
-              <dxo-label text="실제운송사"></dxo-label>
+              <dxo-label text="2차 운송사"></dxo-label>
               <div *dxTemplate>
                 <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
                                   [dataStoreKey]="dataStoreKey"
@@ -487,34 +505,16 @@
                                    (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-table>
               </div>
             </dxi-item>
-            <dxi-item dataField="ZCARNO" [disabled]="false">
-              <dxo-label text="차량번호"></dxo-label>
-              <!--<div *dxTemplate>
-                <nh-possible-table #zcarnoModiCodeEntery
-                                   [dataStoreKey]="dataStoreKey"
-                                   [codeInfo]="zcarnoModiCode"
-                                   valueColumn="ZCARNO"
-                                   [showClearButton]="true"
-                                   valueDisplayFormat="%ZCARNO%"
-                                   width="auto"
-                                   [(selectedValue)]="zcarnoModiValue"
-                                   [gridBoxWidth]="500"
-                                   class="weight-test"
-                                   (onDataLoaded)="onPEDataLoaded($event)"
-                                   [showDataLoadingPanel]="showDataLoadingPanel"
-                                   (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-table>
-              </div>-->
-            </dxi-item>
+
             <dxi-item dataField="ZDRIVER" [disabled]="false"><dxo-label text="운전기사명"></dxo-label></dxi-item>
             <dxi-item dataField="ZPHONE" [disabled]="false"><dxo-label text="전화번호"></dxo-label></dxi-item>
           </dxi-item>
         </dx-form>
 
-        <dx-form id="popupForm" [formData]="popupData" [disabled]="autruDisabled"    style="margin-top:10px; margin-left:5px">
+        <dx-form id="popupForm" [formData]="popupData" [disabled]="autruDisabled" style="margin-top:20px; margin-left:5px">
           <dxi-item itemType="group"
                     [colCount]="3"
-                    [colSpan]="2"
-                 >
+                    [colSpan]="2">
 
             <dxi-item dataField="AUGRU">
               <dxo-label text="오더사유"></dxo-label>
@@ -537,6 +537,16 @@
           </dxi-item>
         </dx-form>
 
+        <dx-form id="popupForm" [formData]="popupData" [visible]="volume" style="margin-top:10px; margin-left:5px">
+          <dxi-item itemType="group"
+                    [colCount]="3"
+                    [colSpan]="2">
+
+            <dxi-item dataField="REVQTY" [disabled]="true"><dxo-label text="예약물량"></dxo-label></dxi-item>
+            <dxi-item dataField="ACTQTY" [disabled]="true"><dxo-label text="출고물량"></dxo-label></dxi-item>
+          </dxi-item>
+        </dx-form>
+
 
 
 
@@ -544,10 +554,10 @@
           <dxi-item itemType="group"
                     caption="농협검수항목관리"
                     [colCount]="3"
-                    [colSpan]="2"
-                   >
+                    [colSpan]="2">
             <dxi-item dataField="ZNHNAME" [disabled]="true"><dxo-label text="농협명"></dxo-label></dxi-item>
-            <dxi-item dataField="MVGR2_N" [disabled]="false">
+            <dxi-item dataField="MVGR2" [disabled]="false">
+              <dxi-validation-rule type="required" message="사업방식필수입력"></dxi-validation-rule>
               <dxo-label text="사업방식"></dxo-label>
               <div *dxTemplate>
                 <nh-possible-table #mvgr2Entery
@@ -566,7 +576,8 @@
               </div>
             </dxi-item>
             <dxi-item dataField="MAKTX_NH" [disabled]="true"><dxo-label text="농협제품"></dxo-label></dxi-item>
-            <dxi-item dataField="MVGR3_N" [disabled]="false">
+            <dxi-item dataField="MVGR3" [disabled]="false">
+              <dxi-validation-rule type="required" message="계통구분필수입력"></dxi-validation-rule>
               <dxo-label text="계통구분"></dxo-label>
               <div *dxTemplate>
                 <nh-possible-table #mvgr3Entery
@@ -584,7 +595,8 @@
                                    (onEntryValueChanged)="onMvgr3CodeValueChanged($event)"></nh-possible-table>
               </div>
             </dxi-item>
-            <dxi-item dataField="MVGR1_N" [disabled]="false">
+            <dxi-item dataField="MVGR1" [disabled]="false">
+              <dxi-validation-rule type="required" message="대분류필수입력"></dxi-validation-rule>
               <dxo-label text="대분류"></dxo-label>
               <div *dxTemplate>
                 <nh-possible-table #mvgr1Entery
@@ -603,6 +615,7 @@
               </div>
             </dxi-item>
             <dxi-item dataField="TAXK1" [disabled]="false">
+              <dxi-validation-rule type="required" message="세무구분필수입력"></dxi-validation-rule>
               <dxo-label text="세무구분"></dxo-label>
               <dx-select-box [dataSource]="taxkData"
                              displayExpr="Name"
@@ -615,9 +628,9 @@
           </dxi-item>
 
           <!--<dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-            <dxi-item dataField="temp3" [disabled]="true"><dxo-label text="주문처 담보금액"></dxo-label></dxi-item>
-            <dxi-item dataField="temp4" [disabled]="true"><dxo-label text="주문처 미수채권"></dxo-label></dxi-item>
-          </dxi-item>-->
+      <dxi-item dataField="temp3" [disabled]="true"><dxo-label text="주문처 담보금액"></dxo-label></dxi-item>
+      <dxi-item dataField="temp4" [disabled]="true"><dxo-label text="주문처 미수채권"></dxo-label></dxi-item>
+    </dxi-item>-->
         </dx-form>
       </div>
     </dx-scroll-view>

@@ -26,6 +26,7 @@ import { AuthService } from '../../../shared/services';
 import { ZSDEPSOENTRYInfoModel, ZSDS3013Model, ZSDS3014Model } from '../../../shared/dataModel/MFSAP/ZSdEpSoEntryInfoProxy';
 import { ZSDCREATESODoModel, ZSDS3100Model, ZSDS6001Model, ZSDS6002Model } from '../../../shared/dataModel/MFSAP/ZsdCreateSodoProxy';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { ZSDT1100Model } from '../../../shared/dataModel/MFSAP/zsdt1100';
 
 /*고객주문등록 Component*/
 
@@ -42,6 +43,7 @@ export class FORDComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
   @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
+  @ViewChild('orderGrid', { static: false }) orderGrid!: DxDataGridComponent;
   @ViewChild('sd007Entery1', { static: false }) sd007Entery1!: CommonPossibleEntryComponent;
   @ViewChild('sd007Entery2', { static: false }) sd007Entery2!: CommonPossibleEntryComponent;
   @ViewChild('sd007Entery3', { static: false }) sd007Entery3!: CommonPossibleEntryComponent;
@@ -65,7 +67,7 @@ export class FORDComponent {
   @ViewChild('t001Entery', { static: false }) t001Entery!: CommonPossibleEntryComponent;
   @ViewChild('incoEntery', { static: false }) incoEntery!: CommonPossibleEntryComponent;
   @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: TablePossibleEntryComponent;
-
+  orderPossible!: string;
 
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
@@ -137,16 +139,17 @@ export class FORDComponent {
   //차량번호(수정)
   zcarnoModiValue!: string | null;
   sort: string[];
-
+  selectGridData: any;
   //오더사유 입력가능., 불가능
   autruDisabled!: boolean;
+  volume!: boolean;
   //셀렉트박스
   data2!: Data2[];
   products!: Product[];
   selectData2: string = "";
   //delete
   selectedItemKeys: any[] = [];
-
+  taxk1!: string;
   //거래처
   clients: string[];
   //정보
@@ -155,6 +158,7 @@ export class FORDComponent {
   //날짜 조회
   startDate: any;
   endDate: any;
+
 
   //
   dataLoading: boolean = false;
@@ -176,7 +180,7 @@ export class FORDComponent {
   colCount: number;
 
   width: any;
-  ZDOFLG: any;
+  ZDOFLG: string;
   popupData: any;
 
   popupTitle: string;
@@ -318,6 +322,7 @@ export class FORDComponent {
     this.mvgr3Value = "";
     this.augruValue = "";
     this.zcarnoModiValue = "";
+    this.taxk1 = "2";
     //form
     this.labelMode = 'floating';
     this.labelLocation = 'left';
@@ -326,6 +331,7 @@ export class FORDComponent {
     this.auartFlag = true;
     this.nh = true;
     this.autruDisabled = true;
+    this.volume = true;
     this.auartFlag2 = false;
     this.minColWidth = 300;
     this.colCount = 2;
@@ -411,7 +417,7 @@ export class FORDComponent {
       onClick(e: any) {
 
         that.popupVisible = false;
-
+        this.dataLoad();
       },
     };
 
@@ -430,30 +436,94 @@ export class FORDComponent {
       onClick: async () => {
 
         console.log(this.dxForm.instance.option('formData'));
-        if (await confirm("저장하시겠습니까?", "알림")) { 
           this.loadingVisible2 = true;
         //this.dataGrid.instance.saveEditData();
-        var result = await this.createOrder();
+
+        var info = await this.detailDataLoad();
         this.loadingVisible2 = false;
         //var result2 = await this.detailDataLoad();
         //if (result2.E_RETURN.MVGR3 !== "1") {
         //  alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
         //  this.kunnrEntery.ClearSelectedValue();
         //  return;
-          //}
-          if (this.selectData2 === "10" || this.selectData2 === "40") {
-            if (this.popupData.AVAILQTY < this.popupData.KWMENG) {
-              alert(`주문가능량을 초과하였습니다.`, "알림");
-              return;
-            }
-          }
+        //}
+        if (this.popupData.AUART === "" || this.popupData.AUART === null) {
+          alert(`필수 필드(주문구분) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.MATNR === "" || this.popupData.MATNR === null) {
+          alert(`필수 필드(제품명) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.KUNNR === "" || this.popupData.KUNNR === null) {
+          alert(`필수 필드(주문처) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.VDATU === "" || this.popupData.VDATU === null || this.popupData.VDATU === undefined) {
+          alert(`필수 필드(출하요청일) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.KUNWE === "" || this.popupData.KUNWE === null) {
+          alert(`필수 필드(도착지) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.LGORT === "" || this.popupData.LGORT === null) {
+          alert(`필수 필드(출고사업장) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.KWMENG === "" || this.popupData.KWMENG === 0 || this.popupData.KWMENG === null)  {
+          alert(`필수 필드(주문수량) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if ((this.selectData2 !== "30" && this.popupData.VKAUS === "") || (this.selectData2 !== "30" && this.popupData.VKAUS === null)) {
+          alert(`필수 필드(용도구분) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.INCO1 === "" || this.popupData.INCO1 === null) {
+          alert(`필수 필드(운송방법) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if (this.popupData.TDLNR === "" || this.popupData.TDLNR === null) {
+          alert(`필수 필드(1차 운송사) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if ((this.nh === true && this.popupData.MVGR2 === "") || (this.nh === true && this.popupData.MVGR2_N === null)) {
+          alert(`필수 필드(사업방식) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if ((this.nh === true && this.popupData.MVGR3 === "") || (this.nh === true && this.popupData.MVGR3_N === null)) {
+          alert(`필수 필드(계통구분) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        else if ((this.nh === true && this.popupData.MVGR1 === "") || (this.nh === true && this.popupData.MVGR1_N === null)) {
+          alert(`필수 필드(대분류) 입력이 누락되었습니다.`, "알림");
+          return;
+        }
+        //else if ((this.nh === true && this.popupData.TAXK1 === "") || (this.nh === true && this.popupData.TAXK1 === null)) {
+        //  alert(`필수 필드(세무구분) 입력이 누락되었습니다.`, "알림");
+        //  return;
+        //}
+
+
+
         if (this.popupData.AUART === "Z400" || this.popupData.AUART === "Z410") {
           if (this.popupData.AUGRU === "") {
-            alert('오더사유를 입력해주세요.', "알림");
+            alert('필수 필드(오더사유) 입력이 누락되었습니다.', "알림");
             return;
           }
         }
 
+        //주문가능량 계산
+
+        
+
+        if (this.popupData.orderPossible !== "") {
+          if (this.popupData.orderPossible < this.popupData.KWMENG) {
+            alert(`주문가능량을 초과하였습니다.`, "알림");
+            return;
+          }
+        }
+        var result = await this.createOrder();
         if (result.E_TYPESO === "E") {
           alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGESO}`, "알림");
           return;
@@ -465,7 +535,7 @@ export class FORDComponent {
           this.popupVisible = false;
           this.dataLoad();
         }
-      }
+
       },
     };
   }
@@ -505,10 +575,17 @@ export class FORDComponent {
       e.component.expandRow(['EnviroCare']);
     }
   };
+
+
   orderDBClick(e: any) {
+    //this.selectGridData = this.orderGrid.instance.getSelectedRowsData();
+    //this.popupData = this.selectGridData[0];
+    //this.zcarnoModiValue = this.selectGridData[0].ZCARNO;
+    //this.popupData.ZCARNO = this.zcarnoModiValue;
     this.infoDataLoad("search");
     this.popupTitle = "주문조회";
     this.editFlag = true;
+    this.nh = false;
     //저장버튼 여부
     this.saveVisible = false;
     this.popupVisible = !this.popupVisible;
@@ -520,14 +597,40 @@ export class FORDComponent {
 
   /* Entry Data Form에 바인딩 */
   //분할 차량번호 선택이벤트
-  //onZcarno1CodeValueChanged(e: any) {
-  //  setTimeout(() => {
-  //    this.popupData.ZCARNO = e.selectedItem.ZCARNO;
-  //    this.popupData.ZDRIVER = e.selectedItem.ZDRIVER;
-  //    this.popupData.ZPHONE = e.selectedItem.ZPHONE;
-  //    this.zcarValue = e.selectedItem.ZCARTYPE;
-  //  });
-  //}
+  onZcarno1CodeValueChanged(e: any) {
+    setTimeout(() => {
+      if (this.selectData2 === "10" || this.selectData2 === "40") {
+        this.popupData.ZCARNO = e.selectedItem.ZCARNO;
+        this.popupData.ZDRIVER = e.selectedItem.ZDRIVER;
+        this.popupData.ZPHONE = e.selectedItem.ZPHONE;
+        this.zcarValue = e.selectedItem.ZCARTYPE;
+        this.popupData.ZCARTYPE = this.zcarValue
+        return;
+      }
+      else if (this.selectData2 === "20") {
+        this.popupData.ZCARNO = e.selectedItem.ZCARNO1;
+        this.popupData.ZDRIVER = e.selectedItem.ZDERIVER1;
+        this.popupData.ZPHONE = e.selectedItem.ZPHONE1;
+        this.zcarValue = e.selectedItem.ZCARTYPE1;
+        this.popupData.ZCARTYPE = this.zcarValue
+
+        this.popupData.TDLNR = e.selectedItem.LIFNR;
+        this.tdlnrValue = e.selectedItem.LIFNR;
+        return;
+      }
+      else if (this.selectData2 === "30") {
+        this.popupData.ZCARNO = e.selectedItem.ZCARNO1;
+        this.popupData.ZDRIVER = e.selectedItem.ZDERIVER1;
+        this.popupData.ZPHONE = e.selectedItem.ZPHONE1;
+        this.zcarValue = e.selectedItem.ZCARTYPE1;
+        this.popupData.ZCARTYPE = this.zcarValue
+
+        this.popupData.TDLNR = e.selectedItem.LIFNR;
+        this.tdlnrValue = e.selectedItem.LIFNR;
+        return;
+      }
+    });
+  }
   onKunnrCodeValueChanged(e: any) {
     setTimeout(async () => {
       this.popupData.KUNNR = e.selectedValue;
@@ -535,7 +638,26 @@ export class FORDComponent {
       this.loadingVisible2 = true;
       //유효성점검
       var result = await this.detailDataLoad();
-
+      var info = await this.detailDataLoad();
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+          this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+        }
+        else {
+          this.popupData.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
+        }
+      }
       //if (this.selectData2 === "10" || this.selectData2 === "40")
       //{
       //  if (this.popupData.AUART !== "Z200") { 
@@ -554,32 +676,60 @@ export class FORDComponent {
       //변경시 마다 RFC 2번 조회 (파라미터 중 납품처)
       this.loadingVisible2 = true;
 
-      //block 조건
-      var result = await this.detailDataLoad();
-      if (result.E_RETURN.BLOCK === "X" && result.E_RETURN.AVAILCHECK !== "Y") {     //블락x면 입력불가
-        this.auartFlag2 = true;
-      }
-      else if (result.E_RETURN.UNBLOCK === "X") {  //언블락x면 입력가능
-        this.auartFlag2 = false;
-      }
-      else if (result.E_RETURN.UNBLOCK === "" && this.popupData.REVQTY !== 0) {  //언블락이 공백이고 예약수량이면 예약수량-출고수량만큼 입력가능
-        this.auartFlag2 = false;
-        this.popupData.possible = (this.popupData.REVQTY - this.popupData.ACTQTY)
+      //도착지 -> 출고사업장 
+      var resultModel = await this.dataService.SelectModelData<ZSDT1100Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT1100ModelList", [],
+        `MANDT = '${this.appConfig.mandt}' AND VKORG='1000' AND SPART = '${this.selectData2}' AND KUNNR = '${this.popupData.KUNWE}'`, "", QueryCacheType.None);
+      if (resultModel.length > 0) {
+        this.lgortValue = resultModel[0].LGORT;
+        this.popupData.LGORT = this.lgortValue;
       }
 
-      else if (result.E_RETURN.AVAILCHECK === "Y") {      //점검대상여부가 Y면 예약수량-출고수량 이랑 가용수량 중 더 작은값 이하로 입력가능
-        this.auartFlag2 = false;
-        if ((this.popupData.REVQTY - this.popupData.GIOTY) < this.popupData.AVAILQTY) {
-          this.popupData.possible = this.popupData.REVQTY - this.popupData.GIOTY
+      var info = await this.detailDataLoad();
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+          this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
         }
         else {
-          this.popupData.possible=this.popupData.AVAILQTY
+          this.popupData.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
         }
       }
+      //block 조건
+      //var result = await this.detailDataLoad();
+      //if (result.E_RETURN.BLOCK === "X" && result.E_RETURN.AVAILCHECK !== "Y") {     //블락x면 입력불가
+      //  this.auartFlag2 = true;
+      //}
+      //else if (result.E_RETURN.UNBLOCK === "X") {  //언블락x면 입력가능
+      //  this.auartFlag2 = false;
+      //}
+      //else if (result.E_RETURN.UNBLOCK === "" && this.popupData.REVQTY !== 0) {  //언블락이 공백이고 예약수량이면 예약수량-출고수량만큼 입력가능
+      //  this.auartFlag2 = false;
+      //  this.popupData.possible = (this.popupData.REVQTY - this.popupData.ACTQTY)
+      //}
+
+      //else if (result.E_RETURN.AVAILCHECK === "Y") {      //점검대상여부가 Y면 예약수량-출고수량 이랑 가용수량 중 더 작은값 이하로 입력가능
+      //  this.auartFlag2 = false;
+      //  if ((this.popupData.REVQTY - this.popupData.GIOTY) < this.popupData.AVAILQTY) {
+      //    this.popupData.possible = this.popupData.REVQTY - this.popupData.GIOTY
+      //  }
+      //  else {
+      //    this.popupData.possible=this.popupData.AVAILQTY
+      //  }
+      //}
     });
   }
   onMatnrCodeValueChanged(e: any) {
-    setTimeout(() => {
+    setTimeout(async () => {
       this.popupData.MATNR = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
       //if (this.popupData.MATNR !== "" && this.popupData.AVAILQTY == "") {
@@ -588,6 +738,26 @@ export class FORDComponent {
       //}
       this.loadingVisible2 = true;
       this.detailDataLoad();
+      var info = await this.detailDataLoad();
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+          this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+        }
+        else {
+          this.popupData.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
+        }
+      }
     }); 
   }
 
@@ -595,7 +765,7 @@ export class FORDComponent {
     setTimeout(() => {
       this.popupData.MVGR1 = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
-      this.loadingVisible2 = true;
+
 
     });
   }
@@ -603,7 +773,7 @@ export class FORDComponent {
     setTimeout(() => {
       this.popupData.MVGR2 = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
-      this.loadingVisible2 = true;
+
 
     });
   }
@@ -611,22 +781,42 @@ export class FORDComponent {
     setTimeout(() => {
       this.popupData.MVGR3 = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
-      this.loadingVisible2 = true;
+
 
     });
   }
   onAugruCodeValueChanged(e: any) {
-    setTimeout(() => {
+    setTimeout(async () => {
       this.popupData.AUGRU = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
       this.loadingVisible2 = true;
       this.detailDataLoad();
+      var info = await this.detailDataLoad();
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+          this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+        }
+        else {
+          this.popupData.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
+        }
+      }
     });
   }
 
   onValueChanged(e: any) {
     if (this.selectData2 === "10" || this.selectData2 === "40") {
-      this.popupData.TAXK1 = e.value;
+      this.taxk1 = e.value;
     }
   }
 
@@ -642,9 +832,11 @@ export class FORDComponent {
       this.maktEntery2.ChangeCodeInfo(this.appConfig.tableCode("비료제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
-      this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("비료출고사업장"), "KUNNR", "%NAME1%(%KUNNR%)", "출고사업장")
+      this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("비료출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
       this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "", "%ZCARNO%", "차량")
+      this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "X";
+      this.volume = true;
     }
 
     //화학
@@ -657,8 +849,11 @@ export class FORDComponent {
       this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("액상출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
-      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("화학차량"), "", "%ZCARNO%", "차량")
+      this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("화학화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "";
+      this.volume = false;
+      this.taxk1 = "";
       return;
     }
     //유류
@@ -671,8 +866,11 @@ export class FORDComponent {
       this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("유류출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
-      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("유류차량"), "", "%ZCARNO%", "차량")
+      this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("유류화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "";
+      this.taxk1 = "";
+      this.volume = false;
       return;
     }
 
@@ -687,19 +885,49 @@ export class FORDComponent {
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("친환경출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
       this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "", "%ZCARNO%", "차량")
+      this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "X";
+      this.volume = true;
       return;
     }
   }
 
   onAuartCodeValueChanged(e: any) {
-    setTimeout(() => {
+    setTimeout(async () => {
       this.popupData.AUART = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 주문유형)
       this.loadingVisible2 = true;
       this.detailDataLoad();
-
+      var info = await this.detailDataLoad();
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+          this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+        }
+        else {
+          this.popupData.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
+        }
+      }
       this.augruEntery.ClearSelectedValue();
+      if (this.popupData.AUART === "Z200") {
+        this.incoEntery.ChangeCodeInfo(this.appConfig.commonCode("운송방법"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "운송방법")
+      }
+      else if (this.popupData.AUART === "Z211") {
+        this.incoEntery.ChangeCodeInfo(this.appConfig.commonCode("운송방법"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "운송방법")
+      }
+      else {
+        this.incoEntery.ChangeCodeInfo(this.appConfig.commonCode("농협운송방법"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "운송방법")
+      }
       if (this.popupData.AUART === "Z410") {
         this.autruDisabled = false;
       }
@@ -789,6 +1017,17 @@ export class FORDComponent {
         }
       }
 
+      if (this.selectData2 === "10" || this.selectData2 === "40") {
+        if (e.selectedValue.startsWith('Z1')) {
+          this.taxk1 = "2";
+        }
+        else if (e.selectedValue.startsWith('Z4')) {
+          this.taxk1 = "2";
+        }
+        else {
+          this.taxk1 = "";
+        }
+      }
     }, 100);
   }
   onTvlvCodeValueChanged(e: any) {
@@ -802,11 +1041,31 @@ export class FORDComponent {
     });
   }
   onLgortCodeValueChanged(e: any) {
-    setTimeout(() => {
+    setTimeout(async () => {
       this.popupData.LGORT = e.selectedValue;
       //변경시 마다 RFC 2번 조회 (파라미터 중 저장위치)
       this.loadingVisible2 = true;
       this.detailDataLoad();
+      var info = await this.detailDataLoad();
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+          this.popupData.orderPossible = info.E_RETURN.AVAILQTY;
+        }
+        else {
+          this.popupData.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
+        }
+      }
     });
   }
   onTdlnrCodeValueChanged(e: any) {
@@ -837,6 +1096,11 @@ export class FORDComponent {
   onIncoCodeValueChanged(e: any) {
     setTimeout(() => {
       this.popupData.INCO1 = e.selectedValue;
+      //if (this.selectData2 === "30") {
+      //  if (e.selectedValue === "G00") {
+      //    this.popupData.TDLNR = "자차운송사";
+      //  }
+      //}
     });
   }
 
@@ -876,7 +1140,7 @@ export class FORDComponent {
 
 
     var zsd3013Model = new ZSDS3013Model(selectData[0].KUNNR, selectData[0].KUNWE, this.selectData2, selectData[0].MATNR, selectData[0].AUART, selectData[0].LGORT);
-    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
 
 
     var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
@@ -897,8 +1161,9 @@ export class FORDComponent {
     this.incoValue = allData.INCO1;
     this.lgortValue = allData.LGORT;
     this.tdlnrValue = allData.TDLNR;
-   this.tdlnr2Value = allData.TDLNR2;
+    this.tdlnr2Value = allData.TDLNR2;
     this.zcarValue = allData.ZCARTYPE;
+    this.zcarnoModiValue = selectData[0].ZCARNO;
     this.vsbedValue = allData.VSBED;
     this.mvgr1Value = allData.MVGR1_N;
     this.mvgr2Value = allData.MVGR2_N;
@@ -913,7 +1178,7 @@ export class FORDComponent {
     var selectData = this.popupData;
 
     var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, this.selectData2, selectData.MATNR, selectData.AUART, selectData.LGORT);
-    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
 
     var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
     var zsdList: ZSDEPSOENTRYInfoModel[] = [zsdModel];
@@ -939,9 +1204,9 @@ export class FORDComponent {
   public async createOrder() {
     var data = this.popupData;
     let fixData = { VKORG: "1000", VTWEG: "10",ZLOGFLG: "X", POSNR: "10", WERKS: "1000"/*, TAXK1: "2"*/ };
-    
+    let bstkd = new Date();
     let userInfo = this.authService.getUser().data; // 나중에 고객번호 가져올때 사용(업무포탈도)
-    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, this.selectData2, "", data.AUGRU, "", data.VDATU, new Date, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", this.popupData.TAXK1, "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, this.ZDOFLG, "", "", "", "");
+    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, this.selectData2, "", data.AUGRU, "", data.VDATU, bstkd, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", this.taxk1, "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, this.ZDOFLG, "", "admin", "IF_IMATE", "");
     var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS, data.MVGR1, data.MVGR2, data.MVGR3);
     var zsds6002Model = new ZSDS6002Model(data.TEXT);
 
@@ -972,8 +1237,8 @@ export class FORDComponent {
     if (this.loadePeCount >= 19) {
       this.enteryLoading = true;
       this.loadePeCount = 0;
-      this.enteryLoading = false;
- /*     this.dataLoad();*/
+/*      this.enteryLoading = false;*/
+      this.dataLoad();
 
     }
   }
@@ -1005,7 +1270,6 @@ export class FORDComponent {
     this.popupVisible = !this.popupVisible;
     
     this.clearEntery();
-
   }
 
   public clearEntery() {

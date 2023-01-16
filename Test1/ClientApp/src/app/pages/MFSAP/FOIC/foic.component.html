@@ -1,0 +1,129 @@
+<!--고객주문조회 및 취소-->
+<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate style="float: left; margin-left: 10px; ">
+      <dx-select-box [dataSource]="data2"
+                     displayExpr="name"
+                     valueExpr="code"
+                     [value]="selectData2"
+                     label="제품구분"
+                     labelMode="floating"
+                     (onValueChanged)="onData2ValueChanged($event)"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="startDate" label="납품요청일(From)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="endDate" label="납품요청일(to)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+
+  <dxi-item location="after" [disabled]="deleteButton">
+    <div *dxTemplate>
+      <dx-button text="주문문서삭제" (onClick)="orderDeleteButton($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after" [disabled]="deliveryButton">
+    <div *dxTemplate>
+      <dx-button text="납품문서삭제" (onClick)="deliveryDeleteButton($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after" [disabled]="releaseButton">
+    <div *dxTemplate>
+      <dx-button text="출고문서삭제" (onClick)="releaseDeleteButton($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after">
+    <div *dxTemplate>
+      <dx-button text="조회" (onClick)="searchButton($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+</dx-toolbar>
+
+
+<dx-data-grid id="grid" #deleteGrid
+              [dataSource]="orderData"
+              keyExpr="VBELN"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'single' }"
+              height="calc(100vh - 230px)"
+              [columnAutoWidth]="true"
+              (onContentReady)="contentReady($event)"
+              [allowColumnReordering]="true"
+              columnResizingMode="widget"
+              [loadPanel]="loadPanelOption"
+              [allowColumnResizing]="true"
+              (onSelectionChanged)="selectionChanged($event)">
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+
+  <!--Data column-->
+  <dxi-column dataField="STAT_TXT"
+              caption="상태내역">
+  </dxi-column>
+  <dxi-column dataField="VBELN"
+              caption="주문번호">
+  </dxi-column>
+  <dxi-column dataField="MBLNR"
+              caption="납품번호">
+  </dxi-column>
+  <dxi-column dataField="POSNR_VL"
+              caption="납품품목">
+  </dxi-column>
+  <dxi-column dataField="POSNR"
+              caption="품목번호">
+  </dxi-column>
+  <dxi-column dataField="MATNR"
+              caption="자재번호">
+  </dxi-column>
+  <dxi-column dataField="ARKTX"
+              caption="제품명">
+  </dxi-column>
+  <dxi-column dataField="KUNAG"
+              caption="판매처">
+  </dxi-column>
+  <dxi-column dataField="KUNAG_NM"
+              caption="판매처 명">
+  </dxi-column>
+
+  <dxi-column dataField="KVGR1"
+              caption="고객그룹">
+  </dxi-column>
+  <dxi-column dataField="KWMENG"
+              caption="판매단위">
+  </dxi-column>
+  <dxi-column dataField="NETWR"
+              caption="정가">
+  </dxi-column>
+  <dxi-column dataField="BEZEI"
+              caption="내역">
+  </dxi-column>
+  <dxi-column dataField="PRCTR"
+              caption="손익센터">
+  </dxi-column>
+  <dxi-column dataField="WERKS"
+              caption="플랜트">
+  </dxi-column>
+</dx-data-grid>

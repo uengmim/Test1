@@ -1,0 +1,129 @@
+<!--STO진행현황-->
+<div style="margin:10px 10px 10px 10px">
+  <dx-toolbar style="margin:20px 0px 20px 0px">
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="startDate" type="date" [width]="150" label="주문기간(From)" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="endDate" type="date" [width]="150" label="주문기간(To)" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <nh-possible-table [codeInfo]="lgortInCode" #lgortInCodeDynamic
+                           [dataStoreKey]="dataStoreKey"
+                           valueColumn="LGORT"
+                           valueDisplayFormat="%LGOBE%"
+                           [width]="200"
+                           [gridBoxWidth]="500"
+                           label="입고창고"
+                           (onDataLoaded)="onPEDataLoaded($event)"
+                           [(selectedValue)]="lgortInSelectValue"
+                           [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]"></nh-possible-table>
+        <nbp-validator [adapter]="lgortAdapter">
+          <dxi-validation-rule type="required"></dxi-validation-rule>
+        </nbp-validator>
+      </div>
+    </dxi-item>
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <nh-possible-table [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
+                           [dataStoreKey]="dataStoreKey"
+                           valueColumn="LGORT"
+                           valueDisplayFormat="%LGOBE%"
+                           [width]="200"
+                           [gridBoxWidth]="500"
+                           [(selectedValue)]="lgortOutSelectValue"
+                           label="출고창고"
+                           (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
+      </div>
+    </dxi-item>
+    <dxi-item location="after" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-button text="출고전기취소" (onClick)="cancelDataB($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="after" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-button text="납품문서취소" (onClick)="cancelDataC($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button text="조회" (onClick)="getDataGrid($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dx-toolbar>
+
+  <div>
+    <dx-data-grid id="gridContainer"
+                  [dataSource]="gridDataSource"
+                  [showBorders]="true"
+                  [focusedRowIndex]="0"
+                  [columnAutoWidth]="true"
+                  [selection]="{ mode: 'single' }"
+                  [(selectedRowKeys)]="selectedRows"
+                  (onContentReady)="contentReady($event)"
+                  height="calc(100vh - 230px)"
+                  [allowColumnReordering]="true"
+                  columnResizingMode="widget"
+                  [allowColumnResizing]="true">
+
+      <dxo-paging [enabled]="false"></dxo-paging>
+      <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+      <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+      <dxo-filter-builder [customOperations]="customOperations"
+                          [allowHierarchicalFields]="true">
+      </dxo-filter-builder>
+      <dxo-filter-builder-popup [position]="popupPosition">
+      </dxo-filter-builder-popup>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+      <dxi-column dataField="CAN_STATUS" caption="취소가능여부" type="string" [visible]="false"></dxi-column>
+      <dxi-column dataField="CAN_STATUS_TXT" caption="취소가능여부" type="string"></dxi-column>
+      <dxi-column dataField="ZVBELN1" caption="STO주문번호" type="string"></dxi-column>
+      <dxi-column dataField="EBELN" caption="문서번호" type="string"></dxi-column>
+      <dxi-column dataField="EBELP" caption="품번" type="string"></dxi-column>
+      <dxi-column dataField="BSART" caption="문서유형" type="string"></dxi-column>
+      <dxi-column dataField="ZSTATS" caption="진행상태" type="string"></dxi-column>
+      <dxi-column dataField="LGORT" caption="입고창고" type="string"></dxi-column>
+      <dxi-column dataField="RESLO" caption="출고창고" type="string"></dxi-column>
+      <dxi-column dataField="AEDAT" caption="주문일" dataType="date" format="yyyy-MM-dd"></dxi-column>
+      <dxi-column dataField="EINDT" caption="납품일자" dataType="date" format="yyyy-MM-dd"></dxi-column>
+      <dxi-column dataField="TXZ01" caption="제품/자재명"></dxi-column>
+      <dxi-column dataField="ZMENGE1" caption="주문수량" dataType="number" format="#,###"></dxi-column>
+      <dxi-column dataField="ZMENGE2" caption="납품수량" dataType="number" format="#,###"></dxi-column>
+      <dxi-column dataField="ZMENGE3" caption="출고수량" dataType="number" format="#,###"></dxi-column>
+      <dxi-column dataField="ZTRANSITQTY" caption="운송중수량" dataType="number" format="#,###"></dxi-column>
+      <dxi-column dataField="NAME1" caption="도착회사" type="string"></dxi-column>
+      <dxi-column dataField="CITY1" caption="도착도시" type="string"></dxi-column>
+      <dxi-column dataField="STREET" caption="도착주소" type="string"></dxi-column>
+      <dxi-column dataField="ZSHIPMENT_NO" caption="배차번호" type="string"></dxi-column>
+      <dxi-column dataField="ZCARNO" caption="차량번호" type="string"></dxi-column>
+      <dxi-column dataField="ZDRIVER" caption="운전기사명" type="string"></dxi-column>
+
+      <dxo-search-panel [visible]="true"></dxo-search-panel>
+      <dxo-group-panel [visible]="true"></dxo-group-panel>
+      <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    </dx-data-grid>
+  </div>
+ </div>
+  <!-- 로딩 패널-->
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>
+
+
+
+
+
+
+

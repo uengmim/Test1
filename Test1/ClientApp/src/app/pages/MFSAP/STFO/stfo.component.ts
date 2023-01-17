@@ -84,15 +84,15 @@ export class STFOComponent {
   matnrCode: TableCodeInfo;
   inco1Code: TableCodeInfo;
   tdlnr1Code: TableCodeInfo;
-  tdlnr2Code: TableCodeInfo;
+  //tdlnr2Code: TableCodeInfo;
   sublgortOutCode: TableCodeInfo;
   stockTypeCode: TableCodeInfo;
   /*cancelCode: TableCodeInfo;*/
   palletTypeCode: TableCodeInfo;
-  truckTypeCode: TableCodeInfo;
+  //truckTypeCode: TableCodeInfo;
   unloadInfoCode: TableCodeInfo;
   zvkausCode: TableCodeInfo;
-  zcarnoCode: TableCodeInfo
+  //zcarnoCode: TableCodeInfo
 
   //파서블엔트리 선택값
   lgortInValue: string | null = "";
@@ -192,15 +192,15 @@ export class STFOComponent {
     this.matnrCode = appConfig.tableCode("비료제품명");
     this.inco1Code = appConfig.tableCode("인코텀스");
     this.tdlnr1Code = appConfig.tableCode("운송업체");
-    this.tdlnr2Code = appConfig.tableCode("운송업체");
+    /*this.tdlnr2Code = appConfig.tableCode("운송업체");*/
     this.sublgortOutCode = appConfig.tableCode("비료창고");
     this.stockTypeCode = appConfig.tableCode("RFC_재고유형");
     /*this.cancelCode = appConfig.tableCode("RFC_취소코드");*/
     this.palletTypeCode = appConfig.tableCode("RFC_파레트유형");
-    this.truckTypeCode = appConfig.tableCode("RFC_화물차종");
+    /*this.truckTypeCode = appConfig.tableCode("RFC_화물차종");*/
     this.unloadInfoCode = appConfig.tableCode("RFC_하차정보");
     this.zvkausCode = appConfig.tableCode("RFC_용도");
-    this.zcarnoCode = appConfig.tableCode("비료차량");
+    /*this.zcarnoCode = appConfig.tableCode("비료차량");*/
 
     let codeInfos = [
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgortInCode),
@@ -211,14 +211,14 @@ export class STFOComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.inco1Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr1Code),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr2Code),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr2Code),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.sublgortOutCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.stockTypeCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.palletTypeCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.truckTypeCode),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.truckTypeCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.unloadInfoCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zvkausCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoCode)
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoCode)*/
     ];
 
     PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
@@ -481,15 +481,15 @@ export class STFOComponent {
     this.matnrCodeDynamic.ClearSelectedValue();
     this.inco1CodeDynamic.ClearSelectedValue();
     this.tdlnr1CodeDynamic.ClearSelectedValue();
-    this.tdlnr2CodeDynamic.ClearSelectedValue();
+    //this.tdlnr2CodeDynamic.ClearSelectedValue();
     this.sublgortOutCodeDynamic.ClearSelectedValue();
     this.stockTypeCodeDynamic.ClearSelectedValue();
     /*this.cancelCodeDynamic.ClearSelectedValue();*/
     this.palletTypeCodeDynamic.ClearSelectedValue();
-    this.truckTypeCodeDynamic.ClearSelectedValue();
+    //this.truckTypeCodeDynamic.ClearSelectedValue();
     this.unloadInfoCodeDynamic.ClearSelectedValue();
     this.zvkausCodeDynamic.ClearSelectedValue();
-    this.zcarnoCodeEntery.ClearSelectedValue();
+    //this.zcarnoCodeEntery.ClearSelectedValue();
   }
 
   //주문등록
@@ -564,11 +564,11 @@ export class STFOComponent {
    */
   onPEDataLoaded(e: any) {
     this.loadePeCount++;
-    if (this.loadePeCount >= 15)
+    if (this.loadePeCount >= 12)
       this.loadingVisible = false;
 
-    if (e.component.popupTitle === "화물차종")
-      this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "A"]);
+    //if (e.component.popupTitle === "화물차종")
+    //  this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "A"]);
   }
 
   //STO주문목록 조회

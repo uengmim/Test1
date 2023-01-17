@@ -244,13 +244,22 @@ export class STGRComponent {
          var sendDataModel = new ZMMSTOGrModel(new ZMMS9000Model("",""), sendData);
          var sendDataList: ZMMSTOGrModel[] = [sendDataModel];
          var result = await this.dataService.RefcCallUsingModel<ZMMSTOGrModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMSTOGrModelList", sendDataList, QueryCacheType.None);
-         result[0].CT_LIST.forEach((array : any) => {
+
+         this.gridDataSource = new ArrayStore(
+           {
+             key: ["EBELN", "VBELN_ST"],
+             data: result[0].CT_LIST
+           });
+
+         alert(`입고처리가 완료되었습니다. 메세지와 상태를 확인해주세요.`, "알림");
+
+         /*result[0].CT_LIST.forEach((array : any) => {
            if (array.TYPE === "E") {
              alert(`${array.VBELN_ST}오류 : ${array.MESSAGE}`, "입고실패");
            } else {
              alert(`${array.VBELN_ST} : ${array.MESSAGE}`, "입고성공");
            }
-         });
+         });*/
 
        }
     } else {

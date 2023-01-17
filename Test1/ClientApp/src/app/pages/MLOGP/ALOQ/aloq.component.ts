@@ -26,6 +26,7 @@ import { ZSDS6410Model, ZSDIFPORTALSAPLE028SndModel } from '../../../shared/data
 import { ZSDS6420Model, ZSDIFPORTALSAPLE028RcvModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Rcv';
 import { alert, confirm } from "devextreme/ui/dialog";
 import dxTextBox from 'devextreme/ui/text_box';
+import { ZMMT1320Model } from '../../../shared/dataModel/OWHP/Zmmt1320Proxy';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -174,7 +175,7 @@ export class ALOQComponent {
       text: "검색",
       onClick: async () => {
         this.loadPanelOption = { enabled: true };
-        this.dataLoad();
+        this.dataLoad(that);
       },
     };
     //등록버튼
@@ -219,7 +220,7 @@ export class ALOQComponent {
             } else {
               alert("2차운송사 정보가 저장되었습니다.", "알림");
               this.loadPanelOption = { enabled: true };
-              this.dataLoad();
+              this.dataLoad(that);
             }
           } else {
             alert("2차운송사 정보를 저장행을 선택하세요.", "알림");
@@ -262,20 +263,30 @@ export class ALOQComponent {
 
 
   //첫화면 데이터 조회 RFC
-  public async dataLoad() {
+  public async dataLoad(thisObj:ALOQComponent) {
+    
     let fixData = { I_ZSHIPSTATUS: "10" };
-    var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, this.vbelnText.value, this.vgpostText.value, this.vsSelect.value, "", "", "", fixData.I_ZSHIPSTATUS, []);
 
-    var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+    if (this.vsSelect.value === "9999") {
+      var queryModel = await this.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
+        [thisObj.appConfig.mandt, thisObj.startDate, thisObj.endDate, fixData.I_ZSHIPSTATUS],
+        "", "A.VBELN", QueryCacheType.None);
 
-    var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
-    this.orderList = resultModel[0].IT_DATA;
-    this.orderData = new ArrayStore(
-      {
-        key: ["VBELN", "POSNR"],
-        data: resultModel[0].IT_DATA
-      });
 
+    } else {
+
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, this.vbelnText.value, this.vgpostText.value, this.vsSelect.value, "", "", "", fixData.I_ZSHIPSTATUS, []);
+
+      var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+
+      var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
+      this.orderList = resultModel[0].IT_DATA;
+      this.orderData = new ArrayStore(
+        {
+          key: ["VBELN", "POSNR"],
+          data: resultModel[0].IT_DATA
+        });
+    }
 
 
     this.loadingVisible = false;
@@ -286,9 +297,12 @@ export class ALOQComponent {
     var zsd6420list: ZSDS6420Model[] = [];
 
     this.orderGrid.instance.getSelectedRowsData().forEach((array: any) => {
+      var ship_date = array.ZSHIPMENT_DATE;
+      if (ship_date === null || ship_date === undefined)
+        ship_date = new Date("9999-12-31");
       zsd6420list.push(new ZSDS6420Model(array.VBELN, array.POSNR, array.ZSEQUENCY, array.VRKME, array.ZMENGE4, array.ZMENG3, new Date("9999-12-31"), array.Z3PARVW, array.Z4PARVW,
                       array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1, array.ZVKAUS, array.ZUNLOAD, array.ZSHIPSTATUS, array.ZSHIPMENT_NO,
-                      array.ZSHIPMENT_DATE, array.ZPALLTP, array.ZPALLETQTY, array.ZCONFIRM_CUT, array.ZTEXT, array.MTY, array.MSG));
+                      ship_date, array.ZPALLTP, array.ZPALLETQTY, array.ZCONFIRM_CUT, array.ZTEXT, array.MTY, array.MSG));
     });
 
     var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
@@ -313,7 +327,7 @@ export class ALOQComponent {
       this.enteryLoading = true;
       this.loadePeCount = 0;
       this.vsSelect.instance.option("value", "1000");
-      this.dataLoad();
+      this.dataLoad(this);
 
     }
   }

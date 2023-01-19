@@ -78,23 +78,23 @@
 
 
   <!--Data column-->
-  <dxi-column dataField="VBELN"
+  <dxi-column dataField="VBELN" [fixed]="true" fixedPosition="left"
               visibleIndex="0"
               caption="납품문서번호">
   </dxi-column>
 
-  <dxi-column dataField="POSNR"
+  <dxi-column dataField="POSNR" [fixed]="true" fixedPosition="left"
               visibleIndex="1"
               caption="납품품번">
   </dxi-column>
-  <dxi-column dataField="ZSEQUENCY"
+  <dxi-column dataField="ZSEQUENCY" [fixed]="true" fixedPosition="left"
               visibleIndex="2"
               caption="납품분할순번">
   </dxi-column>
-  <dxi-column dataField="VGBEL"
+  <dxi-column dataField="VGBEL" [fixed]="true" fixedPosition="left"
               caption="주문번호">
   </dxi-column>
-  <dxi-column dataField="VGPOS"
+  <dxi-column dataField="VGPOS" [fixed]="true" fixedPosition="left"
               caption="주문품번">
   </dxi-column>
   <dxi-column dataField="TDDAT"
@@ -173,8 +173,8 @@
 
 
 <!--출고처리-->
-<dx-popup width="80%"
-          height="80%"
+<dx-popup width="90%"
+          height="90%"
           [showTitle]="true"
           title="출고"
           [dragEnabled]="false"
@@ -282,7 +282,7 @@
                 </dxi-item>
 
                 <dxi-item itemType="group" [colCount]="4">
-                  <dxi-item dataField="ZUNLOAD">
+                  <!--<dxi-item dataField="ZUNLOAD">
                     <dxo-label text="하차정보"></dxo-label>
                     <div *dxTemplate>
                       <nh-possible-table [codeInfo]="unloadInfoCode" #unloadInfoCodeDynamic
@@ -296,7 +296,7 @@
                                          (onDataLoaded)="onPEDataLoaded($event)"
                                          (onEntryValueChanged)="onzunloadCodeValueChanged($event)"></nh-possible-table>
                     </div>
-                  </dxi-item>
+                  </dxi-item>-->
                   <dxi-item dataField="ZCARTYPE">
                     <dxo-label text="화물차종"></dxo-label>
                     <div *dxTemplate>

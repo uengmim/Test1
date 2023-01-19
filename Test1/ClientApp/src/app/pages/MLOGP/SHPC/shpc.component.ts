@@ -186,9 +186,8 @@ export class SHPCComponent {
     this.cSpart = service.getCSpart();
 
     //파서블엔트리 초기화
-    this.matnrCode = appConfig.tableCode("아이템코드");
     this.unloadInfoCode = appConfig.tableCode("하차정보");
-    this.truckTypeCode = appConfig.tableCode("화물차종");
+    this.truckTypeCode = appConfig.tableCode("RFC_화물차종");
     this.tdlnrCode = appConfig.tableCode("운송업체");
 
     this.popTabIndex = 0;
@@ -292,8 +291,6 @@ export class SHPCComponent {
   //화학, 유류 구분
   onCSpartValueChanged(e: any) {
     setTimeout(() => {
-      this.loadingVisible = true;
-
       this.selectCSpart = e.value;
 
       if (this.selectCSpart === "20") {
@@ -309,7 +306,7 @@ export class SHPCComponent {
         this.isPopVisible = false;
         
       }
-    });
+    }, 100);
   }
 
   selectedChanged(e: any) {
@@ -355,20 +352,34 @@ export class SHPCComponent {
     var oilDepotData = thisObj.popOilDepotData;
     var model: ZSDIFPORTALSAPGIYCLIQRcvModel[] = [];
 
-    if (selectData[0].VSBED === "Z4") {
-      await alert("온도기준 출고수량은 정산량으로 설정됩니다.", "알림");
-      GIData.ZMENGE3 = GIData.Z_N_WEI_NET;
-    }
-
     if (GIData.ZMENGE3 === 0) {
       model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고수량입력은 필수입니다.", "E"));
       return model[0];
+    }
+
+    if (GIData.WADAT_IST === null) {
+      model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고전기일자는 필수입니다.", "E"));
+      return model[0];
+    }
+
+    if (GIData.ZSHIPMENT_DATE === null) {
+      model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("배차일자는 필수입니다.", "E"));
+      return model[0];
+    }
+
+    this.loadingVisible = false;
+
+    if (selectData[0].VSBED === "Z4") {
+      await alert("온도기준 출고수량은 정산량으로 설정됩니다.", "알림");
+      GIData.ZMENGE3 = GIData.Z_N_WEI_NET;
     }
       
     //if (GIData.ZMENGE3 > selectData[0].ZMENGE3) {
     //  model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고수량은 납품수량을 넘을 수 없습니다.", "E"));
     //  return model[0];
     //}
+
+    this.loadingVisible = true;
 
     var rfcOilModel: ZSDT6460Model = new ZSDT6460Model(thisObj.appConfig.mandt, GIData.VBELN, GIData.POSNR, GIData.ZSHIPMENT_NO, GIData.ZCARNO, GIData.KUNAG, GIData.VRKME,
       "", 0, 0, 0, "00000", "00000",
@@ -480,6 +491,8 @@ export class SHPCComponent {
 
     model = [new ZSDIFPORTALSAPGIYCLIQRcvModel("", "", [GIData], [rfcOilModel])];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPGIYCLIQRcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPGIYCLIQRcvModelList", model, QueryCacheType.None);
+    this.loadingVisible = false;
+
     return resultModel[0];
   }
 
@@ -651,7 +664,7 @@ export class SHPCComponent {
 
   //팝업화면에 사용되는 엔트리 초기화
   public clearEntery() {
-    this.unloadInfoCodeDynamic.ClearSelectedValue()
+    /*this.unloadInfoCodeDynamic.ClearSelectedValue()*/
     this.matnrCodeDynamic.ClearSelectedValue();
     this.truckTypeCodeDynamic.ClearSelectedValue();
     this.tdlnrCodeDynamic.ClearSelectedValue();

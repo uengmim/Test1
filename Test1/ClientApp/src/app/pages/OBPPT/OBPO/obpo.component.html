@@ -100,28 +100,28 @@
                 columnResizingMode="widget"
                 [allowColumnResizing]="true">
     <dxo-scrolling mode="infinite"></dxo-scrolling>
-
+    <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
     <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
 
 
 
     <!--Data column-->
-    <dxi-column dataField="AEDAT" dataType="date" format="yyyy-MM-dd"
+    <dxi-column dataField="AEDAT" dataType="date" format="yyyy-MM-dd" [fixed]="true"
                 caption="PO일자">
     </dxi-column>
-    <dxi-column dataField="EBELN"
+    <dxi-column dataField="EBELN" [fixed]="true"
                 caption="PO번호">
     </dxi-column>
-    <dxi-column dataField="EBELP"
+    <dxi-column dataField="EBELP" [fixed]="true"
                 caption="PO항번">
     </dxi-column>
-    <dxi-column dataField="ZZCONTRACT_NO"
+    <dxi-column dataField="ZZCONTRACT_NO" [fixed]="true"
                 caption="계약번호">
     </dxi-column>
-    <dxi-column dataField="ZZCONTRACT_ITEM"
+    <dxi-column dataField="ZZCONTRACT_ITEM" [fixed]="true"
                 caption="계약항번">
     </dxi-column>
-    <dxi-column dataField="CONNM"
+    <dxi-column dataField="CONNM" [fixed]="true"
                 caption="계약명">
     </dxi-column>
     <dxi-column dataField="LABNR" dataType="date" format="yyyy-MM-dd"
@@ -134,10 +134,10 @@
                 caption="품명">
     </dxi-column>
     <dxi-column dataField="MENGE"
-                caption="발주수량">
+                caption="발주수량" format="#,###">
     </dxi-column>
     <dxi-column dataField="NETPR"
-                caption="단가">
+                caption="단가" format="#,###" dataType="number">
     </dxi-column>
     <dxi-column dataField="WAERS"
                 caption="통화">
@@ -146,7 +146,7 @@
                 caption="납품일자">
     </dxi-column>
     <dxi-column dataField="ZAMT"
-                caption="발주금액">
+                caption="발주금액" format="#,###" dataType="number">
     </dxi-column>
     <dxi-column dataField="LGORT"
                 caption="저장위치">
@@ -167,7 +167,7 @@
                 caption="납품장소">
     </dxi-column>
     <dxi-column dataField="WEMNG"
-                caption="납품수량">
+                caption="납품수량" format="#,###" dataType="number">
     </dxi-column>
     <dxi-column dataField="ZSPEC_LONG"
                 caption="스펙">

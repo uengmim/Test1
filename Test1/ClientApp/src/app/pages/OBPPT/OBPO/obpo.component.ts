@@ -52,6 +52,7 @@ export class OBPOComponent {
     this.comNm = this.userInfo?.deptName ?? "";
     this.name = this.userInfo?.userName ?? "";
 
+
     // 접수구분 콤보박스 세팅
 
     this.ynList = service.getYnGubun();
@@ -70,21 +71,31 @@ export class OBPOComponent {
     var selectData = this.poGrid.instance.getSelectedRowsData();
 
     if (selectData.length > 0) {
-      var model = new ZMMPOCHANGEConfirmModel(new ZMMS0170Model(selectData[0].EBELN, formatDate(new Date(), "yyyyMMdd", "en-US")), []);
-      var modelList: ZMMPOCHANGEConfirmModel[] = [model];
+      if (await confirm("발주확인하시겠습니까 ?", "알림")) {
+        var model = new ZMMPOCHANGEConfirmModel(new ZMMS0170Model(selectData[0].EBELN, formatDate(new Date(), "yyyyMMdd", "en-US")), []);
+        var modelList: ZMMPOCHANGEConfirmModel[] = [model];
 
-      var resultModel = await this.dataService.RefcCallUsingModel<ZMMPOCHANGEConfirmModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMPOCHANGEConfirmModelList", modelList, QueryCacheType.None);
+        var resultModel = await this.dataService.RefcCallUsingModel<ZMMPOCHANGEConfirmModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMPOCHANGEConfirmModelList", modelList, QueryCacheType.None);
+        var count = 0;
+        var message = "";
 
-      if (resultModel[0].ET_RETURN[0].TYPE === "E") {
-        alert(resultModel[0].ET_RETURN[0].MESSAGE, "알림");
-      }
-      else {
-        alert("발주확인이 완료되었습니다.", "알림");
-        this.dataLoad();
+        resultModel[0].ET_RETURN.forEach((array: any) => {
+          if (array.TYPE == "E") {
+            message = array.MESSAGE;
+            return;
+          }
+        });
+        if (message.length > 0) {
+          alert(`${message}`, "오류");
+        }
+        else {
+          alert("발주확인이 완료되었습니다.", "알림");
+          this.dataLoad();
+        }
       }
     }
     else {
-      alert("저장할 행이 선택되지 않았습니다.", "알림");
+      alert("발주확인 데이터가 선택되지 않았습니다.", "알림");
     }
   }
   cancelData(e: any) {
@@ -106,7 +117,13 @@ export class OBPOComponent {
         key: ["EBELN", "EBELP"],
         data: resultModel[0].ET_DATA
       });
-
+    /*
+    this.poData = new ArrayStore(
+      {
+        key: ["EBELN", "EBELP"],
+        data: [{ AEDAT  : '2022-12-08', EBELN :"2200224500" , EBELP : "00020" , ZZCONTRACT_NO : "2202555124", ZZCONTRACT : "001", CONNM : "공고명 11111", LABNR : '', MATNR : "A00010", TXZ01 : "테스트자재", "MENGE" : 20, NETPR : "5000", WAERS : "KRW", ZAMT : "2500000"}]
+      });
+      */
   }
 
   selectApply(e: any) {

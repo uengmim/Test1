@@ -26,6 +26,8 @@ import { ZMMT8360Model } from '../../../shared/dataModel/OBPPT/Zmmt8360';
 import { ZMMT8370Model } from '../../../shared/dataModel/OBPPT/Zmmt8370';
 import { ZMMT8320Model } from '../../../shared/dataModel/OBPPT/Zmmt8320';
 import { ZMMT8500Model } from '../../../shared/dataModel/OBPPT/Zmmt8500';
+import { ZMMT8300Model } from '../../../shared/dataModel/OBPPT/Zmmt8300';
+
 import { EbanModel } from '../../../shared/dataModel/OBPPT/Eban';
 import { ZMMTDETAILModel } from '../../../shared/dataModel/OBPPT/ZmmtDetail';
 
@@ -114,6 +116,7 @@ export class OBBDComponent {
 
   // 선택값
   selectGridData: ZMMS8030Model[] = [];
+  selectANDTHData: any;
   //팝업 선택값
   popupGridData: ZMMS8020Model[] = [];
   //상세폼
@@ -214,8 +217,9 @@ export class OBBDComponent {
   RFQSEQdata: string = "";
   _dataService: ImateDataService;
   dataSource: any;
-
+  zmmt8500!: ZMMT8500Model;
   formData: any = {};
+  estimateDeleteSelectedData: any;
 
   //로딩
   loading = false;
@@ -290,11 +294,7 @@ export class OBBDComponent {
 
 
     this.imInfo = imInfo;
-    //취급업종
-    this.categorydataSource = new ArrayStore({
-      data: service.getcategory(),
-      key: 'Id',
-    });
+  
     //질문 코드
     this.PrgstatusCode = appConfig.commonCode("공고진행상태");
     this.BusinessCategoryCode = appConfig.tableCode("취급업종");
@@ -337,8 +337,8 @@ export class OBBDComponent {
       text: '엑셀 다운',
       onClick(e: any, thisObj: OBBDComponent) {
         that.estimateDataGrid.export.enabled = true;
-        that.estimateDataGrid.export.fileName = 'Report';
-        that.estimateDataGrid.instance.exportToExcel(false);
+        //that.estimateDataGrid.export.fileName = 'Report';
+        //that.estimateDataGrid.instance.exportToExcel(false);
       },
     };
     //팝업 닫기 버튼
@@ -368,39 +368,87 @@ export class OBBDComponent {
       useSubmitBehavior: true,
       onClick: async (e: any) => {
         var value = this.chkgbox.value;
+        var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
+        let userInfo = this.authService.getUser().data;
+        var lifnr = userInfo?.deptId ?? "";
+        var result8300Model = await this.dataService.SelectModelData<ZMMT8300Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8300ModelList", [],
+          `MANDT = '${this.appConfig.mandt}' AND BIDNO  = '${bidno}' `, "", QueryCacheType.None);
+        var result8500Model = await this.dataService.SelectModelData<ZMMT8500Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8500ModelList", [],
+          `MANDT = '${this.appConfig.mandt}' AND LIFNR  = '${lifnr}' `, "", QueryCacheType.None);
+        var biddingData = result8500Model;
+        var data8300 = result8300Model;
+        let nowDate = formatDate(new Date(), "yyyyMMdd", "en-US")
+        let nowTime = formatDate(new Date(), "HHmmss", "en-US")
+        let qradthDate = formatDate(data8300[0].QTADTH, "yyyyMMdd", "en-US")
+        let qradttDate = data8300[0].QTADTT.replace(/:/g, '');
+        if (biddingData.length > 0) {
+          alert("이미 신청된 입찰 내역이 있습니다.", "알림");
+        } else { 
+          if (await confirm("입찰신청하시겠습니까?", "알림")) {
 
-        if (await confirm("입찰신청하시겠습니까?", "알림")) {
-
-          this.loadingVisible = true;
-          if (this.biddingDetailFormData.INSTXT == "") {
-            alert("보증금 내역을 입력해주세요.", "알림");
-          }
-          else if (this.biddingDetailFormData.INSAMT == "") {
-            alert("보증금액을 입력해주세요.", "알림");
-            return;
-          }
-          else if (this.biddingDetailFormData.INSTY == "") {
-            alert("보증방법을 입력해주세요.", "알림");
-            return;
-          }
-          else if (this.biddingDetailFormData.INSCMY == "") {
-            alert("보증회사을 입력해주세요.", "알림");
-            return;
-          }
-          else if (this.biddingDetailFormData.PASSY == "") {
-            alert("납부면제 사유를 입력해주세요.", "알림");
-            return;
-          } else {
-            if (value == true) {
-
-              this.datainsert(this)
-              alert("입찰신청이 되었습니다.", "알림");
-
-            } else {
-              alert("동의를 눌러주세요.", "알림");
-
+            this.loadingVisible = true;
+            if (this.biddingDetailFormData.INSTXT == "") {
+              alert("보증금 내역을 입력해주세요.", "알림");
             }
+            else if (this.biddingDetailFormData.INSAMT == "") {
+              alert("보증금액을 입력해주세요.", "알림");
+              return;
+            }
+            else if (this.biddingDetailFormData.INSTY == "") {
+              alert("보증방법을 입력해주세요.", "알림");
+              return;
+            } else {
+              if (value == true) {
+                if (this.biddingDetailFormData.INSTY == "2") {
 
+                  if (this.biddingDetailFormData.INSCMY == null || this.biddingDetailFormData.INSCMY == "") {
+                    alert("이행보증증권일 시 보증 회사를 입력해주세요.", "알림");
+                  } else {
+                    if (parseInt(qradthDate) >= parseInt(nowDate)) {
+                      if (parseInt(qradttDate) > parseInt(nowTime)) {
+                        this.datainsert(this)
+                        alert("입찰신청이 되었습니다.", "알림");
+                      } else {
+                        alert("입찰 마감일시가 지난 공고입니다.", "알림");
+                      }
+                    } else {
+                      alert("입찰 마감일시가 지난 공고입니다.", "알림");
+                    }
+
+                  }
+                } else if (this.biddingDetailFormData.INSTY == "4") {
+                  if (this.biddingDetailFormData.PASSY == null || this.biddingDetailFormData.PASSY == "") {
+                    alert("면제일 시 납부면제 사유를 입력해주세요.", "알림");
+                  } else {
+                    if (parseInt(qradthDate) >= parseInt(nowDate)) {
+                      if (parseInt(qradttDate) > parseInt(nowTime)) {
+                        this.datainsert(this)
+                        alert("입찰신청이 되었습니다.", "알림");
+                      } else {
+                        alert("입찰 마감일시가 지난 공고입니다.", "알림");
+                      }
+                    } else {
+                      alert("입찰 마감일시가 지난 공고입니다.", "알림");
+                    }
+                  }
+
+                } else {
+                  if (parseInt(qradthDate) >= parseInt(nowDate)) {
+                    if (parseInt(qradttDate) > parseInt(nowTime)) {
+                      this.datainsert(this)
+                      alert("입찰신청이 되었습니다.", "알림");
+                    } else {
+                      alert("입찰 마감일시가 지난 공고입니다.", "알림");
+                    }
+                  } else {
+                    alert("입찰 마감일시가 지난 공고입니다.", "알림");
+                  }
+                }
+              } else {
+                alert("동의를 눌러주세요.", "알림");
+                return;
+              }
+            }
           }
           this.loadingVisible = false;
         }
@@ -408,14 +456,22 @@ export class OBBDComponent {
       },
 
     }
+    //견적팝업 삭제 버튼
+    this.estimateDeleteSelectedData = {
+      text: '삭제',
+      onClick: async (e: any) => {
+        this.dataDelete(this.dataService, this);
+        alert("삭제되었습니다.", "알림");
 
+      },
+    };
     //견적팝업 엑셀 버튼
     this.estimateexportSelectedData = {
       text: '엑셀 다운',
       onClick(e: any, thisObj: OBBDComponent) {
         that.biddingDataGrid.export.enabled = true;
-        that.biddingDataGrid.export.fileName = 'Report';
-        that.biddingDataGrid.instance.exportToExcel(false);
+        //that.biddingDataGrid.export.fileName = 'Report';
+        //that.biddingDataGrid.instance.exportToExcel(false);
       },
     };
     //견적팝업 닫기 버튼
@@ -450,7 +506,6 @@ export class OBBDComponent {
 
   }
 
-
   //데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
 
@@ -458,10 +513,12 @@ export class OBBDComponent {
     var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
 
     var userdata = await this.userdata(this.dataService);
+    let userInfo = this.authService.getUser().data;
 
+    var LIFNR = userInfo?.deptId ?? "";
     var zmms9000Model = new ZMMS9000Model("", "");
     //진행상태가 2번이어야지만 가능
-    var zmmbidmstModel = new ZMMBIDMstModel(zmms9000Model, this.startDate, this.endDate, "2", userdata.LIFNR, [], []);
+    var zmmbidmstModel = new ZMMBIDMstModel(zmms9000Model, this.startDate, this.endDate, "2", LIFNR, [], []);
 
     var modelList: ZMMBIDMstModel[] = [zmmbidmstModel];
 
@@ -503,13 +560,13 @@ export class OBBDComponent {
     var lifnr = userInfo?.deptId ?? "";
 
     var resultModel = await dataService.SelectModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
-      `BIDNO = '${bidno}' AND LIFNR =  '${lifnr}'`, "RFQSEQ DESC", QueryCacheType.None);
+      `MANDT = '${thisObj.appConfig.mandt}' AND  BIDNO = '${bidno}' AND LIFNR =  '${lifnr}'`, "RFQSEQ DESC", QueryCacheType.None);
 
     return resultModel;
 
   }
 
-  // 8370 견적 로드
+  // 상세 8370 견적 로드
   public async datagridLoad(dataService: ImateDataService, thisObj: OBBDComponent) {
 
 
@@ -518,7 +575,7 @@ export class OBBDComponent {
     var lifnr = userInfo?.deptId ?? "";
 
     var resultModel = await dataService.SelectModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", [],
-      `BIDNO = '${bidno}' AND LIFNR =  '${lifnr}'`, "", QueryCacheType.None);
+      `MANDT = '${thisObj.appConfig.mandt}' AND  BIDNO = '${bidno}' AND LIFNR =  '${lifnr}'`, "", QueryCacheType.None);
 
     return resultModel;
 
@@ -538,7 +595,7 @@ export class OBBDComponent {
 
   }
 
-  // 8370 견적 로드
+  // 입찰 8370 견적 로드
   public async biddingdatagridLoad(dataService: ImateDataService, thisObj: OBBDComponent) {
 
 
@@ -553,7 +610,6 @@ export class OBBDComponent {
 
   }
 
-
   // 데이터 저장
   public async datainsert(thisObj: OBBDComponent) {
     try {
@@ -563,13 +619,14 @@ export class OBBDComponent {
       var bidno = thisObj.detailFormData.BIDNO.padStart(15, '0');
       var bizno = userInfo?.pin ?? ""
       let now = new Date();
+      let nowTime = formatDate(new Date(), 'HH:mm:ss', "en-US");
       let minDate = new Date("0001-01-01");
-      let nowTime = formatDate(new Date(), "HHmmss", "en-US");
 
+      var waers = userInfo?.empId ?? "";
       var insertData = thisObj.biddingDetailFormData as ZMMT8500Model;
 
-      var maininsertData = new ZMMT8500Model(this.appConfig.mandt, bidno, lifnr, bizno, insertData.INSTXT, insertData.INSAMT, "", insertData.INSTY, insertData.INSCMY,
-        insertData.PASSY, minDate, nowTime, "", "", minDate, "", "", this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add);
+      var maininsertData = new ZMMT8500Model(this.appConfig.mandt, bidno, lifnr, bizno, insertData.INSTXT, insertData.INSAMT /100, waers, insertData.INSTY, insertData.INSCMY,
+        insertData.PASSY, now, nowTime, "", "", minDate, "", "", this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add);
       insertData.ModelStatus = DIMModelStatus.Add;
 
       var modelList: ZMMT8500Model[] = [maininsertData];
@@ -581,6 +638,340 @@ export class OBBDComponent {
     }
   }
 
+  //데이터 삭제
+  public async dataDelete(dataService: ImateDataService, thisObj: OBBDComponent) {
+    let userInfo = this.authService.getUser().data;
+
+    var bidno = thisObj.detailFormData.BIDNO.padStart(15, '0');
+    var lifnr = userInfo?.deptId ?? "";
+
+    //해당 공고의 마지막 견적을 선택
+    var select8500Result = await dataService.SelectModelData<ZMMT8500Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8500ModelList", [],
+      `MANDT = '${thisObj.appConfig.mandt}' AND BIDNO = '${bidno}' AND LIFNR = '${lifnr}'`, "", QueryCacheType.None);
+
+
+    if (select8500Result.length == 0) {
+      alert("삭제할 데이터가 없습니다.", "알림");
+    } else {
+      // 견적결과가 빈값이 아니라면 , 삭제 X
+      if (select8500Result[0].BIDRST !== "") {
+        alert("신청결과가 나온 것은 삭제할 수 없습니다.", "알림");
+      }
+      //견적 결과가 빈값이면 , 삭제
+      else {
+        if (select8500Result[0].ZAPPDTH == null) {
+          select8500Result[0].ZAPPDTH = new Date("0001-01-01");
+          this.zmmt8500 = select8500Result[0];
+          this.zmmt8500.ModelStatus = DIMModelStatus.Delete;
+        }
+
+      }
+    }
+    var model8500List: ZMMT8500Model[] = [thisObj.zmmt8500];
+
+    this.rowCount = await this.dataService.ModifyModelData<ZMMT8500Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8500ModelList", model8500List);
+
+
+    this.biddingDetailFormData.resetValues();
+
+  }
+
+  //zmmt8320 업체
+  public async userdetaildata(dataService: ImateDataService, thisObj: OBBDComponent) {
+
+    let userInfo = this.authService.getUser().data;
+
+    var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
+    var lifnr = userInfo?.deptId ?? ""
+    var bizno = userInfo?.pin ?? ""
+
+    var companyData = await dataService.SelectModelData<ZMMT8320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8320ModelList", [],
+      `BIDNO = '${bidno}' AND LIFNR = '${lifnr}' AND BIZNO ='${bizno}' `, "", QueryCacheType.None);
+
+    return companyData[0];
+  }
+
+
+  //상세내용
+  DetailData: any = async (thisObj: OBBDComponent) => {
+    try {
+      this.selectedItemKeys.forEach(async (key: any) => {
+
+        this.loadingVisible = true;
+        var userInfo = this.authService.getUser().data;
+
+        this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+
+        this.estimateFormData = this.selectGridData[0];
+        //사업자등록번호, 회사명
+        this.estimateFormData = Object.assign(this.estimateFormData, { BIZNO: userInfo?.pin, NAME1: userInfo?.deptName });
+
+        var result8360Model = await this.formdataLoad(this.dataService, this);
+        var result8370Model = await this.datagridLoad(this.dataService, this);
+        var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+
+        //상세내용 8360 파트
+        this.estimateDetailFormData = Object.assign({
+          GRETD: result8360Model[0].GRETD, PAYTY: result8360Model[0].PAYTY, RFQSEQ: result8360Model[0].RFQSEQ,
+          RFQCST: result8360Model[0].RFQCST, RFQVAT: result8360Model[0].RFQVAT, RFQAMT: result8360Model[0].RFQAMT
+        });
+        //디테일 데이터
+        result8370Model.forEach((array: any) => {
+          var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+          if (resultData != undefined) {
+            Object.assign(array, {
+              MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
+              MEINS: resultData.MEINS
+            });
+          }
+        });
+        this.estpopupData = new ArrayStore(
+          {
+            key: ["BIDNO"],
+            data: result8370Model
+          });
+
+
+        var data: Array<any> = this.estpopupData._array;
+
+        data.forEach(async (array: any) => {
+
+          var MENGEdata = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+          if (MENGEdata != undefined) {
+            if (this.estimateFormData.BIDRUL == "A") {
+              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+              array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+            }
+
+            else {
+              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+              if (this.estimateFormData.VATTY == "OUT") {
+                array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+              } else {
+                array.RFQVAT = "0"
+              }
+              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+            }
+          }
+          this.loadingVisible = false;
+
+        });
+
+      });
+
+      this.estimatepopupVisible = !this.estimatepopupVisible;
+    } catch (error) {
+      alert("error", "알림");
+    }
+
+  }
+
+  //입찰
+  Bidding: any = async (thisObj: OBBDComponent) => {
+    var company = await this.userdetaildata(this.dataService, this);
+    var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
+    //8300데이터 가져오기
+    var result8300Model = await this.dataService.SelectModelData<ZMMT8300Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8300ModelList", [],
+      `MANDT = '${this.appConfig.mandt}' AND BIDNO  = '${bidno}' `, "", QueryCacheType.None);
+
+    var data8300 = result8300Model;
+    //현재날짜 문자열 변환
+    let nowDate = formatDate(new Date(), "yyyyMMdd", "en-US")
+    //현재시간 문자열 변환
+    let nowTime = formatDate(new Date(), "HHmmss", "en-US")
+    //입찰신청마감날짜 문자열 변환
+    let qradthDate = formatDate(data8300[0].QTADTH, "yyyyMMdd", "en-US")
+    //입찰신청마감시간 : 제거
+    let qradttDate = data8300[0].QTADTT.replace(/:/g, '');
+    //입찰신청마감 날짜가 현재 날짜보다 남았을 때
+    if (parseInt(qradthDate) >= parseInt(nowDate)) {
+      //입찰신청마감 시간이 현재 시간보다 남았을 때
+      if (parseInt(qradttDate) > parseInt(nowTime)) {
+
+        this.selectedItemKeys.forEach(async (key: any) => {
+          this.selectANDTHData = this.statusDataGrid.instance.getSelectedRowsData();
+
+          var buydata = this.selectANDTHData[0];
+          //메인데이터의 현장참석일자가 없을 때 입찰신청 가능
+          if (buydata.ANDTH == null || buydata.ANDTH == "") {
+            this.statuspopupVisible = true;
+
+            this.loadingVisible = true;
+
+
+            var userInfo = this.authService.getUser().data;
+
+            this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+
+            this.detailFormData = this.selectGridData[0];
+
+            Object.assign(this.detailFormData, { BIZNO: userInfo?.pin, NAME1: userInfo?.deptName, WAERS: userInfo?.empId });
+
+            this.biddingdataLoad(this.dataService, this);
+
+            var result8370Model = await this.datagridLoad(this.dataService, this);
+            var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+
+
+            //디테일 데이터
+            result8370Model.forEach((array: any) => {
+              var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+              if (resultData != undefined) {
+                Object.assign(array, {
+                  MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
+                  MEINS: resultData.MEINS
+                });
+              }
+            });
+
+            this.estpopupData = new ArrayStore(
+              {
+                key: ["BIDNO"],
+                data: result8370Model
+              });
+
+
+            var data: Array<any> = this.estpopupData._array;
+
+            data.forEach(async (array: any) => {
+
+              var MENGEdata = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+              if (MENGEdata != undefined) {
+                if (this.detailFormData.BIDRUL == "A") {
+                  array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+                  array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+                  array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+                }
+
+                else {
+                  array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+                  if (this.detailFormData.VATTY == "OUT") {
+                    array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+                  } else {
+                    array.RFQVAT = "0"
+                  }
+                  array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+                }
+              }
+              this.loadingVisible = false;
+
+            });
+
+          }
+          //메인데이터의 현장참석일자가 있을 때는
+          else {
+            //참여업체의 현장설명회 참여여부가 X일때 입찰 신청 가능
+            if (company.ANCHK == "X") {
+              this.statuspopupVisible = true;
+              this.selectedItemKeys.forEach(async (key: any) => {
+
+                this.loadingVisible = true;
+
+
+                var userInfo = this.authService.getUser().data;
+
+                this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+
+                this.detailFormData = this.selectGridData[0];
+
+                Object.assign(this.detailFormData, { BIZNO: userInfo?.pin, NAME1: userInfo?.deptName, WAERS: userInfo?.empId });
+
+                this.biddingdataLoad(this.dataService, this);
+
+                var result8370Model = await this.datagridLoad(this.dataService, this);
+                var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+
+
+                //디테일 데이터
+                result8370Model.forEach((array: any) => {
+                  var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+                  if (resultData != undefined) {
+                    Object.assign(array, {
+                      MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
+                      MEINS: resultData.MEINS
+                    });
+                  }
+                });
+
+                this.estpopupData = new ArrayStore(
+                  {
+                    key: ["BIDNO"],
+                    data: result8370Model
+                  });
+
+
+                var data: Array<any> = this.estpopupData._array;
+
+                data.forEach(async (array: any) => {
+
+                  var MENGEdata = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
+
+                  if (MENGEdata != undefined) {
+                    if (this.detailFormData.BIDRUL == "A") {
+                      array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+                      array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+                      array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+                    }
+
+                    else {
+                      array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+                      if (this.detailFormData.VATTY == "OUT") {
+                        array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+                      } else {
+                        array.RFQVAT = "0"
+                      }
+                      array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+                    }
+                  }
+                  this.loadingVisible = false;
+
+                });
+
+              });
+            }
+            //참석하지 않았을떄 입찰신청 불가능
+            else {
+              this.statuspopupVisible = false;
+              alert(`\t\t\t\t\t\t부적격.\t<br> 현상설명회 불참`, "알림");
+            }
+          }
+        });
+
+      } else {
+        alert("입찰 마감일시가 지난 공고입니다.", "알림");
+      }
+    } else {
+      alert("입찰 마감일시가 지난 공고입니다.", "알림");
+    }
+    this.AssuranceEntery.ClearSelectedValue();
+    this.biddingDetailFormData = { INSTXT: "", INSAMT: "",  INSTY: "", INSCMY: "", PASSY: "" };
+  }
+  //회원가입 버튼 페이지 이동 이벤트
+  movePage(e: any) {
+    this.router.navigate(['obmr']);
+  }
+  //자료첨부
+  test() {
+
+  }
+  //선택
+  selectionChanged(data: any) {
+    this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
+    this.selectedItemKeys = data.currentSelectedRowKeys;
+
+  }
+
+  //조회날짜필터조건
+  selectDate(data: any) {
+    this.statusDataGrid.instance.filter(['QTADTH', '>', data.value]);
+  }
+  //파서블엔트리
   async onPrgstatusDataLoaded(e: any) {
     this.loadePeCount++;
     if (this.loadePeCount >= 3) {
@@ -654,12 +1045,6 @@ export class OBBDComponent {
 
     }
   }
-  //전체 버튼
-  allCategory(thisObj: OBBDComponent) {
-    thisObj.bizpmtagbox.instance.reset();
-    thisObj.statusDataGrid.instance.clearFilter();
-
-  }
   //결제조건코드 값 변경
   onRegulationCodeValueChanged(e: any) {
     setTimeout(() => {
@@ -688,216 +1073,6 @@ export class OBBDComponent {
   //Data refresh 날짜 새로고침 이벤트
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
-  }
-
-
-  //상세내용
-  DetailData: any = async (thisObj: OBBDComponent) => {
-    try {
-      this.selectedItemKeys.forEach(async (key: any) => {
-
-        this.loadingVisible = true;
-
-
-        var userInfo = this.authService.getUser().data;
-
-        this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
-
-        this.estimateFormData = this.selectGridData[0];
-        //사업자등록번호, 회사명
-        this.estimateFormData = Object.assign(this.estimateFormData, { BIZNO: userInfo?.pin, NAME1: userInfo?.deptName });
-
-
-        var result8360Model = await this.formdataLoad(this.dataService, this);
-        var result8370Model = await this.datagridLoad(this.dataService, this);
-        var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
-
-
-        //상세내용 8360 파트
-        this.estimateDetailFormData = Object.assign({
-          GRETD: result8360Model[0].GRETD, PAYTY: result8360Model[0].PAYTY, RFQSEQ: result8360Model[0].RFQSEQ,
-          RFQCST: result8360Model[0].RFQCST, RFQVAT: result8360Model[0].RFQVAT, RFQAMT: result8360Model[0].RFQAMT
-        });
-
-
-
-
-        //디테일 데이터
-        result8370Model.forEach((array: any) => {
-          var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
-
-          if (resultData != undefined) {
-            Object.assign(array, {
-              MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-              MEINS: resultData.MEINS
-            });
-          }
-        });
-
-
-
-
-        this.estpopupData = new ArrayStore(
-          {
-            key: ["BIDNO"],
-            data: result8370Model
-          });
-
-
-        var data: Array<any> = this.estpopupData._array;
-
-        data.forEach(async (array: any) => {
-
-          var MENGEdata = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
-
-          if (MENGEdata != undefined) {
-            if (this.estimateFormData.BIDRUL == "A") {
-              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
-              array.RFQVAT = parseInt(array.RFQCST1) * 0.1
-              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
-            }
-
-            else {
-              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
-              if (this.estimateFormData.VATTY == "OUT") {
-                array.RFQVAT = parseInt(array.RFQCST1) * 0.1
-              } else {
-                array.RFQVAT = "0"
-              }
-              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
-            }
-          }
-          this.loadingVisible = false;
-
-        });
-
-      });
-
-      this.estimatepopupVisible = !this.estimatepopupVisible;
-    } catch (error) {
-      alert("error", "알림");
-    }
-
-  }
-
-
-  //zmmt8320 업체
-  public async userdetaildata(dataService: ImateDataService, thisObj: OBBDComponent) {
-
-    let userInfo = this.authService.getUser().data;
-
-    var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
-    var lifnr = userInfo?.deptId ?? ""
-    var bizno = userInfo?.pin ?? ""
-
-    var companyData = await dataService.SelectModelData<ZMMT8320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8320ModelList", [],
-      `BIDNO = '${bidno}' AND LIFNR = '${lifnr}' AND BIZNO ='${bizno}' `, "", QueryCacheType.None);
-
-    return companyData[0];
-  }
-
-  //입찰
-  Bidding: any = async (thisObj: OBBDComponent) => {
-
-    var company = await this.userdetaildata(this.dataService, this);
-
-    //참여업체의 현장설명회 참여여부가 X면 입찰 신청 가능
-    if (company.ANCHK == "X") {
-      this.statuspopupVisible = true;
-      this.selectedItemKeys.forEach(async (key: any) => {
-
-        this.loadingVisible = true;
-
-
-        var userInfo = this.authService.getUser().data;
-
-        this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
-
-        this.detailFormData = this.selectGridData[0];
-
-        Object.assign(this.detailFormData, { BIZNO: userInfo?.pin, NAME1: userInfo?.deptName });
-
-        this.biddingdataLoad(this.dataService, this);
-
-        var result8370Model = await this.datagridLoad(this.dataService, this);
-        var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
-
-
-        //디테일 데이터
-        result8370Model.forEach((array: any) => {
-          var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
-
-          if (resultData != undefined) {
-            Object.assign(array, {
-              MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-              MEINS: resultData.MEINS
-            });
-          }
-        });
-
-        this.estpopupData = new ArrayStore(
-          {
-            key: ["BIDNO"],
-            data: result8370Model
-          });
-
-
-        var data: Array<any> = this.estpopupData._array;
-
-        data.forEach(async (array: any) => {
-
-          var MENGEdata = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
-
-          if (MENGEdata != undefined) {
-            if (this.detailFormData.BIDRUL == "A") {
-              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
-              array.RFQVAT = parseInt(array.RFQCST1) * 0.1
-              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
-            }
-
-            else {
-              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
-              if (this.detailFormData.VATTY == "OUT") {
-                array.RFQVAT = parseInt(array.RFQCST1) * 0.1
-              } else {
-                array.RFQVAT = "0"
-              }
-              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
-            }
-          }
-          this.loadingVisible = false;
-
-        });
-
-      });
-    } else {
-      this.statuspopupVisible = false;
-      alert(`\t\t\t\t\t\t부적격.\t<br> 현상설명회 불참`, "알림");
-
-    }
-    this.biddingDetailFormData = { INSTXT: "", INSAMT: "",  INSTY: "", INSCMY: "", PASSY: "" };
-
-
-
-
-  }
-  //회원가입 버튼 페이지 이동 이벤트
-  movePage(e: any) {
-    this.router.navigate(['obmr']);
-  }
-  //자료첨부
-  test() {
-
-  }
-  selectionChanged(data: any) {
-    this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
-    this.selectedItemKeys = data.currentSelectedRowKeys;
-
-  }
-
-  //조회날짜필터조건
-  selectDate(data: any) {
-    this.statusDataGrid.instance.filter(['RFQDTH', '>', data.value]);
   }
 
 }

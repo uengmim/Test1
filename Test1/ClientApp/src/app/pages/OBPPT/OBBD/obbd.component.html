@@ -109,6 +109,7 @@
     <dxo-paging [pageSize]="10"></dxo-paging>
     <dxo-scrolling mode="infinite"></dxo-scrolling>
 
+    <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
     <dxo-selection mode="single"></dxo-selection>
     <dxo-filter-row visible="true"></dxo-filter-row>
     <dxo-header-filter visible="true"></dxo-header-filter>
@@ -118,14 +119,42 @@
 
     <!--Data column-->
     <dxi-column dataField="BIDNO"
-                 alignment="center"
-                caption="공고번호">
+                alignment="center"
+                caption="공고번호" [fixed]="true">
     </dxi-column>
     <dxi-column dataField="BIDNM"
-                caption="공고명">
+                caption="공고명" [fixed]="true">
+    </dxi-column>
+    <dxi-column dataField="S_BIDDTH"
+                caption="입찰신청일자"
+                dataType="date"
+                alignment="center"
+                format="yyyy-MM-dd">
+    </dxi-column>
+    <dxi-column dataField="S_BIDRSTT"
+                alignment="center"
+                caption="입찰신청결과">
+    </dxi-column>
+    <dxi-column dataField="BIDSEQ"
+                caption="입찰차수">
+    </dxi-column>
+    <dxi-column dataField="BIDDTH"
+                caption="입찰일자"
+                dataType="date"
+                alignment="center"
+                format="yyyy-MM-dd">
+    </dxi-column>
+    <dxi-column dataField="BIDAMT"
+                caption="입찰금액"
+                alignment="right"
+                dataType="string"
+                format="#,###">
+    </dxi-column>
+    <dxi-column dataField="BIDRST"
+                caption="입찰결과">
     </dxi-column>
     <dxi-column dataField="BIDDT"
-                caption="공고일자"
+                caption="공고일자" [fixed]="true"
                 dataType="date"
                 alignment="center"
                 format="yyyy-MM-dd">
@@ -181,7 +210,7 @@
     </dxi-column>
     <dxi-column dataField="RFQAMT"
                 caption="견적금액"
-                 alignment="right"
+                alignment="right"
                 dataType="string"
                 format="#,###">
     </dxi-column>
@@ -189,33 +218,17 @@
                 alignment="center"
                 caption="견적결과">
     </dxi-column>
-    <dxi-column dataField="S_BIDDTH"
-                caption="입찰신청일자"
-                dataType="date"
-                alignment="center"
-                format="yyyy-MM-dd">
+    <dxi-column dataField="R_RFQDTT"
+                caption="견적마감시간" dataType="time" format="HH:mm:ss" [visible]="false">
     </dxi-column>
-    <dxi-column dataField="S_BIDRSTT"
-                alignment="center"
-                caption="입찰신청결과">
+    <dxi-column dataField="QTADTT"
+                caption="신청마감시간" dataType="time" format="HH:mm:ss" [visible]="false">
     </dxi-column>
-    <dxi-column dataField="BIDSEQ"
-                caption="입찰차수">
+    <dxi-column dataField="BISDTT"
+                caption="입찰개시시간" dataType="datetime" format="HH:mm:ss" [visible]="false">
     </dxi-column>
-    <dxi-column dataField="BIDDTH"
-                caption="입찰일자"
-                dataType="date"
-                alignment="center"
-                format="yyyy-MM-dd">
-    </dxi-column>
-    <dxi-column dataField="BIDAMT"
-                caption="입찰금액"
-                 alignment="right"
-                dataType="string"
-                format="#,###">
-    </dxi-column>
-    <dxi-column dataField="BIDRST"
-                caption="입찰결과">
+    <dxi-column dataField="BIFDTT"
+                caption="입찰마감시간" dataType="datetime" format="HH:mm:ss" [visible]="false">
     </dxi-column>
 
   </dx-data-grid>
@@ -236,6 +249,7 @@
                       toolbar="top"
                       location="before">
     </dxi-toolbar-item>
+
     <dxi-toolbar-item widget="dxButton"
                       toolbar="top"
                       location="after"
@@ -251,13 +265,13 @@
       <div id="form-container">
         <dx-form id="estimatepopupForm" [formData]="estimateFormData" #popupForm>
 
-          <dxi-item itemType="group" caption="조회 데이터"  [colCount]="4" [colSpan]="2">
+          <dxi-item itemType="group" caption="조회 데이터" [colCount]="4" [colSpan]="2">
             <dxi-item dataField="BIZNO" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="사업자등록번호"></dxo-label></dxi-item>
             <dxi-item dataField="NAME1" [editorOptions]="{ height: 30, readOnly: true}"><dxo-label text="회사명"></dxo-label></dxi-item>
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2">
-            <dxi-item dataField="BIDNO" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="구매공고번호"></dxo-label></dxi-item>
-            <dxi-item dataField="BIDNM" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="공고명"></dxo-label></dxi-item>
+            <dxi-item dataField="BIDNO" [colSpan]="1" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="구매공고번호"></dxo-label></dxi-item>
+            <dxi-item dataField="BIDNM" [colSpan]="2" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="공고명"></dxo-label></dxi-item>
           </dxi-item>
 
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
@@ -273,26 +287,25 @@
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="ANDTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="현장설명회 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="ANDTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="현장설명회 시간"></dxo-label></dxi-item>
+            <dxi-item dataField="ANDTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="현장설명회 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="ANLOC" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="현장설명회 장소"></dxo-label></dxi-item>
             <dxi-item></dxi-item>
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="RFQDTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="견적마감 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="RFQDTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="견적마감 시간"></dxo-label></dxi-item>
+            <dxi-item dataField="RFQDTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="견적마감 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="BIDKDT" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="입찰 종류"></dxo-label></dxi-item>
             <dxi-item dataField="MAKERYN" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="메이커등록여부"></dxo-label></dxi-item>
-
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="QTADTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="입찰신청마감 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="QTADTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="입찰신청마감 시간"></dxo-label></dxi-item>
+            <dxi-item dataField="QTADTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="입찰신청마감 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="BIDRULT" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="입찰 방법"></dxo-label></dxi-item>
-            <dxi-item dataField="VATTY" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="부가세 여부"></dxo-label></dxi-item>
+            <dxi-item dataField="VATTYT" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="부가세 여부"></dxo-label></dxi-item>
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="BIFDTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="입찰마감 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="BIFDTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="입찰마감 시간"></dxo-label></dxi-item>
+            <dxi-item dataField="BIFDTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="입찰마감 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="" [editorOptions]="{ height: 30 , readOnly: true}"><dxo-label text="첨부파일"></dxo-label></dxi-item>
             <dxi-item location="after"
                       widget="dxButton"
@@ -313,9 +326,9 @@
 
         <dx-form id="8360popupForm" [formData]="estimateDetailFormData" style="margin-top:10px;">
           <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px;">
-            <dxi-item dataField="GRETD" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd' , readOnly: true}"><dxo-label text="납품가능 일자 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"></dxo-label></dxi-item>
-            <dxi-item dataField="PAYTY" [label]="{text: '결제조건      '}" [editorOptions]="{ height: 30 , readOnly: true}">
-              <div style="float: left; width:100%">
+            <dxi-item dataField="GRETD" [disabled]="true" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd' , readOnly: true}"><dxo-label text="납품가능 일자 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"></dxo-label></dxi-item>
+            <dxi-item dataField="PAYTY" [disabled]="true" [label]="{text: '결제조건      '}" [editorOptions]="{ height: 30 , readOnly: true}">
+              <div *dxTemplate>
                 <nh-possible-comm #regulationEntery
                                   dataStoreKey="obmr"
                                   [codeInfo]="RegulationCode"
@@ -332,13 +345,13 @@
                 </nh-possible-comm>
               </div>
             </dxi-item>
-            <dxi-item dataField="RFQSEQ" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="견적차수"></dxo-label></dxi-item>
+            <dxi-item dataField="RFQSEQ" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="견적차수"></dxo-label></dxi-item>
 
           </dxi-item>
           <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px;">
-            <dxi-item dataField="RFQCST" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true ,format : '#,##0'}"><dxo-label text="견적 공급가"></dxo-label></dxi-item>
-            <dxi-item dataField="RFQVAT" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true ,format : '#,##0'}"><dxo-label text="견적 부가세"></dxo-label></dxi-item>
-            <dxi-item dataField="RFQAMT" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true ,format : '#,##0'}"><dxo-label text="견적 총액"></dxo-label></dxi-item>
+            <dxi-item dataField="RFQCST" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true ,format : '#,##0'}"><dxo-label text="견적 공급가"></dxo-label></dxi-item>
+            <dxi-item dataField="RFQVAT" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true ,format : '#,##0'}"><dxo-label text="견적 부가세"></dxo-label></dxi-item>
+            <dxi-item dataField="RFQAMT" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ height: 30, readOnly: true ,format : '#,##0'}"><dxo-label text="견적 총액"></dxo-label></dxi-item>
 
           </dxi-item>
         </dx-form>
@@ -490,6 +503,11 @@
     <dxi-toolbar-item widget="dxButton"
                       toolbar="top"
                       location="after"
+                      [options]="estimateDeleteSelectedData">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
                       [options]="biddingpopupsaveButtonOptions">
     </dxi-toolbar-item>
     <dxi-toolbar-item widget="dxButton"
@@ -504,10 +522,12 @@
           <dxi-item itemType="group" caption="조회 데이터" [colCount]="4" [colSpan]="2">
             <dxi-item dataField="BIZNO" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="사업자등록번호"></dxo-label></dxi-item>
             <dxi-item dataField="NAME1" [editorOptions]="{ height: 30, readOnly: true}"><dxo-label text="회사명"></dxo-label></dxi-item>
+            <dxi-item dataField="WAERS" [editorOptions]="{ height: 30, readOnly: true}"><dxo-label text="통화키"></dxo-label></dxi-item>
+
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2">
-            <dxi-item dataField="BIDNO" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="구매공고번호"></dxo-label></dxi-item>
-            <dxi-item dataField="BIDNM" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="공고명"></dxo-label></dxi-item>
+            <dxi-item dataField="BIDNO" [colSpan]="1" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="구매공고번호"></dxo-label></dxi-item>
+            <dxi-item dataField="BIDNM" [colSpan]="2" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="공고명"></dxo-label></dxi-item>
           </dxi-item>
 
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
@@ -523,29 +543,29 @@
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="ANDTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="현장설명회 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="ANDTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="현장설명회 시간"[visible]="false"></dxo-label></dxi-item>
+            <dxi-item dataField="ANDTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="현장설명회 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="ANLOC" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="현장설명회 장소"></dxo-label></dxi-item>
             <dxi-item></dxi-item>
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="RFQDTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="견적마감 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="RFQDTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="견적마감 시간"[visible]="false"></dxo-label></dxi-item>
+            <dxi-item dataField="RFQDTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="견적마감 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="BIDKDT" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="입찰 종류"></dxo-label></dxi-item>
             <dxi-item dataField="MAKERYN" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="메이커등록여부"></dxo-label></dxi-item>
 
           </dxi-item>
-          <dxi-item itemType="group" [colCount]="6" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="QTADTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="입찰신청마감 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="QTADTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="입찰신청마감 시간" [visible]="false"></dxo-label></dxi-item>
+            <dxi-item dataField="QTADTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="입찰신청마감 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="BIDRULT" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="입찰 방법"></dxo-label></dxi-item>
-            <dxi-item dataField="VATTY" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="부가세 여부"></dxo-label></dxi-item>
+            <dxi-item dataField="VATTYT" [editorOptions]="{ height: 30, readOnly: true }"><dxo-label text="부가세 여부"></dxo-label></dxi-item>
           </dxi-item>
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="BIFDTH" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd', readOnly: true }"><dxo-label text="입찰마감 일시"></dxo-label></dxi-item>
-            <dxi-item dataField="BIFDTT" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'dateTime',  displayFormat:'HH:mm:ss', readOnly: true }"><dxo-label text="입찰마감 시간" [visible]="false"></dxo-label></dxi-item>
+            <dxi-item dataField="BIFDTT" editorType="dxTextBox" [editorOptions]="{ height: 30, mask:'##:##:##', readOnly: true }" ><dxo-label text="입찰마감 시간" [visible]="false"></dxo-label></dxi-item>
             <dxi-item dataField="" [editorOptions]="{ height: 30 , readOnly: true}"><dxo-label text="첨부파일"></dxo-label></dxi-item>
 
-            </dxi-item>
+          </dxi-item>
         </dx-form>
 
         <dx-form id="85000popupForm" [formData]="biddingDetailFormData" style="margin-top:10px;">
@@ -570,11 +590,14 @@
             </dxi-item>
           </dxi-item>
 
-
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
-            <dxi-item dataField="INSAMT" [colSpan]="2" [editorOptions]="{ height: 30 ,format : '#,##0'}">
+            <dxi-item dataField="INSAMT" editorType="dxNumberBox" [colSpan]="2" [editorOptions]="{ height: 30 ,format : '#,##0'}">
               <dxo-label text="보증금액"></dxo-label>
               <dxi-validation-rule type="required" message="보증금액을 입력해주십시오."></dxi-validation-rule>
+              <dxi-validation-rule type="pattern"
+                                   pattern="^[0-9]"
+                                   message="숫자만 입력해주세요.">
+              </dxi-validation-rule>
             </dxi-item>
             <dxi-item dataField="BIDRST" [colSpan]="2" [label]="{text: '신청결과'}" [editorOptions]="{ height: 30, readOnly: true }">
 
@@ -583,9 +606,9 @@
           </dxi-item>
 
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
-            <dxi-item dataField="INSTY"  [colSpan]="2" [label]="{text: '보증방법'}" [editorOptions]="{ height: 30 }">
+            <dxi-item dataField="INSTY" [colSpan]="2" [label]="{text: '보증방법'}" [editorOptions]="{ height: 30 }">
               <dxi-validation-rule type="required" message="보증방법을 입력해주십시오."></dxi-validation-rule>
-              <div style="float: left; width:100%">
+              <div *dxTemplate>
                 <nh-possible-comm #AssuranceEntery
                                   dataStoreKey="obbd"
                                   [codeInfo]="AssuranceCode"
@@ -607,14 +630,12 @@
             </dxi-item>
             <dxi-item dataField="INSCMY" [colSpan]="2" [editorOptions]="{ height: 30  }">
               <dxo-label text="보증회사"></dxo-label>
-              <dxi-validation-rule type="required" message="보증회사을 입력해주십시오."></dxi-validation-rule>
             </dxi-item>
           </dxi-item>
 
           <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
-            <dxi-item dataField="PASSY" [colSpan]="2"  [editorOptions]="{ height: 30}">
+            <dxi-item dataField="PASSY" [colSpan]="2" [editorOptions]="{ height: 30}">
               <dxo-label text="납부면제 사유 &nbsp;&nbsp;&nbsp;&nbsp;"></dxo-label>
-              <dxi-validation-rule type="required" message="납부면제 사유을 입력해주십시오."></dxi-validation-rule>
             </dxi-item>
           </dxi-item>
           <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px;">
@@ -635,7 +656,7 @@
           </dxi-item>
           <dxi-item horizontalAlignment="center">
             <div class="dx-field-value">
-              <dx-check-box [value]="true" #chkgbox text="동의합니다."></dx-check-box>
+              <dx-check-box [value]="false" #chkgbox text="동의합니다."></dx-check-box>
             </div>
           </dxi-item>
           <dxi-item class="scrollview_view" style="min-height:50px;">
@@ -644,7 +665,7 @@
           </dxi-item>
           <dxi-item horizontalAlignment="center">
             <div class="dx-field-value">
-              <dx-check-box [value]="true" #chkgbox text="동의합니다."></dx-check-box>
+              <dx-check-box [value]="false" #chkgbox text="동의합니다."></dx-check-box>
             </div>
           </dxi-item>
 

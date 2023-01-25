@@ -31,6 +31,7 @@
     </dxi-item>
   </dx-toolbar>
   <dx-form id="form"
+           #masterform
            [formData]="zmmt8100"
            width="80%"
            style="margin-left:180px">
@@ -40,8 +41,16 @@
       </dxi-item>
     </dxi-item>
     <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
-      <dxi-item dataField="LOGPW" [label]="{text: '비밀번호'}" [editorOptions]="{ mode: 'password'}">
+      <dxi-item dataField="LOGPW" [label]="{text: '비밀번호'}" [editorOptions]="{ mode: 'password', maxLength: 20 }">
         <dxi-validation-rule type="required" message="비밀번호를 입력해주십시오.">
+        </dxi-validation-rule>
+        <dxi-validation-rule type="pattern"
+                             pattern="^[A-Z]+[a-z]+[0-9]+[!@#$%%^&*/-~]"
+                             message="대문자+소문자+숫자+특수문자를 조합하여 입력하시오.">
+        </dxi-validation-rule>
+        <dxi-validation-rule type="stringLength"
+                             [min]="5"
+                             message="5글자 이상 작성해주세요">
         </dxi-validation-rule>
       </dxi-item>
     </dxi-item>
@@ -128,7 +137,7 @@
       </dxi-item>
       <dxi-item dataField="BIZTY" [label]="{text: '사업자구분'}" [editorOptions]="{ height: 30 }">
         <dxi-validation-rule type="required" message="사업자구분을 입력해주십시오."></dxi-validation-rule>
-        <div style="float: left; width:100%">
+        <div *dxTemplate>
           <nh-possible-comm #businessClassEntery
                             dataStoreKey="obmr"
                             [codeInfo]="businessClassCode"
@@ -150,7 +159,7 @@
       </dxi-item>
       <dxi-item dataField="LIFTY" [label]="{text: '거래처구분'}" [editorOptions]="{ height: 30 }">
         <dxi-validation-rule type="required" message="거래처구분을 입력해주십시오."></dxi-validation-rule>
-        <div style="float: left; width:100%">
+        <div *dxTemplate>
           <nh-possible-comm #accountClassEntery
                             dataStoreKey="obmr"
                             [codeInfo]="accountClassCode"
@@ -176,7 +185,7 @@
     <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px">
       <dxi-item dataField="COUNTRY" [label]="{text: '국가'}" [editorOptions]="{ height: 30, readOnly: true}">
         <dxi-validation-rule type="required" message="국가를 입력해주십시오."></dxi-validation-rule>
-        <div style="float: left; width:100%">
+        <div *dxTemplate>
           <nh-possible-table #countryEntery
                              dataStoreKey="obmr"
                              [codeInfo]="countryCode"
@@ -199,7 +208,7 @@
       </dxi-item>
       <dxi-item dataField="QSTION" [label]="{text: '질문'}" [editorOptions]="{ height: 30 }">
         <dxi-validation-rule type="required" message="질문을 입력해주십시오."></dxi-validation-rule>
-        <div style="float: left; width:100%">
+        <div *dxTemplate>
           <nh-possible-comm #questionCodeEntery
                             dataStoreKey="obmr"
                             [codeInfo]="questionCode"
@@ -226,6 +235,7 @@
 
   </dx-form>
   <dx-form id="form"
+           #masterform
            [formData]="zmmt8110"
            width="80%"
            style="margin-left:180px">
@@ -234,10 +244,10 @@
       <dxi-item dataField="BIZUPJ" [label]="{text: '취급업종'}" style="margin-top:5px">
         <dx-tag-box #bizpmtagbox
                     [dataSource]="categorydataSource"
-                    displayExpr="Name"
+                    displayExpr="ZCMF01_CH"
                     [value]="selectItems"
                     placeholder="취급업종을 선택하여 주십시오."
-                    valueExpr="Id"
+                    valueExpr="ZCM_CODE1"
                     (onValueChanged)="onTagValueChanged($event)">
         </dx-tag-box>
         <dxi-validation-rule type="required" message="취급업종을 입력해주십시오."></dxi-validation-rule>

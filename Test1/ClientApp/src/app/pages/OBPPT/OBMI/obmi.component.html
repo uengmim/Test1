@@ -8,7 +8,7 @@
            width="80%"
            style="margin-left:180px; margin-top:30px;">
     <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-      <dxi-item dataField="BIZNO" [label]="{text: '사업자등록번호'}" [colCount]="1" [editorOptions]="{ height: 30 }">
+      <dxi-item dataField="BIZNO" [label]="{text: '사업자등록번호'}" [colCount]="1"  [editorOptions]="{ height: 30, mask: '0000000000' }">
         <dxi-validation-rule type="required" message="사업자등록번호 is required">></dxi-validation-rule>
       </dxi-item>
       <dxi-item location="after"
@@ -47,7 +47,7 @@
     <dxi-item itemType="group" [colCount]="2" [colSpan]="1" style="margin-top:5px;">
       <dxi-validation-rule type="required" message="질문 is required"></dxi-validation-rule>
       <dxi-item dataField="QSTION" [label]="{text: '질문'}" [editorOptions]="{ height: 30 }">
-        <div style="float: left; width:100%; margin-top:5px;">
+        <div *dxTemplate>
           <nh-possible-comm #questionCodeEntery
                             dataStoreKey="obmr"
                             [codeInfo]="questionCode"

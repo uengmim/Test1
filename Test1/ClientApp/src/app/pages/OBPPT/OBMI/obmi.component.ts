@@ -11,7 +11,6 @@ import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, Role, Category } from './app.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
   DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxButtonComponent
@@ -41,7 +40,7 @@ const sendRequest = function (value: any) {
 
 @Component({
   templateUrl: './obmi.component.html',
-  providers: [ImateDataService, Service],
+  providers: [ImateDataService],
   //  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
@@ -127,7 +126,7 @@ export class OBMIComponent {
  * @param authService 사용자 인증 서버스
  */
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, private appInfo: AppInfoService,  http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 회원정보찾기";
 
     this.displayExpr = "";

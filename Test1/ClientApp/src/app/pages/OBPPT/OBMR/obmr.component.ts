@@ -10,7 +10,7 @@ import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, Category } from './app.service';
+import { Service } from './app.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
   DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxCheckBoxComponent } from 'devextreme-angular';
@@ -52,7 +52,7 @@ export class OBMRComponent  {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) form!: DxFormComponent;
   @ViewChild('#gcContractList', { static: false }) gcContractList!: DxDataGridComponent;
-
+  @ViewChild('masterform', { static: false }) masterform!: DxFormComponent;
   @ViewChild('categoryEntery', { static: false }) categoryEntery!: CommonPossibleEntryComponent;
   @ViewChild('announcementEntery', { static: false }) announcementEntery!: CommonPossibleEntryComponent;
   @ViewChild('businessClassEntery', { static: false }) businessClassEntery!: CommonPossibleEntryComponent;
@@ -151,7 +151,7 @@ export class OBMRComponent  {
   register: any;
   //취급업종
   categorydataSource: any;
-
+  BSDuplication: any;
   //팝업모드
   popupMode = 'Add';
   //팝업 초기 설정
@@ -216,26 +216,25 @@ export class OBMRComponent  {
     this.localappConfig = appConfig;
     this.selectedValue = "Z100";
     this.selectedLike = "A%";
-      //텍스트박스 데이터
+    //텍스트박스 데이터
     this.value = service.getContent();
 
-    //취급업종
-    this.categorydataSource = new ArrayStore({
-      data: service.getcategory(),
-      key: 'Id',
-    });
+    this.accountClassValue = "1";
+    this.businessClassValue = "1";
+    this.countryValue = "KR";
+
     this.rowCount1 = 0;
     this.rowCount2 = 0;
     //회원가입 폼 데이터
-    this.register = new ZMMT8100Model("500", "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "", "", "", "", "", "", "", new Date(), new Date(), new Date(), new Date(), "", "", new Date(), "", new Date(), "", new Date(), "", "", "", "", this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
+    this.register = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
+      "", "", "1", "1", "KR", "", "", new Date(), new Date(), new Date(), new Date(), "", "", new Date(), "", new Date(), "", new Date(), "", "", "", "", this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
 
-    setTimeout(async (that:OBMRComponent) => {
+    setTimeout(async (that: OBMRComponent) => {
       //mac 가져오기
       let deviceInfo = await that.nbpAgetService.getDeviceInfo();
       that.register.MACID = deviceInfo?.mac;
     }, 0, this);
-    
+
     //회원가입 폼 데이터
     //this.register = new ZMMT8110Model(this.appConfig.mandt, "", "", "", new Date, "", "", new Date,"", DIMModelStatus.UnChanged);
 
@@ -280,16 +279,33 @@ export class OBMRComponent  {
 
         var value = this.chkgbox.value;
         let result = e.validationGroup.validate();
+        var bsresult = await this.bsDataLoad(this.imInfo, this.dataService, this);
+        //필수값을 입력 안했을 때
         if (!result.isValid) {
           alert("필수값을 입력하여 주십시오.", "알림");
         }
+        //필수값을 입력 했을 때
         else {
+          //동의를 눌렀으면
           if (value == true) {
             if (await confirm("회원가입하시겠습니까?", "알림")) {
+              if (bsresult.length > 0) {
+                alert("중복된 사업자 번호가 있습니다.", "알림");
+              } else {
+                if (ErrorEvent) {
+                  alert("Error.", "알림");
+                } else {
+                  this.dataInsert(this)
+                  alert("회원가입이 되었습니다.", "알림");
+                  this.form.instance.getButton("applyBtn")?.option("disabled", true);
+                  this.masterform.instance.resetValues();
 
-              this.dataInsert(this)
-              alert("회원가입이 되었습니다.", "알림");
+                  this.questionCodeEntery.ClearSelectedValue();
+                  this.questionCodeEntery.ClearDataSource();
 
+                  this.bizpmtagbox.instance.reset();
+                }
+              }
             }
           } else {
             alert("동의를 눌러주세요.", "알림");
@@ -314,8 +330,20 @@ export class OBMRComponent  {
         that.comPopupVisible = false;
       },
     };
-  }
 
+  }
+  async ngOnInit() {
+
+    //취급업종
+
+    let categorydataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmr", this.appConfig, this.categoryCode);
+
+    let resultModel = categorydataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
+
+    this.categorydataSource = new ArrayStore({
+      data: resultModel,
+    });
+  }
   /**
  * 파서블 엔트리 데이터 로딩 완료
  * @param e
@@ -386,7 +414,28 @@ export class OBMRComponent  {
 
     }
   }
+  async onCategoryataLoaded(e: any) {
+    this.loadePeCount++;
+    if (this.loadePeCount >= 3) {
+      setTimeout(() => { this.loadingVisible = false });
 
+      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmr", this.appConfig, this.categoryCode);
+
+      let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
+
+      console.info(resultModel);
+
+      //---------------------------------------------------------------------------------
+      dataSet = await this.dataService.dbSelectToDataSet(
+        PossibleEntryDataStore.createCommQueryMessage(this.appConfig, this.categoryCode, null)
+      );
+
+      resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
+
+      console.info(resultModel);
+
+    }
+  }
   /**
 * 화면 종료
 * */
@@ -394,7 +443,7 @@ export class OBMRComponent  {
     PossibleEntryDataStoreManager.removeDataStore("obmr");
   }
 
-  //중복 검사
+  //아이디중복 검사
   async Duplication() {
     var result = await this.dataLoad(this.imInfo, this.dataService, this);
     console.log(result);
@@ -405,10 +454,9 @@ export class OBMRComponent  {
     } else {
       alert("사용 가능한 아이디입니다.", "알림")
       this.form.instance.getButton("applyBtn")?.option("disabled", false);
-
+      
     }
   }
-
 
   //팝업이벤트
   showPopup(popupMode: any, data: any): void {
@@ -463,15 +511,22 @@ export class OBMRComponent  {
   onEVAYNValueChanged(e: any) {
     this.register.EVAYN = e.value[0]
   }
-  // 데이터 로드
+  // 사용자 ID 데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMRComponent) {
 
-    var resultModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
-      `LOGID = '${thisObj.register.LOGID}'`, "", QueryCacheType.None);
-
-    return resultModel;
+    var resultIdModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
+      `LOGID = '${thisObj.register.LOGID}' AND MANDT = '${thisObj.appConfig.mandt}'`, "", QueryCacheType.None);
+    
+    return resultIdModel;
   }
+  // 사업자번호 데이터 로드
+  public async bsDataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMRComponent) {
 
+    var resultBsModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
+      `BIZNO = '${thisObj.register.BIZNO}' AND MANDT = '${thisObj.appConfig.mandt}'`, "", QueryCacheType.None);
+
+    return resultBsModel;
+  }
   //  데이터 삽입
   public async dataInsert(thisObj: OBMRComponent) {
     try {
@@ -517,15 +572,16 @@ export class OBMRComponent  {
         if (value === 3)
           select2 = true;
 
-        submodelList.push(new ZMMT8110Model("500", this.register.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
+        submodelList.push(new ZMMT8110Model(this.appConfig.mandt, this.register.BIZNO, value, this.appConfig.interfaceId, now, nowTime, this.appConfig.interfaceId, now, nowTime, DIMModelStatus.Add));
       });
 
       subinsertData.ModelStatus = DIMModelStatus.Add;
 
       maininsertData.EVAYN = select1 || select2 ? "X" : ""
 
-      this.rowCount1 = await this._dataService.ModifyModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", mainmodelList);
-      this.rowCount2 = await this._dataService.ModifyModelData<ZMMT8110Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8110ModelList", submodelList);
+      this.rowCount1 = await thisObj.dataService.ModifyModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", mainmodelList);
+
+      this.rowCount2 = await thisObj.dataService.ModifyModelData<ZMMT8110Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8110ModelList", submodelList);
 
     }
     catch (error) {

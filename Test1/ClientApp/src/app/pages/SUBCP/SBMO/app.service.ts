@@ -73,6 +73,12 @@ const data: Data[] = [{
 }
 ];
 
+export class GIRequestList {
+  MATNR!: string;
+  REQUESTQTY!: number;
+  MEINS!: string;
+}
+
 @Injectable()
 export class Service {
   getData() {

@@ -5,11 +5,11 @@ import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { exportDataGrid } from 'devextreme/excel_exporter';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
+import { CommonCodeInfo, ParameterDictionary, TableCodeInfo } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { formatDate } from '@angular/common';
-import { Service, Data, Data2, CarSeq } from '../ALRF/app.service';
+import { Service, Data, Data2, CarSeq } from '../SHPQ/app.service';
 import {
   DxDataGridComponent,
   DxDateBoxModule,
@@ -24,6 +24,7 @@ import ArrayStore from 'devextreme/data/array_store';
 import { ZSDS6410Model, ZSDIFPORTALSAPLE028SndModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Snd';
 import { ZSDS6400Model, ZSDIFPORTALSAPGIRcvModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapGiRcvProxy';
 import { confirm, alert } from "devextreme/ui/dialog";
+import { ReportViewerComponent } from '../../../shared/components/reportviewer/report-viewer';
 //필터
 const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
@@ -53,6 +54,7 @@ export class SHPQComponent {
   @ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeEntery!: TablePossibleEntryComponent;
   @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: TablePossibleEntryComponent;
   @ViewChild('z4parvwCodeEntery', { static: false }) z4parvwCodeEntery!: CommonPossibleEntryComponent;
+  @ViewChild('reportViewer', { static: false }) reportViewer!: ReportViewerComponent;
   /* Entry  선언 */
   //출하지점
   vsCode!: TableCodeInfo;
@@ -194,8 +196,8 @@ export class SHPQComponent {
     this.vsCode = appConfig.tableCode("출하지점");
     this.lgCode = appConfig.tableCode("비료창고");
     this.maraCode = appConfig.tableCode("제품구분");
-    this.dd07tCode = appConfig.tableCode("하차정보");
-    this.dd07tCarCode = appConfig.tableCode("화물차종");
+    this.dd07tCode = appConfig.tableCode("RFC_하차정보");
+    this.dd07tCarCode = appConfig.tableCode("RFC_화물차종");
     this.tvlvCode = appConfig.tableCode("용도구분");
     this.zpalCode = appConfig.tableCode("RFC_파레트유형");
     this.tdlnrCode = appConfig.tableCode("운송업체");
@@ -228,7 +230,8 @@ export class SHPQComponent {
     this.zcarValue = "";
     this.zcarnoValue = "";
     this.zcarnoModiValue = "";
-    this.z4parvwValue=""
+    this.z4parvwValue = ""
+    this.tdlnrValue=""
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
@@ -260,6 +263,14 @@ export class SHPQComponent {
     this.shipmentProcessing = {
       text: "출고처리",
       onClick: async () => {
+        if (this.addFormData.WADAT_IST === null || this.addFormData.WADAT_IST === undefined) {
+          alert(`출고전기일자는 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZSHIPMENT_DATE === null || this.addFormData.ZSHIPMENT_DATE === undefined) {
+          alert(`배차일자는 필수값입니다.`, "알림");
+          return;
+        }
         if (await confirm("출고처리 하시겠습니까?", "알림")) {
           var result = await this.release();
 
@@ -359,9 +370,7 @@ export class SHPQComponent {
       this.selectStatus = "20";
   }
 
-  onTdlnrCodeValueChanged(e: any) {
-    this.tdlnrValue = e.value;
-  }
+
 
   //첫화면 데이터 조회 RFC
   public async dataLoad() {
@@ -384,7 +393,8 @@ export class SHPQComponent {
   public async release() {
     var data = this.addFormData
     var selectData = this.orderGrid.instance.getSelectedRowsData();
-    var zsds6400 = new ZSDS6400Model(this.popupData.VBELN, this.popupData.POSNR, "I", selectData[0].ZSAPSTATUS, selectData[0].KZPOD, selectData[0].VGBEL, selectData[0].VGPOS, selectData[0].MATNR, data.ARKTX, 0, selectData[0].VRKME, selectData[0].VSTEL, data.ZMENGE3, data.WADAT_IST, 0, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].ZLGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART, selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW, data.Z4PARVW, data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZDRIVER1, data.ZDRIVER2, data.ZPHONE, data.ZPHONE1, data.ZPHONE2, data.ZUNLOAD, data.ZSHIPMENT_NO, data.ZSHIPMENT_DATE, data.ZPALLTP, data.ZPALLETQTY, data.ZVKAUS, selectData[0].ZVBELN2, selectData[0].ZSAPMESSAGE, selectData[0].ZIFMESSAGE, selectData[0].ZIFSTATUS, selectData[0].ZIFDELETE, new Date(), "000000", selectData[0].ZERNAM, new Date(), "000000", selectData[0].ZAENAM);
+
+    var zsds6400 = new ZSDS6400Model(this.popupData.VBELN, this.popupData.POSNR, "I", selectData[0].ZSAPSTATUS, selectData[0].KZPOD, selectData[0].VGBEL, selectData[0].VGPOS, selectData[0].MATNR, data.ARKTX, 0, selectData[0].VRKME, selectData[0].VSTEL, data.ZMENGE3, data.WADAT_IST, 0, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].ZLGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART, selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW, data.Z4PARVW, data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZDRIVER1, data.ZDRIVER2, data.ZPHONE, data.ZPHONE1, data.ZPHONE2, data.ZUNLOAD, data.ZSHIPMENT_NO, data.ZSHIPMENT_DATE, data.ZPALLTP, data.ZPALLETQTY, data.ZVKAUS, selectData[0].ZVBELN2, selectData[0].ZSAPMESSAGE, selectData[0].ZIFMESSAGE, selectData[0].ZIFSTATUS, selectData[0].ZIFDELETE, new Date("9999-12-31"), "000000", selectData[0].ZERNAM, new Date("9999-12-31"), "000000", selectData[0].ZAENAM);
     var zsdsList: ZSDS6400Model[] = [zsds6400];
     var rcv = new ZSDIFPORTALSAPGIRcvModel("", "", zsdsList)
 
@@ -425,13 +435,20 @@ export class SHPQComponent {
     
     var selectData = this.orderGrid.instance.getSelectedRowsData();
     this.popupData = { VBELN: selectData[0].VBELN, POSNR: selectData[0].POSNR, ZMENGE2: selectData[0].ZMENGE2, ZMENGE4: selectData[0].ZMENGE4, ARKTX: selectData[0].ARKTX }
-/*    this.addFormData = { MATNR: selectData[0].MATNR }*/
+    /*    this.addFormData = { MATNR: selectData[0].MATNR }*/
     var model1 = new ZSDS6400Model(selectData[0].VBELN, selectData[0].POSNR, "I", selectData[0].ZSAPSTATUS, selectData[0].KZPOD, selectData[0].VGBEL, selectData[0].VGPOS, selectData[0].MATNR, selectData[0].ARKTX, 0, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE3, selectData[0].WADAT_IST, 0, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].ZLGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART, selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE, selectData[0].ZCARNO, selectData[0].ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZDRIVER2, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZPHONE2, selectData[0].ZUNLOAD, selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZPALLTP, selectData[0].ZPALLETQTY, selectData[0].ZVKAUS, selectData[0].ZVBELN2, selectData[0].ZSAPMESSAGE, selectData[0].ZIFMESSAGE, selectData[0].ZIFSTATUS, selectData[0].ZIFDELETE, new Date(), "000000", selectData[0].ZERNAM, new Date(), "000000", selectData[0].ZAENAM);
-    var model1Data = model1;
-    this.addFormData = model1Data;
+    this.addFormData = model1;
+    this.zunloadValue = selectData[0].ZUNLOAD;
+    this.zpalValue = selectData[0].ZPALLTP;
+    this.vkausValue = selectData[0].ZVKAUS;
+    this.zcarValue = selectData[0].ZCARTYPE;
+    this.tdlnrValue = selectData[0].Z4PARVW
+    this.zcarnoModiValue = selectData[0].ZCARNO;
     this.popupVisible = !this.popupVisible;
-    this.clearEntery();
+
   }
+
+
 
   //하차
   onZunloadCodeValueChanged(e: any) {
@@ -457,12 +474,18 @@ export class SHPQComponent {
       this.addFormData.ZCARTYPE = e.selectedValue;
     });
   }
-  //2차운송사
-  onz4parvwCodeValueChanged(e: any) {
+    //2차운송사
+  onTdlnrCodeValueChanged(e: any) {
     setTimeout(() => {
       this.addFormData.Z4PARVW = e.selectedValue;
     });
   }
+
+  //onz4parvwCodeValueChanged(e: any) {
+  //  setTimeout(() => {
+  //    this.addFormData.Z4PARVW = e.selectedValue;
+  //  });
+  //}
   //분할 차량번호 선택이벤트
   onZcarno1CodeValueChanged(e: any) {
     setTimeout(() => {
@@ -491,7 +514,24 @@ export class SHPQComponent {
     this.dd07tCarEntery.ClearSelectedValue();
     this.zcarnoCodeEntery.ClearSelectedValue();
     this.zcarnoModiCodeEntery.ClearSelectedValue();
-    this.z4parvwCodeEntery.ClearSelectedValue();
+    /*    this.z4parvwCodeEntery.ClearSelectedValue();*/
+    this.tdlnrEntery.ClearSelectedValue();
+  }
+
+  //화물 위수탁증
+  async print(e: any) {
+    console.log("들어옴");
+    let now = new Date();
+    let toStr = formatDate(now.setDate(now.getDate() - 5), "yyyy-MM-dd", "en-US");
+    let fromStr = formatDate(now, "yyyy-MM-dd", "en-US");
+    let params: ParameterDictionary =
+    {
+      "dbTitle": this.appConfig.dbTitle,
+      "fromDate": fromStr,
+      "toDate": toStr
+    };
+
+    setTimeout(() => { this.reportViewer.OpenReport("ReportTest1", params) });
   }
 }
 

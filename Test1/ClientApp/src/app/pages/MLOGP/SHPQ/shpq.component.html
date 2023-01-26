@@ -84,6 +84,12 @@
   </dxi-item>-->
   <dxi-item location="after">
     <div *dxTemplate>
+      <dx-button text="화물위수탁증" (onClick)="print($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+  <dxi-item location="after">
+    <div *dxTemplate>
       <dx-button text="출고처리(거래명세서)" (onClick)="refAddOrder($event)">
       </dx-button>
     </div>
@@ -238,8 +244,10 @@
   </dxi-column>
 
 
+
 </dx-data-grid>
 
+<report-viewer #reportViewer hostUrl="ReportTest1"></report-viewer>
 <!-- 로딩 패널-->
 <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
                [shading]="true" [hideOnOutsideClick]="true">
@@ -248,7 +256,7 @@
 
 <!--출고처리(거래명세서) 팝업-->
 <dx-popup width="70%"
-          height="60%"
+          height="70%"
           [showTitle]="true"
           title="출고처리(거래명세서)"
           [dragEnabled]="false"
@@ -290,7 +298,7 @@
       <dx-form id="popupForm" [formData]="addFormData">
         <dxi-item itemType="group"
                   caption="출고정보"
-                  [colCount]="4"
+                  [colCount]="3"
                   [colSpan]="4">
           <dxi-item dataField="ZMENGE3"> <dxo-label text="출고수량"></dxo-label> </dxi-item>
           <dxi-item dataField="WADAT_IST" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}">
@@ -301,29 +309,26 @@
           <dxi-item dataField="MATNR" [disabled]="true"><dxo-label text="출고자재"></dxo-label></dxi-item>
 
 
-          <dxi-item dataField="Z4PARVW">
+          <dxi-item dataField="Z4PARVW" [disabled]="true">
             <dxo-label text="2차운송사"></dxo-label>
             <div *dxTemplate>
-              <nh-possible-comm #z4parvwCodeEntery
+              <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
                                 [dataStoreKey]="dataStoreKey"
-                                [codeInfo]="z4parvwCode"
-                                valueColumn="ZCM_CODE3"
-                                [showClearButton]="true"
-                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                valueColumn="LIFNR"
+                                valueDisplayFormat="%NAME1%(%LIFNR%)"
                                 width="auto"
-                                [(selectedValue)]="z4parvwValue"
+                                [showClearButton]="true"
+                                [(selectedValue)]="tdlnrValue"
                                 [gridBoxWidth]="500"
-                                class="weight-test"
                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                [showDataLoadingPanel]="showDataLoadingPanel"
-                                (onEntryValueChanged)="onz4parvwCodeValueChanged($event)"></nh-possible-comm>
+                                (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
         </dxi-item>
 
         <dxi-item itemType="group"
                   caption="차량정보"
-                  [colCount]="4"
+                  [colCount]="3"
                   [colSpan]="4">
           <dxi-item dataField="ZSHIPMENT_NO"> <dxo-label text="배차번호"></dxo-label> </dxi-item>
           <dxi-item dataField="ZSHIPMENT_DATE" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}">

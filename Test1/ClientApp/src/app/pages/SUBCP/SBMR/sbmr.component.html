@@ -1,0 +1,437 @@
+
+<dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+               (onClick)="refreshDataGrid($event)"
+               text="조회"
+               type="normal">
+    </dx-button>
+  </dxi-item>
+
+  <!--dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+              (onClick)="registRow($event)"
+              text="신규"
+              type="normal">
+    </dx-button>
+  <dxi-item>-->
+
+  <dxi-item location="after" #newBtn
+            widget="dxButton"
+            style="width: auto"
+            [height]="25"
+            [options]="newButtonOptions">
+    <!--<div *dxTemplate>
+      <dx-button text="신규" (onClick)="addOrder($event)">
+      </dx-button>
+    </div>-->
+  </dxi-item>
+
+
+  <!--<dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+                (onClick)="modifyRow($event)"
+                text="수정"
+                type="normal">
+    </dx-button>
+  </dxi-item>
+  -->
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+               (onClick)="deleteRow($event)"
+               text="삭제"
+               type="normal">
+    </dx-button>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            style="width: auto"
+            [height]="25"
+            [options]="SaveBuutonOptions">
+    <!--<div *dxTemplate>
+      <dx-button text="신규" (onClick)="addOrder($event)">
+      </dx-button>
+    </div>-->
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25">
+    <dx-button stylingMode="contained"
+               (onClick)="backPage($event)"
+               text="생산지시확인"
+               type="normal">
+    </dx-button>
+  </dxi-item>
+
+  <!--<dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+                (onClick)="modifyRow($event)"
+                text="저장"
+                type="normal">
+    </dx-button>
+  </dxi-item>-->
+</dx-toolbar>
+
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
+
+
+<div id="form-container" style="margin-top: 20px; margin-bottom: 20px; margin-left: 10px;">
+  <dx-form id="" width="100%" [formData]="SupplyData" labelMode="floating" #formmm>
+
+    <dxi-item itemType="group" [colCount]="3">
+      <dxi-item dataField="Requester">
+        <!--<dxo-label text="요청업체"></dxo-label>-->
+        <div *dxTemplate>
+          <nh-possible-comm #CodeEntery
+                            dataStoreKey="dataStoreKey"
+                            [codeInfo]="lifnrCode"
+                            valueColumn="LIFNR"
+                            valueDisplayFormat="%NAME1%(%LIFNR%)"
+                            [(selectedValue)]="lifnrValue"
+                            [gridBoxWidth]="500"
+                            width="auto"
+                            label="업체정보"
+                            labelMode="floating"
+                            [showClearButton]="true"
+                            (onDataLoaded)="onPEDataLoaded($event)">
+          </nh-possible-comm>
+        </div>
+      </dxi-item>
+
+      <dxi-item dataField="SC_R_TIME" [disabled]="false" editorType="dxDateBox" [editorOptions]="{ type: 'time' }">
+        <dxo-label text="요청시간"></dxo-label>
+      </dxi-item>
+
+      <dxi-item dataField="Requester_Name" [disabled]="false" editorType="dxTextBox">
+        <dxo-label text="요청자이름"></dxo-label>
+        <dxi-validation-rule type="required"
+                             message="Password is required"></dxi-validation-rule>
+      </dxi-item>
+
+      <dxi-item dataField="GIRequest_Date" editorType="dxDateBox" [editorOptions]="{ type: 'date', displayFormat: 'yyyy-MM-dd' }">
+        <dxo-label text="출하요청일자"></dxo-label>
+        <dxi-validation-rule type="required"
+                             message="Password is required"></dxi-validation-rule>
+      </dxi-item>
+
+      <dxi-item dataField="ARRequest_Date" editorType="dxDateBox" [editorOptions]="{ type: 'date', displayFormat: 'yyyy-MM-dd' }">
+        <dxo-label text="도착요청일자"></dxo-label>
+        <dxi-validation-rule type="required"
+                             message="Password is required"></dxi-validation-rule>
+      </dxi-item>
+
+      <dxi-item dataField="ZSHIP_STATUS">
+        <div *dxTemplate>
+          <div style="float:left;">
+            <nh-possible-comm #CodeEntery
+                              dataStoreKey="dataStoreKey"
+                              [codeInfo]="zshipCode"
+                              valueColumn="DOMVALUE_L"
+                              valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                              [(selectedValue)]="StatusValue"
+                              [gridBoxWidth]="500"
+                              label="배차상태"
+                              labelMode="floating"
+                              [showClearButton]="true"
+                              (onDataLoaded)="onPEDataLoaded($event)"
+                              (onEntryValueChanged)="selectStatus($event)"
+                              placeholderText="배차상태">
+            </nh-possible-comm>
+          </div>
+        </div>
+      </dxi-item>
+    </dxi-item>
+  </dx-form>
+</div>
+
+<dx-data-grid #drawalGrid
+              [dataSource]="drawalData"
+              [remoteOperations]="false"
+              [focusedRowIndex]="0"
+              [allowColumnReordering]="true"
+              [allowColumnResizing]="true"
+              [rowAlternationEnabled]="true"
+              [selection]="{ mode: 'multiple' }"
+              [showBorders]="true"
+              [columnAutoWidth]="true"
+              (onEditorPreparing)="onEditorPreparing($event)"
+              height="calc(100vh - 300px)"
+              (onRowUpdating)="gridDataUpdating($event)"
+              [columnResizingMode]="columnResizeMode">
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-editing mode="cell"
+               [allowDeleting]="false"
+               [allowAdding]="false"
+               [allowUpdating]="true">
+  </dxo-editing>
+
+  <dxo-selection mode="single"></dxo-selection>
+  <dxo-filter-row visible="true"></dxo-filter-row>
+  <dxo-header-filter visible="true"></dxo-header-filter>
+
+
+
+  <!--Data column-->
+  <dxi-column dataField="VBELN"
+              caption="출하요청번호" [allowEditing]="false" [fixed]="true">
+  </dxi-column>
+
+  <dxi-column dataField="SC_R_DATE"
+              caption="출하요청일자" [allowEditing]="false"
+              dataType="date"
+              format="yyyy-MM-dd">
+  </dxi-column>
+
+  <dxi-column dataField="SC_R_TIME"
+              caption="요청시간" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_R_DATE_R"
+              caption="도착요청일자"
+              dataType="date"
+              format="yyyy-MM-dd" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="IDNRK"
+              caption="자재코드" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="MAKTX"
+              caption="자재명" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_R_MENGE"
+              caption="요청량" [allowEditing]="true">
+  </dxi-column>
+
+  <dxi-column dataField="MEINS"
+              caption="단위" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_R_NAME"
+              caption="요청자이름" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="ZSHIP_STATUS"
+              caption="배차Status" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_R_DATE_C"
+              caption="출하요청확인일"
+              dataType="date"
+              format="yyyy-MM-dd" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_L_MENGE"
+              caption="출하지시량" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_L_DATE"
+              caption="출하지시 일자"
+              dataType="date"
+              format="yyyy-MM-dd" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_L_TIME"
+              caption="출하지시 시간" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_L_NAME"
+              caption="출하지시자명" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="INCO1"
+              caption="인코텀스(파트1)" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="ZSHIPMENT_NO"
+              caption="배차번호" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="TDLNR1"
+              caption="운송업체" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="ZCARTYPE"
+              caption="화물차종" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="ZCARNO"
+              caption="차량번호" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="ZDRIVER"
+              caption="운전기사명" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="ZPHONE"
+              caption="전화번호" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="BLAND_F"
+              caption="출발지" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="BLAND_T"
+              caption="도착지" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_G_MENGE"
+              caption="출고량(출하장 계근량)" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_G_DATE"
+              caption="출고일자"
+              dataType="date"
+              format="yyyy-MM-dd / HH:MM:SS" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_G_TIME"
+              caption="출고시간" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_A_MENGE"
+              caption="착지량" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_A_DATE"
+              caption="인수일자"
+              dataType="date"
+              format="yyyy-MM-dd / HH:MM:SS" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_A_TIME"
+              caption="인수시간" [allowEditing]="false">
+  </dxi-column>
+
+  <dxi-column dataField="SC_A_NAME"
+              caption="인수자명" [allowEditing]="false">
+  </dxi-column>
+
+
+
+</dx-data-grid>
+
+<dx-popup [width]="1200"
+          [height]="600"
+          margin="20px"
+          [dragEnabled]="false"
+          [hideOnOutsideClick]="true"
+          title="불출요청(신규)"
+          container=".dx-viewport"
+          [(visible)]="newPopupVisible">
+
+  <dx-toolbar style="margin-bottom: 9px;">
+
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="addMatSaveButtonOptions">
+    </dxi-item>
+  </dx-toolbar>
+
+  <dx-scroll-view width="100%" height="100%">
+
+    <div id="form-container">
+      <dx-form id="popupForm" [formData]="popupData2">
+        <dxi-item itemType="group" [colCount]="3">
+          <dxi-item dataField="SC_R_DATE" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="출하요청일자"></dxo-label></dxi-item>
+          <dxi-item dataField="SC_R_NAME" [disabled]="true"><dxo-label text="요청자"></dxo-label></dxi-item>
+          <dxi-item dataField="SC_R_DATE_R" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="도착요청일자"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="3">
+          <dxi-item dataField="MATNR" [label]="{text: '자재번호'}">
+            <div style="float: left; width:100%">
+
+              <nh-possible-table [codeInfo]="matnrCode" #matnrCodeDynamic
+                                 [dataStoreKey]="dataStoreKey"
+                                 [(selectedValue)]="matnrValue"
+                                 valueColumn="MATNR"
+                                 valueDisplayFormat="%MAKTX%(%MATNR%)"
+                                 width="auto"
+                                 [gridBoxWidth]="500"
+                                 (onDataLoaded)="onPEDataLoaded($event)"
+                                 (onEntryValueChanged)="onmatnrCodeValueChanged($event)">
+              </nh-possible-table>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="SC_R_MENGE"><dxo-label text="요청수량"></dxo-label></dxi-item>
+          <dxi-item dataField="MEINS" [visible]="false"><dxo-label text="단위"></dxo-label></dxi-item>
+          <dxi-item location="after">
+            <div *dxTemplate>
+              <dx-button text="추가" (onClick)="refAddMat($event)">
+              </dx-button>
+            </div>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+    </div>
+
+
+    <div class="dx-field" style="margin-top: 20px;">
+      <div>
+        <dx-data-grid id="newMaterialsList" #newMaterialsList
+                      [dataSource]="newList"
+                      [remoteOperations]="false"
+                      [allowColumnReordering]="true"
+                      [allowColumnResizing]="true"
+                      [rowAlternationEnabled]="true"
+                      [columnAutoWidth]="true"
+                      [columnResizingMode]="columnResizeMode"
+                      [showBorders]="true">
+
+          <dxo-editing mode="batch"
+                       [allowDeleting]="true"
+                       [allowAdding]="false"
+                       [allowUpdating]="false">
+          </dxo-editing>
+
+          <dxo-filter-row visible="true"></dxo-filter-row>
+          <dxo-header-filter visible="true"></dxo-header-filter>
+
+
+          <dxi-column dataField="MATNR" caption="자재번호"></dxi-column>
+          <dxi-column dataField="SC_R_MENGE" caption="출하요청량"></dxi-column>
+          <dxi-column dataField="MEINS" caption="단위"></dxi-column>
+        </dx-data-grid>
+      </div>
+    </div>
+  </dx-scroll-view>
+</dx-popup>

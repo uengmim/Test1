@@ -112,7 +112,7 @@ export class CREQComponent {
     this.exportSelectedData = {
       icon: 'export',
       onClick: () => {
-        this.dataGrid.instance.exportToExcel(true);
+        //this.dataGrid.instance.exportToExcel(true);
 
       },
     };

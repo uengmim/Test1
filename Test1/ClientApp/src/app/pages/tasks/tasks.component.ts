@@ -95,13 +95,13 @@ export class TasksComponent implements OnDestroy {
   loadingVisible: boolean = false;
 
   //------------------------------------------------------------------
-  
+
   //무게
   weight: number = -1;
 
   //컬럼 리사이즈 모드
   columnResizeMode: string = ThemeManager.columnResizeMode;
-  
+
   /**
  * 상태 구독
  */
@@ -134,9 +134,9 @@ export class TasksComponent implements OnDestroy {
     this.maraCode = appConfig.tableCode("아이템코드");
 
     this.cm001Value = "Z00";
-    this.maraValue ="A010110";
+    this.maraValue = "A010110";
 
-    let param1 : ParameterDictionary = {};
+    let param1: ParameterDictionary = {};
     param1["ZCM_CODE1"] = "1000";
 
     let param2: ParameterDictionary = {};
@@ -353,7 +353,7 @@ export class TasksComponent implements OnDestroy {
    * @param e
    */
   startMonitorClick(e: any) {
-      this.runMonitoring();
+    this.runMonitoring();
   }
   /**
    * COM PORT 닫기

@@ -6,18 +6,18 @@
   <!--toolbar-->
   <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px;">
     <dxi-item location="before" locateInMenu="auto">
-      <div *dxTemplate>
+      <div *dxTemplate style="margin-left:10px;">
         <div style="float:left; ">
           <dx-date-box [(value)]="startDate"
-                       label="시작일"
+                       label="시작일(From)"
                        type="date"
                        [width]="120"
                        displayFormat="yyyy-MM-dd"></dx-date-box>
         </div>
 
-        <div style="float: left; margin-left: 10px; margin-right: 10px;" >
+        <div style="float:left; margin-left:10px;">
           <dx-date-box [(value)]="endDate"
-                       label="종료일"
+                       label="종료일(To)"
                        labelMode="floating"
                        type="date"
                        [width]="120"
@@ -26,15 +26,19 @@
       </div>
     </dxi-item>
 
-
     <dxi-item location="before"
               widget="dxButton"
-              [options]="searchButtonOptions">
-    </dxi-item>
-    <dxi-item location="after"
-              widget="dxButton"
-              locateInMenu="auto"
-              [options]="saveButtonOptions">
+              horizontalAlignment="center"
+              locateInMenu="center"
+              style="margin-top:3px">
+      <div *dxTemplate style="margin-left:15px;">
+        <dx-button stylingMode="contained"
+                   text="조회"
+                   (onClick)="refreshDataGrid($event)"
+                   [width]="80"
+                   style="margin-top:3px">
+        </dx-button>
+      </div>
     </dxi-item>
   </dx-toolbar>
 
@@ -49,27 +53,38 @@
                     widget="dxButton"
                     locateInMenu="auto">
             <dx-button stylingMode="contained"
-                       text="출고지시등록"
+                       text="유류 출고 지시등록"
                        type="normal"
-                       (onClick)="RegisRecords()"
-                       [width]="150">
+                       (onClick)="oilReleasRegis()"
+                       [width]="180">
+            </dx-button>
+          </dxi-item>
+          <dxi-item location="after"
+                    widget="dxButton"
+                    locateInMenu="auto">
+            <dx-button (onClick)="deleteRecords()"
+                       [disabled]="!selectedItemKeys.length"
+                       stylingMode="contained"
+                       type="normal"
+                       [width]="180"
+                       text="유류 출고 지시삭제">
             </dx-button>
           </dxi-item>
         </dx-toolbar>
-        <dx-data-grid id="grid"
-                      [dataSource]="insregis"
+        <dx-data-grid id="oilDataGrid"
+                      oilDataGrid
+                      [dataSource]="mainData"
                       [showBorders]="true"
                       [focusedRowIndex]="0"
-                      columnResizingMode="nextColumn"
-                      keyExpr="insNum"
-                      [selection]="{ mode: 'multiple' }"
+                      keyExpr="DONUM"
+                      [selection]="{ mode: 'single' }"
                       [allowColumnReordering]="true"
-                      (onSelectionChanged)="selectionChanged($event)"
                       [columnAutoWidth]="true"
                       [allowColumnResizing]="true"
+                      [columnResizingMode]="columnResizeMode"
                       [remoteOperations]="false"
                       [rowAlternationEnabled]="true"
-                      (onRowDblClick)="editRow($event)"
+                      (onSelectionChanged)="oilDeleteselectionChanged($event)"
                       height="calc(100vh - 265px)">
           <!--Datagrid Option-->
           <dxo-paging [enabled]="false"></dxo-paging>
@@ -84,101 +99,101 @@
           <dxo-header-filter [visible]="true"></dxo-header-filter>
           <!--Grouping Option-->
           <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
-          <!--Popup Option-->
-          <dxo-editing mode="popup"
-                       [selectTextOnEditStart]="selectTextOnEditStart"
-                       [startEditAction]="startEditAction"
-                       refreshMode="repaint">
-            <dxo-popup title="유류출하 등록"
-                       [showTitle]="true"
-                       width="80%"
-                       height="50%">
-            </dxo-popup>
-            <dxo-form>
-              <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
-                <dxi-item dataField="date" caption="일자" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="insNum" caption="지시번호" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="cliName" caption="거래처명" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="destination" caption="도착지" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="product" caption="제품" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="insQuan" caption="지시량" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="vehicleNum" caption="차량번호" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="driverName" caption="기사명" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="address" caption="주소" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="shipType" caption="출하형태" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="sort" caption="구분" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="disNum" caption="배차번호" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="cRequest" caption="C_REQUEST" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="cBusiNo" caption="C_BUSI_NO" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="cPass" caption="C_PASS" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="severDate" caption="서버일자" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="serverNum" caption="서버순번" [editorOptions]="{ height: 50 }">
 
-                </dxi-item>
-              </dxi-item>
-            </dxo-form>
-          </dxo-editing>
           <!--Data column-->
-          <dxi-column dataField="date"
-                      caption="일자"
-                      dataType="date"
-                      format="yyyy-MM-dd"
-                      alignment="center">
+          <dxi-column dataField="DONUM"
+                      alignment="center"
+                      caption="출고지시번호">
           </dxi-column>
 
-          <dxi-column dataField="insNum"
-                      caption="지시번호">
+          <dxi-column dataField="DODAT"
+                      caption="출고지시일자"
+                      dataType="date"
+                      alignment="center"
+                      format="yyyy-MM-dd">
+
           </dxi-column>
-          <dxi-column dataField="cliName"
-                      caption="거래처명">
+          <dxi-column dataField="ZSEQ"
+                      caption="출고지시순번">
           </dxi-column>
-          <dxi-column dataField="destination"
-                      caption="도착지">
+          <dxi-column dataField="INDAT"
+                      caption="출고지시일"
+                      dataType="date"
+                      alignment="center"
+                      format="yyyy-MM-dd">
+
           </dxi-column>
-          <dxi-column dataField="product"
-                      caption="제품">
+          <dxi-column dataField="KUNNR"
+                      alignment="center"
+                      caption="고객 번호">
           </dxi-column>
-          <dxi-column dataField="insQuan"
-                      caption="지시량"
-                      format="#,###">
+          <dxi-column dataField="NAME1"
+                      caption="거래처">
           </dxi-column>
-          <dxi-column dataField="vehicleNum"
+          <dxi-column dataField="CITY"
+                      caption="도시">
+          </dxi-column>
+          <dxi-column dataField="STREET"
+                      caption="도로주소">
+          </dxi-column>
+          <dxi-column dataField="MAKTX"
+                      caption="자재내역">
+          </dxi-column>
+          <dxi-column dataField="ZCARNO"
                       caption="차량번호">
           </dxi-column>
-          <dxi-column dataField="driverName"
-                      caption="기사명">
-          </dxi-column>
 
-          <dxi-column dataField="address"
-                      caption="주소">
+          <dxi-column dataField="ZDRIVER"
+                      alignment="center"
+                      caption="운전기사명">
           </dxi-column>
-          <dxi-column dataField="shipType"
-                      caption="출하형태">
+          <dxi-column dataField="ZSTATNM"
+                      alignment="center"
+                      caption="상태">
           </dxi-column>
-          <dxi-column dataField="sort"
-                      caption="구분">
-          </dxi-column>
-          <dxi-column dataField="disNum"
-                      caption="배차번호"
+          <dxi-column dataField="JISIMENGE"
+                      caption="수량"
                       format="#,###">
           </dxi-column>
-          <dxi-column dataField="cRequest"
-                      caption="C_REQUEST">
+          <dxi-column dataField="MEINS"
+                      alignment="center"
+                      caption="기본단위">
           </dxi-column>
-          <dxi-column dataField="cBusiNo"
-                      caption="C_BUSI_NO">
+          <dxi-column dataField="DTYPENM"
+                      alignment="center"
+                      caption="제품구분">
           </dxi-column>
-          <dxi-column dataField="cPass"
-                      caption="C_Pass">
+          <dxi-column dataField="BACHNUM"
+                      alignment="center"
+                      caption="배차번호">
           </dxi-column>
-          <dxi-column dataField="severDate"
-                      caption="서버일자"
+          <dxi-column dataField="VBELN"
+                      alignment="center"
+                      caption="문서번호">
+          </dxi-column>
+          <dxi-column dataField="POSNR"
+                      alignment="center"
+                      caption="품목">
+          </dxi-column>
+          <dxi-column dataField="SVBELN"
+                      caption="S_OIL">
+          </dxi-column>
+          <dxi-column dataField="ZIPWDT"
+                      caption="입항일"
                       dataType="date"
-                      format="yyyy-MM-dd"
-                      alignment="center">
+                      alignment="center"
+                      format="yyyy-MM-dd">
           </dxi-column>
-          <dxi-column dataField="serverNum"
-                      caption="서버순번">
+          <dxi-column dataField="ZTANK"
+                      alignment="center"
+                      caption="탱크번호">
+          </dxi-column>
+          <dxi-column dataField="ZIIPNO"
+                      caption="통관번호">
+          </dxi-column>
+          <dxi-column dataField="ZCARNO"
+                      caption="차량번호"
+                      [visible]="false">
           </dxi-column>
         </dx-data-grid>
       </dxi-tab>
@@ -188,26 +203,37 @@
                     widget="dxButton"
                     locateInMenu="auto">
             <dx-button stylingMode="contained"
-                       text="출고지시등록"
+                       text="화학 출고 지시등록"
                        type="normal"
-                       (onClick)="Regis2Records()"
-                       [width]="150">
+                       (onClick)="chemicalReleasRegis()"
+                       [width]="180">
+            </dx-button>
+          </dxi-item>
+          <dxi-item location="after"
+                    widget="dxButton"
+                    locateInMenu="auto">
+            <dx-button (onClick)="cheDeleteRecords()"
+                       [disabled]="!selectedItemKeys.length"
+                       stylingMode="contained"
+                       type="normal"
+                       [width]="180"
+                       text="화학 출고 지시삭제">
             </dx-button>
           </dxi-item>
         </dx-toolbar>
-        <dx-data-grid id="grid"
-                      [dataSource]="liqship"
+        <dx-data-grid id="cheDataGrid"
+                      #cheDataGrid
+                      [dataSource]="cheMainData"
                       [showBorders]="true"
                       [focusedRowIndex]="0"
-                      [allowColumnResizing]="true"
-                      columnResizingMode="nextColumn"
-                      keyExpr="liqInsNum"
-                      [selection]="{ mode: 'multiple' }"
+                      keyExpr="DONUM"
+                      [selection]="{ mode: 'single' }"
                       [allowColumnReordering]="true"
-                      (onSelectionChanged)="selectionChanged($event)"
-                      (onRowDblClick)="editRow($event)"
                       [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
                       [remoteOperations]="false"
+                      [columnResizingMode]="columnResizeMode"
+                      (onSelectionChanged)="cheDeleteselectionChanged($event)"
                       [rowAlternationEnabled]="true"
                       height="calc(100vh - 265px)">
           <!--Datagrid Option-->
@@ -223,854 +249,1053 @@
           <dxo-header-filter [visible]="true"></dxo-header-filter>
           <!--Grouping Option-->
           <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
-          <!--Popup Option-->
-          <dxo-editing mode="popup"
-                       [selectTextOnEditStart]="selectTextOnEditStart"
-                       [startEditAction]="startEditAction"
-                       refreshMode="repaint">
-            <dxo-popup title="화학출하 등록"
-                       [showTitle]="true"
-                       width="80%"
-                       height="50%">
-            </dxo-popup>
-            <dxo-form>
-              <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
-                <dxi-item dataField="liqDate" caption="일자" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="liqInsNum" caption="지시번호" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="liqCliName" caption="거래처명" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="liqDestination" caption="도착지" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqProduct" caption="제품" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqInsQuan" caption="지시량" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqVehicleNum" caption="차량번호" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqDriverName" caption="기사명" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqAddress" caption="주소" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqShipType" caption="출하형태" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqSort" caption="구분" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqDisNum" caption="배차번호" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqCRequest" caption="C_REQUEST" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqCBusiNo" caption="C_BUSI_NO" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqCPass" caption="C_PASS" [editorOptions]="{ height: 50 }"> </dxi-item>
-                <dxi-item dataField="liqShipDate" caption="출하일자" [editorOptions]="{ height: 50 }"></dxi-item>
-                <dxi-item dataField="liqShipNum" caption="출하순번" [editorOptions]="{ height: 50 }"> </dxi-item>
-              </dxi-item>
-            </dxo-form>
-          </dxo-editing>
           <!--Data column-->
-          <dxi-column dataField="liqDate"
-                      caption="일자"
-                      dataType="date"
-                      format="yyyy-MM-dd"
-                      alignment="center">
+          <dxi-column dataField="DONUM"
+                      alignment="center"
+                      caption="출고지시번호">
           </dxi-column>
 
-          <dxi-column dataField="liqInsNum"
-                      caption="지시번호">
+          <dxi-column dataField="DODAT"
+                      caption="출고지시일자"
+                      dataType="date"
+                      alignment="center"
+                      format="yyyy-MM-dd">
+
           </dxi-column>
-          <dxi-column dataField="liqCliName"
-                      caption="거래처명">
+          <dxi-column dataField="ZSEQ"
+                      caption="출고지시순번">
           </dxi-column>
-          <dxi-column dataField="liqDestination"
-                      caption="도착지">
+          <dxi-column dataField="INDAT"
+                      caption="출고지시일"
+                      dataType="date"
+                      alignment="center"
+                      format="yyyy-MM-dd">
+
           </dxi-column>
-          <dxi-column dataField="liqProduct"
-                      caption="제품">
+          <dxi-column dataField="KUNNR"
+                      alignment="center"
+                      caption="고객 번호">
           </dxi-column>
-          <dxi-column dataField="liqInsQuan"
-                      caption="지시량"
-                      format="#,###">
+          <dxi-column dataField="NAME1"
+                      caption="거래처">
           </dxi-column>
-          <dxi-column dataField="liqVehicleNum"
+          <dxi-column dataField="CITY"
+                      caption="도시">
+          </dxi-column>
+          <dxi-column dataField="STREET"
+                      caption="도로주소">
+          </dxi-column>
+          <dxi-column dataField="MAKTX"
+                      caption="자재내역">
+          </dxi-column>
+          <dxi-column dataField="ZCARNO"
                       caption="차량번호">
           </dxi-column>
-          <dxi-column dataField="liqDriverName"
-                      caption="기사명">
-          </dxi-column>
 
-          <dxi-column dataField="liqAddress"
-                      caption="주소">
+          <dxi-column dataField="ZDRIVER"
+                      alignment="center"
+                      caption="운전기사명">
           </dxi-column>
-          <dxi-column dataField="liqShipType"
-                      caption="출하형태">
+          <dxi-column dataField="ZSTATNM"
+                      alignment="center"
+                      caption="상태">
           </dxi-column>
-          <dxi-column dataField="liqSort"
-                      caption="구분">
-          </dxi-column>
-          <dxi-column dataField="liqDisNum"
-                      caption="배차번호"
+          <dxi-column dataField="JISIMENGE"
+                      caption="수량"
                       format="#,###">
           </dxi-column>
-          <dxi-column dataField="liqCRequest"
-                      caption="C_REQUEST">
+          <dxi-column dataField="MEINS"
+                      alignment="center"
+                      caption="기본단위">
           </dxi-column>
-          <dxi-column dataField="liqCBusiNo"
-                      caption="C_BUSI_NO">
+          <dxi-column dataField="DTYPENM"
+                      alignment="center"
+                      caption="제품구분">
           </dxi-column>
-          <dxi-column dataField="liqCPass"
-                      caption="C_Pass">
+          <dxi-column dataField="BACHNUM"
+                      alignment="center"
+                      caption="배차번호">
           </dxi-column>
-          <dxi-column dataField="liqShipDate"
-                      caption="출하일자"
-                      dataType="date"
-                      format="yyyy-MM-dd"
-                      alignment="center">
+          <dxi-column dataField="VBELN"
+                      alignment="center"
+                      caption="문서번호">
           </dxi-column>
-          <dxi-column dataField="liqShipNum"
-                      caption="출하순번">
+          <dxi-column dataField="POSNR"
+                      alignment="center"
+                      caption="품목">
+          </dxi-column>
+          <dxi-column dataField="ZCARNO"
+                      caption="차량번호"
+                      [visible]="false">
           </dxi-column>
         </dx-data-grid>
       </dxi-tab>
     </dxi-item>
   </dx-form>
 
-  <dx-popup [showTitle]="true"
-            [(visible)]="popupVisible"
-            title="유류출하지시 등록"
-            width="80%"
+
+
+  <!--유류출하 출고지시등록-->
+  <dx-popup width="80%"
             height="80%"
-            [showCloseButton]="false">
-    <dxi-toolbar-item widget="dxButton"
-                      toolbar="bottom"
-                      location="before"
-                      [options]="savesButtonOptions">
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="oilPopupVisible">
+
+
+    <dxi-toolbar-item text="유류 출하 지시등록"
+                      toolbar="top"
+                      location="before">
     </dxi-toolbar-item>
     <dxi-toolbar-item widget="dxButton"
-                      toolbar="bottom"
+                      toolbar="top"
                       location="after"
-                      [options]="closeButtonOptions">
+                      [options]="oilPopupSearchButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="oilPopupSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="oilPopupCloseButtonOptions">
+    </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form direction="row" style="margin-bottom:10px;">
+          <dxi-item location="before" locateInMenu="auto">
+            <div *dxTemplate>
+              <div style="float:left; ">
+                <dx-date-box [(value)]="oilStartDate"
+                             label="시작일(From)"
+                             type="date"
+                             [width]="120"
+                             displayFormat="yyyy-MM-dd"></dx-date-box>
+              </div>
+
+              <div style="float:left; margin-left:10px;">
+                <dx-date-box [(value)]="oilEndDate"
+                             label="종료일(To)"
+                             labelMode="floating"
+                             type="date"
+                             [width]="120"
+                             displayFormat="yyyy-MM-dd"></dx-date-box>
+              </div>
+            </div>
+          </dxi-item>
+        </dx-form>
+        <dx-form direction="row" width="100%" style="margin-bottom: 10px;">
+          <dxi-item>
+            <div style="margin-bottom: 5px;">※ 주문정보</div>
+          </dxi-item>
+          <dxi-item>
+            <div *dxTemplate="let data of 'content'" style="margin-right: 30px;">
+              <dx-data-grid #oilGrid
+                            [dataSource]="orderData"
+                            [showBorders]="true"
+                            [selection]="{ mode: 'single' }"
+                            [columnAutoWidth]="true"
+                            [remoteOperations]="false"
+                            [focusedRowIndex]="0"
+                            [columnResizingMode]="columnResizeMode"
+                            height="calc(60vh - 265px)"
+                            [keyExpr]="['VBELN','POSNR', 'ZMENGE4']"
+                            (onFocusedRowChanging)="orderFocusedRowChanging($event)"
+                            (onFocusedRowChanged)="orderFocusedRowChanged($event)"
+                            (onSelectionChanged)="selectionChanged($event)">
+                <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+                <dxo-paging [pageSize]="5"></dxo-paging>
+                <dxo-pager [showInfo]="true"></dxo-pager>
+                <dxo-filter-row [visible]="true"></dxo-filter-row>
+                <dxi-column dataField="VBELN"
+                            alignment="center"
+                            sortOrder="asc"
+                            caption="출하요청번호">
+                </dxi-column>
+                <dxi-column dataField="POSNR"
+                            alignment="center"
+                            caption="출하요청품목">
+                </dxi-column>
+                <dxi-column dataField="NAME1"
+                            caption="거래처명">
+                </dxi-column>
+                <dxi-column dataField="ARKTX"
+                            caption="유종">
+                </dxi-column>
+                <dxi-column dataField="ZMENGE4"
+                            format="#,###"
+                            caption="출하요청량">
+                </dxi-column>
+                <dxi-column dataField="ZCARNO"
+                            caption="차량번호">
+                </dxi-column>
+                <dxi-column dataField="S_OILNO"
+                            alignment="right"
+                            caption="선적번호(S-OIL)">
+                </dxi-column>
+                <dxi-column dataField="STREET"
+                            caption="주소">
+                </dxi-column>
+                <dxi-column dataField="TDDAT"
+                            format="yyyy-MM-dd"
+                            alignment="center"
+                            dataType="date"
+                            caption="출하희망일">
+                </dxi-column>
+                <dxi-column dataField="TELF1"
+                            caption="전화번호">
+                </dxi-column>
+                <dxi-column dataField="MOBILENO"
+                            alignment="center"
+                            caption="연락처">
+                </dxi-column>
+                <dxi-column dataField="orderVehCapacity"
+                            caption="차량용량">
+                </dxi-column>
+                <dxi-column dataField="orderShipDepart"
+                            alignment="center"
+                            caption="출하여부">
+                </dxi-column>
+              </dx-data-grid>
+
+            </div>
+          </dxi-item>
+        </dx-form>
+
+        <dx-form direction="row" width="100%" style="margin-top: 30px; margin-bottom:10px;">
+          <dxi-item>
+            <div style="margin-bottom: 5px;">※ 재고정보</div>
+          </dxi-item>
+          <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+
+            <dxi-item [colSpan]="6">
+              <div *dxTemplate="let data of 'content'">
+                <dx-data-grid class="dx-card wide-card"
+                              #oilSubGrid
+                              [dataSource]="oilSubData"
+                              [showBorders]="true"
+                              [columnResizingMode]="columnResizeMode"
+                              [selection]="{ mode: 'single' }"
+                              [columnAutoWidth]="true"
+                              [focusedRowIndex]="0"
+                              height="calc(60vh - 275px)"
+                              [keyExpr]="['ZIIPNO','ZTANK', 'ZGR_QTY']"
+                              (onFocusedRowChanging)="onFocusedRowChanging($event)"
+                              (onSelectionChanged)="oilSubselectionChanged($event)">
+
+                  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+                  <dxo-paging [pageSize]="5"></dxo-paging>
+                  <dxo-pager [showInfo]="true"></dxo-pager>
+                  <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+                  <dxi-column dataField="ZARRDT"
+                              sortOrder="asc"
+                              format="yyyy-MM-dd"
+                              dataType="date"
+                              alignment="center"
+                              caption="통관일">
+                  </dxi-column>
+                  <dxi-column dataField="ZIIPNO"
+                              caption="통관번호">
+                  </dxi-column>
+                  <dxi-column dataField="MAKTX"
+                              alignment="center"
+                              caption="유종">
+                  </dxi-column>
+                  <dxi-column dataField="ZTANK"
+                              alignment="center"
+                              caption="탱크번호">
+                  </dxi-column>
+                  <dxi-column dataField="ZGR_QTY"
+                              format="#,###"
+                              caption="통관물량">
+                  </dxi-column>
+                  <dxi-column dataField="ZSTOCK"
+                              format="#,###"
+                              caption="재고량">
+                  </dxi-column>
+                  <dxi-column dataField="ZGI_RSV_QTY"
+                              format="#,###"
+                              caption="출하량">
+                  </dxi-column>
+                  <dxi-column dataField="ChulHaJaeGo"
+                              format="#,###"
+                              caption="출하가능수량">
+                  </dxi-column>
+                  <!--<dxi-column dataField="ZGI_RSV_QTY"
+                              format="#,###"
+                              caption="KL물량">
+                  </dxi-column>-->
+                  <!--<dxi-column dataField="shipper"
+                              caption="화주">
+                  </dxi-column>-->
+                  <dxi-column dataField="ZCARRN"
+                              caption="선박">
+                  </dxi-column>
+                </dx-data-grid>
+              </div>
+            </dxi-item>
+            <dxi-item [colSpan]="2">
+              <dx-form width="100%" [formData]="oilSubFormData" style="margin-right: 30px;">
+                <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+                  <dxi-item dataField="ZARRDT" [colSpan]="2" editorType="dxDateBox" [editorOptions]="{dataType:'date',  displayFormat:'yyyy-MM-dd' }">
+                    <dxo-label text="통관일자"></dxo-label>
+                  </dxi-item>
+                  <!--<dxi-item dataField="orderCliName"  >
+                    <dxo-label text="B/L번호"></dxo-label>
+                  </dxi-item>-->
+                </dxi-item>
+                <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+                  <dxi-item dataField="ZCARRN" [colSpan]="2">
+                    <dxo-label text="선박"></dxo-label>
+                  </dxi-item>
+                  <!--<dxi-item dataField="orderCliName" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+                    <dxo-label text="B/L물량"></dxo-label>
+                  </dxi-item>-->
+                </dxi-item>
+                <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+                  <!--<dxi-item dataField="ARKTX" >
+                    <dxo-label text="화주"></dxo-label>
+                  </dxi-item>-->
+                  <dxi-item dataField="ZGR_QTY" [colSpan]="2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+                    <dxo-label text="통관물량"></dxo-label>
+                  </dxi-item>
+                </dxi-item>
+                <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+                  <dxi-item dataField="MATNRNM" [colSpan]="2">
+                    <dxo-label text="유종"></dxo-label>
+                  </dxi-item>
+                  <!--<dxi-item dataField="orderCliName" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+                    <dxo-label text="출고누계" ></dxo-label>
+                  </dxi-item>-->
+                </dxi-item>
+                <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+                  <dxi-item dataField="ZIIPNO" [colSpan]="2">
+                    <dxo-label text="통관번호"></dxo-label>
+                  </dxi-item>
+
+                </dxi-item>
+                <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+                  <!--<dxi-item dataField="ZIIPNO">
+                    <dxo-label text="통관번호"></dxo-label>
+                  </dxi-item>-->
+                  <dxi-item dataField="ZSTOCK" [colSpan]="2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+                    <dxo-label text="재고물량"></dxo-label>
+                  </dxi-item>
+                </dxi-item>
+              </dx-form>
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+
+        <dx-box direction="row" width="100%" [height]="75">
+          <dxi-item [ratio]="5">
+            <dx-form style="margin-top: 25px;" width="97%"
+                     [formData]="oilFormData">
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="OrderDate" [colSpan]="2" editorType="dxDateBox" [editorOptions]="{dataType:'date',  displayFormat:'yyyy-MM-dd' }">
+                  <dxo-label text="통관일자"></dxo-label>
+                </dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <!--<dxi-item dataField="ZSHIPMENT_NO" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="배차번호"></dxo-label>
+                </dxi-item>-->
+              </dxi-item>
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="ARKTX" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="유종"></dxo-label>
+                </dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <!--<dxi-item dataField="orderCliName" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="출하지시번호"></dxo-label>
+                </dxi-item>-->
+              </dxi-item>
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="NAME1" editorType="dxTextBox" [colSpan]="2">
+                  <dxo-label text="거래처"></dxo-label>
+                </dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item dataField="VBELN" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="출하요청번호"></dxo-label>
+                </dxi-item>
+              </dxi-item>
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+
+                <dxi-item dataField="ZCARNO" [colSpan]="2">
+                  <dxo-label text="차량번호"></dxo-label>
+                  <div *dxTemplate>
+                    <nh-possible-comm #carDataCodeEntery
+                                      [dataStoreKey]="dataStoreKey"
+                                      [codeInfo]="carDataCode"
+                                      valueColumn="ZCARNO"
+                                      [showClearButton]="true"
+                                      valueDisplayFormat="%ZCARNO%"
+                                      width="auto"
+                                      [(selectedValue)]="carDataValue"
+                                      popupGridScrollMode="standard"
+                                      [popupGridPagingMode]="true"
+                                      [popupGridPageSize]="10"
+                                      [gridBoxWidth]="500"
+                                      class="weight-test"
+                                      [showDataLoadingPanel]="showDataLoadingPanel"
+                                      (onEntryValueChanged)="onZcarNoCodeValueChanged($event)"></nh-possible-comm>
+                  </div>
+                </dxi-item>
+                <dxi-item dataField="ZRFID" [disabled]="true">
+                  <dxo-label text="RFID" [visible]="false"></dxo-label>
+                </dxi-item>
+                <dxi-item dataField="ZDRIVER" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="기사명"></dxo-label>
+                </dxi-item>
+                <dxi-item dataField="ZPHONE" [disabled]="true">
+                  <dxo-label text="기사전화번호" [visible]="false"></dxo-label>
+                </dxi-item>
+                <dxi-item dataField="TDDAT" editorType="dxDateBox" [editorOptions]="{dataType:'date',  displayFormat:'yyyy-MM-dd' }" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="출하희망일"></dxo-label>
+                </dxi-item>
+              </dxi-item>
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="S_OILNO" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="S-OIL선적번호"></dxo-label>
+                </dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item dataField="CHJANG" editorType="dxNumberBox" [editorOptions]="{value: '1' }" [colSpan]="2" [disabled]="true">
+                  <dxo-label text="출하장"></dxo-label>
+                </dxi-item>
+              </dxi-item>
+
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+
+                <dxi-item dataField="ZMENGE4" [colSpan]="2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+                  <dxo-label text="출하지시물량"></dxo-label>
+                  <dxi-validation-rule type="pattern"
+                                       pattern="^[0-9]"
+                                       message="숫자만 입력해주세요.">
+                  </dxi-validation-rule>
+                </dxi-item>
+                <dxi-item dataField="GEWEI" [disabled]="true">
+                  <dxo-label text="단위" [visible]="false"></dxo-label>
+                </dxi-item>
+                <dxi-item>
+                </dxi-item>
+                <dxi-item [colSpan]="2">
+                </dxi-item>
+                <dxi-item dataField="VRKME" [colSpan]="2">
+                  <dxo-label text="출하단위"></dxo-label>
+                </dxi-item>
+              </dxi-item>
+
+
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="STREET" [colSpan]="2">
+                  <dxo-label text="도착지"></dxo-label>
+                </dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item dataField="VSBED" [colSpan]="2">
+                  <dxo-label text="출하방법"></dxo-label>
+                </dxi-item>
+              </dxi-item>
+
+
+
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="gubun" [colSpan]="2">
+                  <dxo-label text="판매구분"></dxo-label>
+                </dxi-item>
+                <dxi-item [colSpan]="2"> </dxi-item>
+                <dxi-item [colSpan]="2"></dxi-item>
+                <dxi-item dataField="ZTANK" [colSpan]="2">
+                  <dxo-label text="출하탱크"></dxo-label>
+                </dxi-item>
+              </dxi-item>
+
+
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="RACK" [colSpan]="2">
+                  <dxo-label text="RACK"></dxo-label>
+                </dxi-item>
+                <dxi-item dataField="PUMP" [colSpan]="2">
+                  <dxo-label text="PUMP"></dxo-label>
+                </dxi-item>
+                <dxi-item [colSpan]="2" horizontalAlignment="center">
+                  <div class="dx-field-value">
+                    <dx-check-box [value]="false" #chkgbox text="통관재고 잔량 처리"></dx-check-box>
+                  </div>
+                </dxi-item>
+
+                <dxi-item dataField="jisija" [colSpan]="2">
+                  <dxo-label text="출하지시자"></dxo-label>
+                </dxi-item>
+              </dxi-item>
+
+
+
+              <dxi-item itemType="group" [colCount]="8" [colSpan]="2" style="margin-top:5px;">
+                <dxi-item dataField="ZTEXT" [colSpan]="8" [label]="{text: '지시사항'}" [editorOptions]="{  maxLength: 20 }">
+                </dxi-item>
+              </dxi-item>
+
+            </dx-form>
+          </dxi-item>
+          <dxi-item [ratio]="1" style="margin-left:10px;">
+            <dx-form style="margin-top: 170px; margin-left:10px;" width="100%">
+              <dxi-item widget="dxButton">
+                <dx-button stylingMode="contained"
+                           text="차량배차"
+                           type="normal"
+                           (onClick)="carChoice()"
+                           [width]="150">
+                </dx-button>
+              </dxi-item>
+              <!--<dxi-item widget="dxButton">
+                <dx-button stylingMode="contained"
+                           text="거래처등록"
+                           type="normal"
+                           (onClick)="carOldAllocation()"
+                           [width]="150">
+                </dx-button>
+              </dxi-item>-->
+            </dx-form>
+          </dxi-item>
+        </dx-box>
+      </div>
+    </dx-scroll-view>
+
+  </dx-popup>
+
+  <!--화학출하 출고지시등록-->
+  <dx-popup width="80%"
+            height="80%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="chemicalPopupVisible">
+    <dxi-toolbar-item text="화학 출하 지시등록"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="chemicalPopupSearchButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="chemicalSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="chemicalCloseButtonOptions">
     </dxi-toolbar-item>
     <dx-scroll-view width="100%" height="100%">
-      <dx-form>
-        <dxi-item>
-          <div *dxTemplate="let data of 'content'">
-            <dx-toolbar style="height: 40px; margin-top: 5px;">
-              <dxi-item location="before" widget="dxButton" locateInMenu="never">
-                <div *dxTemplate>
-                  <div class="toolbar-label"><b>요청일자</b></div>
-                </div>
-              </dxi-item>
-              <dxi-item location="before">
-                <div *dxTemplate>
-                  <div style="float:left">
-                    <dx-date-box [(value)]="startDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
-                  </div>
-                  <div style="float:left; margin-left:10px; margin-right:10px;">
-                    ~
-                  </div>
-                  <div style="float:left">
-                    <dx-date-box [(value)]="endDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
-                  </div>
-                </div>
-              </dxi-item>
+      <!--툴바-->
+      <dx-form direction="row" style="margin-bottom:10px;">
+        <dxi-item location="before" locateInMenu="auto">
+          <div *dxTemplate>
+            <div style="float:left; ">
+              <dx-date-box [(value)]="cheStartDate"
+                           label="시작일(From)"
+                           type="date"
+                           [width]="120"
+                           displayFormat="yyyy-MM-dd"></dx-date-box>
+            </div>
 
-              <dxi-item location="before"
-                        widget="dxButton"
-                        locateInMenu="auto"
-                        [height]="25"
-                        [options]="searchButtonOptions">
-              </dxi-item>
-              <dxi-item location="after"
-                        widget="dxButton"
-                        locateInMenu="auto"
-                        [options]="saveButtonOptions">
-              </dxi-item>
-
-            </dx-toolbar>
+            <div style="float:left; margin-left:10px;">
+              <dx-date-box [(value)]="cheEndDate"
+                           label="종료일(To)"
+                           labelMode="floating"
+                           type="date"
+                           [width]="120"
+                           displayFormat="yyyy-MM-dd"></dx-date-box>
+            </div>
           </div>
         </dxi-item>
       </dx-form>
-      <dx-form direction="row" width="100%" [height]="170" style="margin-bottom: 20px;">
+
+
+      <dx-form direction="row" width="100%" style="margin-bottom: 10px;">
         <dxi-item>
           <div style="margin-bottom: 5px;">※ 주문정보</div>
         </dxi-item>
         <dxi-item>
-          <div *dxTemplate="let data of 'content'">
+          <div *dxTemplate="let data of 'content'" style="margin-right: 30px;">
+
             <dx-data-grid class="dx-card wide-card"
-                          [dataSource]="orderinfo"
+                          [dataSource]="cheOrderData"
                           [showBorders]="true"
                           [selection]="{ mode: 'single' }"
                           [columnAutoWidth]="true"
                           [focusedRowIndex]="0"
-                          [width]="1500"
-                          keyExpr="orderCBusiNo"
-                          [focusedRowEnabled]="true"
-                          (onFocusedRowChanging)="orderFocusedRowChanging($event)"
-                          (onFocusedRowChanged)="orderFocusedRowChanged($event)">
+                          keyExpr="VGBEL"
+                          [columnResizingMode]="columnResizeMode"
+                          (onFocusedRowChanging)="cheFocusedRowChanging($event)"
+                          (onSelectionChanged)="cheselectionChanged($event)">
               <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
-              <dxo-paging [pageSize]="10"></dxo-paging>
-              <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+              <dxo-paging [pageSize]="5"></dxo-paging>
+              <dxo-pager [showInfo]="true"></dxo-pager>
               <dxo-filter-row [visible]="true"></dxo-filter-row>
-              <dxi-column dataField="orderOrderSort"
-                          caption="주문구분">
+              <dxi-column dataField="ZSHIPMENT_NO"
+                          alignment="center"
+                          caption="배차번호">
               </dxi-column>
-              <dxi-column dataField="orderCliName"
+              <dxi-column dataField="ARKTX"
+                          caption="제품">
+              </dxi-column>
+              <dxi-column dataField="NAME1"
                           caption="거래처명">
               </dxi-column>
-              <dxi-column dataField="orderOilClass"
-                          caption="유종">
-              </dxi-column>
-              <dxi-column dataField="orderShipReqQuan"
-                          format="#,###"
-                          caption="출하요청량">
-              </dxi-column>
-              <dxi-column dataField="orderVehicleNum"
+              <dxi-column dataField="ZCARNO"
                           caption="차량번호">
               </dxi-column>
-              <dxi-column dataField="orderShipNum"
-                          caption="선적번호">
-              </dxi-column>
-              <dxi-column dataField="orderAddress"
-                          caption="주소">
-              </dxi-column>
-              <dxi-column dataField="orderShipDate"
-                          format="yyyy-MM-dd"
+              <dxi-column dataField="VSBED"
                           alignment="center"
-                          dataType="date"
-                          caption="출하희망일">
+                          caption="운송조건">
               </dxi-column>
-              <dxi-column dataField="orderOfficeNum"
-                          caption="전화번호">
+              <dxi-column dataField="CITY"
+                          caption="도착지">
               </dxi-column>
-              <dxi-column dataField="orderPhoneNum"
+              <dxi-column dataField="ZMENGE4"
+                          format="#,###"
+                          caption="주문량">
+              </dxi-column>
+              <dxi-column dataField="VBELN"
                           alignment="center"
-                          caption="연락처">
-              </dxi-column>
-              <dxi-column dataField="orderVehCapacity"
-                          caption="차량용량">
-              </dxi-column>
-              <dxi-column dataField="orderShipDepart"
-                          alignment="center"
-                          caption="출하여부">
-              </dxi-column>
-              <dxi-column dataField="orderCRequest"
-                          caption="C_REQUEST">
+                          caption="출하요청번호">
               </dxi-column>
               <dxi-column dataField="orderSDate"
                           dataType="date"
                           format="yyyy-MM-dd"
                           alignment="center"
-                          caption="S_DATE">
-              </dxi-column>
-              <dxi-column dataField="orderCBusiNo"
-                          caption="C_BUSI_NO">
-              </dxi-column>
-              <dxi-column dataField="orderCOrder"
-                          caption="C_ORDER">
-              </dxi-column>
-
-              <dxi-column dataField="orderCOil"
-                          caption="C_OIL">
-              </dxi-column>
-
-              <dxi-column dataField="orderTemp"
-                          caption="temp">
-              </dxi-column>
-            </dx-data-grid>
-
-          </div>
-        </dxi-item>
-      </dx-form>
-      <dx-form>
-        <dxi-item>
-          <div style="margin-top: 5px; margin-bottom: 5px;">※ 재고등록</div>
-        </dxi-item>
-      </dx-form>
-      <dx-box direction="row" width="100%" [height]="200" style="margin-top: 10px;">
-
-        <dxi-item [ratio]="1" [baseSize]="900">
-          <div *dxTemplate="let data of 'content'">
-            <dx-data-grid class="dx-card wide-card"
-                          [dataSource]="invenlist"
-                          [showBorders]="true"
-                          [columnAutoWidth]="true"
-                          [selection]="{ mode: 'single' }"
-                          [focusedRowIndex]="0"
-                          [width]="900"
-                          keyExpr="cusNum"
-                          [focusedRowEnabled]="true"
-                          (onFocusedRowChanging)="onFocusedRowChanging($event)"
-                          (onFocusedRowChanged)="onFocusedRowChanged($event)">
-              <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
-              <dxo-paging [pageSize]="10"></dxo-paging>
-              <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-              <dxo-filter-row [visible]="true"></dxo-filter-row>
-
-              <dxi-column dataField="cusDate"
-                          format="yyyy-MM-dd"
-                          dataType="date"
-                          alignment="center"
-                          caption="통관일">
-              </dxi-column>
-              <dxi-column dataField="cusNum"
-                          caption="통관번호">
-              </dxi-column>
-              <dxi-column dataField="oilClass"
-                          caption="유종">
-              </dxi-column>
-              <dxi-column dataField="tankNum"
-                          caption="탱크번호">
-              </dxi-column>
-              <dxi-column dataField="cusQuan"
-                          format="#,###"
-                          caption="통관물량">
-              </dxi-column>
-              <dxi-column dataField="invenQuan"
-                          format="#,###"
-                          caption="재고량">
-              </dxi-column>
-              <dxi-column dataField="shipQuan"
-                          format="#,###"
-                          caption="출하량">
-              </dxi-column>
-              <dxi-column dataField="klQuan"
-                          format="#,###"
-                          caption="KL물량">
-              </dxi-column>
-              <dxi-column dataField="shipper"
-                          caption="화주">
-              </dxi-column>
-              <dxi-column dataField="ship"
-                          caption="선박">
-              </dxi-column>
-              <dxi-column dataField="dPass"
-                          caption="D_PASS">
-              </dxi-column>
-              <dxi-column dataField="sBlNo"
-                          caption="S_BL_NO">
-              </dxi-column>
-              <dxi-column dataField="sPassNo"
-                          caption="S_PASS_NO">
-              </dxi-column>
-            </dx-data-grid>
-          </div>
-        </dxi-item>
-        <dxi-item [ratio]="2" [baseSize]="250">
-          <dx-form style="margin-top: 35px;">
-            <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-              <dxi-item dataField="cusDate" caption="통관일자">
-                <div id="cusDate">{{ cusDate }}</div>
-              </dxi-item>
-              <dxi-item dataField="sBlNo" caption="BL번호">
-                <div id="sBlNo">{{ sBlNo }}</div>
-              </dxi-item>
-              <dxi-item dataField="ship" caption="선박">
-                <div id="ship">{{ ship }}</div>
-              </dxi-item>
-              <dxi-item dataField="klQuan" caption="BL물량">
-                <div id="klQuan">{{ klQuan }}</div>
-              </dxi-item>
-              <dxi-item dataField="shipper" caption="화주">
-                <div id="shipper">{{ shipper }}</div>
-              </dxi-item>
-              <dxi-item dataField="cusQuan" caption="통관물량">
-                <div id="cusQuan">{{ cusQuan }}</div>
-              </dxi-item>
-              <dxi-item dataField="oilClass" caption="유종">
-                <div id="oilClass">{{ oilClass }}</div>
-              </dxi-item>
-              <dxi-item dataField="shipQuan" caption="출고누계">
-                <div id="shipQuan">{{ shipQuan }}</div>
-              </dxi-item>
-              <dxi-item dataField="cusNum" caption="통관번호">
-                <div id="cusNum">{{ cusNum }}</div>
-              </dxi-item>
-              <dxi-item dataField="invenQuan" caption="재고물량">
-                <div id="invenQuan">{{ invenQuan }}</div>
-              </dxi-item>
-
-            </dxi-item>
-          </dx-form>
-        </dxi-item>
-      </dx-box>
-      <dx-box direction="row" width="100%">
-        <dxi-item [ratio]="0" [baseSize]="800">
-          <dx-form style="margin-top: 25px;">
-
-            <dxi-item dataField="orderShipDate">
-              <dxo-label text="출하지시일"></dxo-label>
-              <dx-date-box type="date"
-                           [(value)]="now"
-                           displayFormat="yyyy-MM-dd"
-                           [useMaskBehavior]="true"
-                           [showClearButton]="true"
-                           [height]="30"
-                           [width]="300">
-              </dx-date-box>
-            </dxi-item>
-
-            <dxi-item dataField="orderOilClass">
-              <dxo-label text="유종"></dxo-label>
-              <div id="orderOilClass">{{ orderOilClass }}</div>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="거래처"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item [ratio]="1">
-              <dxo-label text="차량번호"></dxo-label>
-              <dx-box direction="row"
-                      width="100%"
-                      height="30px">
-
-                <dxi-item dataField="orderVehicleNum" [ratio]="0" [baseSize]="350">
-                  <div id="orderVehicleNum">{{ orderVehicleNum }}</div>
-                </dxi-item>
-
-                <dxi-item dataField="orderVehicleNum" [ratio]="0" [baseSize]="150">
-                  <div id="orderCBusiNo">{{ orderCBusiNo }}</div>
-                </dxi-item>
-                <dxi-item dataField="orderVehicleNum" [ratio]="0" [baseSize]="150">
-                  <div id="orderCliName">{{ orderCliName }}</div>
-                </dxi-item>
-                <dxi-item dataField="orderVehicleNum" [ratio]="0" [baseSize]="150">
-                  <div id="orderPhoneNum">{{ orderPhoneNum }}</div>
-                </dxi-item>
-              </dx-box>
-            </dxi-item>
-            <dxi-item dataField="orderShipNum">
-              <dxo-label text="S-OIL선적번호"></dxo-label>
-              <div id="orderShipNum">{{ orderShipNum }}</div>
-            </dxi-item>
-
-
-
-            <dxi-item [ratio]="1">
-              <dxo-label text="출하지시물량"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-
-              <dx-box direction="row" width="100%">
-                <dxi-item dataField="orderShipReqQuan" [ratio]="0" [baseSize]="300">
-                  <dx-text-box></dx-text-box>
-                </dxi-item>
-                <dxi-item [ratio]="0" [baseSize]="50">
-                  <div style="margin-top: 8px;">KL</div>
-                </dxi-item>
-                <dxi-item [ratio]="0" [baseSize]="100">
-                  <div style="margin-top: 8px;">재고량:</div>
-                </dxi-item>
-                <dxi-item dataField="invenQuan" [ratio]="0" [baseSize]="150">
-                  <div id="invenQuan" style="margin-top: 8px;">{{ invenQuan }}</div>
-                </dxi-item>
-              </dx-box>
-            </dxi-item>
-
-            <dxi-item dataField="orderAddress" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="도착지"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderOrderSort">
-              <dxo-label text="판매구분"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue1"
-                                  valueExpr="Num"
-                                  displayExpr="Sort"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="salessort"
-                                  [height]="30"
-                                  [width]="300">
-
-                  <dx-data-grid [dataSource]="salessort"
-                                [columns]="['Sort']"
-                                [selection]="{ mode: 'single' }"
-                                [filterRow]="{ visible: true }"
-                                [height]="200"
-                                keyExpr="Num"
-                                [(selectedRowKeys)]="gridBoxValue1">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-            <dxi-item dataField="orderTemp" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="RACK"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue2"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="rack"
-                                  [height]="30"
-                                  [width]="300">
-
-                  <dx-data-grid [dataSource]="rack"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [filterRow]="{ visible: true }"
-                                [height]="200"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue2">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-            <dxi-item dataField="orderNote" [editorOptions]="{ height: 60, width:300}">
-              <dxo-label text="지시사항"></dxo-label>
-            </dxi-item>
-
-          </dx-form>
-        </dxi-item>
-
-        <dxi-item [ratio]="1" [baseSize]="200">
-          <dx-form style="margin-top: 25px;">
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하요청번호"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하지시번호"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="배차번호"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하희망일"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하장"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하단위"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하방법"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하탱크"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하지시자"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-          </dx-form>
-        </dxi-item>
-        <dxi-item [ratio]="0" [baseSize]="130">
-          <dx-form style="margin-top: 20px;">
-            <dxi-item widget="dxButton">
-              <dx-button stylingMode="contained"
-                         text="차량배차"
-                         type="normal"
-                         (onClick)="moveRecords()"
-                         [width]="150">
-              </dx-button>
-            </dxi-item>
-            <dxi-item widget="dxButton">
-              <dx-button stylingMode="contained"
-                         text="거래처등록"
-                         type="normal"
-                         (onClick)="RegisRecords()"
-                         [width]="150">
-              </dx-button>
-            </dxi-item>
-          </dx-form>
-        </dxi-item>
-      </dx-box>
-    </dx-scroll-view>
-
-  </dx-popup>
-
-
-  <dx-popup [showTitle]="true"
-            [(visible)]="liqpopupVisible"
-            title="액상출하지시 등록"
-            width="80%"
-            height="80%"
-            [showCloseButton]="false">
-    <dxi-toolbar-item widget="dxButton"
-                      toolbar="bottom"
-                      location="before"
-                      [options]="liqsavesButtonOptions">
-    </dxi-toolbar-item>
-    <dxi-toolbar-item widget="dxButton"
-                      toolbar="bottom"
-                      location="after"
-                      [options]="liqcloseButtonOptions">
-    </dxi-toolbar-item>
-    <dx-scroll-view width="100%" height="100%">
-      <dx-form>
-        <dxi-item>
-          <div *dxTemplate="let data of 'content'">
-            <dx-toolbar style="height: 40px; margin-top: 5px;">
-              <dxi-item location="before" widget="dxButton" locateInMenu="never">
-                <div *dxTemplate>
-                  <div class="toolbar-label"><b>요청일자</b></div>
-                </div>
-              </dxi-item>
-              <dxi-item location="before">
-                <div *dxTemplate>
-                  <div style="float:left">
-                    <dx-date-box [(value)]="startDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
-                  </div>
-                  <div style="float:left; margin-left:10px; margin-right:10px;">
-                    ~
-                  </div>
-                  <div style="float:left">
-                    <dx-date-box [(value)]="endDate" type="date" [width]="100" displayFormat="yyyy-MM-dd"></dx-date-box>
-                  </div>
-                </div>
-              </dxi-item>
-
-              <dxi-item location="before"
-                        widget="dxButton"
-                        locateInMenu="auto"
-                        [height]="25"
-                        [options]="searchButtonOptions">
-              </dxi-item>
-              <dxi-item location="after"
-                        widget="dxButton"
-                        locateInMenu="auto"
-                        [options]="saveButtonOptions">
-              </dxi-item>
-
-            </dx-toolbar>
-          </div>
-        </dxi-item>
-      </dx-form>
-      <dx-form direction="row" width="100%" [height]="300" style="margin-bottom: 50px;">
-        <dxi-item>
-          <div style="margin-bottom: 5px;">※ 주문정보</div>
-        </dxi-item>
-        <dxi-item>
-          <div *dxTemplate="let data of 'content'">
-
-            <dx-data-grid class="dx-card wide-card"
-                          [dataSource]="liqorderinfo"
-                          [showBorders]="true"
-                          [selection]="{ mode: 'single' }"
-                          [columnAutoWidth]="true"
-                          [focusedRowIndex]="0"
-                          [width]="1500"
-                          [height]="300"
-                          keyExpr="liqAlloNum"
-                          [focusedRowEnabled]="true"
-                          [allowColumnResizing]="true"
-                          columnResizingMode="nextColumn"
-                          (onFocusedRowChanging)="liqFocusedRowChanging($event)"
-                          (onFocusedRowChanged)="liqFocusedRowChanged($event)">
-              <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
-              <dxo-paging [pageSize]="10"></dxo-paging>
-              <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-              <dxo-filter-row [visible]="true"></dxo-filter-row>
-              <dxi-column dataField="liqAlloNum"
-                          caption="배차번호">
-              </dxi-column>
-              <dxi-column dataField="liqProduct"
-                          caption="제품">
-              </dxi-column>
-              <dxi-column dataField="liqCliName"
-                          caption="거래처명">
-              </dxi-column>
-              <dxi-column dataField="liqAlloVol"
-                          format="#,###"
-                          caption="배차물량">
-              </dxi-column>
-              <dxi-column dataField="liqVehicleNum"
-                          caption="차량번호">
-              </dxi-column>
-              <dxi-column dataField="liqTransCon"
-                          caption="운송조건">
-              </dxi-column>
-              <dxi-column dataField="liqDest"
-                          caption="도착지">
-              </dxi-column>
-              <dxi-column dataField="liqOrderQuan"
-                          format="#,###"
-                          caption="주문량">
-              </dxi-column>
-              <dxi-column dataField="liqShipReqNum"
-                          caption="출하요청번호">
-              </dxi-column>
-              <dxi-column dataField="liqDelStartDat"
-                          dataType="date"
-                          alignment="center"
-                          format="yyyy-MM-dd"
                           caption="납기시작일">
               </dxi-column>
-              <dxi-column dataField="liqDelEndDat"
+              <dxi-column dataField="orderEDate"
                           dataType="date"
-                          alignment="center"
                           format="yyyy-MM-dd"
+                          alignment="center"
                           caption="납기종료일">
               </dxi-column>
-              <dxi-column dataField="liqAddress"
+              <dxi-column dataField="STREET"
                           caption="주소">
               </dxi-column>
-              <dxi-column dataField="liqSBusiNum"
-                          caption="S_BUSI_NUM">
-              </dxi-column>
-              <dxi-column dataField="liqSTransCond"
-                          caption="S_TRANS_COND">
-              </dxi-column>
-              <dxi-column dataField="liqSArryPlace"
-                          caption="S_ARRV_PLACE">
-              </dxi-column>
-              <dxi-column dataField="liqCProd"
-                          caption="C_PROD">
-              </dxi-column>
-              <dxi-column dataField="liqSPreordNum"
-                          format="#,###"
-                          caption="S_PREORD_NUM">
-              </dxi-column>
-              <dxi-column dataField="liqSOrdNum"
-                          format="#,###"
-                          caption="S_ORD_NUM">
-              </dxi-column>
 
-              <dxi-column dataField="liqCCustTrans"
-                          caption="C_CUST_TRANS">
-              </dxi-column>
-
-              <dxi-column dataField="liqCDCode"
-                          caption="C_DCODE">
-              </dxi-column>
             </dx-data-grid>
 
           </div>
         </dxi-item>
       </dx-form>
-      <dx-box direction="row" width="100%" style="margin-top: 10px;">
-        <dxi-item [ratio]="0" [baseSize]="1000">
-          <dx-form style="margin-top: 25px;">
-
-            <dxi-item dataField="liqDelStartDat">
-              <dxo-label text="출하지시일"></dxo-label>
-              <dx-date-box type="date"
-                           [(value)]="now"
-                           displayFormat="yyyy-MM-dd"
-                           [useMaskBehavior]="true"
-                           [showClearButton]="true"
-                           [height]="30"
-                           [width]="300">
-              </dx-date-box>
-            </dxi-item>
-
-            <dxi-item dataField="liqShipReqNum">
-              <dxo-label text="출하요청번호"></dxo-label>
-              <div id="liqShipReqNum">{{ liqShipReqNum }}</div>
-            </dxi-item>
-            <dxi-item dataField="liqSOrdNum">
-              <dxo-label text="출하지시번호"></dxo-label>
-              <div id="liqSOrdNum">{{ liqSOrdNum }}</div>
-            </dxi-item>
-            <dxi-item dataField="liqProduct" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="제품"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-
-            <dxi-item dataField="liqCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="거래처"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-
-            <dxi-item [ratio]="1">
-              <dxo-label text="차량번호"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <dx-box direction="row"
-                      width="100%"
-                      height="30px">
-
-                <dxi-item dataField="liqVehicleNum" [ratio]="0" [baseSize]="300">
-                  <dx-text-box></dx-text-box>
-                </dxi-item>
-
-                <dxi-item dataField="orderVehicleNum" [ratio]="0" [baseSize]="150" style="margin-left: 50px;">
-                  <div id="orderCBusiNo">{{ orderCBusiNo }}</div>
-                </dxi-item>
-                <dxi-item dataField="orderVehicleNum" [ratio]="0" [baseSize]="150">
-                  <div id="orderCliName">{{ orderCliName }}</div>
-                </dxi-item>
-                <dxi-item dataField="orderVehicleNum" [ratio]="0" [baseSize]="150">
-                  <div id="orderPhoneNum">{{ orderPhoneNum }}</div>
-                </dxi-item>
-              </dx-box>
-            </dxi-item>
-
-            <dxi-item dataField="liqCCustTrans" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="황산분석치"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="liqSPreordNum" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하지시물량"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-
-
-            <dxi-item [ratio]="1">
-              <dxo-label text="배차물량"></dxo-label>
-              <dx-box direction="row" width="100%" height="30px">
-
-                <dxi-item dataField="liqAlloVol" [ratio]="0" [baseSize]="350">
-                  <div id="liqAlloVol">{{ liqAlloVol }}</div>
-                </dxi-item>
-                <dxi-item dataField="liqAlloVol" [ratio]="0" [baseSize]="150">
-                  <div id="liqAlloVol">{{ liqAlloVol }}</div>
-                </dxi-item>
-                <dxi-item dataField="liqAlloVol" [ratio]="0" [baseSize]="150">
-                  <div id="liqAlloVol">{{ liqAlloVol }}</div>
-                </dxi-item>
-
-              </dx-box>
-            </dxi-item>
-
-          </dx-form>
+      <dx-form style="margin-top: 30px;"
+               width="97%"
+               direction="row"
+               [formData]="cheFormData">
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2">
+          <dxi-item dataField="OrderDate" [colSpan]="2" editorType="dxDateBox" [editorOptions]="{dataType:'date',  displayFormat:'yyyy-MM-dd' }">
+            <dxo-label text="통관일자"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item dataField="STREET" [colSpan]="4">
+            <dxo-label text="도착지"></dxo-label>
+          </dxi-item>
         </dxi-item>
 
-        <dxi-item [ratio]="1" [baseSize]="300">
-          <dx-form style="margin-top: 25px;">
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="도착지"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 60, width:300}">
-              <dxo-label text="지시사항"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="RACK-Pump"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="판매구분"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하장"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하단위"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하방법"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하탱크"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="출하지시자"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-            <dxi-item dataField="orderCliName" [editorOptions]="{ height: 30, width:300}">
-              <dxo-label text="운송사"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-            </dxi-item>
-          </dx-form>
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="VBELN" [colSpan]="2" [disabled]="true">
+            <dxo-label text="출하요청번호"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item dataField="ZTEXT" [colSpan]="4">
+            <dxo-label text="지시사항"></dxo-label>
+          </dxi-item>
         </dxi-item>
-      </dx-box>
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="jisinumber" editorType="dxTextBox" [colSpan]="2">
+            <dxo-label text="출하지시번호"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item dataField="RACK" [colSpan]="2">
+            <dxo-label text="RACK"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="PUMP" [colSpan]="2">
+            <dxo-label text="PUMP"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ARKTX" [colSpan]="2">
+            <dxo-label text="제품"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item dataField="gubun" [colSpan]="2">
+            <dxo-label text="판매구분"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2">
+            <div class="dx-field-value">
+              <dx-check-box [value]="false" #chechkgbox text="타소 장치 출하"></dx-check-box>
+            </div>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="NAME1" [colSpan]="2">
+            <dxo-label text="거래처"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item dataField="CHJANG" editorType="dxNumberBox" [colSpan]="2">
+            <dxo-label text="출하장"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+
+          <dxi-item dataField="ZCARNO" [colSpan]="2">
+            <dxo-label text="차량번호"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #cheCarDataCodeEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="cheCarDataCode"
+                                valueColumn="ZCARNO"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%ZCARNO%"
+                                width="auto"
+                                [(selectedValue)]="cheCarDataValue"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onCheZcarNoCodeValueChanged($event)"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="ZRFID" [disabled]="true">
+            <dxo-label text="RFID" [visible]="false"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZDRIVER" [colSpan]="2" [disabled]="true">
+            <dxo-label text="기사명"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZPHONE" [disabled]="true">
+            <dxo-label text="기사전화번호" [visible]="false"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="VRKME" [colSpan]="2">
+            <dxo-label text="출하단위"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="JISANET" [colSpan]="2">
+            <dxo-label text="황산분석치"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item dataField="VSBED" [colSpan]="2">
+            <dxo-label text="출하방법"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+
+
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZMENGE4" [colSpan]="2" ditorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="출하지시물량"></dxo-label>
+          </dxi-item>
+          <dxi-item [colSpan]="2"> </dxi-item>
+          <dxi-item [colSpan]="2"></dxi-item>
+          <dxi-item dataField="ZTANK" [colSpan]="2">
+            <dxo-label text="출하탱크"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+
+
+
+
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+
+          <dxi-item dataField="ZMENGE4" [colSpan]="2" [disabled]="true">
+            <dxo-label text="배차물량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="jungryang" [colSpan]="2" [disabled]="true">
+            <dxo-label text="정량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="gongcha" [colSpan]="2" [disabled]="true">
+            <dxo-label text="공차"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="jisija" [colSpan]="2">
+            <dxo-label text="출하지시자"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="10" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item [colSpan]="2"> </dxi-item>
+          <dxi-item [colSpan]="2"> </dxi-item>
+          <dxi-item [colSpan]="2"> </dxi-item>
+          <dxi-item dataField="wunsong" [colSpan]="2">
+            <dxo-label text="운송사"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+      </dx-form>
     </dx-scroll-view>
   </dx-popup>
+  <!--배차 선택-->
+  <dx-popup width="15%"
+            height="15%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="choicePopupVisible">
 
 
-  </div>
+    <dxi-toolbar-item text="차량배차"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="choicePopupCloseButtonOptions">
+    </dxi-toolbar-item>
+    <dx-scroll-view width="100%" height="100%">
+      <dx-form width="100%">
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+
+          <dxi-item widget="dxButton">
+            <dx-button stylingMode="contained"
+                       text="신규"
+                       type="normal"
+                       (onClick)="carNewAllocation()"
+                       [width]="150">
+            </dx-button>
+          </dxi-item>
+          <dxi-item widget="dxButton">
+            <dx-button stylingMode="contained"
+                       text="합적"
+                       type="normal"
+                       (onClick)="carOldAllocation()"
+                       [width]="150">
+            </dx-button>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+    </dx-scroll-view>
+  </dx-popup>
+  <!--차량 신규 배차-->
+  <dx-popup width="50%"
+            height="60%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="carPopupVisible">
+
+
+    <dxi-toolbar-item text="신규배차"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="carPopupCloseButtonOptions">
+    </dxi-toolbar-item>
+    <dx-scroll-view width="100%" height="100%">
+
+      <dx-form width="100%" [formData]="carFormData">
+        <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+
+          <dxi-item dataField="ZCARNO" [disabled]="true">
+            <dxo-label text="차량번호"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #carDataCodeEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="carDataCode"
+                                valueColumn="ZCARNO"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%ZCARNO%"
+                                width="auto"
+                                [(selectedValue)]="carDataValue"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcarNoCodeValueChanged($event)"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item widget="dxButton">
+            <dx-button stylingMode="contained"
+                       text="배분적용"
+                       type="normal"
+                       (onClick)="allocationApply()"
+                       [width]="150">
+            </dx-button>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZLITER" [colSpan]="2" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="총용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZMENGE3" [colSpan]="2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="출고량"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="VRKME" [colSpan]="2" [disabled]="true">
+            <dxo-label text="단위"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZCARTANK" [colSpan]="2" [disabled]="true">
+            <dxo-label text="유창개수"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER1" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ type: 'number', format : '#,##0'}">
+            <dxo-label text="유창1"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load1" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재1"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER2" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창2"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load2" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재2"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER3" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창3"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load3" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재3"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER4" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창4"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load4" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재4"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER5" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창5"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load5" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재5"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER6" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창6"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load6" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재6"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER7" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창7"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load7" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재7"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER8" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창8"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load8" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재8"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER9" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창9"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load9" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재9"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px;">
+          <dxi-item dataField="ZTANKLITER10" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="유창10"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="load10" editorType="dxNumberBox" [disabled]="true" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="적재10"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+      </dx-form>
+    </dx-scroll-view>
+  </dx-popup>
+  <!--차량 합적 배차-->
+  <dx-popup width="30%"
+            height="30%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="oldCarPopupVisible">
+
+
+    <dxi-toolbar-item text="합적배차"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="oldCarPopupCloseButtonOptions">
+    </dxi-toolbar-item>
+    <dx-form width="100%">
+      <dxi-item>
+        <div style="margin-bottom: 5px;">준비 중</div>
+      </dxi-item>
+    </dx-form>
+  </dx-popup>
+</div>

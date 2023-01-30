@@ -328,7 +328,22 @@ const rack: Rack[] = [{
   {
     ID: '4',
     Name: '04',
-  }];
+  }, {
+    ID: '5',
+    Name: '05',
+  }, , {
+    ID: '6',
+    Name: '06',
+  }, , {
+    ID: '7',
+    Name: '07',
+  }, , {
+    ID: '8',
+    Name: '08',
+  }, , {
+    ID: '9',
+    Name: '09',
+  },];
 const insregis: InsRegis[] = [{
 
   date: '2022/08/30',

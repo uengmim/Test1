@@ -14,6 +14,8 @@
                       [showClearButton]="true"
                       [(selectedValue)]="cm001Value"
                       [showDataLoadingPanel]="showDataLoadingPanel"
+                      comboGridScrollMode="virtual"
+                      popupGridScrollMode="standard"
                       class="weight-test"
                       (onDataLoaded)="onPEDataLoaded($event)"
                       (onEntryValueChanged)="onCm001ValueChanged($event)">
@@ -65,6 +67,8 @@
                       [validationErrors]="[{type:'required', message:'자재를 선택하여 주십시오.'}]"
                       [showDataLoadingPanel]="showDataLoadingPanel"
                       [filerExpression]="maraFilter"
+                      comboGridScrollMode="standard"
+                      popupGridScrollMode="standard"
                       class="weight-test"
                       (onDataLoaded)="onPEDataLoaded($event)"
                       (onEntryValueChanged)="onMaraValueChanged($event)">
@@ -164,79 +168,122 @@
              class="weight-test-btn"
              (onClick)="onOpenReport($event)">
   </dx-button>
+  <dx-button stylingMode="contained"
+             text="리포트인쇄"
+             type="normal"
+             [width]="150"
+             class="weight-test-btn"
+             (onClick)="onPrintReport($event)">
+  </dx-button>
   <div style="clear:both"></div>
 </div>
 
+<attach-file #AttachFile
+             selectButtonText="첨부파일 선택"
+             labelText="첨부파일을 마우스로 끌어 넣으세요"
+             uploadMode ="useButtons"
+             [multiple]="true"
+             [value]="attachFiles"
+             [uploadDocumentNo]="uploadDocumentNo"
+             direction ="vertical"
+             [fileListHeight] ="120"
+             (valueChanged)="attachFileChanged($event)"
+             (uploadComplete)="uploadComplete($event)">
+</attach-file>
+<div style="margin:10px">
+  <dx-button stylingMode="contained"
+             text="문서번호변경"
+             type="normal"
+             [width]="150"
+             class="weight-test-btn"
+             (onClick)="onChangeDocNo($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+             text="첨부문서 업로드"
+             type="normal"
+             [width]="150"
+             class="weight-test-btn"
+             (onClick)="onUploadFile($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+             text="첨부문서전체삭제"
+             type="normal"
+             [width]="150"
+             class="weight-test-btn"
+             (onClick)="onDeleteDocNo($event)">
+  </dx-button>
+</div>
+<div style="clear:both"></div>
 <dx-data-grid class="dx-card wide-card"
-                [dataSource]="dataSource"
-                [showBorders]="false"
-                [focusedRowEnabled]="true"
-                [focusedRowIndex]="0"
-                [columnAutoWidth]="true"
-                [allowColumnResizing]="true"
-                [columnResizingMode]="columnResizeMode"
-                [columnHidingEnabled]="true">
+              [dataSource]="dataSource"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [columnResizingMode]="columnResizeMode"
+              [columnHidingEnabled]="true">
 
-    <dxo-paging [pageSize]="10"></dxo-paging>
-    <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-    <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
 
-    <dxi-column dataField="Task_ID"
-                [width]="90"
-                [hidingPriority]="2">
-    </dxi-column>
-    <dxi-column dataField="Task_Subject"
-                [width]="190"
-                caption="Subject"
-                [hidingPriority]="8">
-    </dxi-column>
-    <dxi-column dataField="Task_Status"
-                caption="Status"
-                [hidingPriority]="6">
-    </dxi-column>
-    <dxi-column dataField="Task_Priority"
-                caption="Priority"
-                [hidingPriority]="5">
-      <dxo-lookup [dataSource]="priority"
-                  valueExpr="value"
-                  displayExpr="name">
-      </dxo-lookup>
-    </dxi-column>
-    <dxi-column dataField="ResponsibleEmployee.Employee_Full_Name"
-                caption="Assigned To"
-                [allowSorting]="false"
-                [hidingPriority]="7">
-    </dxi-column>
-    <dxi-column dataField="Task_Start_Date"
-                caption="Start Date"
-                dataType="date"
-                [hidingPriority]="3">
-    </dxi-column>
-    <dxi-column dataField="Task_Due_Date"
-                caption="Due Date"
-                dataType="date"
-                [hidingPriority]="4">
-    </dxi-column>
-    <dxi-column dataField="Task_Priority"
-                caption="Priority"
-                name="Priority"
-                [hidingPriority]="1">
-    </dxi-column>
-    <dxi-column dataField="Task_Completion"
-                caption="Completion"
-                [hidingPriority]="0">
-    </dxi-column>
-  </dx-data-grid>
+  <dxi-column dataField="Task_ID"
+              [width]="90"
+              [hidingPriority]="2">
+  </dxi-column>
+  <dxi-column dataField="Task_Subject"
+              [width]="190"
+              caption="Subject"
+              [hidingPriority]="8">
+  </dxi-column>
+  <dxi-column dataField="Task_Status"
+              caption="Status"
+              [hidingPriority]="6">
+  </dxi-column>
+  <dxi-column dataField="Task_Priority"
+              caption="Priority"
+              [hidingPriority]="5">
+    <dxo-lookup [dataSource]="priority"
+                valueExpr="value"
+                displayExpr="name">
+    </dxo-lookup>
+  </dxi-column>
+  <dxi-column dataField="ResponsibleEmployee.Employee_Full_Name"
+              caption="Assigned To"
+              [allowSorting]="false"
+              [hidingPriority]="7">
+  </dxi-column>
+  <dxi-column dataField="Task_Start_Date"
+              caption="Start Date"
+              dataType="date"
+              [hidingPriority]="3">
+  </dxi-column>
+  <dxi-column dataField="Task_Due_Date"
+              caption="Due Date"
+              dataType="date"
+              [hidingPriority]="4">
+  </dxi-column>
+  <dxi-column dataField="Task_Priority"
+              caption="Priority"
+              name="Priority"
+              [hidingPriority]="1">
+  </dxi-column>
+  <dxi-column dataField="Task_Completion"
+              caption="Completion"
+              [hidingPriority]="0">
+  </dxi-column>
+</dx-data-grid>
 
-  <report-viewer #reportViewer></report-viewer>
+<report-viewer #reportViewer></report-viewer>
 
-  <!-- 로딩 패널-->
-  <dx-load-panel #loadPanel
-                 [position]="{ of: '#pageContent' }"
-                 shadingColor="rgba(0,0,0,0.4)"
-                 [(visible)]="loadingVisible"
-                 [showIndicator]="true"
-                 [showPane]="true"
-                 [shading]="true"
-                 [hideOnOutsideClick]="false">
-  </dx-load-panel>
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel
+               [position]="{ of: '#pageContent' }"
+               shadingColor="rgba(0,0,0,0.4)"
+               [(visible)]="loadingVisible"
+               [showIndicator]="true"
+               [showPane]="true"
+               [shading]="true"
+               [hideOnOutsideClick]="false">
+</dx-load-panel>

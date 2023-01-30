@@ -1,7 +1,7 @@
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import 'devextreme/data/odata/store';
 import { Observable, Subscription } from 'rxjs';
-import { ArrayCodeInfo, CommonCodeInfo, ParameterDictionary, TableCodeInfo, TableColumnInfo, ThemeManager } from '../../../shared/app.utilitys';
+import { ArrayCodeInfo, AttachFileInfo, CommonCodeInfo, ParameterDictionary, TableCodeInfo, TableColumnInfo, ThemeManager } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEnteryDataInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
@@ -12,13 +12,17 @@ import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { CasResult, NbpAgentservice } from '../../../shared/services/nbp.agent.service';
 /*import { List, Enumerable } from 'linqts'*/
 import { deepCopy } from '../../../shared/imate/utility/object-copy';
-import { QueryDataType, QueryMessage, QueryParameter, QueryRunMethod } from '../../../shared/imate/imateCommon';
+import { QueryDataType, QueryMessage, QueryParameter, QueryRunMethod, TransactionId } from '../../../shared/imate/imateCommon';
 import { VocCodeInfo } from '../../../shared/dataModel/QMSIF/VocCodeInfo';
 import { VocPersonnfo } from '../../../shared/dataModel/QMSIF/VocPersonInfo';
 import { VocInfData } from '../../../shared/dataModel/QMSIF/VocInfData';
 import { formatDate } from '@angular/common';
 import { QmsInfResult } from '../../../shared/dataModel/QMSIF/QmsInfResult';
 import { ReportViewerComponent } from '../../../shared/components/reportviewer/report-viewer';
+import { debug } from 'console';
+import { AttachFileComponent } from '../../../shared/components/attach-file/attach-file.component';
+import { OfficeXPUtility } from '../../../shared/officeXp.utility';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   templateUrl: 'tasks.component.html',
@@ -26,6 +30,7 @@ import { ReportViewerComponent } from '../../../shared/components/reportviewer/r
 })
 export class TasksComponent implements OnDestroy {
   @ViewChild('reportViewer', { static: false }) reportViewer!: ReportViewerComponent;
+  @ViewChild('AttachFile', { static: false }) AttachFile!: AttachFileComponent;
   @ViewChild('cm001Entery', { static: false }) cm001Entery!: CommonPossibleEntryComponent;
   @ViewChild('dynamicEntery', { static: false }) dynamicEntery!: CommonPossibleEntryComponent;
   @ViewChild('sd007Entery', { static: false }) sd007Entery!: CommonPossibleEntryComponent;
@@ -132,8 +137,25 @@ export class TasksComponent implements OnDestroy {
 
   //--------------------------------------------------------------------
 
+  /**
+   * 첨부 파일들
+   * */
+  attachFiles: AttachFileInfo[] = [];
+
+  /**
+   * 업로드 문서 번호
+   * */
+  uploadDocumentNo: string;
+
+  /**
+   * OffcieXP 유틸리티
+   * */
+  offceXPUtility: OfficeXPUtility;
+
+  //--------------------------------------------------------------------
   dataSource: any;
   priority: any[];
+
 
   /**
    * 생성자
@@ -141,7 +163,10 @@ export class TasksComponent implements OnDestroy {
    * @param nbpAgetService nbpAgent Service
    * @param authService 사용자 인증 서버스
    */
-  constructor(private appConfig: AppConfigService, private nbpAgetService: NbpAgentservice, private authService: AuthService, private dataService: ImateDataService) {
+  constructor(private appConfig: AppConfigService,
+              private nbpAgetService: NbpAgentservice, private authService: AuthService,
+              private dataService: ImateDataService, private httpClient: HttpClient) {
+
     this.cm001Code = appConfig.commonCode("결재코드");
     this.sd007Code = appConfig.commonCode("주문유형");
     this.maraCode = appConfig.tableCode("아이템코드");
@@ -165,7 +190,7 @@ export class TasksComponent implements OnDestroy {
 
     PossibleEntryDataStoreManager.setDataStore("task", codeInfos, appConfig, dataService);
     //데이터 로딩 패널 보이기
-    this.loadingVisible = true;
+    this.loadingVisible = false;
 
     let usrInfo = authService.getUser().data;
     console.info(usrInfo);
@@ -195,6 +220,21 @@ export class TasksComponent implements OnDestroy {
       { name: 'Normal', value: 2 },
       { name: 'Low', value: 1 }
     ];
+
+    this.offceXPUtility = new OfficeXPUtility(httpClient, appConfig);
+    this.offceXPUtility.getOffiXpAttachFileInfo("M202301161930").then((fileInfos) => {
+      this.attachFiles = fileInfos
+    });
+
+    //신규일경우 임시로 업로드 번호를 매긴다.
+    //this.uploadDocumentNo = TransactionId();
+
+    //조회일경우 문서 번호를 셋팅
+    this.uploadDocumentNo = "M202301161930";
+
+    //this.attachFiles.push(new AttachFileInfo("0a3a99df-6a55-2b40-05e7-8e7b1a9a6add", "202104_위임결재기준_ISTN.pdf"));
+    //this.attachFiles.push(new AttachFileInfo("2b35e6ad-7b88-e48e-7134-4b8314bbacaf", "장비및지적재산권목록.xlsx"));
+    //this.attachFiles.push(new AttachFileInfo("de606104-6d6e-2953-2ed3-b1fa192c3f5a", "유니브아이엠씨_통합광고상품소개서_22년5월.pdf"));
 
     //모니터링을 시작 한다.
     //this.runMonitoring();
@@ -233,8 +273,9 @@ export class TasksComponent implements OnDestroy {
       resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
       //console.info(resultModel);
-
     }
+
+    setTimeout(() => { this.loadingVisible = false });
   }
 
   /**
@@ -515,5 +556,62 @@ export class TasksComponent implements OnDestroy {
     };
 
     setTimeout(() => { this.reportViewer.OpenReport("TestReport", params) });
+  }
+
+  async onPrintReport(e: any) {
+    let now = new Date();
+    let toStr = formatDate(now.setDate(now.getDate() - 5), "yyyy-MM-dd", "en-US");
+    let fromStr = formatDate(now, "yyyy-MM-dd", "en-US");
+    let params: ParameterDictionary =
+    {
+      "dbTitle": this.appConfig.dbTitle,
+      "startDate": fromStr,
+      "endDate": toStr
+    };
+
+    //프린터
+    this.reportViewer.printReport("TestReport", params);
+  }
+
+  /**
+   * 문서 번호 변경
+   * */
+  onChangeDocNo(e: any) {
+    //등록한 문서 번호를 변경 한다.
+    let newDocNo = `M${formatDate(new Date(), "yyyyMMddHHmm", "en-US")}`;
+    this.AttachFile.changeDocumentNo(newDocNo);
+  }
+
+  /**
+   * 문서 번호의 첨부 전체 삭제
+   * */
+  onDeleteDocNo(e: any) {
+    //문서번호를 지정 하지 않으면 현재 문서번호의 첨부문서 전체를 삭제 한다.
+    this.AttachFile.deleteDocument(null);
+  }
+  /**
+   * 파일 업로드
+   * */
+  onUploadFile(e: any) {
+    console.log("UPLOAD BEFORE: " + this.AttachFile.uploadFileExists); //업로드할 첨부파일 있으면 True 아니면 False
+
+    this.AttachFile.upload();
+
+  }
+
+  /**
+   * 업로드 파일 변경
+   * */
+  attachFileChanged(e: any) {
+    //debugger;
+    console.info(e);
+  }
+
+  /**
+   * 업로드 완료(useButtons 에서만 발생)
+   * */
+  uploadComplete(e: any) {
+    console.info(e);
+    console.log("UPLOAD AFTER: " + this.AttachFile.uploadFileExists); //업로드할 첨부파일 있으면 True 아니면 False
   }
 }

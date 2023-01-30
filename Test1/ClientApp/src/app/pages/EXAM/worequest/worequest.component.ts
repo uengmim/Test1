@@ -12,6 +12,7 @@ import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
+import { ZCMT0020CustomModel } from '../../../shared/dataModel/MCSHP/Zcmt0020CustomProxy';
 
 @Component({
   templateUrl: './worequest.component.html',
@@ -99,6 +100,11 @@ export class WORequestComponent {
 
     this.localappConfig = appConfig;
 
+    
+    this.getData(this);
+
+
+
     let model = this;
     model.displayExpr = "";
     //this.dataSource = new CustomStore(
@@ -117,6 +123,11 @@ export class WORequestComponent {
         return service.getProduct();
       },
     });
+  }
+
+  async getData(thisObj: WORequestComponent) {
+    var resultModel = await this.dataService.SelectModelData<ZCMT0020CustomModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZCMT0020CustomModelList",
+      [this.appConfig.mandt, "C030030"], "", "", QueryCacheType.None);
   }
 
   gridBox_displayExpr = (item: any) => {
@@ -170,6 +181,8 @@ export class WORequestComponent {
 
     var rfcModel = new ZXNSCNEWRFCCALLTestModel(input1, itInput);
     var rfcMoelList: ZXNSCNEWRFCCALLTestModel[] = [rfcModel];
+
+    
 
     var resultModel = await dataService.RefcCallUsingModel<ZXNSCNEWRFCCALLTestModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCNEWRFCCALLTestModelList",
                                                                           rfcMoelList, QueryCacheType.None);

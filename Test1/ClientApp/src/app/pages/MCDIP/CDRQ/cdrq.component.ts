@@ -1,300 +1,368 @@
-/*
- * 출하 요청 등록 - 액상대리점
- */
-import { Component, enableProdMode, ViewChild, Input, AfterViewInit } from '@angular/core';
-import DataSource from 'devextreme/data/data_source';
-import ArrayStore from "devextreme/data/array_store";
+import { NgModule, Component, enableProdMode, ViewChild } from '@angular/core';
+import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
-import { HttpClient} from '@angular/common/http';
+import { ZXNSCRFCDataModel } from '../../../shared/dataModel/ZxnscRfcData';
+import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
+import ArrayStore from 'devextreme/data/array_store';
+import { AppConfigService } from '../../../shared/services/appconfig.service';
+import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
+import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
+import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { formatDate } from '@angular/common';
-import { Service, OrderData, Reqclass, OilType, ShipSort } from '../CDRQ/app.service'
+import { Service } from './app.service';
+import { alert, confirm } from "devextreme/ui/dialog"
 import {
   DxDataGridComponent,
+  DxButtonModule,
+  DxFormComponent,
+  DxPopupComponent
 } from 'devextreme-angular';
-import { updateObject } from '../../../shared/imate/utility/object-copy';
-
-
-//필터
-const getOrderDay = function (rowData: any): number {
-  return (new Date(rowData.OrderDate)).getDay();
-};
+import notify from 'devextreme/ui/notify';
+import dxForm from 'devextreme/ui/form';
+import { AuthService } from '../../../shared/services';;
+import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { ZSDIFPORTALSAPSHIPPINGReqModel, ZSDS6900Model, ZSDT6900Model } from '../../../shared/dataModel/MCDIP/ZsdIfPortalSapShippingReqProxy';
+if (!/localhost/.test(document.location.host)) {
+  enableProdMode();
+}
 
 @Component({
   templateUrl: 'cdrq.component.html',
-  providers: [ImateDataService, Service]
+  providers: [ImateDataService, Service],
+
 })
 
-export class CDRQComponent implements AfterViewInit {
+//any
+export class CDRQComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
-
-  
-  //multiseletbox
-  gridDataSource: any;
-  gridBoxValue1: string[] = [];
-  gridBoxValue2: string[] = [];
-  gridBoxValue3: string[] = [];
-  gridBoxValue4: string[] = [];
-  gridBoxValue5: string[] = [];
-  gridBoxValue6: string[] = [];
-
-
-  //delete
-  selectedItemKeys: any[] = [];
-  //data
-  store!: ArrayStore;
-  dataSource: any;
-
-  //정보
-  oiltype: OilType[];
-  Orderdata: OrderData[];
-  reqclass: Reqclass[];
-  shipsort: ShipSort[];
-  
-  //날짜 조회
-  startDate: any;
-  endDate: any;
-  formOrderData: OrderData;
-  //form popup
-  colCountByScreen: Object;
-  closeButtonOptions: any;
-
-  //form
-  popupVisible = false;
-  labelMode: string;
-  labelLocation: string
-  readOnly: boolean;
-  showColon: boolean;
-  colCount: number;
-  width: any;
-
+  @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
+  @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
+  @ViewChild('orderGrid', { static: false }) orderGrid!: DxDataGridComponent;
+  @ViewChild('kunnrEntery', { static: false }) kunnrEntery!: CommonPossibleEntryComponent;
+  @ViewChild('matnrEntery', { static: false }) matnrEntery!: CommonPossibleEntryComponent;
+  @ViewChild('kunweEntery', { static: false }) kunweEntery!: CommonPossibleEntryComponent;
+  @ViewChild('zcarnoEntery', { static: false }) zcarnoEntery!: CommonPossibleEntryComponent;
+  @ViewChild('inco1CodeDynamic', { static: false }) inco1CodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('t001Entery', { static: false }) t001Entery!: CommonPossibleEntryComponent;
+  /**
+ * 데이터 스토어 키
+ * */
+  dataStoreKey: string = "cdrq";
+  //조회데이터
+  orderData: any;
   //date box
   now: any = new Date();
+  value: Date = new Date(1981, 3, 27);
+  min: Date = new Date(1900, 0, 1);
+  dateClear = new Date(2015, 11, 1, 6);
 
-  
-  //데이터 저장 버튼
-  saveButtonOptions: any;
-  savesButtonOptions: any;
-  //데이터 삭제 버튼
-  deleteButtonOptions: any;
+  //삭제버튼
+  state: boolean = true;
+  //조회날짜
+  startDate: any;
+  endDate: any;
+  reqVisible = false;
+  //파서블 엔트리 로딩 패널 안보이게함
+  showDataLoadingPanel = false;
+  private loadePeCount: number = 0;
+  //주문처 정보
+  kunnrCode: TableCodeInfo;
+  matnrCode: TableCodeInfo;
+  kunweCode: TableCodeInfo;
+  zcarnoCode: TableCodeInfo;
+  inco1Code: TableCodeInfo;
+  t001Code: CommonCodeInfo;
+  /*Entery value 선언*/
+  kunnrValue: string | null;
+  matnrValue: string | null;
+  kunweValue: string | null;
+  zcarnoValue: string | null;
+  inco1Value: string | null;
+  lgortValue: string | null;
+  //요청팝업
+  reqPopupData: any;
   //데이터 조회 버튼
   searchButtonOptions: any;
-  //데이터 추가 버튼
-  addButtonOptions: any;
-  //편집 취소 버튼
-  cancelEditButtonOptions: any;
+  //load
+  loadPanelOption: any;
+  customOperations!: Array<any>;
+  collapsed: any;
+  incoFilter: any = ["ZCM_CODE2", "<>", "NH"];
+  //
+  dataLoading: boolean = false;
+  enteryLoading: boolean = false;
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
 
-  //detail 편집 모드 설정
-  startEditAction = 'click';
-  selectTextOnEditStart = true;
+    appInfo.title = AppInfoService.APP_TITLE + " | 출하요청 등록";
 
-  //줄 선택
-  selectedRowIndex = -1;
-
-  //필터
-  saleAmountHeaderFilter: any;
-  customOperations: Array<any>;
-
-  //_dataService: ImateDataService;
-
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, private appInfo: AppInfoService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 출하요청등록";
-
-    this.formOrderData = new OrderData();
-    // formpopup
-    const that = this;
-    //스크린크기조정
-    this.colCountByScreen = {
-      md: 3,
-      sm: 2,
-    };
-
-    //form
-    this.labelMode = 'floating';
-    this.labelLocation = 'left';
-    this.readOnly = false;
-    this.showColon = true;
-    this.colCount = 2;
-
-    //정보
-    this.oiltype = service.getOilType();
-    this.Orderdata = service.getOrderData();
-    this.reqclass = service.getReqclass();
-    this.shipsort = service.getShipSort();
-
-    //date
+    this.kunnrCode = appConfig.tableCode("유류납품처");
+    this.kunweCode = appConfig.tableCode("유류납품처");
+    this.matnrCode = appConfig.tableCode("유류제품명");
+    this.zcarnoCode = appConfig.tableCode("유류차량");
+    this.inco1Code = appConfig.tableCode("인코텀스");
+    this.t001Code = appConfig.commonCode("유류출고사업장");
+    //조회날짜 초기값
     var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(now.setDate(now.getDate() - 30), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
-    //필터
-    this.saleAmountHeaderFilter = [{
-      text: 'Less than $3000',
-      value: ['vehicleCapacity', '<', 3000],
-    }, {
-      text: '$3000 - $5000',
-      value: [
-        ['vehicleCapacity', '>=', 3000],
-        ['vehicleCapacity', '<', 5000],
-      ],
-    }, {
-      text: '$5000 - $10000',
-      value: [
-        ['vehicleCapacity', '>=', 5000],
-        ['vehicleCapacity', '<', 10000],
-      ],
-    }, {
-      text: '$10000 - $20000',
-      value: [
-        ['vehicleCapacity', '>=', 10000],
-        ['vehicleCapacity', '<', 20000],
-      ],
-    }, {
-      text: 'Greater than $20000',
-      value: ['vehicleCapacity', '>=', 20000],
-    }];
-    this.customOperations = [{
-      name: 'weekends',
-      caption: 'Weekends',
-      dataTypes: ['date'],
-      icon: 'check',
-      hasValue: false,
-      calculateFilterExpression() {
-        return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
-      },
-    }];
+    //----------------------------------------------------------------------------------------------------------
+    let codeInfos = [
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnrCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunweCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.inco1Code),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.t001Code),
+    ];
 
-    //팝업닫기버튼
-    this.closeButtonOptions = {
-      text: 'Close',
-      onClick(e: any) {
-        that.popupVisible = false;
-      }
+    PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
+    //---------------------------------------------------------------------------------------------------------
+
+    this.kunnrValue = "";
+    this.matnrValue = "";
+    this.kunweValue = "";
+    this.zcarnoValue = "";
+    this.inco1Value = "";
+    this.lgortValue = "";
+    this.dataLoad();
+
+
+  }
+
+
+
+  onKunnrCodeValueChanged(e: any) {
+    setTimeout(async () => {
+      this.reqPopupData.KUNNR = e.selectedValue;
+    });
+  }
+
+  onMatnrCodeValueChanged(e: any) {
+    setTimeout(async () => {
+      this.reqPopupData.MATNR = e.selectedValue;
+      this.reqPopupData.MEINS = e.selectedItem.MEINS;
+      this.reqPopupData.MAKTX = e.selectedItem.MAKTX;
+    });
+  }
+
+  onKunweCodeValueChanged(e: any) {
+    setTimeout(async () => {
+      this.reqPopupData.KUNWE = e.selectedValue;
+    });
+  }
+
+  onZcarnoCodeValueChanged(e: any) {
+    setTimeout(async () => {
+      this.reqPopupData.ZCARNO = e.selectedItem.ZCARNO;
+      this.reqPopupData.ZDRIVER = e.selectedItem.ZDERIVER1;
+    });
+  }
+
+  onLgortCodeValueChanged(e: any) {
+    setTimeout(async () => {
+      this.reqPopupData.LGORT = e.selectedValue;
+    });
+  }
+  oninco1CodeValueChanged(e: any) {
+    this.reqPopupData.INCO1 = e.selectedItem.INCO1;
+  }
+
+
+  contentReady = (e: any) => {
+    if (!this.collapsed) {
+      this.collapsed = true;
+      e.component.expandRow(['EnviroCare']);
     }
-    //팝업저장버튼
-    this.savesButtonOptions = {
-      text: 'Save',
-      onClick: () => {
-
-        this.Orderdata.push(this.formOrderData);
-        that.popupVisible = false;
-      },
-    };
-    //저장버튼
-    this.saveButtonOptions = {
-      icon: 'save',
-      onClick: () => {
-        this.dataGrid.instance.saveEditData();
-      },
-    };
-    //조회버튼
-    this.searchButtonOptions = {
-      icon: 'search',
-      onClick: async () => {
-        this.dataGrid.instance.refresh();
-      },
-    };
-    //추가버튼
-    this.addButtonOptions =
-    {
-      icon: 'add',
-      onClick: async () => {
-        this.dataGrid.instance.addRow();
-      },
-    };
-    //취소버튼
-    this.cancelEditButtonOptions =
-    {
-      icon: 'undo',
-      onClick: async () => {
-        this.dataGrid.instance.cancelEditData( )
-      },
-    };
-    //삭제버튼
-    this.deleteButtonOptions = {
-      icon: 'trash',
-      onClick: () => {
-
-        this.dataGrid.instance.deleteRow(this.selectedRowIndex)
-      },
-    };
-  }
-
-
-  //Data refresh 날짜 새로고침 이벤트
-  public refreshDataGrid(e: Object) {
-    this.dataGrid.instance.refresh();
-
-  }
-
-  selectedChanged(e: any) {
-    this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
-  }
-
-  selectionChanged(data: any) {
-    this.selectedItemKeys = data.selectedRowKeys;
-  }
-
-  AddRecords() {
-    this.selectedItemKeys.forEach((key:any) => {
-      this.dataGrid.instance.addRow();
-    });
-    this.dataGrid.instance.refresh();
-  }
-
-  SOILRecords() {
-    this.formOrderData = new OrderData();
-    //this.formOrderData.Reqdate = new Date();
-
-    this.popupVisible = true;
   };
-  
-  onToolbarPreparing(e:any) {
-    e.toolbarOptions.items[0].showText = 'always';
 
-    e.toolbarOptions.items.push({
-      location: 'after',
-      template: 'deleteButton',
-    });
+  //요청팝업닫기버튼
+  reqCloseButton(e: any) {
+    this.reqVisible = false;
   }
 
-  getCompanySelectorLabelMode() {
-    return this.labelMode === 'outside'
-      ? 'hidden'
-      : this.labelMode;
+
+  //조회버튼
+  searchButton(e: any) {
+    this.dataLoad();
   }
-  ngAfterViewInit() {
-    this.dataSource = new DataSource({
-      store: new ArrayStore({
-        data: this.Orderdata,
-        key: ['ReqNum']
-      }),
-    });
+
+  //버튼활성화
+  selectionChanged(data: any) {
+    var selectData = this.orderGrid.instance.getSelectedRowsData();
+   if (selectData[0].ZSTAT === "R") {
+      this.state = false;
+    }
+    else {
+      this.state = true;
+    }
   }
-  onInitNewRow(e:any) {
-    var selDatas = e.component.getSelectedRowsData();
-    if (selDatas.length <= 0) 
+  //삭제버튼
+  async deleteButton(e: any) {
+    var selectData = this.orderGrid.instance.getSelectedRowsData();
+    if (selectData.length === 0) {
+      alert("라인을 선택해야합니다.", "알림");
       return;
+    }
+    //if (selectData[0].ZSTAT === "R") {
+    //  this.state = false;
+    //}
+    //else {
+    //  this.state = true;
+    //}
+    if (await confirm("삭제하시겠습니까?", "알림")) {
+      alert("삭제되었습니다.","알림")
+      this.deleteData();
+      this.dataLoad();
+      this.state = true;
+    }
+  }
+  //조회 RFC
+  public async dataLoad() {
+    var zsdsList: ZSDS6900Model[] = [];
+    var zsdtList: ZSDT6900Model[] = [];
+    var model = new ZSDIFPORTALSAPSHIPPINGReqModel("", "", this.endDate, "", "", this.startDate, "D", "", "",zsdsList, zsdtList);
+    var modelList: ZSDIFPORTALSAPSHIPPINGReqModel[] = [model];
 
-    var selData = selDatas[0];
-    updateObject(selData, e.data);
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGReqModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGReqModelList", modelList, QueryCacheType.None);
 
-    e.data.reqNum = "";
-    e.data.reqDate = new Date();
-    e.data.shipmentDate = new Date();
+    this.orderData = new ArrayStore(
+      {
+        key: ["VBELN"],
+        data: resultModel[0].ET_DATA
+      });
+
+
+
   }
 
-  //onInsertRow(e: any) {
-  //  var data = e.component.getSelectedRowsData() as [];
-  //  e.cancel = data.length <= 0;
-  //  if (e.cancel) {
-  //    alert("먼저 자료를 선택하여 주십시오.");
-  //  }
-  //}
-  // formpopup
-  screen(width:any) {
-    return width < 720 ? 'sm' : 'md';
+  //등록버튼
+  addButton(e: any) {
+    this.clearEntery();
+    var model1 = new ZSDS6900Model("", "", "", "", "", "", "", "", "", "", "", "", "", new Date(), new Date(), "", "", "", "", "", "", 0, "", "", "", "", "", "");
+    var model2 = new ZSDS6900Model("", "", "", "", "", "", "", "", "", "", "", "", "", new Date(), new Date(), "", "", "", "", "", "", 0, "", "", "", "", "", "")
+    var initDat = Object.assign(model1, model2);
+    this.reqPopupData = initDat;
+    this.reqVisible = true;
   }
+
+
+  //저장버튼
+  async reqSaveButton(e: any) {
+
+
+    if (await confirm("저장하시겠습니까?", "알림")) {
+      if (this.reqPopupData.KUNNR === "" || this.reqPopupData.S_OILNO === null) {
+        alert("주문처는 필수값입니다.", "알림");
+        return;
+      }
+      else if (this.reqPopupData.MATNR === "" || this.reqPopupData.S_OILNO === null) {
+        alert("제품명은 필수값입니다.", "알림");
+        return;
+      }
+      else if (this.reqPopupData.KUNWE === "" || this.reqPopupData.S_OILNO === null) {
+        alert("도착지는 필수값입니다.", "알림");
+        return;
+      }
+
+      else if (this.reqPopupData.ZCARNO === "" || this.reqPopupData.S_OILNO === null) {
+        alert("차량번호 필수값입니다.", "알림");
+        return;
+      }
+      else if (this.reqPopupData.ZDRIVER === "" || this.reqPopupData.S_OILNO === null) {
+        alert("기사명은 필수값입니다.", "알림");
+        return;
+      }
+      else if (this.reqPopupData.INCO1 === "" || this.reqPopupData.S_OILNO === null) {
+        alert("운송방법은 필수값입니다.", "알림");
+        return;
+      }
+      else if (this.reqPopupData.S_OILNO === "" || this.reqPopupData.S_OILNO === null) {
+        alert("선적번호는 필수값입니다.", "알림");
+        return;
+      }
+     
+      var result = this.createOrder();
+
+      this.dataLoad();
+      alert("저장 완료되었습니다","알림");
+
+      this.reqVisible = false;
+
+    }
+  }
+
+
+  //저장rfc
+  public async createOrder() {
+    var data = this.reqPopupData;
+    var zsdsModel = new ZSDS6900Model("", "", "", "", "", "", "", "", "", "", "", "", "", new Date(), new Date(), "", "", "", "", "", "", 0, "", "", "", "", "", "");
+    var zsdtModel = new ZSDT6900Model("", data.VBELN, data.KUNNR, data.KUNWE, data.LGORT, data.MATNR, data.RQDAT, data.VRDAT, data.ZCARNO, data.ZDRIVER, data.INCO1, data.ZMENGE, data.MEINS, data.S_OILNO, data.ZTEXT, data.ZSTAT, "", "", new Date(), "000000", "", new Date(), "000000");
+
+    var zsdsList: ZSDS6900Model[] = [zsdsModel];
+    var zsdtList: ZSDT6900Model[] = [zsdtModel];
+
+    var createModel = new ZSDIFPORTALSAPSHIPPINGReqModel("", "", data.VRDAT, data.KUNNR, data.LGORT, data.VRDAT, "R",data.VBELN, "",zsdsList, zsdtList);
+    var createList: ZSDIFPORTALSAPSHIPPINGReqModel[] = [createModel];
+
+    var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGReqModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGReqModelList", createList, QueryCacheType.None);
+
+    return insertModel[0].IT_DATA;
+
+  }
+
+  //삭제 RFC
+  public async deleteData() {
+    var selectData = this.orderGrid.instance.getSelectedRowsData();
+    var zsdsList: ZSDS6900Model[] = [];
+    var zsdtList: ZSDT6900Model[] = [];
+    var model = new ZSDIFPORTALSAPSHIPPINGReqModel("", "", this.endDate, "", "", this.startDate, "C", selectData[0].VBELN, "",zsdsList, zsdtList);
+    var modelList: ZSDIFPORTALSAPSHIPPINGReqModel[] = [model];
+
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGReqModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGReqModelList", modelList, QueryCacheType.None);
+    return resultModel[0];
+  }
+
+  /**
+ * 파서블 엔트리 데이터 로딩 완료
+ * @param e
+ */
+  onPEDataLoaded(e: any) {
+    this.loadePeCount++;
+    console.info(`DATA LOAD COUNT: ${this.loadePeCount}`);
+    /*
+     if (e.component.ClearSelectedValue != undefined) {
+       setTimeout(() => {
+         e.component.ClearSelectedValue();
+       });
+     }
+     */
+    if (this.loadePeCount >= 7) {
+      this.enteryLoading = true;
+      this.loadePeCount = 0;
+      /*      this.enteryLoading = false;*/
+      this.dataLoad();
+
+    }
+  }
+
+  //엔트리 클리어
+  public clearEntery() {
+    this.kunnrEntery.ClearSelectedValue();
+    this.matnrEntery.ClearSelectedValue();
+    this.kunweEntery.ClearSelectedValue();
+    this.zcarnoEntery.ClearSelectedValue();
+    this.inco1CodeDynamic.ClearSelectedValue();
+    this.t001Entery.ClearSelectedValue();
+  }
+
+
+
+
 
 }
+
+
+

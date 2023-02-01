@@ -4,20 +4,20 @@
 <div style="margin:10px 10px 0px 10px">
 
   <!--toolbar-->
-  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px;">
     <dxi-item location="before" locateInMenu="auto">
-      <div *dxTemplate>
+      <div *dxTemplate style="margin-left:10px;">
         <div style="float:left; ">
           <dx-date-box [(value)]="startDate"
-                       label="시작일"
+                       label="시작일(From)"
                        type="date"
                        [width]="120"
                        displayFormat="yyyy-MM-dd"></dx-date-box>
         </div>
 
-        <div style="float: left; margin-left: 10px; margin-right: 10px;">
+        <div style="float:left; margin-left:10px;">
           <dx-date-box [(value)]="endDate"
-                       label="종료일"
+                       label="종료일(To)"
                        labelMode="floating"
                        type="date"
                        [width]="120"
@@ -25,18 +25,20 @@
         </div>
       </div>
     </dxi-item>
+
     <dxi-item location="before"
               widget="dxButton"
-              locateInMenu="auto"
-              [height]="25"
-              [options]="searchButtonOptions">
-    </dxi-item>
-
-    <dxi-item location="after"
-              widget="dxButton"
-              locateInMenu="auto"
-              [height]="25"
-              [options]="exportSelectedData">
+              horizontalAlignment="center"
+              locateInMenu="center"
+              style="margin-top:3px">
+      <div *dxTemplate style="margin-left:15px;">
+        <dx-button stylingMode="contained"
+                   text="조회"
+                   (onClick)="refreshDataGrid($event)"
+                   [width]="80"
+                   style="margin-top:3px">
+        </dx-button>
+      </div>
     </dxi-item>
   </dx-toolbar>
 
@@ -46,17 +48,18 @@
       </dxo-tab-panel-options>
       <dxi-tab title="유류출하">
         <dx-data-grid id="grid"
+                      #oilDataGrid
                       [dataSource]="OilShip"
                       [showBorders]="true"
                       [focusedRowIndex]="0"
-                      columnResizingMode="widget"
+                      [columnResizingMode]="columnResizeMode"
                       keyExpr="oilNum"
                       [allowColumnReordering]="true"
                       [columnAutoWidth]="true"
                       [allowColumnResizing]="true"
                       [remoteOperations]="false"
                       [rowAlternationEnabled]="true"
-                      height="calc(100vh - 225px)">
+                      height="calc(100vh - 265px)">
 
           <!--Datagrid Option-->
           <dxo-paging [enabled]="false"></dxo-paging>
@@ -115,6 +118,7 @@
       </dxi-tab>
       <dxi-tab title="화학출하">
         <dx-data-grid id="grid"
+                      #cheDataGrid
                       [dataSource]="ChemShip"
                       [showBorders]="true"
                       [focusedRowIndex]="0"
@@ -122,10 +126,10 @@
                       [remoteOperations]="false"
                       [rowAlternationEnabled]="true"
                       [allowColumnResizing]="true"
-                      columnResizingMode="widget"
+                      [columnResizingMode]="columnResizeMode"
                       keyExpr="chemNum"
                       [allowColumnReordering]="true"
-                      height="calc(100vh - 225px)">
+                      height="calc(100vh - 265px)">
           <!--Datagrid Option-->
           <dxo-paging [enabled]="false"></dxo-paging>
           <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
@@ -148,7 +152,7 @@
 
           <dxi-column dataField="chemClient" caption="거래처">  </dxi-column>
 
-          <dxi-column dataField="chemState" caption="순번">  </dxi-column>
+          <dxi-column dataField="chemState" caption="상태">  </dxi-column>
 
           <dxi-column dataField="chemProduct" caption="제품">  </dxi-column>
 
@@ -158,12 +162,9 @@
 
           <dxi-column dataField="chemInsQuan" caption="지시량" format="#,###">
             <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
-
           </dxi-column>
 
           <dxi-column dataField="chemShipQuan" caption="출하량" format="#,###">
-            <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
-
           </dxi-column>
 
           <dxi-column dataField="chemWeight" caption="공차중량" format="#,###">  </dxi-column>
@@ -180,6 +181,6 @@
       </dxi-tab>
     </dxi-item>
   </dx-form>
-  </div>
+</div>
 
 

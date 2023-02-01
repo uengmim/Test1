@@ -25,9 +25,15 @@ export class AppStatus {
 
 const appStatus: AppStatus[] = [
   { CODE: "", NAME: "전체" },
+  { CODE: "O", NAME: "작업요청 "},
   { CODE: "I", NAME: "검수요청" },
   { CODE: "C", NAME: "검수완료" }
 ];
+
+export class equipFormModel {
+  EQUNR?: string;
+  EQUNR_DESC?: string;
+}
 
 //오더데이터
 export class OrderData {

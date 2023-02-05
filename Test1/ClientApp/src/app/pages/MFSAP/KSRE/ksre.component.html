@@ -12,21 +12,24 @@
   </dxi-item>
   <dxi-item location="before">
     <div style="float: left; margin-left: 10px; ">
-      <nh-possible-table [codeInfo]="kunnCode" #kunnrEntery3
+      <nh-possible-comm [codeInfo]="kunnCode" #kunnrEntery3
                          [dataStoreKey]="dataStoreKey"
                          valueColumn="KUNNR"
                          valueDisplayFormat="%NAME1%(%KUNNR%)"
                          width="200"
                          placeholderText="주문처(산하)"
                          label="주문처(산하)"
+                        popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                          [gridBoxWidth]="500"
                          [showClearButton]="true"
-                         (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
+                         (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
     </div>
   </dxi-item>
   <dxi-item location="before">
     <div style="float: left; margin-left: 10px; ">
-      <nh-possible-table #lgEntery
+      <nh-possible-comm #lgEntery
                          [dataStoreKey]="dataStoreKey"
                          [codeInfo]="lgCode"
                          valueColumn="LGORT"
@@ -34,10 +37,13 @@
                          placeholderText="비료창고"
                          width="200"
                          label="비료창고"
+                        popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                          [gridBoxWidth]="500"
                          (onDataLoaded)="onPEDataLoaded($event)"
                          [showClearButton]="true"
-                         class="weight-test"></nh-possible-table>
+                         class="weight-test"></nh-possible-comm>
     </div>
   </dxi-item>
   <dxi-item location="after"

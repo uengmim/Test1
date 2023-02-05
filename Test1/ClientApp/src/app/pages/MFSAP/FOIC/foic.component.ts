@@ -132,7 +132,6 @@ export class FOICComponent {
     var modelList: ZSDS0090Model[] = [];
     var zsdDocument = new ZSDDOCUMENTCancelModel("", "", "", this.startDate, this.endDate, "", "", "", "", "", "A", this.selectData2, "", "", "", "", modelList, modelList);
     var list: ZSDDOCUMENTCancelModel[] = [zsdDocument];
-
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDDOCUMENTCancelModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDDOCUMENTCancelModelList", list, QueryCacheType.None);
 
     this.orderData = new ArrayStore(
@@ -153,6 +152,7 @@ export class FOICComponent {
     this.deleteButton = true;
     this.deliveryButton = true;
     this.releaseButton = true;
+
   }
 
   //주문문서삭제 rfc

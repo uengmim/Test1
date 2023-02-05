@@ -24,6 +24,7 @@ import { confirm, alert } from "devextreme/ui/dialog";
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { CodeInfoType, TableCodeInfo } from '../../../shared/app.utilitys';
 import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -42,14 +43,14 @@ export class KSSHComponent {
   @ViewChild('orderGrid', { static: false }) orderGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
   @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
-  @ViewChild('lgEntery', { static: false }) lgEntery!: TablePossibleEntryComponent;
-  @ViewChild('kunnEntery', { static: false }) kunnEntery!: TablePossibleEntryComponent;
-  @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: TablePossibleEntryComponent;
-  @ViewChild('tdlnr2Entery', { static: false }) tdlnr2Entery!: TablePossibleEntryComponent;
-  @ViewChild('dd07tCarEntery', { static: false }) dd07tCarEntery!: TablePossibleEntryComponent;
-  @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: TablePossibleEntryComponent;
-  @ViewChild('zpalEntery', { static: false }) zpalEntery!: TablePossibleEntryComponent;
-  @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: TablePossibleEntryComponent;
+  @ViewChild('lgEntery', { static: false }) lgEntery!: CommonPossibleEntryComponent;
+  @ViewChild('kunnEntery', { static: false }) kunnEntery!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnr2Entery', { static: false }) tdlnr2Entery!: CommonPossibleEntryComponent;
+  @ViewChild('dd07tCarEntery', { static: false }) dd07tCarEntery!: CommonPossibleEntryComponent;
+  @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: CommonPossibleEntryComponent;
+  @ViewChild('zpalEntery', { static: false }) zpalEntery!: CommonPossibleEntryComponent;
+  @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: CommonPossibleEntryComponent;
   //비료창고
   lgCode!: TableCodeInfo;
   //도착지 정보
@@ -256,16 +257,18 @@ export class KSSHComponent {
 
     let zerdat = new Date("0001-01-01");
     let zaedat = new Date("0001-01-01");
+
+    //입력필드있음
     let zshipmentDate = new Date("0001-01-01");
 
     var zsds5050 = new ZSDS5050Model(selectData[0].VBELN, selectData[0].POSNR, selectData[0].FKDAT, selectData[0].AUBEL, selectData[0].VGBEL, selectData[0].VGPOS,
       this.addFormData.MATNR, selectData[0].ARKTX, selectData[0].FKIMG, selectData[0].VRKME, selectData[0].NETWR, selectData[0].MWSBP, selectData[0].WAERK,
       this.addFormData.LGORT, this.addFormData.KUNWE, this.addFormData.NAME1, selectData[0].CITY1, selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO,
-      this.addFormData.KUNAG, this.addFormData.NAME1_AG, this.addFormData.SPART, selectData[0].WERKS, selectData[0].VKBUR, selectData[0].BZIRK, selectData[0].ZVGBEL,
+      this.addFormData.KUNAG, this.addFormData.NAME1_AG, this.addFormData.SPART, selectData[0].WERKS, selectData[0].VKBUR, selectData[0].BZIRK, null,
       selectData[0].ZVGPOS, this.addFormData.ZMENGE3, this.addFormData.ZMENGE4, this.addFormData.WADAT_IST, this.addFormData.Z3PARVW, this.addFormData.Z4PARVW, this.addFormData.ZKUNWE,
       this.addFormData.NAME1, this.addFormData.ZCITY1, this.addFormData.ZSTREET, selectData[0].TELF1, selectData[0].MOBILENO, this.addFormData.ZCARTYPE, this.addFormData.ZCARNO,
       this.addFormData.ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZVKAUS, selectData[0].ZUNLOAD, selectData[0].ZSHIPSTATUS,
-      selectData[0].ZSHIPMENT_NO, zshipmentDate, this.addFormData.ZPALLETQTY, this.addFormData.ZPALLTP, this.addFormData.ZTEXT, selectData[0].ZEXID, selectData[0].ZDELETE,
+      selectData[0].ZSHIPMENT_NO, this.addFormData.ZSHIPMENT_DATE, this.addFormData.ZPALLETQTY, this.addFormData.ZPALLTP, this.addFormData.ZTEXT, selectData[0].ZEXID, selectData[0].ZDELETE,
       selectData[0].ZIFMESSAGE, selectData[0].ZIFSTATUS, selectData[0].ZIFDELETE, zerdat, selectData[0].ZERZET, selectData[0].ZERNAM, zaedat,
       selectData[0].ZAEZET, selectData[0].ZAENAM, "", "");
 
@@ -274,6 +277,7 @@ export class KSSHComponent {
     var model: ZSDIFPORTALSAPSDNHISPRcvModel[] = [rcv];
 
     var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSDNHISPRcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSDNHISPRcvModelList", model, QueryCacheType.None);
+
     return insertModel[0];
   }
 

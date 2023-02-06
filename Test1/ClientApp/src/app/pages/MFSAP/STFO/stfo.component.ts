@@ -46,22 +46,22 @@ if (!/localhost/.test(document.location.host)) {
 })
 
 export class STFOComponent {
-  @ViewChild('lgortInCodeDynamic', { static: false }) lgortInCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('lgortOutCodeDynamic', { static: false }) lgortOutCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('kunnrCodeDynamic', { static: false }) kunnrCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('kunweCodeDynamic', { static: false }) kunweCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('inco1CodeDynamic', { static: false }) inco1CodeDynamic!: TablePossibleEntryComponent;
+  @ViewChild('lgortInCodeDynamic', { static: false }) lgortInCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('lgortOutCodeDynamic', { static: false }) lgortOutCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('kunnrCodeDynamic', { static: false }) kunnrCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('kunweCodeDynamic', { static: false }) kunweCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('inco1CodeDynamic', { static: false }) inco1CodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('tdlnr1CodeDynamic', { static: false }) tdlnr1CodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('tdlnr2CodeDynamic', { static: false }) tdlnr2CodeDynamic!: CommonPossibleEntryComponent;
-  @ViewChild('sublgortOutCodeDynamic', { static: false }) sublgortOutCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('stockTypeCodeDynamic', { static: false }) stockTypeCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('cancelCodeDynamic', { static: false }) cancelCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('palletTypeCodeDynamic', { static: false }) palletTypeCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('truckTypeCodeDynamic', { static: false }) truckTypeCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('unloadInfoCodeDynamic', { static: false }) unloadInfoCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('zvkausCodeDynamic', { static: false }) zvkausCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeEntery!: TablePossibleEntryComponent;
+  @ViewChild('sublgortOutCodeDynamic', { static: false }) sublgortOutCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('stockTypeCodeDynamic', { static: false }) stockTypeCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('cancelCodeDynamic', { static: false }) cancelCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('palletTypeCodeDynamic', { static: false }) palletTypeCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('truckTypeCodeDynamic', { static: false }) truckTypeCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('unloadInfoCodeDynamic', { static: false }) unloadInfoCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('zvkausCodeDynamic', { static: false }) zvkausCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeEntery!: CommonPossibleEntryComponent;
 
   @ViewChild(DxDataGridComponent, { static: false })
   dataGrid!: DxDataGridComponent;
@@ -164,9 +164,23 @@ export class STFOComponent {
   gridDataSource: any;
   orderInfo: ZSDS0050Model;
   orderList: ZSDS0060Model[] = [];
-
+  callbacks = [];
   popupPosition: any;
   customOperations!: Array<any>;
+
+  //lgort 선택 값
+  lgortValue!: string | null;
+  //값 체크
+  //validation Adapter
+  lgortAdapter = {
+    getValue: () => {
+      return this.lgortValue;
+    },
+    applyValidationResults: (e: any) => {
+      this.lgortInCodeDynamic.validationStatus = e.isValid ? "valid" : "invalid"
+    },
+    validationRequestsCallbacks: this.callbacks
+  };
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO주문-포장재";
@@ -247,32 +261,37 @@ export class STFOComponent {
 
     //저장버튼 이벤트
     this.saveButtonOptions = {
-      text: 'Save',
+      text: '저장',
       useSubmitBehavior: false,
       onClick: async (e: any) => {
         let vali = e.validationGroup.validate();
 
+        if (this.orderInfo.ZUNLOAD === "" || this.orderInfo.ZUNLOAD === null) {
+          alert("하차정보는 필수값입니다.", "알림")
+          return;
+        }
         if (await confirm("저장하시겠습니까?", "알림")) {
 
           this.loadingVisible = true;
           var result: ZSDSTOORDERReceiveModel = await this.createOrder(appConfig);
           this.loadingVisible = false;
-          if (result.MTY === "E")
+          if (result.MTY === "E") {
             alert(result.MSG, "알림");
-          else
+            this.orderInfo.ZSTVBELN = result.T_DATA[0].ZSTVBELN;
+            this.orderInfo.EBELN = result.T_DATA[0].EBELN;
+            this.orderInfo.ZABGRU = result.T_DATA[0].ZABGRU;
+            this.orderInfo.ZBLOCK = result.T_DATA[0].ZBLOCK;
+            that.popupVisible = false;
+          } else
             alert("저장완료", "알림");
 
-          this.orderInfo.ZSTVBELN = result.T_DATA[0].ZSTVBELN;
-          this.orderInfo.EBELN = result.T_DATA[0].EBELN;
-          this.orderInfo.ZABGRU = result.T_DATA[0].ZABGRU;
-          this.orderInfo.ZBLOCK = result.T_DATA[0].ZBLOCK;
-          /*that.popupVisible = false;*/
+          
         }
       }
     };
 
       this.closeButtonOptions = {
-        text: 'Close',
+        text: '닫기',
         onClick(e: any) {
           that.popupVisible = false;
         }
@@ -308,9 +327,14 @@ export class STFOComponent {
   //고객코드 변경이벤트
   onkunnrCodeValueChanged(e: any) {
     setTimeout(() => {
-      this.kunweCodeDynamic.ClearSelectedValue();
-      this.kunweCodeDynamic.SetDataFilter(["KUNNR", "=", e.selectedValue]);
+/*      this.kunweCodeDynamic.ClearSelectedValue();*/
+/*      this.kunweCodeDynamic.SetDataFilter(["KUNNR", "=", e.selectedValue]);*/
+      var resultValue = this.kunweCodeDynamic.gridDataSource._array.find(obj => obj.KUNNR == e.selectedValue);
+      if (resultValue != undefined) {
+        this.kunweValue = resultValue.LGORT;
+      }
 
+      this.orderInfo.LGORT = resultValue.LGORT;
       this.orderInfo.KUNNR = e.selectedItem.KUNNR;
       this.orderInfo.NAME1 = e.selectedItem.NAME1;
       this.orderInfo.CITY1 = e.selectedItem.CITY1;
@@ -406,9 +430,9 @@ export class STFOComponent {
     /*    });*/
   }
 
-  get diffInDay() {
-    return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
-  }
+  //get diffInDay() {
+  //  return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
+  //}
 
   addDataGrid(e: any) {
     this.dataGrid.instance.addRow();
@@ -442,6 +466,12 @@ export class STFOComponent {
           return;
         }
 
+        if (selectedRow.EINDT === null) {
+          selectedRow.EINDT = new Date("0001-01-01");
+        }
+        if (selectedRow.ZBUDAT === null) {
+          selectedRow.ZBUDAT = new Date("0001-01-01");
+        }
         await cancelModelList.push(new ZSDS0061Model(selectedRow.ZCANCEL, selectedRow.ZSTVBELN, selectedRow.EBELN, selectedRow.EBELP, selectedRow.BSART,
           selectedRow.ZSTATS, selectedRow.WERKS, selectedRow.LGORT, selectedRow.AEDAT, selectedRow.EINDT, selectedRow.TDLNR1, selectedRow.TDLNR2,
           selectedRow.MATNR, selectedRow.TXZ01, selectedRow.ZMENGE1, selectedRow.MEINS, selectedRow.RESWK, selectedRow.RESLO, selectedRow.ZVBELN1,
@@ -464,9 +494,19 @@ export class STFOComponent {
     }
   }
 
-  getDataGrid(e: any) {
-    this.dataGrid.instance.refresh();
-  }
+
+    getDataGrid(e: any) {
+      let result = e.validationGroup.validate();
+      if (!result.isValid) {
+        alert("필수값을 입력하여 주십시오.", "알림");
+        return;
+      }
+      else {
+        this.dataGrid.instance.refresh();
+      }
+    }
+
+
 
   dbClickDataGrid(e: any) {
     this.popupVisible = false;
@@ -536,7 +576,7 @@ export class STFOComponent {
       selectedData.ZSTATS, "", new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
 
     this.kunnrValue = selectedData.KUNNR;
-    this.kunweValue = selectedData.RESLO;
+    this.kunweValue = selectedData.LGORT;
     this.matnrValue = selectedData.MATNR;
     this.inco1Value = selectedData.INCO1;
     this.tdlnr1Value = selectedData.TDLNR1;

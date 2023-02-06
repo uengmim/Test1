@@ -12,7 +12,7 @@
   </dxi-item>
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <nh-possible-table [codeInfo]="lgortInCode" #lgortInCodeDynamic
+      <nh-possible-comm [codeInfo]="lgortInCode" #lgortInCodeDynamic
                          [dataStoreKey]="dataStoreKey"
                          valueColumn="LGORT"
                          valueDisplayFormat="%LGOBE%"
@@ -20,20 +20,32 @@
                          [gridBoxWidth]="500"
                          label="입고창고"
                          (onDataLoaded)="onPEDataLoaded($event)"
-                         (onEntryValueChanged)="onlgortInCodeValueChanged($event)"></nh-possible-table>
+                         (onEntryValueChanged)="onlgortInCodeValueChanged($event)"
+                         [(selectedValue)]="lgortValue"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                         [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]">
+        <nbp-validator [adapter]="lgortAdapter">
+          <dxi-validation-rule type="required"></dxi-validation-rule>
+        </nbp-validator>
+      </nh-possible-comm>
     </div>
   </dxi-item>
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
-      <nh-possible-table [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
+      <nh-possible-comm [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
                          [dataStoreKey]="dataStoreKey"
                          valueColumn="LGORT"
                          valueDisplayFormat="%LGOBE%"
                          [width]="200"
                          [gridBoxWidth]="500"
                          label="출고창고"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
                          (onDataLoaded)="onPEDataLoaded($event)"
-                         (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-table>
+                         (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-comm>
     </div>
   </dxi-item>
   <dxi-item location="after" locateInMenu="auto">
@@ -92,8 +104,8 @@
     <dxi-column dataField="ZSTATS" caption="진행상태" type="string"></dxi-column>
     <dxi-column dataField="LGORT" caption="입고창고" type="string"></dxi-column>
     <dxi-column dataField="RESLO" caption="출고창고" type="string"></dxi-column>
-    <dxi-column dataField="AEDAT" caption="주문일" type="date" format="yyyy-MM-dd"></dxi-column>
-    <dxi-column dataField="EINDT" caption="납품일자" type="date" format="yyyy-MM-dd"></dxi-column>
+    <dxi-column dataField="AEDAT" caption="주문일자" dataType="date" format="yyyy-MM-dd"></dxi-column>
+    <dxi-column dataField="EINDT" caption="납기일자" dataType="date" format="yyyy-MM-dd"></dxi-column>
     <dxi-column dataField="TXZ01" caption="제품/자재명"></dxi-column>
     <dxi-column dataField="ZMENGE1" caption="주문수량" type="number" format="#,###"></dxi-column>
     <dxi-column dataField="ZMENGE2" caption="납품수량" type="number" format="#,###"></dxi-column>
@@ -181,15 +193,18 @@
               <dxi-validation-rule type="required" message="주문처필수선택"></dxi-validation-rule>
               <dxo-label text="주문처"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="kunnrCode" #kunnrCodeDynamic
+                <nh-possible-comm [codeInfo]="kunnrCode" #kunnrCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="kunnrValue"
                                     valueColumn="KUNNR"
                                     valueDisplayFormat="%NAME1%(%KUNNR%)"
                                     width="auto"
                                     [gridBoxWidth]="500"
+                                    popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                                     (onDataLoaded)="onPEDataLoaded($event)"
-                                    (onEntryValueChanged)="onkunnrCodeValueChanged($event)"></nh-possible-table>
+                                    (onEntryValueChanged)="onkunnrCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
           </dxi-item>
@@ -197,7 +212,7 @@
             <dxi-item dataField="MATNR">
               <dxo-label text="제품명"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="matnrCode" #matnrCodeDynamic
+                <nh-possible-comm [codeInfo]="matnrCode" #matnrCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="matnrValue"
                                    valueColumn="MATNR"
@@ -205,7 +220,10 @@
                                    width="auto"
                                    [gridBoxWidth]="500"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="onmatnrCodeValueChanged($event)"></nh-possible-table>
+                                   popupGridScrollMode="standard"
+                                   [popupGridPagingMode]="true"
+                                   [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="onmatnrCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
             <dxi-item dataField="KWMENG" editorType="dxNumberBox" [editorOptions]="{ format: '#,###'}">
@@ -226,7 +244,7 @@
             <dxi-item dataField="ZPALLTP">
               <dxo-label text="팔렛트"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="palletTypeCode" #palletTypeCodeDynamic
+                <nh-possible-comm [codeInfo]="palletTypeCode" #palletTypeCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="palletTypeValue"
                                    valueColumn="DOMVALUE_L"
@@ -235,13 +253,16 @@
                                    [gridBoxWidth]="500"
                                    [searchPanel]="true"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="onpalletCodeValueChanged($event)"></nh-possible-table>
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="onpalletCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
             <dxi-item dataField="ZUNLOAD">
               <dxo-label text="하차방법"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="unloadInfoCode" #unloadInfoCodeDynamic
+                <nh-possible-comm [codeInfo]="unloadInfoCode" #unloadInfoCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="unloadInfoValue"
                                    valueColumn="DOMVALUE_L"
@@ -250,13 +271,16 @@
                                    [gridBoxWidth]="500"
                                    [searchPanel]="true"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="onzunloadCodeValueChanged($event)"></nh-possible-table>
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="onzunloadCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
             <dxi-item dataField="INCO1">
               <dxo-label text="운송방법"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="inco1Code" #inco1CodeDynamic
+                <nh-possible-comm [codeInfo]="inco1Code" #inco1CodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="inco1Value"
                                    valueColumn="INCO1"
@@ -264,7 +288,10 @@
                                    width="auto"
                                    [gridBoxWidth]="500"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="oninco1CodeValueChanged($event)"></nh-possible-table>
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="oninco1CodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
           </dxi-item>
@@ -280,7 +307,7 @@
             <dxi-item dataField="ZVKAUS" colSpan="1">
               <dxo-label text="용도"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="zvkausCode" #zvkausCodeDynamic
+                <nh-possible-comm [codeInfo]="zvkausCode" #zvkausCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="zvkausValue"
                                    valueColumn="DOMVALUE_L"
@@ -289,7 +316,10 @@
                                    [gridBoxWidth]="500"
                                    [searchPanel]="true"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="onzvkausCodeValueChanged($event)"></nh-possible-table>
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="onzvkausCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
           </dxi-item>
@@ -297,10 +327,10 @@
 
         <dxi-item itemType="group" caption="도착정보" [colCount]="1" style="margin-top:20px">
           <dxi-item itemType="group" caption="" [colCount]="3">
-            <dxi-item dataField="LGORT">
+            <dxi-item dataField="LGORT" [disabled]="true">
               <dxo-label text="도착지"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="kunweCode" #kunweCodeDynamic
+                <nh-possible-comm [codeInfo]="kunweCode" #kunweCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="kunweValue"
                                    valueColumn="LGORT"
@@ -308,7 +338,10 @@
                                    width="auto"
                                    [gridBoxWidth]="500"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="onlgortCodeValueChanged($event)"></nh-possible-table>
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="onlgortCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
             <dxi-item dataField="CITY1" editorType="dxTextBox">
@@ -355,6 +388,9 @@
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                                   (onEntryValueChanged)="ontdlnr1CodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
@@ -429,7 +465,7 @@
             <dxi-item dataField="UMLGO">
               <dxo-label text="출고사업장"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="sublgortOutCode" #sublgortOutCodeDynamic
+                <nh-possible-comm [codeInfo]="sublgortOutCode" #sublgortOutCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="sublgortOutValue"
                                    valueColumn="LGORT"
@@ -437,7 +473,10 @@
                                    width="auto"
                                    [gridBoxWidth]="500"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="onumlgoCodeValueChanged($event)"></nh-possible-table>
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="onumlgoCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
           </dxi-item>
@@ -445,7 +484,7 @@
             <dxi-item dataField="INSMK">
               <dxo-label text="재고유형"></dxo-label>
               <div *dxTemplate>
-                <nh-possible-table [codeInfo]="stockTypeCode" #stockTypeCodeDynamic
+                <nh-possible-comm [codeInfo]="stockTypeCode" #stockTypeCodeDynamic
                                    [dataStoreKey]="dataStoreKey"
                                    [(selectedValue)]="stockTypeValue"
                                    valueColumn="DOMVALUE_L"
@@ -454,7 +493,10 @@
                                    [gridBoxWidth]="500"
                                    [searchPanel]="true"
                                    (onDataLoaded)="onPEDataLoaded($event)"
-                                   (onEntryValueChanged)="oninsmkCodeValueChanged($event)"></nh-possible-table>
+                                  popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                   (onEntryValueChanged)="oninsmkCodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
             <dxi-item dataField="ZABGRU" editorType="dxTextBox" [disabled]="true" >

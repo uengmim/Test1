@@ -13,7 +13,7 @@
     </dxi-item>
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <nh-possible-table [codeInfo]="lgortInCode" #lgortInCodeDynamic
+        <nh-possible-comm [codeInfo]="lgortInCode" #lgortInCodeDynamic
                            [dataStoreKey]="dataStoreKey"
                            valueColumn="LGORT"
                            valueDisplayFormat="%LGOBE%"
@@ -22,27 +22,33 @@
                            label="입고창고"
                            (onDataLoaded)="onPEDataLoaded($event)"
                            [(selectedValue)]="lgortValue"
+                          popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                            [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]"
                            [showClearButton]="true">
           <nbp-validator [adapter]="lgortAdapter">
             <dxi-validation-rule type="required"></dxi-validation-rule>
           </nbp-validator>
-        </nh-possible-table>
+        </nh-possible-comm>
       </div>
 
     </dxi-item>
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <nh-possible-table [codeInfo]="matnrCode" #matnrCodeDynamic
+        <nh-possible-comm [codeInfo]="matnrCode" #matnrCodeDynamic
                            [dataStoreKey]="dataStoreKey"
                            [(selectedValue)]="matnrValue"
                            valueColumn="MATNR"
                            valueDisplayFormat="%MAKTX%(%MATNR%)"
                            width="200"
                            [gridBoxWidth]="500"
+                          popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                            label="자재"
                            [showClearButton]="true"
-                           (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
+                           (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
       </div>
     </dxi-item>
     <dxi-item location="before" locateInMenu="auto">

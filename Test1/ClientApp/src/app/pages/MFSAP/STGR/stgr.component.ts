@@ -48,8 +48,8 @@ if (!/localhost/.test(document.location.host)) {
 })
 
 export class STGRComponent {
-  @ViewChild('lgortInCodeDynamic', { static: false }) lgortInCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: TablePossibleEntryComponent;
+  @ViewChild('lgortInCodeDynamic', { static: false }) lgortInCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('ebelnText', { static: false }) ebelnText!: DxTextBoxComponent;
 
   @ViewChild(DxDataGridComponent, { static: false })
@@ -213,9 +213,9 @@ export class STGRComponent {
   };
 
 
-  get diffInDay() {
-    return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
-  }
+  //get diffInDay() {
+  //  return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
+  //}
 
   saveDataGrid(e: any) {
     /*this.dataGrid.instance.saveEditData();*/

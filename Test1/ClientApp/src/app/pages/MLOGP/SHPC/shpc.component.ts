@@ -5,7 +5,7 @@ import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { exportDataGrid } from 'devextreme/excel_exporter';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
+import { CommonCodeInfo, ParameterDictionary, TableCodeInfo } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { formatDate } from '@angular/common';
@@ -26,6 +26,11 @@ import { ZSDS6430Model, ZSDIFPORTALSAPLELIQSndModel } from '../../../shared/data
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZSDIFPORTALSAPGIYCLIQRcvModel, ZSDS6450Model, ZSDT6460Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapGiYcliqRcvProxy';
 import { HeaderData, OilDepot } from '../SHPC/app.service';
+import { ReportViewerComponent } from '../../../shared/components/reportviewer/report-viewer';
+import { CarbynmfModel } from '../../../shared/dataModel/ORACLE/CARBYNMFProxy';
+import { UtijisifModel } from '../../../shared/dataModel/ORACLE/UTIJISIFProxy';
+import { ZSDIFPORTALSAPSHIPPINGInsModel, ZSDS6901Model, ZSDT6901Model } from '../../../shared/dataModel/MCDIP/ZsdIfPortalSapShippingIns';
+import { UtichulfModel } from '../../../shared/dataModel/ORACLE/UTICHULFProxy';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -40,12 +45,14 @@ const getOrderDay = function (rowData: any): number {
 
 
 export class SHPCComponent {
+  @ViewChild('reportViewer', { static: false }) reportViewer!: ReportViewerComponent;
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild('orderGrid', { static: false }) orderGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
   @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
   @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('tdlnrEntery', { static: false }) tdlnrCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnr1Entery', { static: false }) tdlnr1CodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('unloadInfoCodeDynamic', { static: false }) unloadInfoCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('truckTypeCodeDynamic', { static: false }) truckTypeCodeDynamic!: CommonPossibleEntryComponent;
@@ -57,6 +64,8 @@ export class SHPCComponent {
   unloadInfoCode!: TableCodeInfo;
   //화물차종
   truckTypeCode!: TableCodeInfo;
+  //1차운송사
+  tdlnr1Code!: TableCodeInfo;
   //2차운송사
   tdlnrCode!: TableCodeInfo;
   //차량번호
@@ -69,6 +78,8 @@ export class SHPCComponent {
   unloadInfoValue: string | null;
   //화물차종
   truckTypeValue!: string | null;
+  //1차운송사
+  tdlnr1Value!: string | null;
   //2차운송사
   tdlnrValue!: string | null;
   //차량번호
@@ -83,6 +94,7 @@ export class SHPCComponent {
   private loadePeCount: number = 0;
 
   cSpart: CSpart[];
+  carFormData: any = {};  //차량 배차 메인 폼데이터
 
   selectStatus: string = "10";
   selectCSpart: string = "20";
@@ -124,7 +136,10 @@ export class SHPCComponent {
   searchButtonOptions: any;
   //상세 추가 버튼
   addDetailButtonOptions: any;
+  cheGiButtonOptions: any;
 
+  oilPopupCloseButtonOptions: any;
+  chePopupCloseButtonOptions: any;
   //편집 취소 버튼
   cancelEditButtonOptions: any;
   loadPanelOption: any;
@@ -169,7 +184,7 @@ export class SHPCComponent {
   popupVisible3 = false;
   popupVisible4 = false;
   collapsed: any;
-
+  chePopupVisible = false;
   //배차팝업 선택값
   selectGrid2Data: ZSDS6450Model[] = [];
   //_dataService: ImateDataService;
@@ -189,6 +204,7 @@ export class SHPCComponent {
     this.unloadInfoCode = appConfig.tableCode("하차정보");
     this.truckTypeCode = appConfig.tableCode("RFC_화물차종");
     this.tdlnrCode = appConfig.tableCode("운송업체");
+    this.tdlnr1Code = appConfig.tableCode("운송업체");
 
     this.popTabIndex = 0;
 
@@ -207,6 +223,7 @@ export class SHPCComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.truckTypeCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnrCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr1Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.unloadInfoCode),
     ];
@@ -219,6 +236,7 @@ export class SHPCComponent {
     this.matnrValue = "";
     this.truckTypeValue = "";
     this.tdlnrValue = "";
+    this.tdlnr1Value = "";
     this.zcarnoValue = "";
 
     //date
@@ -249,21 +267,64 @@ export class SHPCComponent {
     this.GiButtonOptions = {
       text: "출고처리",
       onClick: async () => {
-        if (await confirm("저장하시겠습니까?", "알림")) {
-          this.loadingVisible = true;
-          var result = await thisObj.saveData(thisObj);
-          this.loadingVisible = false;
+        if (this.carFormData.BYSTATUS !== "C") {
+          await alert("완료되지 않았습니다.", "알림");
 
-          if (result.E_MTY === "E")
-            alert(result.E_MSG, "알림");
-          else
-            alert("저장되었습니다.", "알림");
+        } else {
+          if (await confirm("출고 처리하시겠습니까?", "알림")) {
+            this.loadingVisible = true;
+            var result = await thisObj.saveData(thisObj);
+            this.loadingVisible = false;
 
-          await this.dataLoad();
-        } 
+            if (result.E_MTY === "E")
+              alert(result.E_MSG, "알림");
+            else {
+              await alert("출고 처리되었습니다.", "알림");
+              await this.printRef(null);
+            }
+
+
+            await this.dataLoad();
+          }
+        }
       },
     };
+    //출고처리버튼
+    this.cheGiButtonOptions = {
+      text: "출고처리",
+      onClick: async () => {
+        if (await confirm("출고 처리하시겠습니까?", "알림")) {
+          this.loadingVisible = true;
+          await thisObj.saveData(thisObj);
+          await alert("출고 처리되었습니다.", "알림");
+          this.loadingVisible = false;
 
+          //if (result.E_MTY === "E")
+          //  alert(result.E_MSG, "알림");
+          //else {
+          //  await alert("저장되었습니다.", "알림");
+          //  await this.printRef(null);
+          //}
+
+
+          await this.dataLoad();
+        }
+      },
+    };
+    //유류팝업닫기버튼
+    this.oilPopupCloseButtonOptions = {
+      text: '닫기',
+      onClick(e: any) {
+        that.popupVisible = false;
+      }
+    }
+    //유류팝업닫기버튼
+    this.chePopupCloseButtonOptions = {
+      text: '닫기',
+      onClick(e: any) {
+        that.chePopupVisible = false;
+      }
+    }
     //출고취소버튼
     this.CGiButtonOptions = {
       text: "출고취소",
@@ -290,7 +351,8 @@ export class SHPCComponent {
 
   //화학, 유류 구분
   onCSpartValueChanged(e: any) {
-    setTimeout(() => {
+    this.loadingVisible = true;
+    setTimeout(async () => {
       this.selectCSpart = e.value;
 
       if (this.selectCSpart === "20") {
@@ -298,15 +360,18 @@ export class SHPCComponent {
         this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("화학제품명"), "MATNR", "%MAKTX%(%MATNR%)", "자재명");
         this.popTabIndex = 0;
         this.isPopVisible = true;
-        
+
       } else {
         this.zcarnoCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("유류차량"), "ZCARNO", "%ZCARNO%", "차량정보");
         this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("유류제품명"), "MATNR", "%MAKTX%(%MATNR%)", "자재명");
         this.popTabIndex = 0;
         this.isPopVisible = false;
-        
+
       }
-    }, 100);
+      await this.dataLoad();
+      this.loadingVisible = false;
+
+    });
   }
 
   selectedChanged(e: any) {
@@ -326,7 +391,7 @@ export class SHPCComponent {
 
   //첫화면 데이터 조회 RFC
   public async dataLoad() {
-    let fixData = { I_ZSHIPSTATUS: "30" };
+    let fixData = { I_ZSHIPSTATUS: "40" };
     var zsds6430: ZSDS6430Model[] = [];
     var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6430);
 
@@ -341,8 +406,69 @@ export class SHPCComponent {
         key: ["VBELN", "POSNR", "ZSEQUENCY"],
         data: this.orderGridData
       });
+    this.loadingVisible = false;
+  }
+
+  public async yuchangDataLoad() {
+    var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
+    var jisiilja = selectData[0].ZLIQORDER.substring(0, 8);
+    var jisiseq = selectData[0].ZLIQORDER.substring(9, 11);
+    var jisiDataResult = await this.dataService.SelectModelData<UtijisifModel[]>("NCOIL", "NBPDataModels", "NAMHE.Model.UtijisifModelList", [],
+      ` JIYYMM = '${parseInt(jisiilja)}' AND JISEQ = '${parseInt(jisiseq)}'`, "", QueryCacheType.None);
+
+    var byilja = jisiDataResult[0].JIBCNO1
+    var byseq = jisiDataResult[0].JIBCNO2
+    var oilDataResult = await this.dataService.SelectModelData<CarbynmfModel[]>("NCOIL", "NBPDataModels", "NAMHE.Model.CarbynmfModelList", [],
+      ` BYILJA = '${byilja}' AND BYSEQ = '${byseq}'`, "", QueryCacheType.None);
+
+
+    var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
+    var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
+    var zsds6901List: ZSDS6901Model[] = [];
+    var zsdt6901List: ZSDT6901Model[] = [];
+
+    var oilRFCDataResult = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", selectData[0].ZLIQORDER, "O", this.endDate, this.startDate, "D", zsds6901List, zsdt6901List);
+
+    var modelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilRFCDataResult];
+    this.loadingVisible = true;
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", modelList, QueryCacheType.None);
+
+    var utiChulDataResult = await this.dataService.SelectModelData<UtichulfModel[]>("NCOIL", "NBPDataModels", "NAMHE.Model.UtichulfModelList", [],
+      ` CHYYMM = '${resultModel[0].ET_DATA[0].CHDAT}' AND CHSEQ = '${resultModel[0].ET_DATA[0].CHSEQ}'`, "", QueryCacheType.None);
 
     this.loadingVisible = false;
+
+    if (oilDataResult[0].BYSTATUS !== "C") {
+      this.popupVisible = false;
+      await alert("지시를 새로 내리거나 수동 출하 등록 하세요.", "알림");
+
+    } else {
+      debugger;
+      this.carFormData = oilDataResult[0];
+      this.carFormData.BYSTTIME01 = (oilDataResult[0].BYSTTIME01 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME02 = (oilDataResult[0].BYSTTIME02 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME03 = (oilDataResult[0].BYSTTIME03 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME04 = (oilDataResult[0].BYSTTIME04 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME05 = (oilDataResult[0].BYSTTIME05 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME06 = (oilDataResult[0].BYSTTIME06 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME07 = (oilDataResult[0].BYSTTIME07 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME08 = (oilDataResult[0].BYSTTIME08 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME09 = (oilDataResult[0].BYSTTIME09 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYSTTIME10 = (oilDataResult[0].BYSTTIME10 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME01 = (oilDataResult[0].BYENTIME01 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME02 = (oilDataResult[0].BYENTIME02 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME03 = (oilDataResult[0].BYENTIME03 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME04 = (oilDataResult[0].BYENTIME04 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME05 = (oilDataResult[0].BYENTIME05 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME06 = (oilDataResult[0].BYENTIME06 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME07 = (oilDataResult[0].BYENTIME07 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME08 = (oilDataResult[0].BYENTIME08 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME09 = (oilDataResult[0].BYENTIME09 ?? "000000").toString().padEnd(6, '0');
+      this.carFormData.BYENTIME10 = (oilDataResult[0].BYENTIME10 ?? "000000").toString().padEnd(6, '0');
+      this.popItemData.ZSTARTTIME = (utiChulDataResult[0].CHSTTIME ?? "000000").toString().padEnd(6, '0');
+      this.popItemData.ZENDTIME = (utiChulDataResult[0].CHENTIME ?? "000000").toString().padEnd(6, '0');
+
+    }
   }
 
   //데이터 저장로직
@@ -373,7 +499,7 @@ export class SHPCComponent {
       await alert("온도기준 출고수량은 정산량으로 설정됩니다.", "알림");
       GIData.ZMENGE3 = GIData.Z_N_WEI_NET;
     }
-      
+
     //if (GIData.ZMENGE3 > selectData[0].ZMENGE3) {
     //  model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고수량은 납품수량을 넘을 수 없습니다.", "E"));
     //  return model[0];
@@ -501,7 +627,7 @@ export class SHPCComponent {
     var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
     var modelList: ZSDS6450Model[] = [];
     selectData.forEach(async (row: ZSDS6430Model) => {
-      
+
     });
 
     //var zsd6440list: ZSDS6440Model[] = this.popupData;
@@ -534,7 +660,7 @@ export class SHPCComponent {
        });
      }
      */
-    if (this.loadePeCount >= 5) {
+    if (this.loadePeCount >= 6) {
       this.loadingVisible = false;
       this.loadePeCount = 0;
     }
@@ -544,7 +670,7 @@ export class SHPCComponent {
   async mainDBClick(e: any) {
     //파서블엔트리 초기화
     this.clearEntery();
-
+    this.yuchangDataLoad();
     setTimeout((
     ) => {
       var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
@@ -555,10 +681,18 @@ export class SHPCComponent {
       this.popHeaderData.ZMENGE2 = selectData[0].ZMENGE2;
       this.popHeaderData.ZMENGE4 = selectData[0].ZMENGE4;
 
+      var ZMENGE = 0;
+
+      //출고수량이 없으면 배차수량으로 대신함
+      if (selectData[0].ZMENGE3 === 0)
+        ZMENGE = selectData[0].ZMENGE4;
+      else
+        ZMENGE = selectData[0].ZMENGE3;
+
       //팝업 아이템정보 입력
       this.popItemData = new ZSDS6450Model(selectData[0].VBELN, selectData[0].POSNR, "", selectData[0].ZSHIPSTATUS, selectData[0].KZPOD, selectData[0].VGBEL,
-        selectData[0].VGPOS, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE3,
-        selectData[0].WADAT_IST, selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART,
+        selectData[0].VGPOS, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, ZMENGE,
+        new Date(), selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART,
         selectData[0].WERKS, selectData[0].LFART, 0, 0, 0, 0, "", "", "", "", "000000", "000000", selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE,
         selectData[0].ZCARNO, selectData[0].ZDRIVER, selectData[0].ZDRIVER1, "", selectData[0].ZPHONE, selectData[0].ZPHONE1, "", "", selectData[0].ZSHIPMENT_NO,
         selectData[0].ZSHIPMENT_DATE, "", "", DIMModelStatus.UnChanged);
@@ -567,6 +701,7 @@ export class SHPCComponent {
       this.matnrValue = selectData[0].MATNR;
       this.zcarnoValue = selectData[0].ZCARNO;
       this.tdlnrValue = selectData[0].Z4PARVW;
+      this.tdlnr1Value = selectData[0].Z3PARVW;
       this.truckTypeValue = selectData[0].ZCARTYPE;
 
       //유창정보 초기화
@@ -578,7 +713,11 @@ export class SHPCComponent {
           data: this.popOilDepotData
         });
 
-      this.popupVisible = true;
+      if (this.selectCSpart === "20") {
+        this.chePopupVisible = true;
+      } else {
+        this.popupVisible = true;
+      }
     }, 100);
   }
 
@@ -592,24 +731,24 @@ export class SHPCComponent {
 
       if (this.orderGrid.instance.getSelectedRowsData().length > 0) {
         this.loadingVisible = true;
-          var result = await this.createOrder();
-          this.loadingVisible = false;
-          var reMSG = "";
-          //result.T_DATA.forEach(async (row: ZSDS6440Model) => {
-          //  if (row.MTY === "E")
-          //    reMSG = row.MSG;
-          //});
+        var result = await this.createOrder();
+        this.loadingVisible = false;
+        var reMSG = "";
+        //result.T_DATA.forEach(async (row: ZSDS6440Model) => {
+        //  if (row.MTY === "E")
+        //    reMSG = row.MSG;
+        //});
 
-          //if (reMSG !== "") {
-          //  alert(`배차등록 실패,\n\n오류 메세지: ${reMSG}`);
-          //  return;
-          //}
-          //else if ((result.E_MTY === "S")) {
-          //  alert("배차등록완료");
-          //  this.popupVisible = false;
-          //  /*            this.orderData.push(this.popupData);*/
-          //  this.dataLoad();
-          //}
+        //if (reMSG !== "") {
+        //  alert(`배차등록 실패,\n\n오류 메세지: ${reMSG}`);
+        //  return;
+        //}
+        //else if ((result.E_MTY === "S")) {
+        //  alert("배차등록완료");
+        //  this.popupVisible = false;
+        //  /*            this.orderData.push(this.popupData);*/
+        //  this.dataLoad();
+        //}
       } else {
 
       }
@@ -618,12 +757,41 @@ export class SHPCComponent {
 
   async refConfirmGI(e: any) {
 
+
+  }
+
+  async printRef(e: any) {
+    if (this.orderGrid.instance.getSelectedRowsData().length > 1) {
+      alert("단일 행 선택 후 전표 출력이 가능합니다.", "알림");
+      return;
+    }
+    else {
+
+      let selectData = this.orderGrid.instance.getSelectedRowsData()[0];
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "sPart": selectData.SPART,
+        "Ivbeln": selectData.VBELN,
+        "Tddat": selectData.TDDAT
+      };
+
+      setTimeout(() => { this.reportViewer.OpenReport("MeterTicket", params) });
+    }
   }
 
   //운송사 변경 이벤트
   onTdlnrCodeValueChanged(e: any) {
     setTimeout(() => {
       this.popItemData.Z4PARVW = e.selectedValue;
+      /*this.tdlnrValue = e.selectedValue;*/
+    });
+  }
+
+  //운송사 변경 이벤트
+  onTdlnr1CodeValueChanged(e: any) {
+    setTimeout(() => {
+      this.popItemData.Z3PARVW = e.selectedValue;
       /*this.tdlnrValue = e.selectedValue;*/
     });
   }
@@ -653,13 +821,13 @@ export class SHPCComponent {
 
   //차량번호 선택이벤트
   onZcarnoCodeValueChanged(e: any) {
-/*    setTimeout(() => {*/
-      /*this.zcarnoValue = e.selectedValue;*/
-      this.popItemData.ZCARNO = e.selectedValue;
-      this.popItemData.ZDRIVER = e.selectedItem.ZDERIVER1;
-      this.popItemData.ZPHONE = e.selectedItem.ZPHONE1;
-      this.popItemData.ZCARTYPE = e.selectedItem.ZCARTYPE1;
-/*    });*/
+    /*    setTimeout(() => {*/
+    /*this.zcarnoValue = e.selectedValue;*/
+    this.popItemData.ZCARNO = e.selectedValue;
+    this.popItemData.ZDRIVER = e.selectedItem.ZDERIVER1;
+    this.popItemData.ZPHONE = e.selectedItem.ZPHONE1;
+    this.popItemData.ZCARTYPE = e.selectedItem.ZCARTYPE1;
+    /*    });*/
   }
 
   //팝업화면에 사용되는 엔트리 초기화

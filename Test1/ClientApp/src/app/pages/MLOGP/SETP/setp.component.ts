@@ -304,7 +304,7 @@ export class SETPComponent {
         array.INCO1, array.VSBED, array.KUNNR, array.NAME1, array.CITY, array.STREET, array.TELF1,
         array.MOBILENO, array.KUNAG, array.NAME1_AG, array.SPART, array.WERKS, array.LFART, array.Z3PARVW,
         array.Z4PARVW, array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1,
-        array.ZSHIPMENT, array.ZSHIPSTATUS, array.ZSHIPMENT_NO, new Date("9999-12-31"), array.ZCONFIRM_CUT, array.ZTEXT,
+        array.ZSHIPMENT, array.ZSHIPSTATUS, array.ZSHIPMENT_NO, new Date("9999-12-31"), array.ZCONFIRM_CUT, "", array.ZTEXT,
         array.MTY, array.MSG, DIMModelStatus.UnChanged));
     });
 
@@ -312,8 +312,7 @@ export class SETPComponent {
     var createModelList: ZSDIFPORTALSAPLELIQRcvModel[] = [createModel];
 
     var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQRcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQRcvModelList", createModelList, QueryCacheType.None);
-    return insertModel[0];
-    
+    return insertModel[0]; 
   }
 
   //1차2차운송사 구분변경 이벤트
@@ -325,8 +324,6 @@ export class SETPComponent {
   onCSpartValueChanged(e: any) {
     this.selectCSpart = e.value;
   }
-  
-
 
   /**
  * 파서블 엔트리 데이터 로딩 완료
@@ -362,7 +359,6 @@ export class SETPComponent {
       //this.addFormData.ZCARTYPE = e.selectedValue;
     });
   }
-  
 
   selectionChanged(data: any) {
     this.selectedItemKeys = data.currentSelectedRowKeys;
@@ -373,4 +369,3 @@ export class SETPComponent {
     }
   }
 }
-

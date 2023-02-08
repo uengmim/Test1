@@ -437,8 +437,6 @@ export class ALRCComponent {
         console.log(this.addFormData);
         this.popupData.push(this.addFormData);
         that.popupVisible2 = false;
-
-
       },
     };
     //수정 저장
@@ -519,18 +517,13 @@ export class ALRCComponent {
   }
 
   public async dateLoad(dataService: ImateDataService) {
-
     var sdate = formatDate(this.startDate, "yyyyMMDD", "en-US")
     var edate = formatDate(this.endDate, "yyyyMMDD", "en-US")
-
-
-
   }
 
   //Data refresh 날짜 새로고침 이벤트
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
-
   }
 
   //1차2차운송사 구분변경 이벤트
@@ -639,8 +632,6 @@ export class ALRCComponent {
 
   }
 
-
-
   /**
  * 파서블 엔트리 데이터 로딩 완료
  * @param e
@@ -711,7 +702,7 @@ export class ALRCComponent {
         row.INCO1, row.VSBED, row.KUNNR, row.NAME1, row.CITY, row.STREET, row.TELF1,
         row.MOBILENO, row.KUNAG, row.NAME1_AG, row.SPART, row.WERKS, row.LFART, row.Z3PARVW,
         row.Z4PARVW, row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, row.ZDRIVER1, row.ZPHONE, row.ZPHONE1,
-        row.ZSHIPMENT, row.ZSHIPSTATUS, row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT, row.ZTEXT,
+        row.ZSHIPMENT, row.ZSHIPSTATUS, row.ZSHIPMENT_NO, row.ZSHIPMENT_DATE, row.ZCONFIRM_CUT, "", row.ZTEXT,
         row.MTY, row.MSG, DIMModelStatus.UnChanged));
     });
 
@@ -740,7 +731,7 @@ export class ALRCComponent {
       selectData[0].INCO1, selectData[0].VSBED, selectData[0].KUNNR, selectData[0].NAME1, selectData[0].CITY1, selectData[0].STREET, selectData[0].TELF1,
       selectData[0].MOBILENO, selectData[0].KUNAG, selectData[0].NAME1_AG, selectData[0].SPART, selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW,
       selectData[0].Z4PARVW, selectData[0].ZCARTYPE, "", "", "", "", "",
-      selectData[0].ZSHIPMENT, selectData[0].ZSHIPSTATUS, selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZCONFIRM_CUT, selectData[0].ZTEXT,
+      selectData[0].ZSHIPMENT, selectData[0].ZSHIPSTATUS, selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZCONFIRM_CUT, "", selectData[0].ZTEXT,
       selectData[0].MTY, selectData[0].MSG, DIMModelStatus.UnChanged);
     //배차량 더하기
     var sum = 0;

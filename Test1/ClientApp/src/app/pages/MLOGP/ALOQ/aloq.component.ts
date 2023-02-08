@@ -27,6 +27,7 @@ import { ZSDS6420Model, ZSDIFPORTALSAPLE028RcvModel } from '../../../shared/data
 import { alert, confirm } from "devextreme/ui/dialog";
 import dxTextBox from 'devextreme/ui/text_box';
 import { ZMMT1320Model } from '../../../shared/dataModel/OWHP/Zmmt1320Proxy';
+import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -46,9 +47,9 @@ export class ALOQComponent {
   @ViewChild('popupGrid', { static: false }) popupGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
   @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
-  @ViewChild('vsEntery', { static: false }) vsEntery!: TablePossibleEntryComponent;
-  @ViewChild('lgEntery', { static: false }) lgEntery!: TablePossibleEntryComponent;
-  @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: TablePossibleEntryComponent;
+  @ViewChild('vsEntery', { static: false }) vsEntery!: CommonPossibleEntryComponent;
+  @ViewChild('lgEntery', { static: false }) lgEntery!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: CommonPossibleEntryComponent;
   @ViewChild('vgpostText', { static: false }) vgpostText!: DxTextBoxComponent;
   @ViewChild('vbelnText', { static: false }) vbelnText!: DxTextBoxComponent;
   @ViewChild('vsSelect', { static: false }) vsSelect!: DxSelectBoxComponent;
@@ -95,6 +96,8 @@ export class ALOQComponent {
   orderData: any;
   orderList: ZSDS6410Model[] = [];
 
+  imOrderList: ZMMT1320Model[] = [];
+
   //날짜 조회
   startDate: any;
   endDate: any;
@@ -139,6 +142,8 @@ export class ALOQComponent {
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 2차운송사지정-비료,고체화학";
 
+    this.loadingVisible = true;
+
     this.keyArray = ['VBELN', 'POSNR'];
 
     //this.vsCode = appConfig.tableCode("출하지점");
@@ -175,7 +180,9 @@ export class ALOQComponent {
       text: "검색",
       onClick: async () => {
         this.loadPanelOption = { enabled: true };
-        this.dataLoad(that);
+        that.loadingVisible = true;
+        await this.dataLoad(that);
+        that.loadingVisible = false;
       },
     };
     //등록버튼
@@ -213,7 +220,10 @@ export class ALOQComponent {
         if (await confirm("저장하시겠습니까?", "알림")) {
 
           if (this.orderGrid.instance.getSelectedRowsData().length > 0) {
+
+            that.loadingVisible = true;
             var result = await this.saveData();
+            that.loadingVisible = false;
 
             if (result.E_MTY === "E") {
               alert(result.E_MSG, "저장오류");
@@ -264,30 +274,36 @@ export class ALOQComponent {
 
   //첫화면 데이터 조회 RFC
   public async dataLoad(thisObj:ALOQComponent) {
-    
+    thisObj.orderList = [];
     let fixData = { I_ZSHIPSTATUS: "10" };
 
     if (this.vsSelect.value === "9999") {
-      var queryModel = await this.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
-        [thisObj.appConfig.mandt, thisObj.startDate, thisObj.endDate, fixData.I_ZSHIPSTATUS],
+      thisObj.imOrderList = await this.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
+        [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), fixData.I_ZSHIPSTATUS, ""],
         "", "A.VBELN", QueryCacheType.None);
 
-
+      thisObj.imOrderList.forEach(async (row: ZMMT1320Model) => {
+        thisObj.orderList.push(new ZSDS6410Model(row.VBELN, "", "", "", "", "", "", "", row.SC_R_DATE, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
+          row.MEINS, "9999", 0, 0, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
+          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", ""));
+      })
+     
     } else {
 
-      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, this.vbelnText.value, this.vgpostText.value, this.vsSelect.value, "", "", "", fixData.I_ZSHIPSTATUS, []);
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, "", "", this.vsSelect.value, "", "", "", fixData.I_ZSHIPSTATUS, []);
 
       var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
 
       var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
       this.orderList = resultModel[0].IT_DATA;
-      this.orderData = new ArrayStore(
-        {
-          key: ["VBELN", "POSNR"],
-          data: resultModel[0].IT_DATA
-        });
+      
     }
 
+    this.orderData = new ArrayStore(
+      {
+        key: ["VBELN", "POSNR"],
+        data: thisObj.orderList
+      });
 
     this.loadingVisible = false;
   }
@@ -295,22 +311,58 @@ export class ALOQComponent {
   //
   public async saveData() {
     var zsd6420list: ZSDS6420Model[] = [];
+    var zmmt1320List: ZMMT1320Model[] = [];
+    var insertMod: ZSDIFPORTALSAPLE028RcvModel = new ZSDIFPORTALSAPLE028RcvModel("", "", []);
+    var insertModel: ZSDIFPORTALSAPLE028RcvModel[] = [insertMod];
+    var rowCount: number = 0;
 
-    this.orderGrid.instance.getSelectedRowsData().forEach((array: any) => {
-      var ship_date = array.ZSHIPMENT_DATE;
-      if (ship_date === null || ship_date === undefined)
-        ship_date = new Date("9999-12-31");
-      zsd6420list.push(new ZSDS6420Model(array.VBELN, array.POSNR, array.ZSEQUENCY, array.VRKME, array.ZMENGE4, array.ZMENG3, new Date("9999-12-31"), array.Z3PARVW, array.Z4PARVW,
-                      array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1, array.ZVKAUS, array.ZUNLOAD, array.ZSHIPSTATUS, array.ZSHIPMENT_NO,
-                      ship_date, array.ZPALLTP, array.ZPALLETQTY, array.ZCONFIRM_CUT, array.ZTEXT, array.MTY, array.MSG));
-    });
+    var checkVSTEL = this.orderGrid.instance.getSelectedRowsData().find(item => item.VSTEL === "9999")
 
-    var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
-    var createModelList: ZSDIFPORTALSAPLE028RcvModel[] = [createModel];
+    //임가공인지 체크
+    if (checkVSTEL === undefined) {
+      this.orderGrid.instance.getSelectedRowsData().forEach(async (array: any) => {
+        var ship_date = array.ZSHIPMENT_DATE;
+        if (ship_date === null || ship_date === undefined)
+          ship_date = new Date("9999-12-31");
+        zsd6420list.push(new ZSDS6420Model(array.VBELN, array.POSNR, array.ZSEQUENCY, array.VRKME, array.ZMENGE4, array.ZMENG3, new Date("9999-12-31"), array.Z3PARVW, array.Z4PARVW,
+          array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1, array.ZVKAUS, array.ZUNLOAD, array.ZSHIPSTATUS, array.ZSHIPMENT_NO,
+          ship_date, array.ZPALLTP, array.ZPALLETQTY, array.ZCONFIRM_CUT, array.ZTEXT, array.MTY, array.MSG));
+      });
 
-    var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
+      var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
+      var createModelList: ZSDIFPORTALSAPLE028RcvModel[] = [createModel];
+
+      insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
+    } else {
+      this.orderGrid.instance.getSelectedRowsData().forEach(async (array: ZSDS6410Model) => {
+        var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
+        if (getData !== undefined) {
+          getData.ModelStatus = DIMModelStatus.Modify;
+          getData.TDLNR2 = array.Z4PARVW;
+          getData.ZSHIP_STATUS = "20";
+          getData.SC_L_DATE = new Date("0001-01-01");
+          getData.SC_G_DATE = new Date("0001-01-01");
+          getData.SC_A_DATE = new Date("0001-01-01");
+          getData.SC_R_DATE_C = new Date("0001-01-01");
+          getData.SC_L_DATE = new Date("0001-01-01");
+          getData.AENAM = this.appConfig.interfaceId;
+          getData.AEDAT = new Date();
+          getData.AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
+            new Date().getSeconds().toString().padStart(2, '0');
+          zmmt1320List.push(getData);
+        }
+      });
+        rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
+
+      /*if (rowCount > 0) {*/
+        insertModel[0].E_MTY = "S";
+      //}else {
+      //  insertModel[0].E_MTY = "E";
+      //  insertModel[0].E_MSG = "저장하지 못했습니다.";
+      //}
+    }
+
     return insertModel[0];
-    
   }
   
 
@@ -328,6 +380,7 @@ export class ALOQComponent {
       this.loadePeCount = 0;
       this.vsSelect.instance.option("value", "1000");
       this.dataLoad(this);
+      this.loadingVisible = false;
 
     }
   }
@@ -348,6 +401,17 @@ export class ALOQComponent {
   onTdlnrCodeValueChanged(e: any) {
     setTimeout(() => {
       //this.addFormData.ZCARTYPE = e.selectedValue;
+    });
+  }
+
+  //화학, 유류 구분
+  onCSpartValueChanged(e: any) {
+    this.loadingVisible = true;
+    setTimeout(async () => {
+      this.vsSelect.value = e.value;
+
+      await this.dataLoad(this);
+      this.loadingVisible = false;
     });
   }
   

@@ -9,7 +9,7 @@ import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { formatDate } from '@angular/common';
-import { Service, CarSeq, CSpart } from '../ALRF/app.service';
+import { Service, CarSeq, CSpart, MatType } from '../ALRF/app.service';
 import {
   DxDataGridComponent,
   DxDateBoxModule,
@@ -25,6 +25,7 @@ import { ZSDS6410Model, ZSDIFPORTALSAPLE028SndModel } from '../../../shared/data
 import { ZSDS6420Model, ZSDIFPORTALSAPLE028RcvModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Rcv';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ThisReceiver } from '@angular/compiler';
+import { ZMMT1320Model } from '../../../shared/dataModel/OWHP/Zmmt1320Proxy';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -45,14 +46,14 @@ export class ALRFComponent {
   @ViewChild('popupGrid', { static: false }) popupGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
   @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
-  @ViewChild('vsEntery', { static: false }) vsEntery!: TablePossibleEntryComponent;
-  @ViewChild('lgEntery', { static: false }) lgEntery!: TablePossibleEntryComponent;
-  @ViewChild('maraEntery', { static: false }) maraEntery!: TablePossibleEntryComponent;
+  @ViewChild('vsEntery', { static: false }) vsEntery!: CommonPossibleEntryComponent;
+  @ViewChild('lgEntery', { static: false }) lgEntery!: CommonPossibleEntryComponent;
+  @ViewChild('maraEntery', { static: false }) maraEntery!: CommonPossibleEntryComponent;
   //@ViewChild('dd07tEntery', { static: false }) dd07tEntery!: TablePossibleEntryComponent;
-  @ViewChild('dd07tCarEntery', { static: false }) dd07tCarEntery!: TablePossibleEntryComponent;
+  @ViewChild('dd07tCarEntery', { static: false }) dd07tCarEntery!: CommonPossibleEntryComponent;
   //@ViewChild('tvlvEntery', { static: false }) tvlvEntery!: TablePossibleEntryComponent;
   //@ViewChild('zpalEntery', { static: false }) zpalEntery!: TablePossibleEntryComponent;
-  @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: TablePossibleEntryComponent;
+  @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: CommonPossibleEntryComponent;
   /*@ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeEntery!: CommonPossibleEntryComponent;*/
   @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: CommonPossibleEntryComponent;
 
@@ -114,9 +115,15 @@ export class ALRFComponent {
 
   carSeq: CarSeq[];
   cSpart: CSpart[];
+  matType: MatType[];
 
   selectStatus: string = "10";
-  selectCSpart: string = "10";
+  selectCSpart: string = "1000";
+  selectMatType: string = "1000";
+
+  isButtonLimit: boolean = false;
+
+  isColVisible: boolean = true;
 
   /**
  * 데이터 스토어 키
@@ -130,6 +137,9 @@ export class ALRFComponent {
   //정보
   orderData: any;
   orderGridData: ZSDS6410Model[] = [];
+
+  //임가공 원데이터
+  imOrderList: ZMMT1320Model[] = [];
 
   //납품총수량-배차량
   possible!: number;
@@ -210,6 +220,8 @@ export class ALRFComponent {
     //화학, 유류 구분
     this.cSpart = service.getCSpart();
 
+    this.matType = service.getMatType();
+
     //this.vsCode = appConfig.tableCode("출하지점");
     //this.lgCode = appConfig.tableCode("비료창고");
     this.maraCode = appConfig.tableCode("제품구분");
@@ -244,6 +256,7 @@ export class ALRFComponent {
     this.vkausValue = "";
     this.zpalValue = "";
     this.zcarValue = "";
+    this.tdlnrValue = "";
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
@@ -253,14 +266,14 @@ export class ALRFComponent {
     //배차등록 팝업 초기화
     this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: this.endDate, ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" }
 
-    this.dataLoad();
+    this.dataLoad(this);
 
     //조회버튼
     this.searchButtonOptions = {
       text: "검색",
       onClick: async () => {
         this.loadingVisible = true;
-        await this.dataLoad();
+        await this.dataLoad(this);
         this.loadingVisible = false;
       },
     };
@@ -360,13 +373,13 @@ export class ALRFComponent {
             alert(`실패했습니다.<br/> SAP오류 메세지: ${reMSG}`, "알림");
             return;
           }
-          else if ((result.E_MTY === "S")) {
+          if ((result.E_MTY === "S")) {
             alert("등록완료되었습니다.", "알림");
             /*            this.orderData.push(this.popupData);*/
-            this.dataLoad();
+            this.dataLoad(this);
 
           } else {
-            alert("2차운송사 정보를 저장행을 선택하세요.", "알림");
+            alert(result.E_MSG, "알림");
           }
         }
       },
@@ -539,21 +552,31 @@ export class ALRFComponent {
 
   //1차2차운송사 구분변경 이벤트
   onGubunValueChanged(e: any) {
-    if (e.value === 1)
+    if (e.value === "1") {
       this.selectStatus = "10";
-    else
+    } else {
       this.selectStatus = "20";
+    }
+      
   }
 
   //화학, 유류 구분
   onCSpartValueChanged(e: any) {
-    setTimeout(() => {
+    this.loadingVisible = true;
+    setTimeout(async() => {
       this.selectCSpart = e.value;
-
-      if (this.selectCSpart === "10") {
-        /*this.zcarnoCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("화학차량"), "ZCARNO", "%ZCARNO%", "차량정보");*/
-        this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량정보");
-      } 
+      if (this.selectCSpart === "9999") {
+        this.isColVisible = false;
+      } else {
+        this.isColVisible = true;
+      }
+      
+      await this.dataLoad(this);
+      this.loadingVisible = false;
+      //if (this.selectCSpart === "10") {
+      //  /*this.zcarnoCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("화학차량"), "ZCARNO", "%ZCARNO%", "차량정보");*/
+      //  this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량정보");
+      //} 
     });
   }
 
@@ -581,29 +604,63 @@ export class ALRFComponent {
   //}
 
   onTdlnrCodeValueChanged(e: any) {
-    this.tdlnrValue = e.value;
+    /*this.tdlnrValue = e.value;*/
   }
 
   onMatTypeValueChanged(e: any) {
-
+    this.selectMatType = e.value;
   }
 
   //첫화면 데이터 조회 RFC
-  public async dataLoad() {
+  public async dataLoad(thisObj:ALRFComponent) {
     let fixData = { I_ZSHIPSTATUS: this.selectStatus };
     var zsds6410: ZSDS6410Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", "", "", this.startDate, this.endDate, "", "", "2000", "", this.tdlnrValue ?? "", "", fixData.I_ZSHIPSTATUS, zsds6410);
+    thisObj.orderGridData = [];
 
-    var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+    //포장재 or 임가공
+    if (thisObj.selectCSpart !== "9999") {
+      thisObj.isButtonLimit = false;
 
-    var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
+      var tdlnr1 = "";
+      var tdlnr2 = "";
 
-    this.orderGridData = resultModel[0].IT_DATA;
+      if (this.selectStatus === "10")
+        tdlnr1 = thisObj.tdlnrValue ?? "";
+      else
+        tdlnr2 = thisObj.tdlnrValue ?? ""
+     
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", "", "", thisObj.startDate, thisObj.endDate, "", "", thisObj.selectCSpart, tdlnr1, tdlnr2, "", fixData.I_ZSHIPSTATUS, zsds6410);
 
-    this.orderData = new ArrayStore(
+      var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+
+      var resultModel = await thisObj.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
+
+      thisObj.orderGridData = resultModel[0].IT_DATA;
+    } else {
+      thisObj.isButtonLimit = true;
+
+      var addWhereCondi = "";
+
+      if (this.selectStatus === "10" && this.tdlnrValue !== "")
+        addWhereCondi = "AND A.TDLNR1 = " + this.tdlnrValue;
+      else if (this.selectStatus === "20" && this.tdlnrValue !== "")
+        addWhereCondi = "AND A.TDLNR2 = " + this.tdlnrValue;
+
+      thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
+        [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), fixData.I_ZSHIPSTATUS, addWhereCondi],
+        "", "A.VBELN", QueryCacheType.None);
+
+      thisObj.imOrderList.forEach(async (row: ZMMT1320Model) => {
+        thisObj.orderGridData.push(new ZSDS6410Model(row.VBELN, "", "", "", "", "", "", "", row.SC_R_DATE, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
+          row.MEINS, "9999", 0, 0, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
+          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", ""));
+      })
+    }
+    
+    thisObj.orderData = new ArrayStore(
       {
         key: ["VBELN", "POSNR", "ZSEQUENCY"],
-        data: this.orderGridData
+        data: thisObj.orderGridData
       });
   }
 
@@ -623,29 +680,66 @@ export class ALRFComponent {
     //});
 
     var zsd6420list: ZSDS6420Model[] = [];
+    var zmmt1320List: ZMMT1320Model[] = [];
+    var insertMod: ZSDIFPORTALSAPLE028RcvModel = new ZSDIFPORTALSAPLE028RcvModel("", "", []);
+    var insertModel: ZSDIFPORTALSAPLE028RcvModel[] = [insertMod]
+    var rowCount: number = 0;
 
     var selectedData = this.orderGrid.instance.getSelectedRowsData();
 
-    selectedData.forEach(async (row: ZSDS6410Model) => {
-      var dataModel: ZSDS6410Model[] = [];
-      var checkKey = zsd6420list.findIndex(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR);
-      if (checkKey === -1) {
-        dataModel = thisObj.orderGridData.filter(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR);
-        dataModel.forEach(async (subRow: ZSDS6410Model) => {
-          zsd6420list.push(new ZSDS6420Model(subRow.VBELN, subRow.POSNR, subRow.ZSEQUENCY, subRow.VRKME, subRow.ZMENGE4,
-            subRow.ZMENGE3, new Date("9999-12-31"), subRow.Z3PARVW, subRow.Z4PARVW, subRow.ZCARTYPE,
-            subRow.ZCARNO, subRow.ZDRIVER, subRow.ZDRIVER1, subRow.ZPHONE, subRow.ZPHONE1,
-            subRow.ZVKAUS, subRow.ZUNLOAD, "30", subRow.ZSHIPMENT_NO, subRow.ZSHIPMENT_DATE,
-            subRow.ZPALLTP, subRow.ZPALLETQTY, subRow.ZCONFIRM_CUT, subRow.ZTEXT, "",""));
-        });
-      }
+    var checkVSTEL = this.orderGrid.instance.getSelectedRowsData().find(item => item.VSTEL === "9999")
 
-    });
+    //포장재 or 임가공 로직 분기
+    if (checkVSTEL === undefined) {
+      selectedData.forEach(async (row: ZSDS6410Model) => {
+        var dataModel: ZSDS6410Model[] = [];
+        var checkKey = zsd6420list.findIndex(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR);
+        if (checkKey === -1) {
+          dataModel = thisObj.orderGridData.filter(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR);
+          dataModel.forEach(async (subRow: ZSDS6410Model) => {
+            zsd6420list.push(new ZSDS6420Model(subRow.VBELN, subRow.POSNR, subRow.ZSEQUENCY, subRow.VRKME, subRow.ZMENGE4,
+              subRow.ZMENGE3, new Date("9999-12-31"), subRow.Z3PARVW, subRow.Z4PARVW, subRow.ZCARTYPE,
+              subRow.ZCARNO, subRow.ZDRIVER, subRow.ZDRIVER1, subRow.ZPHONE, subRow.ZPHONE1,
+              subRow.ZVKAUS, subRow.ZUNLOAD, "30", subRow.ZSHIPMENT_NO, subRow.ZSHIPMENT_DATE,
+              subRow.ZPALLTP, subRow.ZPALLETQTY, subRow.ZCONFIRM_CUT, subRow.ZTEXT, "", ""));
+          });
+        }
 
-    var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
-    var createModelList: ZSDIFPORTALSAPLE028RcvModel[] = [createModel];
+      });
 
-    var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
+      var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
+      var createModelList: ZSDIFPORTALSAPLE028RcvModel[] = [createModel];
+
+      insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
+    } else {
+      this.orderGrid.instance.getSelectedRowsData().forEach(async (array: ZSDS6410Model) => {
+        var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
+        if (getData !== undefined) {
+          getData.ModelStatus = DIMModelStatus.Modify;
+          getData.ZSHIP_STATUS = "30";
+          getData.SC_L_MENGE = array.ZMENGE4;
+          getData.SC_L_DATE = array.ZSHIPMENT_DATE;
+          getData.ZSHIPMENT_NO = array.ZSHIPMENT_NO;
+          getData.ZCARNO = array.ZCARNO;
+          getData.ZCARTYPE = array.ZCARTYPE;
+          getData.ZDRIVER = array.ZDRIVER;
+          getData.ZPHONE = array.ZPHONE;
+          getData.SC_G_DATE = new Date("0001-01-01");
+          getData.SC_A_DATE = new Date("0001-01-01");
+          getData.SC_R_DATE_C = new Date("0001-01-01");
+          getData.AENAM = this.appConfig.interfaceId;
+          getData.AEDAT = new Date();
+          getData.AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
+            new Date().getSeconds().toString().padStart(2, '0');
+          zmmt1320List.push(getData);
+        }
+      });
+      rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
+
+      /*if (rowCount > 0) {*/
+      insertModel[0].E_MTY = "S";
+    }
+    
     return insertModel[0];
 
   }
@@ -702,34 +796,43 @@ export class ALRFComponent {
   }
 
   //배차등록버튼
-  refAddOrder(e: any) {
+  async refAddOrder(e: any) {
 
-
-    //this.dataLoad("search");
-    this.popupData = [];
-    var selectData: ZSDS6410Model[] = this.orderGrid.instance.getSelectedRowsData();
-
-    if (selectData.length === 0) {
-      alert("라인을 선택한 후 실행하세요.", "알림");
-      return;
-    } else if (selectData.length === 1) {
-      this.popCarSetData = {
-        ZMENGE4: 0, ZCARTYPE: selectData[0].ZCARTYPE, ZCARNO: selectData[0].ZCARNO, ZDRIVER: selectData[0].ZDRIVER,
-        ZPHONE: selectData[0].ZPHONE, ZSHIPMENT_DATE: selectData[0].ZSHIPMENT_DATE, ZDRIVER1: selectData[0].ZDRIVER1, ZPHONE1: selectData[0].ZPHONE1, ZSHIPMENT_NO: selectData[0].ZSHIPMENT_NO
-      }
-    } else {
-      this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: this.endDate, ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" };
-      this.zcarnoModiValue = "";
-      this.zcarValue = "";
-
-      //alert("한 라인만 선택하세요.", "알림");
-      //return;
-    }
-
-    this.popupCarSetupVisible = true;
-
-    if (selectData.length > 1)
+    
+      //this.dataLoad("search");
+      this.popCarSetData = [];
       this.clearEntery();
+      var selectData: ZSDS6410Model[] = this.orderGrid.instance.getSelectedRowsData();
+      var ZMENGE = 0;
+      if (selectData.length === 0) {
+        alert("라인을 선택한 후 실행하세요.", "알림");
+        return;
+      } else if (selectData.length === 1) {
+        if (selectData[0].ZMENGE4 === 0)
+          ZMENGE = selectData[0].ZMENGE1;
+        else
+          ZMENGE = selectData[0].ZMENGE4;
+
+        this.popCarSetData = {
+          ZMENGE4: ZMENGE, ZCARTYPE: selectData[0].ZCARTYPE, ZCARNO: selectData[0].ZCARNO, ZDRIVER: selectData[0].ZDRIVER,
+          ZPHONE: selectData[0].ZPHONE, ZSHIPMENT_DATE: new Date(), ZDRIVER1: selectData[0].ZDRIVER1, ZPHONE1: selectData[0].ZPHONE1, ZSHIPMENT_NO: selectData[0].ZSHIPMENT_NO
+        }
+        this.zcarnoModiValue = selectData[0].ZCARNO;
+        this.zcarValue = selectData[0].ZCARTYPE;
+      } else {
+        this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: new Date(), ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" };
+        this.zcarnoModiValue = "";
+        this.zcarValue = "";
+
+        //alert("한 라인만 선택하세요.", "알림");
+        //return;
+      }
+    setTimeout(async () => {
+      this.popupCarSetupVisible = true;
+
+      //if (selectData.length > 1)
+      //
+    }, 100);
   }
 
   //수정더블클릭

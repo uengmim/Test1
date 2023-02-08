@@ -23,10 +23,37 @@ export class CSpart {
 
 const cspart: CSpart[] = [
   {
-    code: "10",
+    code: "1000",
     name: "비료"
+  },
+  {
+    code: "2000",
+    name: "화학"
+  },
+  {
+    code: "9999",
+    name: "임가공"
   }
 ]
+
+export class MatType {
+  code!: string;
+  name!: string;
+}
+
+const matType: MatType[] = [
+  {
+    code: "1000",
+    name: "비료"
+  },
+  {
+    code: "2000",
+    name: "화학"
+  },
+  {
+    code: "9999",
+    name: "임가공"
+  }]
 
 @Injectable()
 export class Service {
@@ -36,5 +63,9 @@ export class Service {
 
   getCSpart(): CSpart[] {
     return cspart;
+  }
+
+  getMatType(): MatType[] {
+    return matType;
   }
 }

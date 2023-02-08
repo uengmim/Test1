@@ -44,6 +44,7 @@ import { ZMMT3050Model } from '../../../shared/dataModel/MLOGP/Zmmt3050';
 export class MGWIComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild('datebox', { static: false }) datebox!: DxDateBoxComponent;
+  @ViewChild('maindataGrid', { static: false }) maindataGrid!: DxDataGridComponent;
   @ViewChild(DxFormComponent, { static: false }) form!: DxFormComponent;
   @ViewChild('numberbox', { static: false }) numberbox!: DxNumberBoxComponent;
   @ViewChild('testBox', { static: false }) testBox!: DxiItemComponent;
@@ -106,7 +107,7 @@ export class MGWIComponent {
 * @param authService 사용자 인증 서버스
 */
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService,  private nbpAgetService: NbpAgentservice, service: Service, private appInfo: AppInfoService, private authService: AuthService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 정문 공차/중량계근I/F";
+    appInfo.title = AppInfoService.APP_TITLE + " | 정문 수동 공차/중량계근I/F";
     //this._dataService = dataService;
     this.zmms0210 = new ZMMS0210Model("", new Date(), "", "", "", "", "", "", "", 0, "", "", "", "", "", "", DIMModelStatus.Add);
                                                                //--------------------중량 측정-------------------//
@@ -198,7 +199,7 @@ export class MGWIComponent {
 
     this.mainData = new ArrayStore(
       {
-        key: ["ZGW_SEQ"],
+        key: ["ZGW_DATE","ZGW_SEQ"],
         data: resultModel
       });
 
@@ -213,15 +214,14 @@ export class MGWIComponent {
       var zmms9900Model = new ZMMS9900Model("", "");
 
       var zmms0210Model: ZMMS0210Model[] = [];
-
-      zmms0210Model.push(new ZMMS0210Model("G", thisObj.weightStartData.ZGW_DATE, formatDate(thisObj.weightStartData.ZGW_TIME, 'HH:mm:ss', "en-US"), thisObj.weightStartData.ZCARNO, thisObj.weightStartData.ZDRIVER, thisObj.weightStartData.ZGW_MATNR,
-        thisObj.weightStartData.ZGW_MAKTX, thisObj.weightStartData.ZGW_LIFNR, thisObj.weightStartData.ZGW_NAME1, thisObj.weightStartData.ZGW_ATGEW, thisObj.weightStartData.GEWEI, thisObj.weightStartData.ZGW_PER1, thisObj.weightStartData.ZGW_PER2, "", "", "", DIMModelStatus.Add));
+      zmms0210Model.push(new ZMMS0210Model("G", thisObj.weightStartData.ZGW_DATE, formatDate(thisObj.weightStartData.ZGW_TIME, 'HH:mm:ss', "en-US"), thisObj.weightStartData.ZCARNO, thisObj.weightStartData.ZDRIVER, "",
+        thisObj.weightStartData.ZGW_MAKTX, "", thisObj.weightStartData.ZGW_NAME1, thisObj.weightStartData.ZGW_ATGEW, thisObj.weightStartData.GEWEI, thisObj.weightStartData.ZGW_PER1, thisObj.weightStartData.ZGW_PER2, "4600000092", "2300031757232705", "0080001040", DIMModelStatus.Add));
 
       var zmmfromgwgrirModel = new ZMMFROMGWGrirModel(zmms9900Model, zmms0210Model);
       var modelList: ZMMFROMGWGrirModel[] = [zmmfromgwgrirModel];
 
       var insertModel = await this.dataService.RefcCallUsingModel<ZMMFROMGWGrirModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMFROMGWGrirModelList", modelList, QueryCacheType.None);
-
+      this.dataLoad(this.dataService, this);
       return insertModel[0];
     }
     catch (error: any) {

@@ -46,7 +46,7 @@ export class PGWIComponent {
   @ViewChild('subdataGrid', { static: false }) subdataGrid!: DxDataGridComponent;
   @ViewChild('maindataGrid', { static: false }) maindataGrid!: DxDataGridComponent;
   @ViewChild('datebox', { static: false }) datebox!: DxDateBoxComponent;
-  @ViewChild(DxFormComponent, { static: false }) form!: DxFormComponent;
+  @ViewChild('weightform', { static: false }) weightform!: DxFormComponent;
   @ViewChild('numberbox', { static: false }) numberbox!: DxNumberBoxComponent;
   @ViewChild('testBox', { static: false }) testBox!: DxiItemComponent;
 
@@ -65,6 +65,7 @@ export class PGWIComponent {
   weightStatementOutput: any;
   // 폼데이터
   weightStartData: any = {};
+  weightData: any = {};
 
   /* 계근 */
   //무게 정보
@@ -110,7 +111,7 @@ export class PGWIComponent {
 * @param authService 사용자 인증 서버스
 */
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, service: Service, private appInfo: AppInfoService, private authService: AuthService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 석고 공차/중량계근I/F";
+    appInfo.title = AppInfoService.APP_TITLE + " | 정문 출고 공차/중량계근I/F";
     //this._dataService = dataService;
     this.zmms0210 = new ZMMS0210Model("", new Date(), "", "", "", "", "", "", "", 0, "", "", "", "", "", "", DIMModelStatus.Add);
 
@@ -122,10 +123,10 @@ export class PGWIComponent {
     if (this.casSubscription$ !== undefined && this.casSubscription$ !== null)
       return;
     this.weightStartData.ZGW_DATE = new Date();
-    this.weightStartData.ZGW_TIME = new Date();
+    this.weightStartData.ZGW_GI_TIME = new Date();
     this.weightStartData.ZGW_ATGEW = 0;
     this.weightStartData.GEWEI = "MT";
-    this.weightStartData.STATUS = "계근 입력 상태";
+    this.weightData.STATUS = "계근 입력 상태";
     
 
 
@@ -200,16 +201,16 @@ export class PGWIComponent {
   public async dataLoad(dataService: ImateDataService, thisObj: PGWIComponent) {
     var userInfo = this.authService.getUser().data;
     Object.assign(this.weightStartData, { ZGW_PER1: userInfo?.userName, ZGW_PER2: userInfo?.userName });
-    var result3051Model = await dataService.SelectModelData<ZMMT3051Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3051ModelList", [],
-      `MANDT = '${thisObj.appConfig.mandt}'`, "", QueryCacheType.None);
+    var result3050Model = await dataService.SelectModelData<ZMMT3050Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3050ModelList", [],
+      `MANDT = '${thisObj.appConfig.mandt}' AND ZGW_GUBUN = 'G'`, "", QueryCacheType.None);
 
     this.mainData = new ArrayStore(
       {
-        key: ["ZGW_TIME"],
-        data: result3051Model
+        key: ["ZGW_DATE", "ZGW_SEQ"],
+        data: result3050Model
       });
 
-    return result3051Model;
+    return result3050Model;
   }
 
   //서브데이터로드
@@ -221,7 +222,7 @@ export class PGWIComponent {
 
     this.subData = new ArrayStore(
       {
-        key: ["ZGW_SEQ"],
+        key: ["ZGW_DATE", "ZGW_SEQ"],
         data: result3050Model
       });
 
@@ -237,15 +238,17 @@ export class PGWIComponent {
 
       var zmms0210Model: ZMMS0210Model[] = [];
 
-      zmms0210Model.push(new ZMMS0210Model("S", thisObj.weightStartData.ZGW_DATE, formatDate(thisObj.weightStartData.ZGW_TIME, 'HH:mm:ss', "en-US"), thisObj.weightStartData.ZCARNO, thisObj.weightStartData.ZDRIVER, thisObj.weightStartData.ZGW_MATNR,
+      zmms0210Model.push(new ZMMS0210Model("G", thisObj.weightStartData.ZGW_DATE, formatDate(thisObj.weightStartData.ZGW_GI_TIME, 'HH:mm:ss', "en-US"), thisObj.weightStartData.ZCARNO, thisObj.weightStartData.ZDRIVER, thisObj.weightStartData.ZGW_MATNR,
         thisObj.weightStartData.ZGW_MAKTX, thisObj.weightStartData.ZGW_LIFNR, thisObj.weightStartData.ZGW_NAME1, thisObj.weightStartData.ZGW_ATGEW, thisObj.weightStartData.GEWEI, thisObj.weightStartData.ZGW_PER1, thisObj.weightStartData.ZGW_PER2, "", "", "", DIMModelStatus.Add));
 
       var zmmfromgwgrirModel = new ZMMFROMGWGrirModel(zmms9900Model, zmms0210Model);
       var modelList: ZMMFROMGWGrirModel[] = [zmmfromgwgrirModel];
 
       var insertModel = await this.dataService.RefcCallUsingModel<ZMMFROMGWGrirModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMFROMGWGrirModelList", modelList, QueryCacheType.None);
-
+      this.dataLoad(this.dataService, this);
+      this.subdataLoad(this.dataService, this);
       return insertModel[0];
+
     }
     catch (error: any) {
       alert(error, " 오류");
@@ -259,7 +262,7 @@ export class PGWIComponent {
     this.dataLoad(this.dataService, this);
     this.subdataLoad(this.dataService, this);
     this.now = new Date();
-    this.weightStartData.ZGW_TIME = new Date();
+    this.weightStartData.ZGW_GI_TIME = new Date();
 
   }
   //수동등록 클릭
@@ -269,15 +272,15 @@ export class PGWIComponent {
       if (this.inProgress) {
         this.testBox.editorOptions = { disabled: false };
         this.buttonText = '계근 등록';
-        this.weightStartData.STATUS = "수동 입력 상태";
+        this.weightData.STATUS = "수동 입력 상태";
       } else {
         this.testBox.editorOptions = { disabled: true };
         this.buttonText = '수동 등록';
-        this.weightStartData.STATUS = "계근 입력 상태";
+        this.weightData.STATUS = "계근 입력 상태";
       }
       this.inProgress = !this.inProgress;
     });
-    this.form.instance.repaint();
+    this.weightform.instance.repaint();
   }
 
   //삭제 클릭
@@ -289,13 +292,24 @@ export class PGWIComponent {
   }
 
 
-  //선택이벤트
-  selectionChanged(data: any) {
+  //sub 데이터 그리드 선택이벤트
+  selectionChanged(e: any) {
+    setTimeout(() => {
+      const rowData = e.selectedRowsData[0];
+
+      if (rowData) {
+        this.weightStartData = rowData;
+
+      }
+    }, 100);
+
+  }
+  //main 데이터 그리드 선택이벤트
+  mainselectionChanged(data: any) {
     this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
     this.selectedItemKeys = data.currentSelectedRowKeys;
 
   }
-
   //--------------------무게-------------------//
 
   /**

@@ -4,13 +4,23 @@ import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import { formatDate } from '@angular/common';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
-import { QueryCacheType } from '../../../shared/imate/imateCommon';
+import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, Data, Order, ShAddress, Sortation, Classification, Product } from '../CTOC/app.service';
+import { Service, CSpart, SpData } from '../CTOC/app.service';
 import {
   DxDataGridComponent,
   DxDateBoxModule,
 } from 'devextreme-angular';
+import { AppConfigService } from '../../../shared/services/appconfig.service';
+import { AuthService } from '../../../shared/services';
+import { CodeInfoType, TableCodeInfo } from '../../../shared/app.utilitys';
+import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
+import { alert, confirm } from "devextreme/ui/dialog"
+import { ZSDIFPORTALSAPLE29SndModel, ZSDS6310Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe29Snd';
+import ArrayStore from 'devextreme/data/array_store';
+import { ZSDIFPORTALSAPLE028RcvModel, ZSDS6420Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Rcv';
+import { ZSDIFPORTALSAPLE29RcvModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe29Rcv';
 
 /**
  *
@@ -24,37 +34,57 @@ import {
 
 export class CTOCComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent
-  dataSource: any;
+  @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: TablePossibleEntryComponent
 
   selectedItemKeys: any[] = [];
   selectedRowIndex = -1;
 
-  //정보
-  data: Data[];
-  order!: string[];
-  shAddress!: string[];
-  sortation!: string[];
-  classification!: string[];
-  product!: string[];
 
-  //date box
-  value: Date = new Date(1981, 3, 27);
-  min: Date = new Date(1900, 0, 1);
-  now: Date = new Date();
-  dateClear = new Date(2015, 11, 1, 6);
+  callbacks = [];
 
+  //조회조건
+  wadatIstDate: any;
+  cSpart: CSpart[];
+  Spdata: SpData[];
+  tdlnrCode!: TableCodeInfo;
+  tdlnrValue!: string | null;
+  spartValue: string | null;
+  spdataValue: string | null;
+
+
+  /**
+ * 데이터 스토어 키
+ * */
+  dataStoreKey: string = "ctoc";
+
+  //파서블엔트리 로딩 카운트
+  private loadePeCount: number = 0;
+
+  //UI 데이터 로딩 패널
+  loadingVisible: boolean = false;
 
   //데이터 조회 버튼
   searchButtonOptions: any;
 
+  gridDataSource: any;
+  orderList: ZSDS6310Model[] = [];
+
+
+  //값 체크
+  //validation Adapter
+ tdlnrAdapter = {
+    getValue: () => {
+      return this.tdlnrValue;
+    },
+    applyValidationResults: (e: any) => {
+      this.tdlnrEntery.validationStatus = e.isValid ? "valid" : "invalid"
+    },
+    validationRequestsCallbacks: this.callbacks
+  };
+
+
   //버튼
   saveButtonOptions: any;
-
-  //날짜 조회
-  startDate: any;
-  endDate: any;
-
-  checkBoxValue: boolean | null = null;
 
   //필터
   customOperations!: Array<any>;
@@ -68,84 +98,139 @@ export class CTOCComponent {
 
 
 
-  constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 인수확인(화학)";
 
-    this.data = service.getData();
+    this.loadingVisible = true;
+    // 값세팅
+    this.spartValue = "20";
+    this.spdataValue = "2000";
 
-    //date
-    var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
-    this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
+    //화학 구분
+    this.cSpart = service.getCSpart();
+    //화학 출하지점
+    this.Spdata = service.getSpData();
+    //운송사 code정보
+    this.tdlnrCode = appConfig.tableCode("운송업체");
+    //출고일자 Default
+    this.wadatIstDate = new Date();
 
-    //정보
-    this.order = service.getOrder();
-    this.shAddress = service.getShAddress();
-    this.sortation = service.getSortation();
-    this.classification = service.getClassification();
-    this.product = service.getProduct();
+    //----------------------------------------------------------------------------------------------------------
+    let codeInfos = [
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.tdlnrCode)
+    ];
+    PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
+    //---------------------------------------------------------------------------------------------------------
 
-    let modelTest01 = this;
-    this.dataSource = new CustomStore(
-      {
-        key: ["PARAM1"],
-        load: function (loadOptions) {
-          return modelTest01.dataLoad(dataService);
-        }
-      });
+    this.tdlnrValue = "";
+
+
     //저장버튼
     this.saveButtonOptions = {
-      icon: 'save',
-      onClick: () => {
-        this.dataGrid.instance.saveEditData();
+      text: "검색",
+      onClick: async () => {
+        this.loadingVisible = true;
+        //await this.dataLoad();
+        this.loadingVisible = false;
       },
     };
 
     //조회버튼
     this.searchButtonOptions = {
-      icon: 'search',
-      onClick: async () => {
-        this.dataGrid.instance.refresh();
+      text: "검색",
+      onClick: async (e: any) => {
+        /*let result = e.validationGroup.validate();
+        if (!result.isValid) {
+          alert("필수값을 입력하여 주십시오.", "알림");
+          return;
+        }
+        else {*/
+          this.loadingVisible = true;
+          await this.dataLoad();
+          this.loadingVisible = false;
+        
       },
+    };
+
+
+    this.loadingVisible = false;
+  }
+  /*
+  * 파서블 엔트리 데이터 로딩 완료
+  * @param e
+  */
+onPEDataLoaded(e: any) {
+  this.loadePeCount++; 
+  if (this.loadePeCount >= 1) {
+    this.loadingVisible = false;
+    this.loadePeCount = 0;
+  }
+}
+
+  //고객인수확인 목록 조회
+  public async dataLoad() {
+
+
+    var sendModel = new ZSDIFPORTALSAPLE29SndModel("", "", "", "", "", this.spartValue, this.spdataValue, this.wadatIstDate, "", "", "", []);
+
+    var sendModelList: ZSDIFPORTALSAPLE29SndModel[] = [sendModel];
+
+    var result = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE29SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE29SndModelList", sendModelList, QueryCacheType.None);
+    console.log(result);
+    this.orderList = result[0].T_DATA;
+
+    this.gridDataSource = new ArrayStore(
+      {
+        key: ["VBELN"],
+        data: this.orderList
+      });
+  }
+
+  async saveData() {
+    var selectData = this.dataGrid.instance.getSelectedRowsData();
+    if (selectData.length > 0) {
+
+      var sendData: ZSDS6310Model[] = [];
+
+      selectData.forEach((array : any) => {
+
+        if (array.ZCONFIRM_CUT === null || array.ZCONFIRM_CUT === 0) {
+          return;
+        }
+        else {
+          sendData.push(array);
+        }
+
+
+      });
+
+      console.log(sendData);
+
+      if (selectData.length != sendData.length) {
+        alert("고객확인 수량이 입력되지 않은 데이터가 존재합니다.", "알림");
+        return;
+      }
+
+      if (await confirm("저장하시겠습니까?", "알림")) {
+
+        var sendDataModel = new ZSDIFPORTALSAPLE29RcvModel("", "", sendData);
+        var sendDataList: ZSDIFPORTALSAPLE29RcvModel[] = [sendDataModel];
+        var result = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE29RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE29RcvModelList", sendDataList, QueryCacheType.None);
+
+        if (result[0].E_MTY === "E") {
+          alert(`저장 오류 : ${result[0].E_MSG}`, "저장실패");
+        } else {
+          alert(`[ ${result[0].E_MTY}] 저장되었습니다.`, "저장성공");
+          this.dataGrid.instance.clearSelection();
+          this.dataLoad();
+        }
+      }
+      console.log(result[0]);
+
+    } else {
+      alert("저장할 데이터 행을 선택해주세요.", "알림");
+      return;
     }
-  }
-
-  public async dataLoad(dataService: ImateDataService) {
-
-    var itInput: ZIMATETESTStructModel[] = [];
-    var input1 = new ZIMATETESTStructModel("ABCD", 1.21, 10000, new Date("2020-12-01"), "10:05:30.91");
-
-    itInput.push(new ZIMATETESTStructModel("EGCH", 2.32, 20, new Date("2021-01-02"), "22:00:15.1"));
-    itInput.push(new ZIMATETESTStructModel("IJKL", 3.43, 30, new Date("2022-05-11"), "09:20:27.540"));
-    itInput.push(new ZIMATETESTStructModel("MNON", 4.54, 40, new Date("2022-04-20"), "16:00:20.101"));
-
-    var rfcModel = new ZXNSCNEWRFCCALLTestModel(input1, itInput);
-    var rfcMoelList: ZXNSCNEWRFCCALLTestModel[] = [rfcModel];
-
-    var resultModel = await dataService.RefcCallUsingModel<ZXNSCNEWRFCCALLTestModel[]>("ISTN_INA", "TestModels", "ISTN.Model.ZXNSCNEWRFCCALLTestModelList",
-      rfcMoelList, QueryCacheType.None);
-    return resultModel[0].IT_RESULT;
-  }
-  //옵션 변경
-  onDetailOptionChanged(cellInfo: any, e: any) {
-    cellInfo.setValue(e.value);
-  }
-
-  detailRowChanged(e: any) {
-    this.selectedOption = e.component.cellValue(e.rowIndex, "acStatus");
-  }
-  saveRecords() {
-    this.selectedItemKeys.forEach((key: any) => {
-      this.dataSource.remove(key);
-    });
-    this.dataGrid.instance.refresh();
-  }
-  selectedChanged(e: any) {
-    this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
-  }
-
-  selectionChanged(data: any) {
-    this.selectedItemKeys = data.selectedRowKeys;
   }
 
 }

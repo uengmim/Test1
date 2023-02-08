@@ -190,7 +190,9 @@ export class SETBComponent {
       text: "검색",
       onClick: async () => {
         this.loadPanelOption = { enabled: true };
-        this.dataLoad();
+        this.loadingVisible = true;
+        await this.dataLoad();
+        this.loadingVisible = false;
       },
     };
     //등록버튼
@@ -264,16 +266,12 @@ export class SETBComponent {
     this.selectedRowIndex = e.component.getRowIndexByKey(e.selectedRowKeys[0]);
   }
 
-
   contentReady = (e: any) => {
     if (!this.collapsed) {
       this.collapsed = true;
       e.component.expandRow(['EnviroCare']);
     }
   };
-
-
-
 
   //첫화면 데이터 조회 RFC
   public async dataLoad() {
@@ -304,7 +302,7 @@ export class SETBComponent {
         array.INCO1, array.VSBED, array.KUNNR, array.NAME1, array.CITY, array.STREET, array.TELF1,
         array.MOBILENO, array.KUNAG, array.NAME1_AG, array.SPART, array.WERKS, array.LFART, array.Z3PARVW,
         array.Z4PARVW, array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1,
-        array.ZSHIPMENT, array.ZSHIPSTATUS, array.ZSHIPMENT_NO, new Date("9999-12-31"), array.ZCONFIRM_CUT, array.ZTEXT,
+        array.ZSHIPMENT, array.ZSHIPSTATUS, array.ZSHIPMENT_NO, new Date("9999-12-31"), array.ZCONFIRM_CUT, "", array.ZTEXT,
         array.MTY, array.MSG, DIMModelStatus.UnChanged));
     });
 
@@ -318,12 +316,24 @@ export class SETBComponent {
 
   //1차2차운송사 구분변경 이벤트
   onGubunValueChanged(e: any) {
+    this.loadingVisible = true;
+    setTimeout(async () => {
       this.selectStatus = "10";
+
+      await this.dataLoad();
+      this.loadingVisible = false;
+    });
   }
 
   //화학, 유류 구분
   onCSpartValueChanged(e: any) {
-    this.selectCSpart = e.value;
+    this.loadingVisible = true;
+    setTimeout(async() => {
+      this.selectCSpart = e.value;
+
+      await this.dataLoad();
+      this.loadingVisible = false;
+    });
   }
   
 

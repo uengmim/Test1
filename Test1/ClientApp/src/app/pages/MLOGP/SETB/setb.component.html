@@ -43,7 +43,7 @@
     </div>
   </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto">
+  <!--<dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
       <dx-select-box [dataSource]="carSeq"
                      displayExpr="name"
@@ -53,7 +53,7 @@
                      labelMode="floating"
                      (onValueChanged)="onGubunValueChanged($event)"></dx-select-box>
     </div>
-  </dxi-item>
+  </dxi-item>-->
 
   <dxi-item location="after">
     <div *dxTemplate>
@@ -75,7 +75,7 @@
   </dxi-item>
 </dx-toolbar>
 
-<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+<!--<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">-->
 
   <!--<dxi-item location="before">
     <div style="float: left; margin-left: 10px; ">
@@ -88,7 +88,7 @@
                          groupFiled="SPART"></nh-possible-table>
     </div>
   </dxi-item>-->
-  <dxi-item location="before">
+  <!--<dxi-item location="before">
     <div *dxTemplate>
       <div style="float: left; margin-left: 10px;">
         <dx-text-box #vbelnText
@@ -110,7 +110,7 @@
       </div>
     </div>
   </dxi-item>
-</dx-toolbar>
+</dx-toolbar>-->
 
 
 <dx-data-grid class="master" #orderGrid
@@ -268,6 +268,9 @@
                               width="auto"
                               [showClearButton]="true"
                               [(selectedValue)]="tdlnrValue"
+                              popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                               [gridBoxWidth]="500"
                               (onDataLoaded)="onPEDataLoaded($event)"
                               (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>

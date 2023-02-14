@@ -53,6 +53,8 @@ export class VOCRComponent {
   @ViewChild('factoryEntery', { static: false }) factoryEntery!: CommonPossibleEntryComponent;
   @ViewChild('domesticEntery', { static: false }) domesticEntery!: CommonPossibleEntryComponent;
   @ViewChild('overseaEntery', { static: false }) overseaEntery!: CommonPossibleEntryComponent;
+  @ViewChild('registerEntery', { static: false }) registerEntery!: CommonPossibleEntryComponent;
+
 
   dataSource: any;
 
@@ -78,10 +80,9 @@ export class VOCRComponent {
 
   callbacks = [];
 
-
-  //_dataService: ImateDataService;
-
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
+
+   //_dataService: ImateDataService;
 
     appInfo.title = AppInfoService.APP_TITLE + " | MODEL TEST1";
 
@@ -275,6 +276,19 @@ export class VOCRComponent {
       validationRequestsCallbacks: this.callbacks
     };
 
+  //담당자 선택
+  selREGISTER: string | null = null;
+  registerAdapter =
+    {
+      getValue: () => {
+        return this.selREGISTER;
+      },
+      applyValidationResults: (e: any) => {
+        this.registerEntery.validationStatus = e.isValid ? "valid" : "invalid"
+      },
+      validationRequestsCallbacks: this.callbacks
+    };
+
   /**
    * QMS VOC 기본 코드
    * @param e
@@ -309,21 +323,108 @@ export class VOCRComponent {
     var vocCause = resultSet.getDataObject("vocCause", VocCodeInfo);
     //불량수량단위
     var rejectQtyUnit = resultSet.getDataObject("rejectQtyUnit", VocCodeInfo);
-
     //시비량단위
     var manureQtyUnit = resultSet.getDataObject("manureQtyUnit", VocCodeInfo);
     //담당자
     var InCharges = resultSet.getDataObject("inCharge", VocPersonnfo);
 
     //배열 코드정보를 만든다.
+    //시비량 단위
     let manureQtyUnitCode = new ArrayCodeInfo("시비량단위", ["code"], manureQtyUnit,
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //사업장
+    let siteCode = new ArrayCodeInfo("사업장", ["code"], site,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //사업부
+    let bunitCode = new ArrayCodeInfo("사업부", ["code"], bunit,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //고객유형
+    let cystmerTypeCode = new ArrayCodeInfo("고객유형", ["code"], cystmerType,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //지역
+    let areaCode = new ArrayCodeInfo("지역", ["code"], area,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //지역국내
+    let domesticCode = new ArrayCodeInfo("지역국내", ["code"], domestic,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //지역해외
+    let overseaCode = new ArrayCodeInfo("지역해외", ["code"], oversea,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //재배형태
+    let culytivateTypeCode = new ArrayCodeInfo("재배형태", ["code"], culytivateType,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //불량수량단위
+    let rejectQtyUnitCode = new ArrayCodeInfo("불량수량단위", ["code"], rejectQtyUnit,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //제품군
+    let productGroupCode = new ArrayCodeInfo("제품군", ["code"], productGroup,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //민원종류
+    let vocTypeCode = new ArrayCodeInfo("제품군", ["code"], vocType,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //민원원인
+    let vocCauseCode = new ArrayCodeInfo("제품군", ["code"], vocCause,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //생산공장
+    let factoryCode = new ArrayCodeInfo("생산공장", ["code"], factory,
+      [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
     //파서블 엔터리의 코드 정보를 변경 한다.
+    //시비량 단위
     this.manureQtyUnitEntery.ChangeCodeInfo(manureQtyUnitCode, "code", "%codenm%(%code%)");
+
+    //사업장
+    this.siteEntery.ChangeCodeInfo(siteCode, "code", "%codenm%(%code%)")
+
+    //사업부
+    this.bunitEntery.ChangeCodeInfo(bunitCode, "code", "%codenm%(%code%)")
+
+    //고객유형
+    this.cystmerTypeEntery.ChangeCodeInfo(cystmerTypeCode, "code", "%codenm%(%code%)")
+
+    //지역
+    this.areaEntery.ChangeCodeInfo(areaCode, "code", "%codenm%(%code%)")
+
+    //지역국내
+    this.domesticEntery.ChangeCodeInfo(domesticCode, "code", "%codenm%(%code%)")
+
+    //지역해외
+    this.overseaEntery.ChangeCodeInfo(overseaCode, "code", "%codenm%(%code%)")
+
+    //재배형태
+    this.culytivateTypeEntery.ChangeCodeInfo(culytivateTypeCode, "code", "%codenm%(%code%)")
+
+    //불량수량단위
+    this.rejectQtyUnitEntery.ChangeCodeInfo(rejectQtyUnitCode, "code", "%codenm%(%code%)")
+
+    //제품군
+    this.productGroupEntery.ChangeCodeInfo(productGroupCode, "code", "%codenm%(%code%)")
+
+    //민원종류
+    this.vocTypeEntery.ChangeCodeInfo(vocTypeCode, "code", "%codenm%(%code%)")
+
+    //민원원인
+    this.vocCauseEntery.ChangeCodeInfo(vocCauseCode, "code", "%codenm%(%code%)")
+
+    //생산공장
+    this.factoryEntery.ChangeCodeInfo(factoryCode, "code", "%codenm%(%code%)")
 
     //배열 코드정보를 만든다.
     let inChargesCode = new ArrayCodeInfo("담당자", ["id"], InCharges,
       [new TableColumnInfo("plant", "플렌트"), new TableColumnInfo("id", "ID"), new TableColumnInfo("name", "이름"), new TableColumnInfo("buseonm", "부서")]);
+
     //파서블 엔터리의 코드 정보를 변경 한다.
     this.inChargesCodeEntery.ChangeCodeInfo(inChargesCode, "id", "%name% / %buseonm% (%id%)");
   }

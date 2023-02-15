@@ -4,32 +4,40 @@
 <div style="margin:10px 10px 0px 10px">
 
   <dx-form id="form"
+           #masterform
            [formData]="searchID"
            width="80%"
            style="margin-left:180px; margin-top:30px;">
-    <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-      <dxi-item dataField="BIZNO" [label]="{text: '사업자등록번호'}" [colCount]="1"  [editorOptions]="{ height: 30, mask: '0000000000' }">
+    <dxi-item itemType="group" [colCount]="2">
+      <dxi-item dataField="BIZNO" [label]="{text: '사업자등록번호'}" [colCount]="1" [editorOptions]="{ height: 30, mask: '0000000000' }">
         <dxi-validation-rule type="required" message="사업자등록번호 is required">></dxi-validation-rule>
       </dxi-item>
-      <dxi-item location="after"
-                widget="dxButton"
-                horizontalAlignment="center"
-                locateInMenu="center">
-        <dx-button stylingMode="contained"
-                   text="ID 찾기"
-                   type="normal"
-                   (onClick)="SearchIDButton()"
-                   [width]="150">
-        </dx-button>
+      <dxi-item itemType="group" [colCount]="2">
+        <dxi-item location="after"
+                  style="text-align:end;"
+                  widget="dxButton"
+                  horizontalAlignment="after"
+                  locateInMenu="after">
+          <dx-button stylingMode="contained"
+                     text="ID 찾기"
+                     type="normal"
+                     (onClick)="SearchIDButton()"
+                     [width]="150">
+          </dx-button>
+        </dxi-item>
+
+        <dxi-item itemType="button"
+                  widget="dxButton"
+                  name="applyBtn"
+                  #buttonIem
+                  horizontalAlignment="center"
+                  style="margin-top:20px;width:150px "
+                  [buttonOptions]="saveButtonOptions">
+        </dxi-item>
       </dxi-item>
       <!--<dxi-item editorType="dxTextBox" [editorOptions]="{ mode: 'password' }">
-        <dxo-label text="인증 번호"> </dxo-label>
-      </dxi-item>-->
-    </dxi-item>
-    <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
-      <dxi-item dataField="LOGID" [label]="{text: '아이디(ID)'}" [editorOptions]="{ height: 30 }">
-        <dxi-validation-rule type="required" message="ID is required"></dxi-validation-rule>
-      </dxi-item>
+    <dxo-label text="인증 번호"> </dxo-label>
+  </dxi-item>-->
     </dxi-item>
 
     <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
@@ -57,6 +65,9 @@
                             width="100%"
                             [showClearButton]="true"
                             [(selectedValue)]="questionCodeValue"
+                            popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
                             (onDataLoaded)="onQSTIONDataLoaded($event)"
                             placeholderText="질문을 선택하여 주십시오."
                             [validationErrors]="[{type:'required', message:'질문을 선택하여 주십시오.'}]"
@@ -71,72 +82,66 @@
         <dxi-validation-rule type="required" message="답변 is required"></dxi-validation-rule>
       </dxi-item>
     </dxi-item>
-    <dxi-item>
-      <div style="background-color: rgba(191, 191, 191, 0.15);">
-        <div class="dx-fieldset">
-          <div class="dx-fieldset-header" style=" color:black;">1. 아이디 찾기</div>
-          <div class="dx-field">
-            <div class="dx-field-value-static">비밀번호 재설정 또는 휴면계정 복구는 2번 또는 3번 항목 중 택일하십시오.</div>
-          </div>
-          <div class="dx-field">
-            <div class="dx-field-label">- 사업자등록번호, 이메일을 입력 후 [ID 찾기] 클릭시 [아이디] 항목에 표시됩니다.</div>
-          </div>
-        </div>
-        <div class="dx-fieldset" style="margin-top:10px;">
-          <div class="dx-fieldset-header" style=" color:black;">2. 비밀번호 재설정(휴면계정 대상자 포함)</div>
-          <div class="dx-field">
-            <div class="dx-field-value-static"> => 회원가입시 [질문] 항목을 등록한 거래처</div>
-          </div>
-          <div class="dx-field">
-            <div class="dx-field-label">순서1. 사업자등록번호, 아이디, 회원가입시 등록한 이메일과 질문 선택 및 입력합니다.</div>
-          </div>
-          <div class="dx-field">
-            <div class="dx-field-label">순서2. 변경 비밀번호를 입력 후 [재설정] 버튼을 클릭합니다.</div>
-          </div>
-        </div>
-        <div class="dx-fieldset" style="margin-top:10px;">
-          <div class="dx-fieldset-header" style=" color:black;">3. 비밀번호 재설정(휴면계정 대상자 포함)</div>
-          <div class="dx-field">
-            <div class="dx-field-value-static"> => 먼저 구매부서에 전화로 초기화 요청</div>
-          </div>
-          <div class="dx-field">
-            <div class="dx-field-label">순서1. 사업자등록번호, 아이디, 회원가입시 등록한 이메일과 수신된 인증번호를 입력합니다.</div>
-          </div>
-          <div class="dx-field">
-            <div class="dx-field-label">순서2. 변경 비밀번호를 입력 후 [재설정] 버튼을 클릭합니다.</div>
-          </div>
-        </div>
-        <div class="dx-fieldset">
-          <div class="dx-fieldset-header" style="text-align:center; color:red;">*** 중요 정보는 외부에 노출되지 않도록 주의하셔야합니다. ***</div>
-          <div class="dx-fieldset-header" style="text-align: center; color: blue;">변경작업시 사용자의 관련정보(ID, IP등)는 관리되고 있습니다.</div>
 
-        </div>
-      </div>
+    <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
+      <dxi-item dataField="LOGID" [label]="{text: '아이디(ID)'}" [editorOptions]="{ height: 30 , disabled:true }">
+        <dxi-validation-rule type="required" message="ID is required"></dxi-validation-rule>
+      </dxi-item>
     </dxi-item>
     <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
-      <dxi-item dataField="LOGPW" [label]="{text: '비밀번호'}" [editorOptions]="{ mode: 'password'}">
-        <dxi-validation-rule type="required" message="Password is required">
+      <dxi-item dataField="LOGPW" [label]="{text: '비밀번호'}" [editorOptions]="{ mode: 'password', maxLength: 20 }">
+        <dxi-validation-rule type="required" message="비밀번호를 입력해주십시오.">
         </dxi-validation-rule>
       </dxi-item>
-      <dxi-item editorType="dxTextBox" [editorOptions]="{ mode: 'password' }">
-        <dxo-label text="비밀번호 확인"> </dxo-label>
+      <dxi-item dataField="LOGPW_CHK"[label]="{text: '비밀번호 확인'}" [editorOptions]="{ mode: 'password', maxLength: 20 }">
         <dxi-validation-rule type="required"
-                             message="Confirm Password is required">
+                             message="비밀번호 확인을 해주십시오.">
         </dxi-validation-rule>
         <dxi-validation-rule type="compare"
                              [comparisonTarget]="passwordComparison"
-                             message="Password and Confirm Password do not match">
+                             message="비밀번호와 비밀번호 확인이 맞지 않습니다.">
         </dxi-validation-rule>
       </dxi-item>
     </dxi-item>
-    <dxi-item itemType="button"
-              widget="dxButton"
-              name="applyBtn"
-              #buttonIem
-              horizontalAlignment="center"
-              style="margin-top:20px; "
-              [buttonOptions]="saveButtonOptions">
+    <dxi-item>
+      <div style="background-color: rgba(191, 191, 191, 0.15);">
+        <div class="dx-fieldset" style="margin-top:15px; margin-bottom:15px; padding-top:10px;" >
+          <div class="dx-field" style="margin-bottom:0px;">
+            <div class="dx-fieldset-header" style=" color:black; float:left; width:fit-content; padding-right:30px; margin-bottom:0px;">1. 아이디 찾기</div>
+            <div class="dx-field-value-static" style="float:left">비밀번호 재설정 또는 휴면계정 복구는 2번 또는 3번 항목 중 택일하십시오.</div>
+          </div>
+          <div class="dx-field">
+            <div class="dx-field-label" style="width:90%;">- 사업자등록번호, 이메일을 입력 후 [ID 찾기] 클릭시 [아이디] 항목에 표시됩니다.</div>
+          </div>
+        </div>
+
+        <div class="dx-fieldset" style="margin-top:15px; margin-bottom:15px;" >
+          <div class="dx-field" style="margin-bottom:0px;">
+            <div class="dx-fieldset-header" style=" color: black; float: left; width: fit-content; padding-right: 30px; margin-bottom: 0px;">2. 비밀번호 재설정(휴면계정 대상자 포함)</div>
+            <div class="dx-field-value-static" style="float:left"> => 회원가입시 [질문] 항목을 등록한 거래처</div>
+          </div> 
+          <div class="dx-field">
+            <div class="dx-field-label" style="width:90%;">순서1. 사업자등록번호, 아이디, 회원가입시 등록한 이메일과 질문 선택 및 입력합니다.</div>
+            <div class="dx-field-label" style="width:90%;">순서2. 변경 비밀번호를 입력 후 [재설정] 버튼을 클릭합니다.</div>
+          </div>
+        </div>
+        <div class="dx-fieldset"  style="margin-top:15px; margin-bottom:15px;" >
+          <div class="dx-field" style="margin-bottom:0px;">
+            <div class="dx-fieldset-header" style=" color: black; float: left; width: fit-content; padding-right: 30px; margin-bottom: 0px;">3. 비밀번호 재설정(휴면계정 대상자 포함)</div>
+            <div class="dx-field-value-static" style="float:left"> => 먼저 구매부서에 전화로 초기화 요청</div>
+          </div>
+          <div class="dx-field">
+            <div class="dx-field-label" style="width:90%;">순서1. 사업자등록번호, 아이디, 회원가입시 등록한 이메일과 수신된 인증번호를 입력합니다.</div>
+            <div class="dx-field-label" style="width:90%;">순서2. 변경 비밀번호를 입력 후 [재설정] 버튼을 클릭합니다.</div>
+          </div>
+        </div>
+        <div class="dx-fieldset"  style="margin-top:15px; padding-bottom:10px;">
+          <div class="dx-fieldset-header" style="text-align: center; color: red; margin-bottom: 10px;">*** 중요 정보는 외부에 노출되지 않도록 주의하셔야합니다. ***</div>
+          <div class="dx-fieldset-header" style="text-align: center; color: blue; margin-bottom: 10px;">변경작업시 사용자의 관련정보(ID, IP등)는 관리되고 있습니다.</div>
+        </div>
+      </div>
     </dxi-item>
+
   </dx-form>
 
 </div>

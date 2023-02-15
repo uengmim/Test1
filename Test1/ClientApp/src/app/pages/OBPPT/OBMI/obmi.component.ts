@@ -52,6 +52,7 @@ export class OBMIComponent {
   @ViewChild('#gcContractList', { static: false }) gcContractList!: DxDataGridComponent;
   @ViewChild('questionCodeEntery', { static: false }) questionCodeEntery!: CommonPossibleEntryComponent;
   @ViewChild('buttonIem', { static: false }) buttonIem!: DxiItemComponent;
+  @ViewChild('masterform', { static: false }) masterform!: DxFormComponent;
 
   callbacks = [];
 
@@ -126,7 +127,7 @@ export class OBMIComponent {
  * @param authService 사용자 인증 서버스
  */
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, private appInfo: AppInfoService,  http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, private appInfo: AppInfoService, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 회원정보찾기";
 
     this.displayExpr = "";
@@ -135,8 +136,7 @@ export class OBMIComponent {
     this.rowCount1 = 0;
     this.rowCount2 = 0;
     //회원가입 폼 데이터
-    this.searchID = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "", "", "", "", "", "", "", new Date, new Date, new Date, new Date, "", "", new Date, "", new Date, "", new Date, "", "", "", "", this.appConfig.interfaceId, new Date, "", this.appConfig.interfaceId, new Date, "", DIMModelStatus.UnChanged);
+    this.searchID = {};
 
     this._dataService = dataService;
     this.imInfo = imInfo;
@@ -147,25 +147,38 @@ export class OBMIComponent {
     let codeInfos = [
       new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.questionCode),
     ];
-    PossibleEntryDataStoreManager.setDataStore("obmr", codeInfos, appConfig, dataService);
+    PossibleEntryDataStoreManager.setDataStore("obmi", codeInfos, appConfig, dataService);
 
 
     const that = this;
 
 
-    //재설정버튼
+    //재설정버튼 
     this.saveButtonOptions = {
       text: "재설정",
       type: 'success',
+      width:150,
       useSubmitBehavior: true,
       disabled: true,
-      onClick: async  (e: any) => {
-
+      onClick: async (e: any) => {
+        console.log(this.searchID);
+        var result = await this.dataLoad(this.imInfo, this.dataService, this, 'Pw');
+        if (result.length == 0 ) {
+          alert("해당 아이디의 이메일과 사업자번호를 입력하여 주십시오.", "알림");
+          return;
+        }
+        if (result[0].QSTION != this.searchID.QSTION || result[0].ANSWER != this.searchID.ANSWER) {
+          alert("질문과 답변이 일치하지 않습니다.", "알림");
+          return;
+        }
+        if (this.searchID.LOGPW != this.searchID.LOGPW_CHK) {
+          alert("비밀번호 확인이 일치하지 않습니다.", "알림");
+          return;
+        }
         if (await confirm("비밀번호를 변경하시겠습니까?", "알림")) {
           this.dataInsert(this)
           alert("비밀번호가 변경되었습니다.", "알림");
         }
-
 
       },
     };
@@ -175,38 +188,28 @@ export class OBMIComponent {
 * 화면 종료
 * */
   ngOnDestroy(): void {
-    PossibleEntryDataStoreManager.removeDataStore("obmr");
+    PossibleEntryDataStoreManager.removeDataStore("obmi");
   }
 
   //중복 검사
   async SearchIDButton() {
 
-    var result = await this.dataLoad(this.imInfo, this.dataService, this);
     if (this.searchID.BIZNO == "") {
-      alert("사업자번호를 입력해주세요.","알림");
-      return;
-    }
-    else if (this.searchID.LOGID == "") {
-      alert("ID를 입력해주세요.", "알림");
+      alert("사업자번호를 입력해주세요.", "알림");
       return;
     }
     else if (this.searchID.E_MAIL == "") {
       alert("이메일을 입력해주세요.", "알림");
       return;
     }
-    else if (this.searchID.QSTION == "") {
-      alert("질문을 입력해주세요.", "알림");
-      return;
-    }
-    else if (this.searchID.ANSWER == "") {
-      alert("답변을 입력해주세요.", "알림");
-      return;
-    }
+    var result = await this.dataLoad(this.imInfo, this.dataService, this, 'Id');
+
     if (result.length > 0) {
-      alert("변경하실 비밀번호를 입력해주세요.", "알림");
+      alert(`입력한 정보로 조회된 아이디는 '${result[0].LOGID}' 입니다.`, "알림");
+      this.searchID.LOGID = result[0].LOGID;
       this.form.instance.getButton("applyBtn")?.option("disabled", false);
     } else {
-      alert("입력하신 정보가 다릅니다.", "알림")
+      alert("입력한 정보로 조회된 아이디가 없습니다.", "알림")
       this.form.instance.getButton("applyBtn")?.option("disabled", true);
     }
 
@@ -221,14 +224,13 @@ export class OBMIComponent {
 
 
   // 데이터 로드
-  public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMIComponent) {
-
-    var resultModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
-      `BIZNO = '${thisObj.searchID.BIZNO}'
-       AND LOGID = '${thisObj.searchID.LOGID}'
-       AND E_MAIL = '${thisObj.searchID.E_MAIL}'
-       AND QSTION = '${thisObj.searchID.QSTION}'
-       AND ANSWER = '${thisObj.searchID.ANSWER}' `, "", QueryCacheType.None);
+  public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMIComponent, action : string) {
+    if (action == "Id") {
+      var where = `MANDT = '${this.appConfig.mandt}' AND BIZNO = '${thisObj.searchID.BIZNO}' AND E_MAIL = '${thisObj.searchID.E_MAIL}'`;
+    } else {
+      var where = `MANDT = '${this.appConfig.mandt}' AND BIZNO = '${thisObj.searchID.BIZNO}' AND E_MAIL = '${thisObj.searchID.E_MAIL}' AND LOGID = '${thisObj.searchID.LOGID}'`;
+    }
+    var resultModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [], where, "", QueryCacheType.None);
 
     return resultModel;
   }
@@ -242,32 +244,46 @@ export class OBMIComponent {
       let minDate = new Date("0001-01-01");
       let nowTime = formatDate(new Date(), "HH:mm:ss", "en-US");
 
-      var maininsertData = thisObj.searchID as ZMMT8100Model;
+      var resultModel = await this.dataService.SelectModelData<ZMMT8100Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
+        `MANDT = '${this.appConfig.mandt}' AND BIZNO= '${thisObj.searchID.BIZNO}' AND LOGID= '${thisObj.searchID.LOGID}' AND E_MAIL= '${thisObj.searchID.E_MAIL}'`, "", QueryCacheType.None);
 
+      var userPW = thisObj.searchID.LOGPW
+
+      var maininsertData = new ZMMT8100Model(this.appConfig.mandt, resultModel[0].BIZNO, resultModel[0].LIFNR, resultModel[0].NAME1, resultModel[0].APPST, resultModel[0].LOGID, userPW,
+        resultModel[0].MACID, resultModel[0].INTIP, resultModel[0].J_1KFREPRE, resultModel[0].ADDHQ, resultModel[0].HOUSE_NO, resultModel[0].SEARCHTERM1, resultModel[0].J_1KFTIND, resultModel[0].J_1KFTBUS,
+        resultModel[0].POSTL_COD1, resultModel[0].BIZPM, resultModel[0].LICNO, resultModel[0].OFFNM, resultModel[0].TELF1, resultModel[0].TELF2, resultModel[0].FAX, resultModel[0].E_MAIL, resultModel[0].BRANCH,
+        resultModel[0].BIZTY, resultModel[0].LIFTY, resultModel[0].COUNTRY, resultModel[0].QSTION, resultModel[0].ANSWER, resultModel[0].REQDT, resultModel[0].IUPDT, resultModel[0].INVDT, resultModel[0].CREDT,
+        resultModel[0].CREGD, resultModel[0].EVAYN, resultModel[0].LSTDT, resultModel[0].LSTID, resultModel[0].STODT, resultModel[0].STOID, resultModel[0].DUEDT, resultModel[0].ZWELS, resultModel[0].ZTERM,
+        resultModel[0].KALSK, resultModel[0].REMARK, this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
+      //등록 요청 일자
       maininsertData.REQDT = now;
+      //정보 수정 일자
       maininsertData.IUPDT = now;
+      //개인 정보 동의일
       maininsertData.INVDT = now;
-      maininsertData.ERDAT = now;
-      maininsertData.AEZET = nowTime;
-      maininsertData.ERZET = nowTime;
+      //신용 평가 기간
       maininsertData.CREDT = minDate;
+      //최종 승인 일자
       maininsertData.LSTDT = minDate;
+      //사용 중지 일자
+      maininsertData.STODT = minDate;
+      //유효 일자
       maininsertData.DUEDT = minDate;
-
+      //레코드 생성일
+      maininsertData.ERDAT = now;
+      //입력시간
+      maininsertData.AEZET = nowTime;
+      //최종 변경 시간
+      maininsertData.ERZET = nowTime;
       maininsertData.ModelStatus = DIMModelStatus.Modify;
 
       var mainmodelList: ZMMT8100Model[] = [maininsertData];
 
-      var select1: boolean = false;
-      var select2: boolean = false;
-
-      maininsertData.EVAYN = select1 || select2 ? "X" : ""
-
       this.rowCount1 = await this._dataService.ModifyModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", mainmodelList);
-
+      console.log("rowCount1" + this.rowCount1);
     }
     catch (error) {
-      alert("error", "알림");
+      alert("비밀번호 재설정 중 오류가 발생했습니다. 담당자에게 문의해주세요.", "알림");
     }
   }
 
@@ -276,7 +292,7 @@ export class OBMIComponent {
     if (this.loadePeCount >= 3) {
       setTimeout(() => { this.loadingVisible = false });
 
-      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmr", this.appConfig, this.questionCode);
+      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmi", this.appConfig, this.questionCode);
 
       let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 

@@ -13,7 +13,7 @@ import { AppInfoService } from '../../../shared/services/app-info.service';
 import { Service } from './app.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
-  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxCheckBoxComponent } from 'devextreme-angular';
+  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxCheckBoxComponent, DxValidationGroupComponent } from 'devextreme-angular';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { ZCMT0020Model } from '../../../shared/dataModel/common/zcmt0020';
 import { AuthService } from '../../../shared/services';
@@ -29,6 +29,8 @@ import { NbpAgentservice, DeviceInfo } from '../../../shared/services/nbp.agent.
 import notify from 'devextreme/ui/notify';
 import { async } from 'rxjs';
 import { alert, confirm } from "devextreme/ui/dialog";
+import dxValidator from 'devextreme/ui/validator';
+import { DxiItemComponent, DxiValidationRuleComponent } from 'devextreme-angular/ui/nested';
 
 const sendRequest = function (value: any) {
   const invalidEmail = 'test@dx-email.com';
@@ -59,9 +61,10 @@ export class OBMRComponent  {
   @ViewChild('accountClassEntery', { static: false }) accountClassEntery!: CommonPossibleEntryComponent;
   @ViewChild('questionCodeEntery', { static: false }) questionCodeEntery!: CommonPossibleEntryComponent;
 
-  @ViewChild('countryEntery', { static: false }) countryEntery!: TablePossibleEntryComponent;
+  @ViewChild('countryEntery', { static: false }) countryEntery!: CommonPossibleEntryComponent;
   @ViewChild('bizpmtagbox', { static: false }) bizpmtagbox!: DxTagBoxComponent;
   @ViewChild('chkgbox', { static: false }) chkgbox!: DxCheckBoxComponent;;
+  @ViewChild('valueRule', { static: false }) valueRule!: DxiValidationRuleComponent;
 
   callbacks = [];
 
@@ -271,7 +274,7 @@ export class OBMRComponent  {
 
     //저장버튼
     this.saveButtonOptions = {
-      text: "회원가입",
+      text: "회원가입 요청",
       disabled: true,
       type: 'success',
       useSubmitBehavior: true,
@@ -279,32 +282,27 @@ export class OBMRComponent  {
 
         var value = this.chkgbox.value;
         let result = e.validationGroup.validate();
+        let formresult = this.masterform.instance.validate();
         var bsresult = await this.bsDataLoad(this.imInfo, this.dataService, this);
         //필수값을 입력 안했을 때
-        if (!result.isValid) {
+        if (!formresult.isValid || !result.isValid) {
           alert("필수값을 입력하여 주십시오.", "알림");
+          return;
+
         }
         //필수값을 입력 했을 때
         else {
           //동의를 눌렀으면
           if (value == true) {
-            if (await confirm("회원가입하시겠습니까?", "알림")) {
+            if (await confirm("회원가입 요청하시겠습니까?", "알림")) {
               if (bsresult.length > 0) {
                 alert("중복된 사업자 번호가 있습니다.", "알림");
               } else {
-                if (ErrorEvent) {
-                  alert("Error.", "알림");
-                } else {
+
                   this.dataInsert(this)
-                  alert("회원가입이 되었습니다.", "알림");
+                  alert("회원가입 요청이 완료되었습니다.", "알림");
                   this.form.instance.getButton("applyBtn")?.option("disabled", true);
-                  this.masterform.instance.resetValues();
-
-                  this.questionCodeEntery.ClearSelectedValue();
-                  this.questionCodeEntery.ClearDataSource();
-
-                  this.bizpmtagbox.instance.reset();
-                }
+                
               }
             }
           } else {
@@ -446,8 +444,6 @@ export class OBMRComponent  {
   //아이디중복 검사
   async Duplication() {
     var result = await this.dataLoad(this.imInfo, this.dataService, this);
-    console.log(result);
-
     if (result.length > 0) {
       alert("중복된 아이디가 있습니다.", "알림");
       this.form.instance.getButton("applyBtn")?.option("disabled", true);
@@ -515,7 +511,7 @@ export class OBMRComponent  {
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMRComponent) {
 
     var resultIdModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
-      `LOGID = '${thisObj.register.LOGID}' AND MANDT = '${thisObj.appConfig.mandt}'`, "", QueryCacheType.None);
+      `MANDT = '${this.appConfig.mandt}' AND LOGID = '${thisObj.register.LOGID}' AND MANDT = '${thisObj.appConfig.mandt}'`, "", QueryCacheType.None);
     
     return resultIdModel;
   }
@@ -523,7 +519,7 @@ export class OBMRComponent  {
   public async bsDataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMRComponent) {
 
     var resultBsModel = await dataService.SelectModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
-      `BIZNO = '${thisObj.register.BIZNO}' AND MANDT = '${thisObj.appConfig.mandt}'`, "", QueryCacheType.None);
+      `MANDT = '${this.appConfig.mandt}' AND BIZNO = '${thisObj.register.BIZNO}' AND MANDT = '${thisObj.appConfig.mandt}'`, "", QueryCacheType.None);
 
     return resultBsModel;
   }

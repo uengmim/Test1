@@ -102,14 +102,18 @@ export class OBPCComponent {
 
       var result = await this.dataService.RefcCallUsingModel<ZMMCONMstModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMCONMstModelList", modeldtlList, QueryCacheType.None);
 
-
+      console.log(result);
       this.gridList = new ArrayStore(
         {
           key: ["CONNO"],
           data: result[0].ET_DATA
         });
 
+      this.dataList.instance.clearSelection();
+      this.dataList.instance.option("focusedRowIndex", -1);
+      var selectData = this.dataList.instance.getSelectedRowsData();
 
+      //this.dataList.onSelectionChanged.emit();
       //return resultModel;
 
     } catch (error) {
@@ -133,32 +137,57 @@ export class OBPCComponent {
 
   }
   selectedChanged(e: any) {
-    
-    var selectData = this.dataList.instance.getSelectedRowsData();
-    this.conFormData = { CONNM: selectData[0].CONNM, CONDT: selectData[0].CONDT, CONNO: selectData[0].CONNO, BIZDT: selectData[0].BIZDT };
+    if (e.selectedRowsData.length > 0) {
 
-    if (selectData[0].BIZAPPYN == "") {
-      this.btnDisabledValue = false;
-    } else {
+      var selectData = e.selectedRowsData;
+      this.conFormData = { CONNM: selectData[0].CONNM, CONDT: selectData[0].CONDT, CONNO: selectData[0].CONNO, BIZDT: selectData[0].BIZDT };
+
+      if (selectData[0].BIZAPPYN == "") {
+        this.btnDisabledValue = false;
+      } else {
+        this.btnDisabledValue = true;
+      }
+    }
+    else {
+
+      this.conFormData = {};
       this.btnDisabledValue = true;
     }
+    
   }
   async apply() {
     if (await confirm("계약서를 접수하시겠습니까 ?", "알림")) {
 
       var selectData = this.dataList.instance.getSelectedRowsData()[0];
       var model: ZMMT8700Model;
+      var cleanDate = new Date("0001-01-01");
 
       var result = await this.dataService.SelectModelData<ZMMT8700Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8700ModelList", [], `MANDT = '${this.appConfig.mandt}' AND CONNO = '${selectData.CONNO}'`, "", QueryCacheType.None);
       model = result[0];
       model.ModelStatus = DIMModelStatus.Modify;
       model.BIZAPPYN = "X";
+      model.BIDDT = model.BIDDT ?? cleanDate;
+      model.CONDT = model.CONDT ?? cleanDate;
+      model.DUEDT = model.DUEDT ?? cleanDate;
+      model.FEXPDT = model.FEXPDT ?? cleanDate;
+      model.TEXPDT = model.TEXPDT ?? cleanDate;
+      model.INSDT = model.INSDT ?? cleanDate;
+      model.MOMDT = model.MOMDT ?? cleanDate;
+      model.AENAM = this.appConfig.interfaceId;
+      model.PRICE = model.PRICE/100;
+      model.VAT = model.VAT/100;
+      model.AMOUNT = model.AMOUNT/100;
+      model.AEDAT = new Date();
+      model.AEZET = formatDate(new Date(), "HH:mm:ss", "en-US");
       model.BIZDT = new Date();
+
 
       var resultRow = this.dataService.ModifyModelData<ZMMT8700Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8700ModelList", [model]);
     
       alert("접수완료", "알림");
       this.dataLoad();
+
+     
     }
   }
   selectApply(e: any) {

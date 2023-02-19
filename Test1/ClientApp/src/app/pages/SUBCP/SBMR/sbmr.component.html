@@ -86,6 +86,26 @@
                type="normal">
     </dx-button>
   </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25">
+    <dx-button stylingMode="contained"
+               (onClick)="takeOver($event)"
+               text="자재인수"
+               type="normal">
+    </dx-button>
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25">
+    <dx-button stylingMode="contained"
+               (onClick)="takeCancel($event)"
+               text="인수취소"
+               type="normal">
+    </dx-button>
+  </dxi-item>
 
   <!--<dxi-item location="after"
             widget="dxButton"
@@ -155,7 +175,7 @@
       <dxi-item dataField="ZSHIP_STATUS">
         <div *dxTemplate>
           <div style="float:left;">
-            <nh-possible-comm #CodeEntery
+            <nh-possible-comm #StatusEntery
                               dataStoreKey="dataStoreKey"
                               [codeInfo]="zshipCode"
                               valueColumn="DOMVALUE_L"
@@ -180,6 +200,7 @@
               [dataSource]="drawalData"
               [remoteOperations]="false"
               [focusedRowIndex]="0"
+              [(selectedRowKeys)]="SelectKey"
               [allowColumnReordering]="true"
               [allowColumnResizing]="true"
               [rowAlternationEnabled]="true"
@@ -235,7 +256,8 @@
   </dxi-column>
 
   <dxi-column dataField="SC_R_MENGE"
-              caption="요청량" [allowEditing]="true">
+              caption="요청량" [allowEditing]="true" format="#,##0.###"
+              [editorOptions]="{format: '#,##0.000'}" dataType="number">
   </dxi-column>
 
   <dxi-column dataField="MEINS"
@@ -247,7 +269,7 @@
   </dxi-column>
 
   <dxi-column dataField="ZSHIP_STATUS"
-              caption="배차Status" [allowEditing]="false">
+              caption="배차상태" [allowEditing]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_R_DATE_C"
@@ -257,7 +279,7 @@
   </dxi-column>
 
   <dxi-column dataField="SC_L_MENGE"
-              caption="출하지시량" [allowEditing]="false">
+              caption="출하지시량" [allowEditing]="false" format="#,##0.###" dataType="number">
   </dxi-column>
 
   <dxi-column dataField="SC_L_DATE"
@@ -311,7 +333,7 @@
   </dxi-column>
 
   <dxi-column dataField="SC_G_MENGE"
-              caption="출고량(출하장 계근량)" [allowEditing]="false">
+              caption="출고량(출하장 계근량)" [allowEditing]="false" format="#,##0.###" dataType="number">
   </dxi-column>
 
   <dxi-column dataField="SC_G_DATE"
@@ -325,7 +347,7 @@
   </dxi-column>
 
   <dxi-column dataField="SC_A_MENGE"
-              caption="착지량" [allowEditing]="false">
+              caption="착지량" [allowEditing]="false" format="#,##0.###" dataType="number">
   </dxi-column>
 
   <dxi-column dataField="SC_A_DATE"
@@ -335,6 +357,8 @@
   </dxi-column>
 
   <dxi-column dataField="SC_A_TIME"
+              dataType="time"
+              format="HH:mm:ss"
               caption="인수시간" [allowEditing]="false">
   </dxi-column>
 
@@ -435,3 +459,57 @@
     </div>
   </dx-scroll-view>
 </dx-popup>
+
+
+<!--2차운송사 수정 팝업-->
+<dx-popup width="20%"
+          height="30%"
+          [showTitle]="true"
+          title="인수"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="takePopupVisible">
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="addButtonOptions">
+  </dxi-toolbar-item>
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form #takeForm id="popupForm" [formData]="takeFormData" >
+
+          <dxi-item itemType="group" caption="" [colCount]="1">
+            <dxi-item dataField="SC_A_DATE" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true, height: 35}">
+              <dxo-label text="인수일자"></dxo-label>
+              <dxi-validation-rule type="required" message="인수일자를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" caption="" [colCount]="1">
+            <dxi-item dataField="SC_A_TIME" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'HH:mm:ss',type: 'time', useMaskBehavior : true, height: 35, pickerType: 'rollers'}">
+              <dxo-label text="인수시간"></dxo-label>
+              <dxi-validation-rule type="required" message="인수시간을 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" caption="" [colCount]="1">
+            <dxi-item dataField="SC_A_NAME" [editorOptions]="{ height: 35 }">
+              <dxo-label text="인수자명"></dxo-label>
+              <dxi-validation-rule type="required" message="인수자명을 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+          </dxi-item>
+
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+</dx-popup>
+

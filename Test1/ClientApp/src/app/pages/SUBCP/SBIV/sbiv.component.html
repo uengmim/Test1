@@ -1,8 +1,21 @@
  <!--toolbar-->
 <div style="margin:20px 10px 10px 20px">
 
-
-  <dx-data-grid  [dataSource]="forestData"
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="width: auto;
+              margin-left: 5px;
+              margin-right: 5px;">
+      <dx-button stylingMode="contained"
+                 (onClick)="LoadData($event)"
+                 text="조회"
+                 type="normal">
+      </dx-button>
+    </dxi-item>
+  </dx-toolbar>
+  <dx-data-grid [dataSource]="forestData"
                 [remoteOperations]="false"
                 [focusedRowIndex]="0"
                 [allowColumnReordering]="true"
@@ -25,43 +38,63 @@
 
     <!--Data column-->
     <dxi-column dataField="MTART"
-                caption="자재유형코드">
+                caption="자재유형코드"
+                [fixed]="true"
+                [visible]="false"
+                fixedPosition="left">
     </dxi-column>
 
     <dxi-column dataField="MATNR"
-                caption="자재코드">
+                caption="자재코드"
+                [fixed]="true"
+                fixedPosition="left">
     </dxi-column>
 
     <dxi-column dataField="MAKTX"
-                caption="자재명칭">
+                caption="자재명칭"
+                [fixed]="true"
+                fixedPosition="left">
+    </dxi-column>
+    <dxi-column dataField="LABST"
+                format="#,##0.###"
+                dataType="number"
+                caption="가용재고 수량">
     </dxi-column>
 
-    <dxi-column dataField="SPART"
-                caption="재품군 코드">
+    <dxi-column dataField="INSME"
+                format="#,##0.###"
+                dataType="number"
+                caption="품질검사 수량">
     </dxi-column>
 
-    <dxi-column dataField="VTEXT"
-                caption="제품군 코드내역">
+    <dxi-column dataField="SPEME"
+                format="#,##0.###"
+                dataType="number"
+                caption="고결/파포 수량">
     </dxi-column>
 
-    <dxi-column dataField="MATKL"
-                caption="자재그룹코드">
+    <dxi-column dataField="UMLME"
+                format="#,##0.###"
+                dataType="number"
+                caption="이동중/운송중">
     </dxi-column>
 
-    <dxi-column dataField="WGBEZ"
-                caption="자재그룹내역">
+    <dxi-column dataField="LABST_MT"
+                format="#,##0.###"
+                dataType="number"
+                caption="가용재고MT">
     </dxi-column>
 
-    <dxi-column dataField="ZZDEPT_CD"
-                caption="운영부서코드">
+    <dxi-column dataField="INSME_MT"
+                format="#,##0.###"
+                dataType="number"
+                caption="품질검사MT">
     </dxi-column>
 
-    <dxi-column dataField="ZZDEPT_NM"
-                caption="부서명">
-    </dxi-column>
-
-    <dxi-column dataField="ZZBIN"
-                caption="저장빈 코드">
+    <dxi-column dataField="SPEME_MT"
+                format="#,##0.###"
+                dataType="number"
+                caption="고결/파포MT">
     </dxi-column>
 
     <dxi-column dataField="MEINS"
@@ -74,58 +107,6 @@
 
     <dxi-column dataField="SOTXT"
                 caption="특별재고유형">
-    </dxi-column>
-
-    <dxi-column dataField="PARTNER"
-                caption="BP코드">
-    </dxi-column>
-
-    <dxi-column dataField="NAME1"
-                caption="BP명칭">
-    </dxi-column>
-
-    <dxi-column dataField="LABST"
-                caption="가용재고 수량">
-    </dxi-column>
-
-    <dxi-column dataField="INSME"
-                caption="품질검사 수량">
-    </dxi-column>
-
-    <dxi-column dataField="SPEME"
-                caption="보류재고 수량">
-    </dxi-column>
-
-    <dxi-column dataField="UMLME"
-                caption="이동중/운송중">
-    </dxi-column>
-
-    <dxi-column dataField="LABST_MT"
-                caption="가용재고MT">
-    </dxi-column>
-
-    <dxi-column dataField="INSME_MT"
-                caption="품질검사MT">
-    </dxi-column>
-
-    <dxi-column dataField="SPEME_MT"
-                caption="보류재고MT">
-    </dxi-column>
-
-    <dxi-column dataField="UMLME_MT"
-                caption="이동중/운송중 MT">
-    </dxi-column>
-
-    <dxi-column dataField="VPRSV"
-                caption="가격지시자">
-    </dxi-column>
-
-    <dxi-column dataField="PEINH"
-                caption="단가단위">
-    </dxi-column>
-
-    <dxi-column dataField="VERPR"
-                caption="단가">
     </dxi-column>
   </dx-data-grid>
 </div>

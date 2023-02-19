@@ -94,6 +94,20 @@
               margin-left: 5px;
               margin-right: 5px;">
       <dx-button stylingMode="contained"
+                 (onClick)="cancelData($event)"
+                 [disabled]="chDisabled"
+                 text="접수취소"
+                 type="normal">
+      </dx-button>
+    </dxi-item>
+
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="width: auto;
+              margin-left: 5px;
+              margin-right: 5px;">
+      <dx-button stylingMode="contained"
                  [disabled]="chDisabled"
                  (onClick)="troRow($event)"
                  text="구성품확인"
@@ -132,9 +146,9 @@
   <div id="form-container" style="margin-top: 20px; margin-bottom: 20px; margin-left: 10px;">
     <dx-form id="registerInfo" [formData]="ReceptionistData">
       <dxi-item itemType="group" [colCount]="5">
-        <dxi-item editorType="dxDateBox" dataField="PRD_P_ACPT_DATE" [disabled]="true" [editorOptions]="{ labelmode: 'floating', displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true }"><dxo-label text="접수일자"></dxo-label></dxi-item>
+        <dxi-item editorType="dxDateBox" dataField="PRD_P_ACPT_DATE" [disabled]="false" [editorOptions]="{ labelmode: 'floating', displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true }"><dxo-label text="접수일자"></dxo-label></dxi-item>
         <dxi-item editorType="dxTextBox" dataField="PRD_P_ACPT_NAME" [disabled]="true" [editorOptions]="{ labelmode: 'floating' }"><dxo-label text="접수자"></dxo-label></dxi-item>
-        <dxi-item editorType="dxTextBox" dataField="KUNNR" [disabled]="true" [editorOptions]="{ labelmode: 'floating' }"><dxo-label text="거래처번호"></dxo-label></dxi-item>
+        <dxi-item editorType="dxTextBox" dataField="LIFNR" [disabled]="true" [editorOptions]="{ labelmode: 'floating' }"><dxo-label text="거래처번호"></dxo-label></dxi-item>
       </dxi-item>
     </dx-form>
   </div>
@@ -174,7 +188,8 @@
 
     <dxi-column dataField="LIFNR"
                 caption="공급업체"
-                [width]="110">
+                [width]="110"
+                [visible]="false">
     </dxi-column>
 
     <dxi-column dataField="PRD_P_DATE"
@@ -231,12 +246,14 @@
 
     <dxi-column dataField="PRD_P_MENGE"
                 caption="지시량(포)"
-                format="#,###">
+                dataType="number"
+                format="#,##0.###">
     </dxi-column>
 
     <dxi-column dataField="PRD_P_MENGE_MT"
                 caption="지시량(톤)"
-                format="#,###">
+                dataType="number"
+                format="#,##0.###">
     </dxi-column>
 
     <dxi-column dataField="PRD_TYPE"
@@ -255,12 +272,14 @@
 
     <dxi-column dataField="PRD_PI_MENGE"
                 caption="생산량(포)"
-                format="#,###">
+                dataType="number"
+                format="#,##0.###">
     </dxi-column>
 
     <dxi-column dataField="PRD_G_MENGE"
                 caption="요청량"
-                format="#,###">
+                dataType="number"
+                format="#,##0.###">
     </dxi-column>
 
     <dxi-column dataField="PRD_G_NAME"
@@ -284,7 +303,9 @@
     </dxi-column>
 
     <dxi-column dataField="PRD_A_MENGE"
-                caption="입고수량">
+                caption="입고수량"
+                dataType="number"
+                format="#,##0.###">
     </dxi-column>
   </dx-data-grid>
 
@@ -404,12 +425,14 @@
 
           <dxi-column dataField="PRD_P_MENGE"
                       caption="지시량(포)"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_P_MENGE_MT"
                       caption="지시량(톤)"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_TYPE"
@@ -442,12 +465,14 @@
 
           <dxi-column dataField="PRD_PI_MENGE"
                       caption="생산량(포)"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_G_MENGE"
                       caption="요청량"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_G_NAME"
@@ -465,7 +490,9 @@
           </dxi-column>
 
           <dxi-column dataField="PRD_A_MENGE"
-                      caption="입고수량">
+                      caption="입고수량"
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
         </dx-data-grid>
       </div>
@@ -506,11 +533,12 @@
         <dxi-column dataField="BDMNG"
                     caption="소요량"
                     alignment="right"
-                    dataType="string">
+                    dataType="number"
+                    format="#,##0.###">
         </dxi-column>
 
         <dxi-column dataField="BDMNG_P"
-                    format="#,##0"
+                    format="#,##0.###"
                     caption="업체투입실적"
                     alignment="right"
                     dataType="number">
@@ -519,7 +547,8 @@
         <dxi-column dataField="BDMNG_A"
                     caption="실투입실적"
                     alignment="right"
-                    dataType="string">
+                    dataType="number"
+                    format="#,##0.###">
         </dxi-column>
 
         <dxi-column dataField="MENGE"
@@ -560,8 +589,25 @@
     <dx-scroll-view width="100%" height="100%">
 
       <div class="dx-field">
-        <div style="float: right; ">
+        <div style="float: right; " >
           <dx-box>
+            <dxi-item [ratio]="0" [baseSize]="220" style="margin-right:15px;margin-left15px">
+              <dx-form style="margin-bottom: 10px;">
+                <dxi-item location="before"
+                          widget="dxButton"
+                          locateInMenu="auto">
+                  <dx-button stylingMode="contained"
+                             text="구성품투입실적"
+                             (onClick)="insertPopup($event)"
+                             [disabled]="saDisabled"
+                             type="normal"
+                             style="margin-top:20px;"
+                             [width]="200">
+                  </dx-button>
+                </dxi-item>
+              </dx-form>
+            </dxi-item>
+
             <dxi-item [ratio]="0" [baseSize]="200" style="margin-right:15px;">
               <dx-form style="margin-bottom: 10px;">
                 <dxi-item location="before"
@@ -570,6 +616,7 @@
                   <dx-button stylingMode="contained"
                              text="저장"
                              (onClick)="storageList()"
+                             [disabled]="saDisabled"
                              type="normal"
                              style="margin-top:20px;"
                              [width]="100">
@@ -586,6 +633,7 @@
                           locateInMenu="auto">
                   <dx-button stylingMode="contained"
                              text="신규"
+                             [disabled]="saDisabled"
                              (onClick)="addrow()"
                              style="margin-top:20px;"
                              type="normal"
@@ -604,6 +652,7 @@
                   <dx-button stylingMode="contained"
                              (onClick)="resultList($event)"
                              text="조회"
+                             [disabled]="saDisabled"
                              style="margin-top:20px;"
                              type="normal"
                              [width]="100">
@@ -627,7 +676,6 @@
       </dxi-item>
     </dx-form>
   </dxi-item>-->
-
             <!--<dxi-item [ratio]="0" [baseSize]="200" style="margin-right:15px;">
     <dx-form style="margin-bottom: 10px;">
       <dxi-item location="before"
@@ -652,6 +700,7 @@
                           locateInMenu="auto">
                   <dx-button stylingMode="contained"
                              text="삭제"
+                             [disabled]="saDisabled"
                              (onClick)="deleteList()"
                              type="normal"
                              style="margin-top:20px;"
@@ -734,12 +783,14 @@
 
           <dxi-column dataField="PRD_P_MENGE"
                       caption="지시량(포)"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_P_MENGE_MT"
                       caption="지시량(톤)"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_TYPE"
@@ -772,12 +823,14 @@
 
           <dxi-column dataField="PRD_PI_MENGE"
                       caption="생산량(포)"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_G_MENGE"
                       caption="요청량"
-                      format="#,###">
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
 
           <dxi-column dataField="PRD_G_NAME"
@@ -795,7 +848,9 @@
           </dxi-column>
 
           <dxi-column dataField="PRD_A_MENGE"
-                      caption="입고수량">
+                      caption="입고수량"
+                      dataType="number"
+                      format="#,##0.###">
           </dxi-column>
         </dx-data-grid>
       </div>
@@ -807,12 +862,16 @@
                     [allowColumnReordering]="true"
                     [allowColumnResizing]="true"
                     [rowAlternationEnabled]="true"
+                    [(selectedRowKeys)]="registSelectKey"
                     [columnAutoWidth]="true"
                     [selection]="{ mode: 'single' }"
+                    (onCellClick)="focusChange($event)"
                     (onRowDblClick)="dblClick($event)"
+                    (onRowUpdating)="rowUpdating($event)"
                     (onRowUpdated)="rowUpdate($event)"
                     [columnResizingMode]="columnResizeMode"
                     (onEditorPreparing)="onEditorPreparing($event)"
+                    (onEditorPrepared)="onEditorPrepared($event)"
                     keyExpr="SEQ"
                     [showBorders]="true">
         <dxo-paging [pageSize]="10"></dxo-paging>
@@ -838,29 +897,51 @@
 
         <dxi-column dataField="DATA_DATE"
                     caption="일자"
-                    [allowEditing]="false"
+                    [allowEditing]="true"
                     dataType="date"
                     format="yyyy-MM-dd">
         </dxi-column>
 
         <dxi-column dataField="PRD_PI_MENGE"
                     caption="생산량(포)"
-                    format="#,##0"
+                    format="#,##0.###"
                     [allowEditing]="editingPI"
-                    alignment="right"    
+                    [editorOptions]="{format: '#,##0.000'}"
+                    alignment="right"
                     dataType="number">
         </dxi-column>
 
         <dxi-column dataField="PRD_G_MENGE"
                     caption="입고요청량(포)"
-                    format="#,##0"
+                    format="#,##0.###"
                     [allowEditing]="editingG"
+                    [editorOptions]="{format: '#,##0.000'}"
                     alignment="right"
                     dataType="number">
         </dxi-column>
 
         <dxi-column dataField="PRD_G_NAME"
                     caption="입고요청자"
+                    [allowEditing]="false"
+                    dataType="string">
+        </dxi-column>
+
+        <dxi-column dataField="PRD_A_MENGE"
+                    caption="입고량"
+                    [allowEditing]="false"
+                    format="#,##0.###"
+                    dataType="number">
+        </dxi-column>
+
+        <dxi-column dataField="PRD_A_DATE"
+                    caption="입고일자"
+                    [allowEditing]="false"
+                    dataType="date"
+                    format="yyyy-MM-dd">
+        </dxi-column>
+
+        <dxi-column dataField="PRD_A_NAME"
+                    caption="입고자명"
                     [allowEditing]="false"
                     dataType="string">
         </dxi-column>
@@ -906,7 +987,6 @@
                     [allowColumnResizing]="true"
                     [rowAlternationEnabled]="true"
                     [columnAutoWidth]="true"
-                    (onRowUpdated)="row31Update($event)"
                     [columnResizingMode]="columnResizeMode"
                     [showBorders]="true">
         <dxo-paging [pageSize]="10"></dxo-paging>
@@ -924,6 +1004,7 @@
 
         <dxi-column dataField="RSPOS"
                     caption="예약품목번호"
+                    [allowEditing]="false"
                     dataType="string"
                     [fixed]="true">
         </dxi-column>
@@ -950,18 +1031,21 @@
                     caption="소요량"
                     [allowEditing]="false"
                     alignment="right"
-                    dataType="string">
+                    dataType="number"
+                    format="#,##0.###">
         </dxi-column>
 
         <dxi-column dataField="BDMNG_P"
-                    format="#,##0"
+                    format="#,##0.###"
                     caption="업체투입실적"
                     [allowEditing]="true"
+                    [editorOptions]="{format: '#,##0.000'}"
                     alignment="right"
                     dataType="number">
         </dxi-column>
 
         <dxi-column dataField="BDMNG_A"
+                    format="#,##0.###"
                     caption="실투입실적"
                     [allowEditing]="false"
                     alignment="right"

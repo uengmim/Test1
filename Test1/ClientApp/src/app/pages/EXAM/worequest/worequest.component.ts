@@ -80,7 +80,7 @@ export class WORequestComponent {
 
     this.sd007Code = appConfig.commonCode("주문유형");
 
-    this.t023tCode = appConfig.tableCode("제품구분");
+    /*this.t023tCode = appConfig.tableCode("제품구분");*/
 
     this.maraCode = appConfig.tableCode("비료납품처")
 

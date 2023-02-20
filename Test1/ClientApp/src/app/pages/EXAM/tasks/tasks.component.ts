@@ -156,6 +156,10 @@ export class TasksComponent implements OnDestroy {
   dataSource: any;
   priority: any[];
 
+  /**
+   * 첨부 편집 모드
+   * */
+  editingMode: boolean = true;
 
   /**
    * 생성자
@@ -290,6 +294,11 @@ export class TasksComponent implements OnDestroy {
    * @param e 이벤트 인수
    */
   onCm001ValueChanged = (e: any) => {
+    console.log("onCm001ValueChanged Event 발생");
+
+    this.cm001Entery.SetEventBocking();
+    console.log("onCm001ValueChanged Event Set Blcocking");
+
     if (e.selectedValue.startsWith("A")) {
       //파라미터를 지우고 샛팅 한다.
       this.dynamicEntery.parameters = {};
@@ -312,6 +321,10 @@ export class TasksComponent implements OnDestroy {
    * @param e 이벤트 인수
    */
   onDynamicValueChanged = (e: any) => {
+
+    this.cm001Entery.ClearEventBlocking();
+    console.log("onCm001ValueChanged Event Clear Blcocking");
+
     //파서블 엔트로 선택 값에의해 필터 조건을 변경 한다.
     this.sd007Entery.SetDataFilter(["ZCM_CODE2", "=", e.selectedValue]);
     this.maraEntery.ClearSelectedValue();
@@ -547,12 +560,14 @@ export class TasksComponent implements OnDestroy {
   async onOpenReport(e: any) {
     let now = new Date();
     let toStr = formatDate(now.setDate(now.getDate() - 5), "yyyy-MM-dd", "en-US");
-    let fromStr = formatDate(now, "yyyy-MM-dd", "en-US");
+    let nowStr = formatDate(now, "yyyy-MM-dd", "en-US");
     let params: ParameterDictionary =
     {
       "dbTitle": this.appConfig.dbTitle,
-      "startDate": fromStr,
-      "endDate": toStr
+      "izgwDate": nowStr,
+      "izgwGubun": "G",
+      "izgwSeq": "004",
+      "mandt": this.appConfig.mandt
     };
 
     setTimeout(() => { this.reportViewer.OpenReport("TestReport", params) });

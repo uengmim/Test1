@@ -205,6 +205,7 @@ export class OSHAComponent {
           key: ["oilShipDate", "oilNum"],
           data: this.OilShipData
         });
+      this.oilDataGrid.instance.getScrollable().scrollTo(0);
 
       this.loadingVisible = false;
 
@@ -280,6 +281,7 @@ export class OSHAComponent {
           key: ["chemShipDate", "chemNum"],
           data: this.ChemShipData
         });
+      this.cheDataGrid.instance.getScrollable().scrollTo(0);
 
       this.loadingVisible = false;
 

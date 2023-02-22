@@ -84,7 +84,7 @@ export class STOOComponent {
   /*kunnrCode: TableCodeInfo;*/
   kunweCode: TableCodeInfo;
   matnrCode: TableCodeInfo;
-  inco1Code: TableCodeInfo;
+  inco1Code: CommonCodeInfo;
   tdlnr1Code: TableCodeInfo;
   tdlnr2Code: TableCodeInfo;
   sublgortOutCode: TableCodeInfo;
@@ -208,7 +208,7 @@ export class STOOComponent {
     /*this.kunweCode = appConfig.tableCode("유류창고");*/
     this.kunweCode = appConfig.tableCode("RFC_유류고객정보");
     this.matnrCode = appConfig.tableCode("유류제품명");
-    this.inco1Code = appConfig.tableCode("인코텀스");
+    this.inco1Code = appConfig.commonCode("운송방법");
     this.tdlnr1Code = appConfig.tableCode("운송업체");
     this.tdlnr2Code = appConfig.tableCode("운송업체");
     this.sublgortOutCode = appConfig.tableCode("유류창고");
@@ -235,7 +235,7 @@ export class STOOComponent {
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnrCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunweCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.inco1Code),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.inco1Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr1Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr2Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.sublgortOutCode),
@@ -394,7 +394,7 @@ export class STOOComponent {
 
   //운송방법변경
   oninco1CodeValueChanged(e: any) {
-    this.orderInfo.INCO1 = e.selectedItem.INCO1;
+    this.orderInfo.INCO1 = e.selectedItem.ZCM_CODE3;
     return;
   }
 

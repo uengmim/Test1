@@ -20,8 +20,9 @@
                         [gridBoxWidth]="500"
                         label="입고창고"
                         popupGridScrollMode="standard"
-                        [popupGridPagingMode]="true"
-                        [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                         (onDataLoaded)="onPEDataLoaded($event)"
                         (onEntryValueChanged)="onlgortInCodeValueChanged($event)"
                         [(selectedValue)]="lgortValue"
@@ -45,6 +46,7 @@
                         popupGridScrollMode="standard"
                         [popupGridPagingMode]="true"
                         [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         (onDataLoaded)="onPEDataLoaded($event)"
                         (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-comm>
     </div>
@@ -230,8 +232,9 @@
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="onzproductCodeValueChanged($event)"></nh-possible-comm>
               </div>
@@ -249,8 +252,9 @@
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="onmatnrCodeValueChanged($event)"></nh-possible-comm>
               </div>
@@ -357,13 +361,14 @@
                 <nh-possible-comm [codeInfo]="inco1Code" #inco1CodeDynamic
                                   [dataStoreKey]="dataStoreKey"
                                   [(selectedValue)]="inco1Value"
-                                  valueColumn="INCO1"
-                                  valueDisplayFormat="%BEZEI%(%INCO1%)"
+                                  valueColumn="ZCM_CODE3"
+                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="oninco1CodeValueChanged($event)"></nh-possible-comm>
               </div>
@@ -384,8 +389,9 @@
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="onlgortCodeValueChanged($event)"></nh-possible-comm>
               </div>
@@ -433,8 +439,9 @@
                                   valueDisplayFormat="%NAME1%(%LIFNR%)"
                                   width="auto"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   [gridBoxWidth]="500"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="ontdlnr1CodeValueChanged($event)"></nh-possible-comm>
@@ -451,8 +458,9 @@
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="ontdlnr2CodeValueChanged($event)"></nh-possible-comm>
               </div>
@@ -473,8 +481,9 @@
                                   [gridBoxWidth]="500"
                                   class="weight-test"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   [showDataLoadingPanel]="showDataLoadingPanel"
                                   (onEntryValueChanged)="onZcarnoCodeValueChanged($event)"></nh-possible-comm>
@@ -499,8 +508,9 @@
                                   [gridBoxWidth]="500"
                                   [searchPanel]="true"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="onzcartypeCodeValueChanged($event)"></nh-possible-comm>
               </div>
@@ -528,8 +538,9 @@
                                   width="auto"
                                   [gridBoxWidth]="500"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="onumlgoCodeValueChanged($event)"></nh-possible-comm>
               </div>
@@ -548,8 +559,9 @@
                                   [gridBoxWidth]="500"
                                   [searchPanel]="true"
                                   popupGridScrollMode="standard"
-                                  [popupGridPagingMode]="true"
-                                  [popupGridPageSize]="10"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="oninsmkCodeValueChanged($event)"></nh-possible-comm>
               </div>

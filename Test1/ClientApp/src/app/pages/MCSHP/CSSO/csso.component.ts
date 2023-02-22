@@ -28,7 +28,7 @@ import { ZSDT7020Model } from '../../../shared/dataModel/MFSAP/Zsdt7020Proxy';
 import { ZSDIFPORTALSAPSHIPPINGReqModel, ZSDS6900Model, ZSDT6900Model } from '../../../shared/dataModel/MCDIP/ZsdIfPortalSapShippingReqProxy';
 import { ThemeManager } from '../../../shared/app.utilitys';
 import {
-  DxDataGridComponent, DxCheckBoxComponent
+  DxDataGridComponent, DxCheckBoxComponent, DxFormComponent
 } from 'devextreme-angular';
 import { ZCMT0020CustomModel } from '../../../shared/dataModel/MCSHP/Zcmt0020CustomProxy';
 import { ZSDIFPORTALSAPLELIQRcvModel, ZSDS6440Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLeLiqRcv';
@@ -37,6 +37,7 @@ import { ZMMOILGirecvModel, ZMMS3210Model } from '../../../shared/dataModel/MCDI
 import { ZSDIFPORTALSAPSHIPPINGInsModel, ZSDS6901Model, ZSDT6901Model } from '../../../shared/dataModel/MCDIP/ZsdIfPortalSapShippingIns';
 import { UtichulfModel } from '../../../shared/dataModel/ORACLE/UTICHULFProxy';
 import { OILWkodModel } from '../../../shared/dataModel/ORACLE/OIL_WKODProxy';
+import notify from 'devextreme/ui/notify';
 
 
 //필터
@@ -58,6 +59,7 @@ export class CSSOComponent {
   @ViewChild('cheCarDataCodeEntery', { static: false }) cheCarDataCodeEntery!: CommonPossibleEntryComponent;
   @ViewChild('chkgbox', { static: false }) chkgbox!: DxCheckBoxComponent;
   @ViewChild('chechkgbox', { static: false }) chechkgbox!: DxCheckBoxComponent;
+  @ViewChild('masterform', { static: false }) masterform!: DxFormComponent;
 
   //파서블 엔트리 로딩 패널 안보이게함
   showDataLoadingPanel = false;
@@ -156,7 +158,7 @@ export class CSSOComponent {
   carFormData: any = {};  //차량 배차 메인 폼데이터
   //차량배차 버튼
   carPopupCloseButtonOptions: any;
-
+  carPopupSaveButtonOptions: any;
   //필터
   saleAmountHeaderFilter: any;
   customOperations: Array<any>;
@@ -181,6 +183,8 @@ export class CSSOComponent {
     appInfo.title = AppInfoService.APP_TITLE + " | 출고지시등록";
     this.OraDbTitle = "NCOIL"
     this.liqsndLGORT = "6000"
+    this.mainDataLoad();
+    this.cheMainDataLoad();
     //파서블엔트리
     this.carDataCode = appConfig.tableCode("유류차량");
     this.cheCarDataCode = appConfig.tableCode("화학차량");
@@ -222,6 +226,7 @@ export class CSSOComponent {
       text: '조회',
       onClick: async () => {
         this.mainDataLoad();
+        this.cheMainDataLoad();
       },
     };
     //메인저장버튼
@@ -253,7 +258,7 @@ export class CSSOComponent {
           return;
         }
 
-        if (this.oilSubFormData.ZSTOCK == 0 || this.oilSubFormData.ZSTOCK == undefined || this.oilSubFormData.ZSTOCK == null) {
+        if (this.oilSubFormData.ChulHaJaeGo == 0 || this.oilSubFormData.ChulHaJaeGo == undefined || this.oilSubFormData.ChulHaJaeGo == null) {
           alert("재고가 없습니다.", "알림");
           return;
         }
@@ -312,6 +317,18 @@ export class CSSOComponent {
       text: '닫기',
       onClick(e: any) {
         that.choicePopupVisible = false;
+      }
+    }
+
+    //차량배차팝업저장버튼
+    this.carPopupSaveButtonOptions = {
+      text: '저장',
+      async onClick(e: any) {
+        if (await confirm("저장하시겠습니까?", "알림")) {
+
+          alert("저장되었습니다.", "알림");
+          that.carPopupVisible = false;
+        }
       }
     }
     //차량배차팝업닫기버튼
@@ -394,7 +411,7 @@ export class CSSOComponent {
     //유류메인화면
     this.mainData = new CustomStore(
       {
-        key: ["DONUM"],
+        key: ["DONUM", "DODAT", "ZSEQ"],
 
         load: function (loadOptions) {
           return that.mainDataLoad();
@@ -403,7 +420,7 @@ export class CSSOComponent {
     //화학메인화면
     this.cheMainData = new CustomStore(
       {
-        key: ["DONUM"],
+        key: ["DONUM", "DODAT", "ZSEQ"],
 
         load: function (loadOptions) {
           return that.cheMainDataLoad();
@@ -414,37 +431,37 @@ export class CSSOComponent {
 
   //메인화면 로드   //ZSDIFPORTALSAPSHIPPINGInsModel(RFC)
   public async mainDataLoad() {
-      var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
-      var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
-      var zsds6901List: ZSDS6901Model[] = [];
-      var zsdt6901List: ZSDT6901Model[] = [];
+    var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
+    var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
+    var zsds6901List: ZSDS6901Model[] = [];
+    var zsdt6901List: ZSDT6901Model[] = [];
 
-      var oilDataResult = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", "", "O", this.endDate, this.startDate, "D", zsds6901List, zsdt6901List);
-      var modelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilDataResult];
-      this.loadingVisible = true;
-      var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", modelList, QueryCacheType.None);
-      this.loadingVisible = false;
-      return resultModel[0].ET_DATA;
+    var oilDataResult = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", "", "O", this.endDate, this.startDate, "D", zsds6901List, zsdt6901List);
+    var modelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilDataResult];
+    this.loadingVisible = true;
+    var resultOilModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", modelList, QueryCacheType.None);
+    this.loadingVisible = false;
+    return resultOilModel[0].ET_DATA;
 
 
-    
+
   }
 
 
   //화학메인화면 로드  //ZSDIFPORTALSAPSHIPPINGInsModel(RFC)
   public async cheMainDataLoad() {
-      var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
-      var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
-      var zsds6901List: ZSDS6901Model[] = [];
-      var zsdt6901List: ZSDT6901Model[] = [];
+    var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
+    var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
+    var zsds6901List: ZSDS6901Model[] = [];
+    var zsdt6901List: ZSDT6901Model[] = [];
 
-      var oilDataResult = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", "", "C", this.endDate, this.startDate, "D", zsds6901List, zsdt6901List);
+    var oilDataResult = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", "", "C", this.endDate, this.startDate, "D", zsds6901List, zsdt6901List);
 
-      var modelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilDataResult];
-      this.loadingVisible = true;
-      var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", modelList, QueryCacheType.None);
-      this.loadingVisible = false;
-      return resultModel[0].ET_DATA;
+    var modelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilDataResult];
+    this.loadingVisible = true;
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", modelList, QueryCacheType.None);
+    this.loadingVisible = false;
+    return resultModel[0].ET_DATA;
   }
 
 
@@ -455,12 +472,13 @@ export class CSSOComponent {
     this.orderData = [];
     let fixData = { I_ZSHIPSTATUS: "30" };
     var zsds6430: ZSDS6430Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", this.liqsndLGORT, "", this.selectCSpart, this.oilStartDate, this.oilEndDate, "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6430);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", this.liqsndLGORT, "", this.selectCSpart, this.oilStartDate, this.oilEndDate, "", "", "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6430);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
 
-    this.orderGridData = resultModel[0].IT_DATA;
+    /*this.orderGridData = resultModel[0].IT_DATA;*/
+    this.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");
 
     var zsdsList: ZSDS6900Model[] = [];
     var zsdtList: ZSDT6900Model[] = [];
@@ -471,16 +489,18 @@ export class CSSOComponent {
 
     resultsOilModel[0].ET_DATA.forEach(async (row: ZSDS6900Model) => {
       this.orderGridData.push(new ZSDS6430Model(row.VBELN, "000010", "000000000", "", "", "", row.INCO1, "", new Date(), row.MATNR, row.MAKTX, row.ZMENGE, row.ZMENGE, row.MEINS, "", row.ZMENGE,
-        0, new Date(), 0, "", "", "", row.KUNNR, row.NAME1, row.CITY1, row.STREET, row.TELF1, row.MOBILENO, "", row.NAME2, "", "", "", "", "", row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "",
-        "", "", "", new Date(), 0, "", row.ZTEXT, "", "", row.S_OILNO));
-    });
+        0, new Date(), 0, row.MEINS, "", "", row.KUNNR, row.NAME1, row.CITY1, row.STREET, row.TELF1, row.MOBILENO, "", row.NAME2, "", "", "", "", "", row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "",
+        "", "", "", new Date(), 0, "", row.ZTEXT, "", "", "", row.S_OILNO));
 
+
+    });
     this.loadingVisible = true;
     this.orderData = new ArrayStore(
       {
         key: ["VBELN", "POSNR"],
         data: this.orderGridData
       });
+    this.oilGrid.instance.getScrollable().scrollTo(0);
 
     this.loadingVisible = false;
   }
@@ -534,6 +554,7 @@ export class CSSOComponent {
         key: ["ZARRDT", "ZTANK"],
         data: this.oilSubGridData
       });
+    this.oilGrid.instance.getScrollable().scrollTo(0);
 
     this.loadingVisible = false;
 
@@ -563,13 +584,14 @@ export class CSSOComponent {
     this.cheOrderData = [];
     let fixData = { I_ZSHIPSTATUS: "30" };
     var chezsds6430: ZSDS6430Model[] = [];
-    var chezsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.cheSelectCSpart, this.cheStartDate, this.cheEndDate, "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, chezsds6430);
+    var chezsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.cheSelectCSpart, this.cheStartDate, this.cheEndDate, "", "", "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, chezsds6430);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [chezsdif];
 
     var cheResultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
 
-    this.cheGridData = cheResultModel[0].IT_DATA;
+    /*this.cheGridData = cheResultModel[0].IT_DATA;*/
+    this.cheGridData = cheResultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");
     this.loadingVisible = true;
 
     this.cheOrderData = new ArrayStore(
@@ -577,6 +599,7 @@ export class CSSOComponent {
         key: ["VGBEL", "VGPOS"],
         data: this.cheGridData
       });
+    this.oilGrid.instance.getScrollable().scrollTo(0);
 
     this.loadingVisible = false;
   }
@@ -601,7 +624,7 @@ export class CSSOComponent {
       let oilCVTIme = formatDate(new Date(), "HH:mm:ss", "en-US");
       let oilNowDate = new Date();
       let oilNowTIme = formatDate(new Date(), "HH:mm:ss", "en-US");
-      let chulNowDate = formatDate(new Date(), "yyMMdd", "en-US");
+      let chulNowDate = formatDate(new Date(), "yyyyMMdd", "en-US");
       let chulNowTIme = formatDate(new Date(), "HHmmss", "en-US");
 
       //ORACLE 유류
@@ -635,14 +658,14 @@ export class CSSOComponent {
       var resultModel = await this.dataService.SelectModelData<ZCMT0020CustomModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZCMT0020CustomModelList",
         [this.appConfig.mandt, insertData.MATNR], "", "", QueryCacheType.None);
 
-
+      var jijangb = "";
       //통관재고 잔량처리
       var value = this.chkgbox.value;
       if (value == true) {
-        var jijangb = "Y"
+        jijangb = "Y"
 
       } else {
-        var jijangb = ""
+        jijangb = ""
       }
       //잔량처리가 체크 되면 2들은 복사
       if (jijangb == "Y") {
@@ -667,7 +690,7 @@ export class CSSOComponent {
       let pwdt = formatDate(new Date(insertSubData.ZIPWDT), 'yyyyMMdd', "en-US");
       var formatIPWDT = parseInt(pwdt)
       var oilInsertData = new UtijisifModel(parseInt(now), jiseq, formatARRDT, "1", "0000520", resultModel[0].ZCM_CODE2, insertSubData.ZIIPNO, "0000520", formatIPWDT, 1, "0000520", "", "",
-        "0000520", insertData.gubun, insertSubData.ZTANK, "", "1", "1", "1", insertData.ZMENGE4, insertData.ZCARNO, "", insertData.jisija, insertData.ZRFID, insertData.RACK, insertData.PUMP, "", istData, 0, 0, 0, 0, jijangb,
+        "0000520", insertData.gubun, insertData.ZTANK, "", "1", "1", "1", insertData.ZMENGE4, insertData.ZCARNO, "", insertData.jisija, insertData.ZRFID, insertData.RACK.padStart(2,'0'), insertData.PUMP, "", istData, 0, 0, 0, 0, jijangb,
         phang2, bonsun2, hwaju2, hwamul2, blno2, custil2, chasu2, parseInt(now), byseq, "", 0, "", 0, "", "", parseInt(chulNowDate), parseInt(chulNowTIme), "", "Y", "N", "", "", "", DIMModelStatus.Add);
 
       var oilModelList: UtijisifModel[] = [oilInsertData];
@@ -695,80 +718,139 @@ export class CSSOComponent {
       var num8 = 8;
       var num9 = 9;
       var num10 = 10;
-
+      var doCode1 = "999";
+      var doCode2 = "999";
+      var doCode3 = "999";
+      var doCode4 = "999";
+      var doCode5 = "999";
+      var doCode6 = "999";
+      var doCode7 = "999";
+      var doCode8 = "999";
+      var doCode9 = "999";
+      var doCode10 = "999";
+      var doName1 = "포탈도착지";
+      var doName2 = "포탈도착지";
+      var doName3 = "포탈도착지";
+      var doName4 = "포탈도착지";
+      var doName5 = "포탈도착지";
+      var doName6 = "포탈도착지";
+      var doName7 = "포탈도착지";
+      var doName8 = "포탈도착지";
+      var doName9 = "포탈도착지";
+      var doName10 = "포탈도착지";
 
       if (carData.ZTANKLITER1 == 0) {
-        num1 = 0
         carData.load1 = 0
-        BYJISI1 = ""
       } if (carData.ZTANKLITER2 == 0) {
-        num2 = 0
         carData.load2 = 0
-        BYJISI2 = ""
       } if (carData.ZTANKLITER3 == 0) {
-        num3 = 0
         carData.load3 = 0
-        BYJISI3 = ""
       } if (carData.ZTANKLITER4 == 0) {
-        num4 = 0
         carData.load4 = 0
-        BYJISI4 = ""
       } if (carData.ZTANKLITER5 == 0) {
-        num5 = 0
         carData.load5 = 0
-        BYJISI5 = ""
       } if (carData.ZTANKLITER6 == 0) {
-        num6 = 0
         carData.load6 = 0
-        BYJISI6 = ""
       } if (carData.ZTANKLITER7 == 0) {
-        num7 = 0
         carData.load7 = 0
-        BYJISI7 = ""
       } if (carData.ZTANKLITER8 == 0) {
-        num8 = 0
         carData.load8 = 0
-        BYJISI8 = ""
       } if (carData.ZTANKLITER9 == 0) {
-        num9 = 0
         carData.load9 = 0
-        BYJISI9 = ""
       } if (carData.ZTANKLITER10 == 0) {
-        num10 = 0
         carData.load10 = 0
-        BYJISI10 = ""
       }
-
-      var carInsertData = new CarbynmfModel(parseInt(now), byseq, insertData.ZCARNO, insertData.CHJANG, "1", carData.ZMENGE3, "", 0, 0, 0, insertData.ZRFID, resultModel[0].ZCM_CODE2, insertData.MAKTX, "", insertData.RACK, insertData.PUMP,
-        num1, carData.ZTANKLITER1, carData.load1, 0, BYJISI1, 0, 0, "", "", "", "",
-        num2, carData.ZTANKLITER2, carData.load2, 0, BYJISI2, 0, 0, "", "", "", "",
-        num3, carData.ZTANKLITER3, carData.load3, 0, BYJISI3, 0, 0, "", "", "", "",
-        num4, carData.ZTANKLITER4, carData.load4, 0, BYJISI4, 0, 0, "", "", "", "",
-        num5, carData.ZTANKLITER5, carData.load5, 0, BYJISI5, 0, 0, "", "", "", "",
-        num6, carData.ZTANKLITER6, carData.load6, 0, BYJISI6, 0, 0, "", "", "", "",
-        num7, carData.ZTANKLITER7, carData.load7, 0, BYJISI7, 0, 0, "", "", "", "",
-        num8, carData.ZTANKLITER8, carData.load8, 0, BYJISI8, 0, 0, "", "", "", "",
-        num9, carData.ZTANKLITER9, carData.load9, 0, BYJISI9, 0, 0, "", "", "", "",
-        num10, carData.ZTANKLITER10, carData.load10, 0, BYJISI10, 0, 0, "", "", "", "",
-        "R", "", parseInt(chulNowDate), parseInt(chulNowTIme), "", 0, formatARRDT, "1", "0000520");
+      // 도착지
+      if (carData.load1 == 0 || carData.load1 == undefined || carData.load1 == null) {
+        carData.ZTANKLITER1 = 0
+        num1 = 0
+        BYJISI1 = ""
+        doCode1 = "";
+        doName1 = "";
+      } if (carData.load2 == 0 || carData.load2 == undefined || carData.load2 == null) {
+        carData.ZTANKLITER2 = 0
+        num2 = 0
+        BYJISI2 = ""
+        doCode2 = "";
+        doName2 = "";
+      } if (carData.load3 == 0 || carData.load3 == undefined || carData.load3 == null) {
+        carData.ZTANKLITER3 = 0
+        num3 = 0
+        BYJISI3 = ""
+        doCode3 = "";
+        doName3 = "";
+      } if (carData.load4 == 0 || carData.load4 == undefined || carData.load4 == null) {
+        carData.ZTANKLITER4 = 0
+        num4 = 0
+        BYJISI4 = ""
+        doCode4 = "";
+        doName4 = "";
+      } if (carData.loadR5 == 0 || carData.load5 == undefined || carData.load5 == null) {
+        carData.ZTANKLITER5 = 0
+        num5 = 0
+        BYJISI5 = ""
+        doCode5 = "";
+        doName5 = "";
+      } if (carData.load6 == 0 || carData.load6 == undefined || carData.load6 == null) {
+        carData.ZTANKLITER6 = 0
+        num6 = 0
+        BYJISI6 = ""
+        doCode6 = "";
+        doName6 = "";
+      } if (carData.load7 == 0 || carData.load7 == undefined || carData.load7 == null) {
+        carData.ZTANKLITER7 = 0
+        num7 = 0
+        BYJISI7 = ""
+        doCode7 = "";
+        doName7 = "";
+      } if (carData.load8 == 0 || carData.load8 == undefined || carData.load8 == null) {
+        carData.ZTANKLITER8 = 0
+        num8 = 0
+        BYJISI8 = ""
+        doCode8 = "";
+        doName8 = "";
+      } if (carData.load9 == 0 || carData.load9 == undefined || carData.load9 == null) {
+        carData.ZTANKLITER9 = 0
+        num9 = 0
+        BYJISI9 = ""
+        doCode9 = "";
+        doName9 = "";
+      } if (carData.load10 == 0 || carData.load10 == undefined || carData.load10 == null) {
+        carData.ZTANKLITER10 = 0
+        num10 = 0
+        BYJISI10 = ""
+        doCode10 = "";
+        doName10 = "";
+      }
+      var carInsertData = new CarbynmfModel(parseInt(now), byseq, insertData.ZCARNO, insertData.CHJANG, "1", carData.ZMENGE3, 1, 0, 0, 0, insertData.ZRFID, resultModel[0].ZCM_CODE2, insertData.ARKTX, insertData.ZTANK, insertData.RACK.padStart(2, '0'), insertData.PUMP,
+        num1, carData.ZTANKLITER1, carData.load1, 0, BYJISI1, 0, 0, "", "", doCode1, doName1,
+        num2, carData.ZTANKLITER2, carData.load2, 0, BYJISI2, 0, 0, "", "", doCode2, doName2,
+        num3, carData.ZTANKLITER3, carData.load3, 0, BYJISI3, 0, 0, "", "", doCode3, doName3,
+        num4, carData.ZTANKLITER4, carData.load4, 0, BYJISI4, 0, 0, "", "", doCode4, doName4,
+        num5, carData.ZTANKLITER5, carData.load5, 0, BYJISI5, 0, 0, "", "", doCode5, doName5,
+        num6, carData.ZTANKLITER6, carData.load6, 0, BYJISI6, 0, 0, "", "", doCode6, doName6,
+        num7, carData.ZTANKLITER7, carData.load7, 0, BYJISI7, 0, 0, "", "", doCode7, doName7,
+        num8, carData.ZTANKLITER8, carData.load8, 0, BYJISI8, 0, 0, "", "", doCode8, doName8,
+        num9, carData.ZTANKLITER9, carData.load9, 0, BYJISI9, 0, 0, "", "", doCode9, doName9,
+        num10, carData.ZTANKLITER10, carData.load10, 0, BYJISI10, 0, 0, "", "", doCode10, doName10,
+        "R", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "25685", 0, formatARRDT, "WS2", "0000520");
       carInsertData.ModelStatus = DIMModelStatus.Add;
 
       var carModelList: CarbynmfModel[] = [carInsertData];
 
-      
       // OILWkodModel
-      var oilCarInsertData = new OILWkodModel(parseInt(now), byseq, insertData.ZCARNO, insertData.CHJANG, "1", carData.ZMENGE3, "", 0, 0, 0, insertData.ZRFID, resultModel[0].ZCM_CODE2, insertData.MAKTX, "", insertData.RACK, insertData.PUMP,
-        num1, carData.ZTANKLITER1, carData.load1, 0, BYJISI1, 0, 0, "", "", "", "",
-        num2, carData.ZTANKLITER2, carData.load2, 0, BYJISI2, 0, 0, "", "", "", "",
-        num3, carData.ZTANKLITER3, carData.load3, 0, BYJISI3, 0, 0, "", "", "", "",
-        num4, carData.ZTANKLITER4, carData.load4, 0, BYJISI4, 0, 0, "", "", "", "",
-        num5, carData.ZTANKLITER5, carData.load5, 0, BYJISI5, 0, 0, "", "", "", "",
-        num6, carData.ZTANKLITER6, carData.load6, 0, BYJISI6, 0, 0, "", "", "", "",
-        num7, carData.ZTANKLITER7, carData.load7, 0, BYJISI7, 0, 0, "", "", "", "",
-        num8, carData.ZTANKLITER8, carData.load8, 0, BYJISI8, 0, 0, "", "", "", "",
-        num9, carData.ZTANKLITER9, carData.load9, 0, BYJISI9, 0, 0, "", "", "", "",
-        num10, carData.ZTANKLITER10, carData.load10, 0, BYJISI10, 0, 0, "", "", "", "",
-        "R", "", parseInt(chulNowDate), parseInt(chulNowTIme), "");
+      var oilCarInsertData = new OILWkodModel(parseInt(now), byseq, insertData.ZCARNO, insertData.CHJANG, "1", carData.ZMENGE3, 1, 0, 0, 0, insertData.ZRFID, resultModel[0].ZCM_CODE2, insertData.ARKTX, insertData.ZTANK, insertData.RACK.padStart(2, '0'), insertData.PUMP,
+        num1, carData.ZTANKLITER1, carData.load1, 0, BYJISI1, 0, 0, "", "", doCode1, doName1,
+        num2, carData.ZTANKLITER2, carData.load2, 0, BYJISI2, 0, 0, "", "", doCode2, doName2,
+        num3, carData.ZTANKLITER3, carData.load3, 0, BYJISI3, 0, 0, "", "", doCode3, doName3,
+        num4, carData.ZTANKLITER4, carData.load4, 0, BYJISI4, 0, 0, "", "", doCode4, doName4,
+        num5, carData.ZTANKLITER5, carData.load5, 0, BYJISI5, 0, 0, "", "", doCode5, doName5,
+        num6, carData.ZTANKLITER6, carData.load6, 0, BYJISI6, 0, 0, "", "", doCode6, doName6,
+        num7, carData.ZTANKLITER7, carData.load7, 0, BYJISI7, 0, 0, "", "", doCode7, doName7,
+        num8, carData.ZTANKLITER8, carData.load8, 0, BYJISI8, 0, 0, "", "", doCode8, doName8,
+        num9, carData.ZTANKLITER9, carData.load9, 0, BYJISI9, 0, 0, "", "", doCode9, doName9,
+        num10, carData.ZTANKLITER10, carData.load10, 0, BYJISI10, 0, 0, "", "", doCode10, doName10,
+        "R", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "25685");
       oilCarInsertData.ModelStatus = DIMModelStatus.Add;
 
       var oilCarModelList: OILWkodModel[] = [oilCarInsertData];
@@ -871,13 +953,12 @@ export class CSSOComponent {
 
 
       var zsdt6901 = new ZSDT6901Model(thisObj.appConfig.mandt, doNum, now, jiseq, insertData.OrderDate, insertData.KUNNR, insertData.MATNR, insertData.ZCARNO, insertData.ZDRIVER,
-        "R", insertData.ZMENGE4, insertData.GEWEI, oilDType, BYJISI1, insertData.VBELN, insertData.POSNR, sOilNo, insertSubData.ZARRDT, insertSubData.ZIPWDT, insertSubData.ZTANK
+        "R", insertData.ZMENGE4, insertData.VRKME, oilDType, BYJISI1, insertData.VBELN, insertData.POSNR, sOilNo, insertSubData.ZARRDT, insertSubData.ZIPWDT, insertSubData.ZTANK
         , insertSubData.ZIIPNO, insertData.TDDAT, now, chseq, this.appConfig.interfaceId, oilNowDate, oilNowTIme, this.appConfig.interfaceId, oilNowDate, oilNowTIme, DIMModelStatus.Add);
 
 
       var zsds6901List: ZSDS6901Model[] = [zsds6901];
       var zsdt6901List: ZSDT6901Model[] = [zsdt6901];
-
       var oilRFCData = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", doNum, "O", new Date(), new Date(), "I", zsds6901List, zsdt6901List);
 
       var oilRFCModelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilRFCData];
@@ -885,19 +966,20 @@ export class CSSOComponent {
 
 
 
-      var chulfInsertData = new UtichulfModel(parseInt(now), chseq, 0, "1", "0000520", resultModel[0].ZCM_CODE2, "", "", 0, 0, "0000520", "", insertData.ZTANK, "", "",
+      var chulfInsertData = new UtichulfModel(parseInt(now), chseq, 0, "1", "0000520", resultModel[0].ZCM_CODE2, insertSubData.ZIIPNO, "", 0, 0, "0000520", "", insertData.ZTANK, "", "",
         "1", "1", insertData.ZMENGE4, 0, 0, 0, 0, 0, 0, 0, "", "", "1", 0, 0,
-        0, insertData.ZCARNO, "", insertData.jisija, "", insertData.ZRFID, insertData.RACK, insertData.PUMP, "", 0, 0, "", parseInt(now), jiseq, 0,
-        0, 0, 0, "N", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "", "", 0, "", "N", DIMModelStatus.Add);
+        0, insertData.ZCARNO, "", insertData.jisija, "", insertData.ZRFID, insertData.RACK.padStart(2, '0'), insertData.PUMP, "", 0, 0, "", parseInt(now), jiseq, 0,
+        0, 0, 0, "N", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "", "", 0, parseInt(now), "N", DIMModelStatus.Add);
 
       var chulfModelList: UtichulfModel[] = [chulfInsertData];
-
+      
       this.rowCount1 = await this.dataService.ModifyModelData<UtijisifModel[]>(this.OraDbTitle, "NBPDataModels", "NAMHE.Model.UtijisifModelList", oilModelList);
       this.rowCount2 = await this.dataService.ModifyModelData<CarbynmfModel[]>(this.OraDbTitle, "NBPDataModels", "NAMHE.Model.CarbynmfModelList", carModelList);
       this.rowCount3 = await this.dataService.ModifyModelData<OILWkodModel[]>(this.OraDbTitle, "NBPDataModels", "NAMHE.Model.OILWkodModelList", oilCarModelList);
       this.rowCount4 = await this.dataService.RefcCallUsingModel<ZMMOILGirecvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMOILGirecvModelList", oilSubModelList, QueryCacheType.None);
       this.rowCount5 = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", oilRFCModelList, QueryCacheType.None);
       this.rowCount6 = await this.dataService.ModifyModelData<UtichulfModel[]>(this.OraDbTitle, "NBPDataModels", "NAMHE.Model.UtichulfModelList", chulfModelList);
+      this.masterform.instance.resetValues();
 
     }
     catch (error) {
@@ -932,8 +1014,9 @@ export class CSSOComponent {
 
       //통관재고 잔량처리
       var value = this.chechkgbox.value;
+      var jijangb = ""
       if (value == true) {
-        var jijangb = "T"
+        jijangb = "T"
       } else {
         jijangb = "R"
       }
@@ -943,9 +1026,9 @@ export class CSSOComponent {
       if (insertData.PUMP == undefined || insertData.PUMP == null) {
         insertData.PUMP = ""
       }
- 
+
       var CheJisiInsertData = new UtijisifModel(parseInt(now), jiseq, 0, "1", "0000520", resultModel[0].ZCM_CODE2, "", "0000520", 0, 0, "0000520", "", "",
-        "0000520", insertData.gubun, insertData.ZTANK, "", "2", "1", "2", insertData.ZMENGE4, insertData.ZCARNO, "", insertData.jisija, insertData.ZRFID, insertData.RACK, insertData.PUMP, "", istData, 0, 0, 0, 0, "",
+        "0000520", insertData.gubun, insertData.ZTANK, "", "2", "1", "2", insertData.ZMENGE4, insertData.ZCARNO, "", insertData.jisija, insertData.ZRFID, insertData.RACK.padStart(2, '0'), insertData.PUMP, "", istData, 0, 0, 0, 0, "",
         0, "", "", "", "", 0, 0, 0, 0, "", 0, "", 0, "1", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "", jijangb, "N", "", "", "", DIMModelStatus.Add);
 
       var CheJisiModelList: UtijisifModel[] = [CheJisiInsertData];
@@ -966,8 +1049,8 @@ export class CSSOComponent {
       var insertData = thisObj.cheFormData;
 
       var cheInsertData = new CHMWkodModel(parseInt(now), jiseq, 0, "1", "0000520", resultModel[0].ZCM_CODE2, "", "0000520", 0, 0, "0000520", "", "",
-        "0000520", insertData.gubun, insertData.ZTANK, "", "2", "1", "2", insertData.ZMENGE4, insertData.ZCARNO, "", insertData.jisija, insertData.ZRFID, insertData.RACK, insertData.PUMP, "", istData, 0, 0, 0, 0, "",
-        0, "", "", "", "", 0, 0, 0, 0, "", 0, "", 0, "1", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "", "R", 0, 0, "", "", insertData.JISANET, 0, 0, "", "", "", DIMModelStatus.Add);
+        "0000520", insertData.gubun, insertData.ZTANK, "", "2", "1", "2", insertData.ZMENGE4, insertData.ZCARNO, "", insertData.jisija, insertData.ZRFID, insertData.RACK.padStart(2, '0'), insertData.PUMP, "", istData, 0, 0, 0, 0, "",
+        0, "", "", "", "", 0, 0, 0, 0, "", 0, "", 0, "1", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "", jijangb, 0, 0, "", "", insertData.JISANET, 0, 0, "", "", "", DIMModelStatus.Add);
 
       var cheModelList: CHMWkodModel[] = [cheInsertData];
 
@@ -977,7 +1060,7 @@ export class CSSOComponent {
       //UtichulfModel
       var chulfInsertData = new UtichulfModel(parseInt(now), chseq, 0, "1", "0000520", resultModel[0].ZCM_CODE2, "", "0000520", 0, 0, "0000520", "", insertData.ZTANK, "", "",
         "2", "1", insertData.ZMENGE4, 0, 0, 0, 0, 0, 0, 0, "", "", "2", 0, 0,
-        0, insertData.ZCARNO, "", insertData.jisija, "", insertData.ZRFID, insertData.RACK, insertData.PUMP, "", 0, 0, "", parseInt(now), jiseq, 0,
+        0, insertData.ZCARNO, "", insertData.jisija, "", insertData.ZRFID, insertData.RACK.padStart(2, '0'), insertData.PUMP, "", 0, 0, "", parseInt(now), jiseq, 0,
         0, 0, 0, "", "A", parseInt(chulNowDate), parseInt(chulNowTIme), "", jijangb, 0, "", "N", DIMModelStatus.Add);
 
       var chulfModelList: UtichulfModel[] = [chulfInsertData];
@@ -991,9 +1074,8 @@ export class CSSOComponent {
 
       var zsds6901 = new ZSDS6901Model("", "", 0, new Date(), "", "", "", "", "", "", "", "", "", "", 0, "", "", "", "", "", "", "", new Date(), new Date(), "", "", "", 0, new Date(), "", 0);
 
-
       var zsdt6901 = new ZSDT6901Model(thisObj.appConfig.mandt, doNum, now, jiseq, insertData.OrderDate, insertData.KUNNR, insertData.MATNR, insertData.ZCARNO, insertData.ZDRIVER,
-        "R", insertData.ZMENGE4, insertData.GEWEI, "C", "", insertData.VBELN, insertData.POSNR, "", minDate, minDate, "", "", insertData.TDDAT, now, chseq,
+        "R", insertData.ZMENGE4, insertData.VRKME, "C", "", insertData.VBELN, insertData.POSNR, "", minDate, minDate, "", "", insertData.TDDAT, now, chseq,
         this.appConfig.interfaceId, cheNowDate, cheNowTIme, this.appConfig.interfaceId, cheNowDate, cheNowTIme, DIMModelStatus.Add);
 
 
@@ -1003,7 +1085,6 @@ export class CSSOComponent {
       var cheRFCData = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", doNum, "C", new Date(), new Date(), "I", zsds6901List, zsdt6901List);
 
       var cheRFCModelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [cheRFCData];
-
       this.rowCount4 = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", cheRFCModelList, QueryCacheType.None);
 
 
@@ -1183,7 +1264,6 @@ export class CSSOComponent {
     this.loadingVisible = true;
     this.oilSubData = [];
     this.oilFormData = {};
-    this.oilSubFormData = {};
     this.carDataCodeEntery.ClearSelectedValue();
     this.oilFormData.ZDRIVER = "";
     this.loadingVisible = false;
@@ -1208,6 +1288,7 @@ export class CSSOComponent {
 
   //차량 신규 배차
   carNewAllocation: any = async () => {
+
     if (this.oilFormData.ZCARNO == "" || this.oilFormData.ZCARNO == undefined) {
       alert("차량번호를 클릭후 배차하세요.", "알림");
       return;
@@ -1227,10 +1308,19 @@ export class CSSOComponent {
     }
     const name = "load" + (result + 1);
     Object.assign(this.carFormData, { [name]: remainder });
-    alert("적용되었습니다.", "알림");
 
     this.carPopupVisible = true;
+    if (this.carFormData.ZLITER < this.carFormData.ZMENGE3) {
+      setTimeout(() => {
+        notify("차량 총 용량보다 출고량이 클 수 없습니다.  출하 지시 물량을 다시 입력해주세요.", "error", 5000)
+        this.carPopupVisible = false;
 
+      }, 1000);
+    } else {
+      setTimeout(() => {
+        notify("적용되었습니다.", "info", 3000)
+      }, 1000);
+    }
   };
 
 
@@ -1258,7 +1348,7 @@ export class CSSOComponent {
       }
       const name = "load" + (result + 1);
       Object.assign(this.carFormData, { [name]: remainder });
-      alert("적용되었습니다.", "알림");
+      notify("적용되었습니다.", "info", 3000)
     }
 
   };
@@ -1338,7 +1428,7 @@ export class CSSOComponent {
         this.oilSubDataLoad();
         this.oilFormData = rowData;
         this.carDataValue = rowData.ZCARNO;
-        Object.assign(this.oilFormData, { CHJANG: "1", RACK: "01", OrderDate: new Date(), jisija: "30189", gubun: "1" });
+        Object.assign(this.oilFormData, { CHJANG: "1", OrderDate: new Date(), jisija: "30189", gubun: "1" });
       }
     }, 100);
   }
@@ -1369,7 +1459,7 @@ export class CSSOComponent {
       if (rowData) {
         this.cheFormData = rowData;
         this.cheCarDataValue = rowData.ZCARNO;
-        Object.assign(this.cheFormData, { CHJANG: "1", OrderDate: new Date(), jisija: "30189", gubun : "1"});
+        Object.assign(this.cheFormData, { CHJANG: "1", OrderDate: new Date(), jisija: "30189", gubun: "1" });
       }
     }, 100);
   }
@@ -1391,7 +1481,7 @@ export class CSSOComponent {
   //분할 차량번호 선택이벤트
   onZcarNoCodeValueChanged(e: any) {
     setTimeout(() => {
-      this.oilFormData.ZCARNO = e.selectedItem.ZCARNO;
+      this.oilFormData.ZCARNO = e.selectedValue;
       this.oilFormData.ZDRIVER = e.selectedItem.ZDERIVER1;
       this.oilFormData.ZPHONE = e.selectedItem.ZPHONE1;
       this.oilFormData.ZRFID = e.selectedItem.ZRFID;
@@ -1400,7 +1490,7 @@ export class CSSOComponent {
   }
   onCheZcarNoCodeValueChanged(e: any) {
     setTimeout(() => {
-      this.cheFormData.ZCARNO = e.selectedItem.ZCARNO;
+      this.cheFormData.ZCARNO = e.selectedValue;
       this.cheFormData.ZDRIVER = e.selectedItem.ZDERIVER1;
       this.cheFormData.ZPHONE = e.selectedItem.ZPHONE1;
       this.cheFormData.ZRFID = e.selectedItem.ZRFID;

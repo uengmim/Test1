@@ -170,7 +170,7 @@
   <dxi-column dataField="VKAUS_N"
               caption="용도">
   </dxi-column>
-  <dxi-column dataField="KUNNR"
+  <dxi-column dataField="KUNNR_N"
               caption="판매처">
   </dxi-column>
   <dxi-column dataField="KUNWE_N"
@@ -180,12 +180,12 @@
               caption="주문량">
   </dxi-column>
 
-  <dxi-column dataField="NETPR"
+  <!--<dxi-column dataField="NETPR"
               caption="주문단가"
               format='#,##0'
               dataType="number">
     <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
-  </dxi-column>
+  </dxi-column>-->
   <dxi-column dataField="GIQTY"
               caption="출고량">
   </dxi-column>
@@ -194,16 +194,16 @@
               format="yyyy-MM-dd"
               dataType="date">
   </dxi-column>
-  <dxi-column dataField="LGORT"
+  <dxi-column dataField="LGORT_N"
               caption="출고지">
   </dxi-column>
   <dxi-column dataField="TDLNR_N"
               caption="운송사">
   </dxi-column>
-  <dxi-column dataField="shipmentNum"
+  <dxi-column dataField="DONUMBER"
               caption="출하요청번호">
   </dxi-column>
-  <dxi-column dataField="orderAccount"
+  <dxi-column dataField="ZEXID"
               caption="주문등록계정">
   </dxi-column>
 
@@ -215,7 +215,7 @@
   <dxi-column dataField="DOLOG"
               caption="출하가능">
   </dxi-column>
-  <dxi-column dataField="productClass"
+  <dxi-column dataField="MATKL_N"
               caption="제품구분">
   </dxi-column>
   <dxi-column dataField="TEXT"
@@ -270,6 +270,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   [gridBoxWidth]="500"
                                   class="weight-test"
                                   (onDataLoaded)="onPEDataLoaded($event)"
@@ -292,6 +293,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    [showClearButton]="true"
@@ -326,6 +328,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    (onDataLoaded)="onPEDataLoaded($event)"
                                    [showDataLoadingPanel]="showDataLoadingPanel"
                                    (onEntryValueChanged)="onKunnrCodeValueChanged($event)"></nh-possible-comm>
@@ -352,6 +355,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    (onDataLoaded)="onPEDataLoaded($event)"
                                    [showDataLoadingPanel]="showDataLoadingPanel"
                                    (onEntryValueChanged)="onKunweCodeValueChanged($event)"></nh-possible-comm>
@@ -372,6 +376,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   [gridBoxWidth]="500"
                                   class="weight-test"
                                   (onDataLoaded)="onPEDataLoaded($event)"
@@ -407,6 +412,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    (onDataLoaded)="onPEDataLoaded($event)"
@@ -429,6 +435,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    (onDataLoaded)="onPEDataLoaded($event)"
@@ -450,6 +457,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   [gridBoxWidth]="500"
                                   [filerExpression]="incoFilter"
                                   (onDataLoaded)="onPEDataLoaded($event)"
@@ -472,6 +480,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    (onDataLoaded)="onPEDataLoaded($event)"
@@ -495,6 +504,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   [gridBoxWidth]="500"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
@@ -515,6 +525,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                   [gridBoxWidth]="500"
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="onTdlnr2CodeValueChanged($event)"></nh-possible-comm>
@@ -534,6 +545,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    (onDataLoaded)="onPEDataLoaded($event)"
@@ -565,6 +577,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    [showClearButton]="true"
@@ -595,7 +608,7 @@
                     [colCount]="3"
                     [colSpan]="2">
             <dxi-item dataField="ZNHNAME" [disabled]="true"><dxo-label text="농협명"></dxo-label></dxi-item>
-            <dxi-item dataField="MVGR2" [disabled]="false">
+            <dxi-item dataField="MVGR2" [disabled]="nh2">
               <dxi-validation-rule type="required" message="사업방식필수입력"></dxi-validation-rule>
               <dxo-label text="사업방식"></dxo-label>
               <div *dxTemplate>
@@ -609,6 +622,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    [showClearButton]="true"
@@ -618,7 +632,7 @@
               </div>
             </dxi-item>
             <dxi-item dataField="MAKTX_NH" [disabled]="true"><dxo-label text="농협제품"></dxo-label></dxi-item>
-            <dxi-item dataField="MVGR3" [disabled]="false">
+            <dxi-item dataField="MVGR3" [disabled]="nh2">
               <dxi-validation-rule type="required" message="계통구분필수입력"></dxi-validation-rule>
               <dxo-label text="계통구분"></dxo-label>
               <div *dxTemplate>
@@ -632,6 +646,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    [showClearButton]="true"
@@ -640,7 +655,7 @@
                                    (onEntryValueChanged)="onMvgr3CodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
-            <dxi-item dataField="MVGR1" [disabled]="false">
+            <dxi-item dataField="MVGR1" [disabled]="nh2">
               <dxi-validation-rule type="required" message="대분류필수입력"></dxi-validation-rule>
               <dxo-label text="대분류"></dxo-label>
               <div *dxTemplate>
@@ -654,6 +669,7 @@
                                   popupGridScrollMode="standard"
                                     [popupGridPagingMode]="true"
                                     [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                    [gridBoxWidth]="500"
                                    class="weight-test"
                                    [showClearButton]="true"
@@ -662,7 +678,7 @@
                                    (onEntryValueChanged)="onMvgr1CodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
-            <dxi-item dataField="TAXK1" [disabled]="false">
+            <dxi-item dataField="TAXK1" [disabled]="nh2">
               <dxi-validation-rule type="required" message="세무구분필수입력"></dxi-validation-rule>
               <dxo-label text="세무구분"></dxo-label>
               <dx-select-box [dataSource]="taxkData"
@@ -684,6 +700,464 @@
     </dx-scroll-view>
 </dx-popup>
 
+
+<!--조회용 더블클릭-->
+<dx-popup [title]="popupTitle"
+          [showTitle]="true"
+          width="80%"
+          height="80%"
+          [(visible)]="popupVisible2"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport">
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="saveButtonOptions"
+                    [visible]="saveVisible">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item location="after"
+                    widget="dxButton"
+                    locateInMenu="auto"
+                    [options]="closeButtonOptions2">
+  </dxi-toolbar-item>
+  <dx-scroll-view width="100%" height="100%">
+    <div id="form-container">
+      <dx-form id="popupForm" [formData]="popupData2" [disabled]="true">
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+          <dxi-item dataField="VBELN" [disabled]="true"><dxo-label text="주문번호"></dxo-label></dxi-item>
+          <dxi-item dataField="CREDIT_LIMIT" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}"><dxo-label text="여신금액"></dxo-label></dxi-item>
+          <dxi-item dataField="ARAMOUNT" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}"><dxo-label text="미수채권"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+          <dxi-item dataField="AUART" [disabled]="false">
+            <dxi-validation-rule type="required" message="주문구분필수입력"></dxi-validation-rule>
+            <dxo-label text="주문구분"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #sd007Entery2
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="sd007Code2"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                width="auto"
+                                [showClearButton]="true"
+                                [(selectedValue)]="auartValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="MATNR" [disabled]="false">
+            <dxi-validation-rule type="required" message="제품명필수입력"></dxi-validation-rule>
+            <dxo-label text="제품명"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #maktEntery2
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="maktCode2"
+                                valueColumn="MATNR"
+                                valueDisplayFormat="%MAKTX%(%MATNR%)"
+                                width="auto"
+                                [(selectedValue)]="maktValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showClearButton]="true"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="KUNNR" [disabled]="false">
+            <dxi-validation-rule type="required" message="주문처필수입력"></dxi-validation-rule>
+            <dxo-label text="주문처"></dxo-label>
+            <div *dxTemplate>
+              <!--<nh-possible-comm [codeInfo]="kunnCode2" #kunnrEntery
+              [dataStoreKey]="dataStoreKey"
+              valueColumn="ZCMF01_CH"
+              valueDisplayFormat="%ZCMF02_CH%(%ZCMF01_CH%)"
+              width="auto"
+              [gridBoxWidth]="500"
+              [showClearButton]="true"
+              [(selectedValue)]="kunnrValue2"
+              (onDataLoaded)="onPEDataLoaded($event)"
+              [showDataLoadingPanel]="showDataLoadingPanel"
+              (onEntryValueChanged)="onKunnrCodeValueChanged($event)"></nh-possible-comm>-->
+              <nh-possible-comm [codeInfo]="kunnCode2" #kunnrEntery
+                                [dataStoreKey]="dataStoreKey"
+                                valueColumn="KUNNR"
+                                valueDisplayFormat="%NAME1%(%KUNNR%)"
+                                width="auto"
+                                [gridBoxWidth]="500"
+                                [showClearButton]="true"
+                                [(selectedValue)]="kunnrValue2A"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="VDATU" [disabled]="false" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true}">
+            <dxi-validation-rule type="required" message="출하요청일필수입력"></dxi-validation-rule>
+            <dxo-label text="출하요청일"></dxo-label>
+          </dxi-item>
+
+          <dxi-item dataField="KUNWE" [disabled]="false">
+            <dxi-validation-rule type="required" message="도착지필수입력"></dxi-validation-rule>
+            <dxo-label text="도착지"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm [codeInfo]="kunnCode" #kunnEntery
+                                [dataStoreKey]="dataStoreKey"
+                                valueColumn="KUNNR"
+                                valueDisplayFormat="%NAME1%(%KUNNR%)"
+                                width="auto"
+                                valueExpr="KUNWE"
+                                [gridBoxWidth]="500"
+                                [showClearButton]="true"
+                                [(selectedValue)]="kunnrValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="LGORT" [disabled]="false">
+            <dxi-validation-rule type="required" message="출고사업장필수입력"></dxi-validation-rule>
+            <dxo-label text="출고사업장"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #t001Entery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="t001Code"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                width="auto"
+                                [showClearButton]="true"
+                                [(selectedValue)]="lgortValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+
+
+          <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="주문가능량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxi-validation-rule type="required" message="주문수량필수입력"></dxi-validation-rule>
+            <dxo-label text="주문수량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="MEINS" [disabled]="true"><dxo-label text="단위"></dxo-label></dxi-item>
+
+
+
+          <dxi-item dataField="VKAUS" [disabled]="false">
+            <!--<dxi-validation-rule type="required" message="용도구분필수입력"></dxi-validation-rule>-->
+
+            <dxo-label text="용도구분"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #tvlvEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="tvlvCode"
+                                valueColumn="DOMVALUE_L"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="vkausValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="ZUNLOAD" [disabled]="false">
+            <dxo-label text="하차방법"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #dd07tEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="dd07tCode"
+                                valueColumn="DOMVALUE_L"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [showClearButton]="true"
+                                [(selectedValue)]="zunloadValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="INCO1" [disabled]="false">
+            <dxo-label text="운송방법"></dxo-label>
+            <dxi-validation-rule type="required" message="운송방법 필수입력"></dxi-validation-rule>
+            <div *dxTemplate>
+              <nh-possible-comm [codeInfo]="inco1Code" #incoEntery
+                                [dataStoreKey]="dataStoreKey"
+                                valueColumn="ZCM_CODE3"
+                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                width="auto"
+                                [showClearButton]="true"
+                                [(selectedValue)]="incoValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                [filerExpression]="incoFilter"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="TEXT" [colSpan]="2" [editorOptions]="{height:60}" [disabled]="false"><dxo-label text="특기사항"></dxo-label></dxi-item>
+          <dxi-item dataField="ZCARNO" [disabled]="false">
+            <dxo-label text="차량번호"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #zcarnoModiCodeEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zcarnoModiCode"
+                                valueColumn="ZCARNO"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%ZCARNO%"
+                                width="auto"
+                                [(selectedValue)]="zcarnoModiValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="TDLNR" [disabled]="false">
+            <dxo-label text="1차 운송사"></dxo-label>
+            <dxi-validation-rule type="required" message="1차 운송사 필수입력"></dxi-validation-rule>
+            <div *dxTemplate>
+              <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
+                                [dataStoreKey]="dataStoreKey"
+                                valueColumn="LIFNR"
+                                valueDisplayFormat="%NAME1%(%LIFNR%)"
+                                width="auto"
+                                label="운송사"
+                                labelMode="floating"
+                                [showClearButton]="true"
+                                [(selectedValue)]="tdlnrValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="TDLNR2" [disabled]="false">
+            <dxo-label text="2차 운송사"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
+                                [dataStoreKey]="dataStoreKey"
+                                valueColumn="LIFNR"
+                                valueDisplayFormat="%NAME1%(%LIFNR%)"
+                                width="auto"
+                                label="운송사"
+                                labelMode="floating"
+                                [showClearButton]="true"
+                                [(selectedValue)]="tdlnr2ValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="ZCARTYPE" [disabled]="false">
+            <dxo-label text="화물차종"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #dd07tCarEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="dd07tCarCode"
+                                valueColumn="DOMVALUE_L"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="zcarValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+
+          <dxi-item dataField="ZDRIVER" [disabled]="false"><dxo-label text="운전기사명"></dxo-label></dxi-item>
+          <dxi-item dataField="ZPHONE" [disabled]="false"><dxo-label text="전화번호"></dxo-label></dxi-item>
+        </dxi-item>
+      </dx-form>
+
+      <dx-form id="popupForm" [formData]="popupData2" [disabled]="true" style="margin-top:20px; margin-left:5px">
+        <dxi-item itemType="group"
+                  [colCount]="3"
+                  [colSpan]="2">
+
+          <dxi-item dataField="AUGRU">
+            <dxo-label text="오더사유"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #augruEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="augruCode"
+                                valueColumn="AUGRU"
+                                valueDisplayFormat="%AUGRU%"
+                                width="auto"
+                                [(selectedValue)]="augruValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showClearButton]="true"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+
+      <dx-form id="popupForm" [formData]="popupData2" [visible]="true" style="margin-top:10px; margin-left:5px">
+        <dxi-item itemType="group"
+                  [colCount]="3"
+                  [colSpan]="2">
+
+          <dxi-item dataField="REVQTY" [disabled]="true"><dxo-label text="예약물량"></dxo-label></dxi-item>
+          <dxi-item dataField="ACTQTY" [disabled]="true"><dxo-label text="출고물량"></dxo-label></dxi-item>
+        </dxi-item>
+      </dx-form>
+
+
+
+
+      <dx-form id="popupForm" [formData]="popupData2" [visible]="nh" style="margin-top:10px;">
+        <dxi-item itemType="group"
+                  caption="농협검수항목관리"
+                  [colCount]="3"
+                  [colSpan]="2">
+          <dxi-item dataField="ZNHNAME" [disabled]="true"><dxo-label text="농협명"></dxo-label></dxi-item>
+          <dxi-item dataField="MVGR2" [disabled]="nh2">
+            <dxi-validation-rule type="required" message="사업방식필수입력"></dxi-validation-rule>
+            <dxo-label text="사업방식"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #mvgr2Entery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="mvgr2Code"
+                                valueColumn="MVGR2"
+                                valueDisplayFormat="%BEZEI%(%MVGR2%)"
+                                width="auto"
+                                [(selectedValue)]="mvgr2ValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showClearButton]="true"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="MAKTX_NH" [disabled]="true"><dxo-label text="농협제품"></dxo-label></dxi-item>
+          <dxi-item dataField="MVGR3" [disabled]="nh2">
+            <dxi-validation-rule type="required" message="계통구분필수입력"></dxi-validation-rule>
+            <dxo-label text="계통구분"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #mvgr3Entery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="mvgr3Code"
+                                valueColumn="MVGR3"
+                                valueDisplayFormat="%BEZEI%(%MVGR3%)"
+                                width="auto"
+                                [(selectedValue)]="mvgr3ValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showClearButton]="true"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="MVGR1" [disabled]="nh2">
+            <dxi-validation-rule type="required" message="대분류필수입력"></dxi-validation-rule>
+            <dxo-label text="대분류"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #mvgr1Entery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="mvgr1Code"
+                                valueColumn="MVGR1"
+                                valueDisplayFormat="%BEZEI%(%MVGR1%)"
+                                width="auto"
+                                [(selectedValue)]="mvgr1ValueA"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showClearButton]="true"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="TAXK1" [disabled]="nh2">
+            <dxi-validation-rule type="required" message="세무구분필수입력"></dxi-validation-rule>
+            <dxo-label text="세무구분"></dxo-label>
+            <dx-select-box [dataSource]="taxkData"
+                           displayExpr="Name"
+                           valueExpr="ID"
+                           [value]="products[1].ID">
+            </dx-select-box>
+          </dxi-item>
+          <dxi-item dataField="INCO1" [disabled]="true"><dxo-label text="인수도구분"></dxo-label></dxi-item>
+        </dxi-item>
+
+        <!--<dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+          <dxi-item dataField="temp3" [disabled]="true"><dxo-label text="주문처 담보금액"></dxo-label></dxi-item>
+          <dxi-item dataField="temp4" [disabled]="true"><dxo-label text="주문처 미수채권"></dxo-label></dxi-item>
+        </dxi-item>-->
+      </dx-form>
+    </div>
+  </dx-scroll-view>
+</dx-popup>
 <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
                [shading]="true" [hideOnOutsideClick]="true">
 </dx-load-panel>

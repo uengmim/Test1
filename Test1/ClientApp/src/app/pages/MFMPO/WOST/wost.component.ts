@@ -24,6 +24,14 @@ import { AuthService } from '../../../shared/services';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { ThemeManager } from '../../../shared/app.utilitys';
 import { AppStatus } from '../WORR/app.service';
+import { userInfo } from 'os';
+import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+
+import { AutoPrintInput, jsPDF } from 'jspdf';
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
+import { bottom } from '@devexpress/analytics-core/analytics-elements-metadata';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -98,10 +106,11 @@ export class WOSTComponent {
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
 
-  selectedAppStatus: string = "";
+  selectedAppStatus: string = "O";
 
   appStatus: AppStatus[] = [];
-
+  empId: string = "";
+  rolid: string[] = [];
   //_dataService: ImateDataService;
   /**
  * 생성자
@@ -110,8 +119,17 @@ export class WOSTComponent {
  * @param authService 사용자 인증 서버스
  */
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private authService: AuthService, private appInfo: AppInfoService,
+    private http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, service: Service) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 진행현황";
+    let userInfo = this.authService.getUser().data;
+
+    this.rolid = userInfo?.role;
+    var role = this.rolid.find(item => item === "ADMIN");
+    if (role !== undefined)
+      this.empId = "";
+    else
+      this.empId = userInfo?.empId.padStart(10, '0');
 
     this.appStatus = service.getAppStatusList();
 
@@ -119,7 +137,7 @@ export class WOSTComponent {
     var now = new Date();
     this.startDate = formatDate(new Date(), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(now.setDate(now.getDate() + 1), "yyyy-MM-dd", "en-US");
-    this.orderData = service.getOrderData();
+    /*this.orderData = service.getOrderData();*/
     const that = this;
     let test = this;
     this.rowCount = 0;
@@ -135,20 +153,42 @@ export class WOSTComponent {
     }];
     this._dataService = dataService;
     this.rowCount = 0;
-    this.orderData = new CustomStore(
-      {
-        key: ["AUFNR"],
-        load: function (loadOptions) {
-          return test.dataLoad(imInfo, dataService);
-        }
-      });
+
+    this.loadingVisible = true;
+    this.dataLoad(this.imInfo, this.dataService);
+    this.loadingVisible = false;
 
 
     //엑셀버튼
     this.exportSelectedData = {
-      icon: 'export',
-      onClick: () => {
-        //this.dataGrid.instance.exportToExcel(true);
+      icon: 'print',
+      text: "프린터",
+      onClick: async () => {
+        const doc = new jsPDF('landscape', 'mm', [297, 210]);
+        let malgun = await this.http.get('assets/malgun.ttf', { responseType:"text"}).toPromise();
+
+        doc.addFileToVFS('malgun.ttf', malgun);
+        doc.addFont('malgun.ttf', 'malgun', 'normal');
+        doc.setFont('malgun');
+        doc.setLanguage("ko-KR");
+
+        exportDataGridToPdf({
+          jsPDFDocument: doc,
+          component: this.dataGrid.instance,
+          margin: {top: 10, left: 5, right: 5, bottom: 5},
+          customizeCell: function (options) {
+            const { gridCell, pdfCell } = options;
+
+            if (gridCell.rowType === 'data') {
+              pdfCell.font = { size: 10 };
+              pdfCell.wordWrapEnabled = true;
+            }
+          }
+        }).then(() => {
+          doc.autoPrint({ variant: 'non-conform' });
+          doc.output('dataurlnewwindow');
+          //doc.save('wost.pdf');
+        })
 
       },
     };
@@ -156,7 +196,10 @@ export class WOSTComponent {
     this.searchButtonOptions = {
       icon: 'search',
       onClick: async () => {
-        this.dataGrid.instance.refresh();
+        /*this.dataGrid.instance.refresh();*/
+        this.loadingVisible = true;
+        await this.dataLoad(this.imInfo, this.dataService);
+        this.loadingVisible = false;
       },
     };
     //팝업닫기버튼
@@ -176,6 +219,36 @@ export class WOSTComponent {
     };
 
 
+  }
+
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: e.component,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), 'DataGrid.xlsx');
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    e.cancel = true;
   }
 
   contentReady = (e: any) => {
@@ -205,9 +278,27 @@ export class WOSTComponent {
     this.orderInfo = resultModel[0].ITAB_DATA2[0]
 
     this.matUseList = resultModel[0].ITAB_DATA3;
+    for (var row of this.matUseList) {
+      if (row.ZAPP_CD === "A00")
+        row.ZAPP_CDT = "요청URL 호출(GW)";
+      else if (row.ZAPP_CD === "A01")
+        row.ZAPP_CDT = "승인요청";
+      else if (row.ZAPP_CD === "A02")
+        row.ZAPP_CDT = "회수(요청취소)";
+      else if (row.ZAPP_CD === "A03")
+        row.ZAPP_CDT = "승인중";
+      else if (row.ZAPP_CD === "A04")
+        row.ZAPP_CDT = "결재완료";
+      else if (row.ZAPP_CD === "A05")
+        row.ZAPP_CDT = "반려";
+      else if (row.ZAPP_CD === "Z00")
+        row.ZAPP_CDT = "웹이상종료(GW)";
+
+    }
+
     this.MaterialList = new ArrayStore(
       {
-        key: ["AUFNR", "RSNUM", "WERKS", "LGORT", "MATNR"],
+        key: ["AUFNR", "RSNUM", "RSPOS", "WERKS", "LGORT", "MATNR"],
         data: this.matUseList
       });
 
@@ -340,18 +431,23 @@ export class WOSTComponent {
 
     //작업요청 선택 시 RFC는 빈값으로 수행 후 데이터 조정
     if (appStatus === "O") appStatus = "";
-
-    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", appStatus, "", "", []);
+    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", this.empId, "", appStatus, "", this.appConfig.plant, []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
     this.loadingVisible = true;
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
 
-    resultModel[0].ITAB_DATA.forEach(async (row: ZPMS0002Model) => {
+    //resultModel[0].ITAB_DATA.forEach(async (row: ZPMS0002Model) => {
+    //  if (row.STAT1 === "") row.STATNAME = "작업요청";
+    //  else if (row.STAT1 === "I") row.STATNAME = "검수요청";
+    //  else if (row.STAT1 === "C") row.STATNAME = "검수승인"
+    //});
+
+    for (var row of resultModel[0].ITAB_DATA) {
       if (row.STAT1 === "") row.STATNAME = "작업요청";
       else if (row.STAT1 === "I") row.STATNAME = "검수요청";
       else if (row.STAT1 === "C") row.STATNAME = "검수승인"
-    });
+    }
 
     var returnData = resultModel[0].ITAB_DATA;
 
@@ -362,9 +458,16 @@ export class WOSTComponent {
     this.loadingVisible = false;
     if (resultModel[0].E_TYPE !== "S") {
       alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
-      return [];
+      return;
     } 
-    return returnData;
+
+    this.orderData = new ArrayStore(
+      {
+        key: ["AUFNR"],
+        data: returnData
+      });
+
+    this.gcOrderData.instance.getScrollable().scrollTo(0);
   }
 
   // 상세 데이터 로드
@@ -392,7 +495,7 @@ export class WOSTComponent {
     
     var zpms0012: ZPMS0012Model[] = [];
     this.matUseList.forEach(async (row: ZPMS0004Model) => {
-      zpms0012.push(new ZPMS0012Model("", row.RSNUM, "", row.LGORT, row.MATNR, row.QTY_INPUT, 0, row.MEINS));
+      zpms0012.push(new ZPMS0012Model("", row.RSNUM, row.RSPOS, row.LGORT, row.MATNR, row.QTY_INPUT??0, 0, row.MEINS));
     });
 
     var zpf0003Model = new ZPMF0003Model("", "", this.orderInfo.AUFNR, [], [], [], [], zpms0012);

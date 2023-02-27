@@ -30,20 +30,26 @@
         <dx-select-box [dataSource]="appStatus"
                        displayExpr="NAME"
                        valueExpr="CODE"
-                       value=""
+                       value="O"
                        label="검수구분"
                        labelMode="floating"
                        (onValueChanged)="onAppStatusChanged($event)"></dx-select-box>
       </div>
     </dxi-item>
 
-    <dxi-item location="before">
-      <div *dxTemplate>
-        <dx-button icon="search" (onClick)="refreshDataGrid($event)">
-        </dx-button>
-      </div>
+    <!--<dxi-item location="before">
+    <div *dxTemplate>
+      <dx-button icon="search" (onClick)="refreshDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>-->
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="margin-left:10px;"
+              [height]="25"
+              [options]="searchButtonOptions">
     </dxi-item>
-
 
     <dxi-item location="after"
               widget="dxButton"
@@ -70,9 +76,11 @@
                 [selection]="{ mode: 'multiple' }"
                 (onSelectionChanged)="selectionChanged($event)"
                 (onRowDblClick)="dblClick($event)"
-                (onContentReady)="contentReady($event)">
+                (onContentReady)="contentReady($event)"
+                (onExporting)="onExportingOrderData($event)">
+    >
     <dxo-scrolling mode="infinite"></dxo-scrolling>
-
+    <dxo-export [enabled]="true"></dxo-export>
     <dxo-selection mode="single"></dxo-selection>
     <dxo-filter-row visible="true"></dxo-filter-row>
     <dxo-header-filter visible="true"></dxo-header-filter>
@@ -146,10 +154,10 @@
                 dataType="string">
     </dxi-column>
 
-    <dxi-column dataField="AUART"
+    <!--<dxi-column dataField="AUART"
                 caption="오더유형"
                 dataType="string">
-    </dxi-column>
+    </dxi-column>-->
 
     <dxi-column dataField="GSTRP"
                 caption="시작일"
@@ -168,10 +176,66 @@
                 dataType="string">
     </dxi-column>
 
-    <dxi-column dataField="GSBER_DESC"
+    <!--<dxi-column dataField="GSBER_DESC"
                 caption="사업영역"
                 dataType="string">
+    </dxi-column>-->
+
+    <dxi-column dataField="QTY_REQ_TOT"
+                caption="요청금액"
+                format="#,###.###"
+                dataType="number">
     </dxi-column>
+
+    <dxi-column dataField="QTY_CON_TOT"
+                caption="승인금액"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_NO"
+                caption="작업등록수"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_REQ"
+                caption="예약수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_OUT"
+                caption="출고수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_CON"
+                caption="사용수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_REC"
+                caption="반납수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxo-summary>
+      <dxi-total-item column="QTY_REQ_TOT"
+                      valueFormat="#,###.###"
+                      displayFormat="합계 : {0}"
+                      summaryType="sum">
+      </dxi-total-item>
+      <dxi-total-item column="QTY_CON_TOT"
+                      valueFormat="#,###.###"
+                      displayFormat="합계 : {0}"
+                      summaryType="sum">
+      </dxi-total-item>
+
+    </dxo-summary>
 
   </dx-data-grid>
 
@@ -289,23 +353,29 @@
         <dxi-column dataField="RSNUM"
                     caption="예약번호"
                     [allowEditing]="false"
+                    sortOrder="asc"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="RSPOS"
+                    caption="예약항번"
+                    [allowEditing]="false"
+                    sortOrder="asc"
                     dataType="string"></dxi-column>
 
         <!--<dxi-column dataField="WERKS"
-    caption="플랜트"
-    dataType="string"></dxi-column>-->
+  caption="플랜트"
+  dataType="string"></dxi-column>-->
         <!--<dxi-column dataField="LGORT"
-    caption="저장위치"
-    dataType="string"></dxi-column>-->
+  caption="저장위치"
+  dataType="string"></dxi-column>-->
+        <!--<dxi-column dataField="LGOBE"
+              caption="저장위치명"
+              [allowEditing]="false"
+              dataType="string"></dxi-column>-->
 
-        <dxi-column dataField="LGOBE"
-                    caption="저장위치명"
-                    [allowEditing]="false"
+        <dxi-column dataField="MATNR"
+                    caption="자재코드"
                     dataType="string"></dxi-column>
-
-        <!--<dxi-column dataField="MATNR"
-    caption="자재코드"
-    dataType="string"></dxi-column>-->
 
         <dxi-column dataField="MATNR_DESC"
                     caption="자재명"
@@ -344,6 +414,11 @@
 
         <dxi-column dataField="MEINS"
                     caption="수량단위"
+                    [allowEditing]="false"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="ZAPP_CDT"
+                    caption="결재상태"
                     [allowEditing]="false"
                     dataType="string"></dxi-column>
 

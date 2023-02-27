@@ -33,6 +33,8 @@ const appStatus: AppStatus[] = [
 export class equipFormModel {
   EQUNR?: string;
   EQUNR_DESC?: string;
+  AUFNR?: string;
+  KTEXT?: string;
 }
 
 //오더데이터

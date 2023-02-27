@@ -20,18 +20,26 @@
         <dx-select-box [dataSource]="appStatus"
                        displayExpr="NAME"
                        valueExpr="CODE"
-                       value=""
+                       value="O"
                        label="검수구분"
                        labelMode="floating"
                        (onValueChanged)="onAppStatusChanged($event)"></dx-select-box>
       </div>
     </dxi-item>
 
-    <dxi-item location="after">
-      <div *dxTemplate>
-        <dx-button text="조회" (onClick)="refreshDataGrid($event)">
-        </dx-button>
-      </div>
+    <!--<dxi-item location="after">
+    <div *dxTemplate>
+      <dx-button text="조회" (onClick)="refreshDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>-->
+
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="margin-left:10px;"
+              [height]="25"
+              [options]="searchButtonOptions">
     </dxi-item>
 
     <dxi-item location="after"
@@ -44,7 +52,7 @@
   </dx-toolbar>
 
 
-  <dx-data-grid id="gcOrderData"
+  <dx-data-grid id="gcOrderData" #gcOrderGrid
                 [dataSource]="orderData"
                 [remoteOperations]="false"
                 [focusedRowIndex]="0"
@@ -81,7 +89,7 @@
 
     <dxi-column dataField="AUFNR"
                 caption="오더번호"
-                dataType="string">
+                dataType="number">
     </dxi-column>
 
     <dxi-column dataField="KTEXT"
@@ -128,10 +136,10 @@
                 dataType="string">
     </dxi-column>
 
-    <dxi-column dataField="AUART"
+    <!--<dxi-column dataField="AUART"
                 caption="오더유형"
                 dataType="string">
-    </dxi-column>
+    </dxi-column>-->
 
     <dxi-column dataField="GSTRP"
                 caption="시작일"
@@ -150,10 +158,42 @@
                 dataType="string">
     </dxi-column>
 
-    <dxi-column dataField="GSBER_DESC"
+    <!--<dxi-column dataField="GSBER_DESC"
                 caption="사업영역"
                 dataType="string">
+    </dxi-column>-->
+
+    <dxi-column dataField="QTY_REQ_TOT"
+                caption="요청금액"
+                format="#,###.###"
+                dataType="number">
     </dxi-column>
+
+    <dxi-column dataField="QTY_CON_TOT"
+                caption="승인금액"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_NO"
+                caption="작업등록수"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxo-summary>
+      <dxi-total-item column="QTY_REQ_TOT"
+                      valueFormat="#,###.###"
+                      displayFormat="합계 : {0}"
+                      summaryType="sum">
+      </dxi-total-item>
+      <dxi-total-item column="QTY_CON_TOT"
+                      valueFormat="#,###.###"
+                      displayFormat="합계 : {0}"
+                      summaryType="sum">
+      </dxi-total-item>
+
+    </dxo-summary>
 
   </dx-data-grid>
 
@@ -183,6 +223,22 @@
       <div class="dx-field">
         <div style="float: right; ">
           <dx-box>
+            <dxi-item [ratio]="0" [baseSize]="250" style="margin-right:15px;">
+              <dx-form style="margin-bottom: 10px;">
+                <dxi-item location="before"
+                          widget="dxButton"
+                          locateInMenu="auto">
+                  <dx-date-box [(value)]="workingDate"
+                               type="date"
+                               [width]="190"
+                               style="margin-top:20px;"
+                               displayFormat="yyyy-MM-dd"
+                               (onValueChanged)="workingDateChange($event)"
+                               label="작업완료일(지급기준일)"></dx-date-box>
+                  </dxi-item>
+              </dx-form>
+            </dxi-item>
+
             <dxi-item [ratio]="0" [baseSize]="200" style="margin-right:15px;">
               <dx-form style="margin-bottom: 10px;">
 
@@ -239,10 +295,12 @@
 
       </div>
 
-      <dx-form id="equipForm" [formData]="equipFormData" width="60%">
-        <dxi-item itemType="group" caption="" colCount="3">
+      <dx-form id="equipForm" [formData]="equipFormData" width="100%">
+        <dxi-item itemType="group" caption="" colCount="6">
           <dxi-item dataField="EQUNR" [editorOptions]="{readOnly: true, width: 'auto'}" [colSpan]="1"><dxo-label text="설비코드"></dxo-label></dxi-item>
           <dxi-item dataField="EQUNR_DESC" [editorOptions]="{readOnly: true, width: 'auto'}" [colSpan]="2"><dxo-label text="설비명"></dxo-label></dxi-item>
+          <dxi-item dataField="AUFNR" [editorOptions]="{readOnly: true, width: 'auto'}" [colSpan]="1"><dxo-label text="오더번호"></dxo-label></dxi-item>
+          <dxi-item dataField="KTEXT" [editorOptions]="{readOnly: true, width: 'auto'}" [colSpan]="2"><dxo-label text="내역"></dxo-label></dxi-item>
         </dxi-item>
       </dx-form>
 
@@ -272,20 +330,20 @@
                       caption="오더번호"
                       [allowEditing]="false"
                       visibleIndex="1"
-                      dataType="string">
+                      dataType="number">
           </dxi-column>
 
           <!--<dxi-column dataField="PAY_CNT"
-                  caption="순번"
-                  [allowEditing]="false"
-                  dataType="string">
-      </dxi-column>-->
+              caption="순번"
+              [allowEditing]="false"
+              dataType="string">
+  </dxi-column>-->
           <!--<dxi-column dataField="PAYITEM"
-                  caption="자재번호"
-                  [allowEditing]="false"
-                  visibleIndex="7"
-                  dataType="string">
-      </dxi-column>-->
+              caption="자재번호"
+              [allowEditing]="false"
+              visibleIndex="7"
+              dataType="string">
+  </dxi-column>-->
 
           <dxi-column dataField="PAYITEM"
                       caption="자재명"
@@ -332,6 +390,35 @@
                       visibleIndex="6"
                       dataType="string">
           </dxi-column>
+
+          <dxi-column dataField="EBELN"
+                      caption="구매문서번호"
+                      visibleIndex="9"
+                      dataType="string">
+          </dxi-column>
+
+          <dxi-column dataField="EBELP"
+                      caption="문서항목"
+                      visibleIndex="10"
+                      sortOrder="asc"
+                      dataType="string">
+          </dxi-column>
+
+          <dxo-summary>
+
+            <dxi-total-item column="NETPR"
+                            valueFormat="#,###.###"
+                            displayFormat="합계: {0}"
+                            summaryType="sum">
+            </dxi-total-item>
+
+            <dxi-total-item column="QTY_BPREI_TOT"
+                            valueFormat="#,###.###"
+                            displayFormat="합계: {0}"
+                            summaryType="sum">
+            </dxi-total-item>
+
+          </dxo-summary>
         </dx-data-grid>
       </div>
       <div>
@@ -356,7 +443,7 @@
 
           <dxi-column dataField="AUFNR"
                       caption="오더번호"
-                      dataType="string">
+                      dataType="number">
           </dxi-column>
 
           <dxi-column dataField="PAY_CNT"
@@ -568,6 +655,7 @@
                     [columnAutoWidth]="true"
                     [columnResizingMode]="columnResizeMode"
                     [selection]="{ mode: 'multiple' }"
+                    [(selectedRowKeys)]="selectedRows"
                     height="calc(100vh - 200px)"
                     (onSelectionChanged)="selectionMeterialChanged($event)"
                     [showBorders]="true">

@@ -9,7 +9,7 @@ import 'devextreme/data/odata/store';
 import { BrowserModule } from '@angular/platform-browser';
 import { formatDate } from '@angular/common';
 import { ZPMF0001Model, ZPMS0002Model } from '../../../shared/dataModel/MFMPO/ZPmF0001Proxy';
-import { ZPMF0002Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
+import { ZPMF0002Model, ZPMS0004Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
 import { ZPMF0004Model } from '../../../shared/dataModel/MFMPO/ZPmF0004Proxy';
 import { ZPMF0003Model, ZPMT0010Model, ZPMT0020Model, ZPMS0009Model, ZPMS0012Model } from '../../../shared/dataModel/MFMPO/ZPmF0003Proxy';
 import { ZPMF0006Model, ZPMS0008Model, ZPMS0024Model } from '../../../shared/dataModel/MFMPO/ZPmF0006Proxy';
@@ -44,9 +44,9 @@ const getOrderDay = function (rowData: any): number {
 })
 
 export class WORRComponent implements OnInit {
-  @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
-  @ViewChild('#gcContractList', { static: false }) gcContractList!: DxDataGridComponent;
-  @ViewChild('#gcMatList', { static: false }) gcMatList!: DxDataGridComponent;
+  @ViewChild('gcOrderGrid', { static: false }) gcOrderGrid!: DxDataGridComponent;
+  @ViewChild('gcContractList', { static: false }) gcContractList!: DxDataGridComponent;
+  @ViewChild('gcMatList', { static: false }) gcMatList!: DxDataGridComponent;
   
   @ViewChild('test1Entery', { static: false }) test1Entery!: CommonPossibleEntryComponent;
   @ViewChild('test2Entery', { static: false }) test2Entery!: CommonPossibleEntryComponent;
@@ -121,7 +121,7 @@ export class WORRComponent implements OnInit {
 
   appStatus: AppStatus[] = [];
 
-  selectedAppStatus: string = "";
+  selectedAppStatus: string = "O";
 
   //버튼
   exportSelectedData: any;
@@ -190,6 +190,7 @@ export class WORRComponent implements OnInit {
   workList: ZPMT0020Model[] = [];
   contList: ZPMT0010Model[] = [];
   faultList: ZPMS0009Model[] = [];
+  matUseList: ZPMS0004Model[] = [];
 
   conGroupKDATBText: any;
 
@@ -204,8 +205,14 @@ export class WORRComponent implements OnInit {
 
   //그리드 수정제한
   isEditing: boolean = true;
+  empId: string = "";
+  rolid: string[] = [];
 
   private loadePeCount: number = 0;
+
+  selectedRows: any;
+
+  workingDate: any;
 
   //_dataService: ImateDataService;
   /**
@@ -225,7 +232,11 @@ export class WORRComponent implements OnInit {
     this.selectedLike = "A%";
 
     this.appStatus = service.getAppStatusList();
-
+    let userInfo = this.authService.getUser().data;
+    this.rolid = userInfo?.role;
+    if(this.rolid.find(item=>item==="ADMIN") === undefined)
+      this.empId = userInfo?.empId.padStart(10, '0');
+    
     let usrInfo = authService.getUser();
     console.info(usrInfo);
     console.info();
@@ -234,6 +245,9 @@ export class WORRComponent implements OnInit {
     var now = new Date();
     this.startDate = formatDate(new Date(), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(now.setDate(now.getDate() + 1), "yyyy-MM-dd", "en-US");
+
+    this.workingDate = formatDate(new Date(), "yyyy-MM-dd", "en-US");
+
     const that = this;
     let test = this;
     this.rowCount = 0;
@@ -251,7 +265,7 @@ export class WORRComponent implements OnInit {
     }];
     this._dataService = dataService;
     this.imInfo = imInfo;
-    this.t023tCode = appConfig.tableCode("제품구분");
+    /*this.t023tCode = appConfig.tableCode("제품구분");*/
 
     this.test1Code = appConfig.tableCode("오브젝트파트")
     this.test2Code = appConfig.tableCode("손상")
@@ -272,9 +286,12 @@ export class WORRComponent implements OnInit {
 
     //조회버튼
     this.searchButtonOptions = {
-      icon: 'search',
+      text: '조회',
       onClick: async () => {
-        this.dataGrid.instance.refresh();
+        this.loadingVisible = true;
+        await this.dataLoad(this.imInfo, this.dataService);
+        this.loadingVisible = false;
+        /*this.dataGrid.instance.refresh();*/
       },
     };
 
@@ -434,7 +451,9 @@ export class WORRComponent implements OnInit {
        });
      }
      */
-    if (this.loadePeCount >= 5) {
+    if (this.loadePeCount >= 4) {
+
+      this.dataLoad(this.imInfo, this.dataService);
       this.loadingVisible = false;
       this.loadePeCount = 0;
     }
@@ -465,14 +484,12 @@ export class WORRComponent implements OnInit {
    **/
   async ngOnInit() {
     this.loadingVisible = true;
-    var orderData = await this.dataLoad(this.imInfo, this.dataService);
+  }
 
-    this.loadingVisible = false;
-    this.orderData = new ArrayStore(
-      {
-        key: ["AUFNR"],
-        data: orderData
-      });
+  workingDateChange(e: any) {
+    //for (var row of this.contList) {
+    //  row.REDAT = e.value;
+    //} 
   }
 
 
@@ -496,6 +513,8 @@ export class WORRComponent implements OnInit {
     //설비정보 추가
     this.equipFormData.EQUNR = e.data.EQUNR;
     this.equipFormData.EQUNR_DESC = e.data.EQUNR_DESC;
+    this.equipFormData.AUFNR = e.data.AUFNR;
+    this.equipFormData.KTEXT = e.data.KTEXT;
 
     await this.detaildatareload(this);
     this.loadingVisible = false;
@@ -517,6 +536,7 @@ export class WORRComponent implements OnInit {
     thisObj.contList = resultModel[0].ITAB_DATA5;
 
     thisObj.FaultInfo = resultModel[0].ITAB_DATA4
+    thisObj.matUseList = resultModel[0].ITAB_DATA3;
 
     var checkStat = thisObj.contList.find(row => row.STAT === "I" || row.STAT === "C");
 
@@ -610,18 +630,18 @@ export class WORRComponent implements OnInit {
   }
 
   //작업결과등록
-  AddRecords() {
-    this.selectedOrderItemKeys.forEach((key: any) => {
-      this.orderData.addRow();
-    });
-    this.dataGrid.instance.saveEditData();
-  }
+  //AddRecords() {
+  //  this.selectedOrderItemKeys.forEach((key: any) => {
+  //    this.orderData.addRow();
+  //  });
+  //  this.dataGrid.instance.saveEditData();
+  //}
 
   //계약추가 팝업
   addRow: any = async (e: any) => {
     this.loadingVisible = true;
+
     var resultModel = await this.popupdataLoad(this.imInfo, this.dataService) as ZPMF0006Model;
-    this.loadingVisible = false;
 
     if (resultModel.ITAB_DATA2.length === 0) {
       alert("해당 W/O에 단가항목정보가 없습니다.", "알림");
@@ -649,6 +669,18 @@ export class WORRComponent implements OnInit {
         key: ["EBELN", "EBELP"],
         data: resultModel.ITAB_DATA2
       });
+
+    this.gcMatList.instance.clearSelection();
+
+    var selectKeys = [];
+    for (var row of this.workList) {
+      var selectKey = { EBELN: row.EBELN, EBELP: row.EBELP };
+      selectKeys.push(selectKey);
+    }
+    this.selectedRows = selectKeys;
+    /*this.gcMatList.instance.selectRows(selectKeys, false);*/
+
+    this.loadingVisible = false;
 
     this.showPopup('Add', {}); //change undefined to {}
   }
@@ -951,12 +983,28 @@ export class WORRComponent implements OnInit {
   ReqRecords2: any = async () => {
 
     var check: number = 0;
-    if (await confirm("요청하시겠습니까?", "알림")) {
+    var checkQty: boolean = true;
+    var confirmText = `요청하시겠습니까? </br> 작업완료일 : ${this.workingDate}`;
+
+    //if (this.matUseList.length === 0)
+    //  confirmText = "자재사용 입력이 남아있습니다. 진행하겠습니까?";
+
+    for (var row of this.matUseList) {
+      if (row.QTY_REV > row.QTY_CON)
+        confirmText = `자재사용 입력이 남아있습니다. 진행하겠습니까? </br> 작업완료일 : ${this.workingDate}`;
+    }
+
+    if (await confirm(confirmText, "알림")) {
       //검수요청 상태업데이트
       this.contList.forEach(async (row: ZPMT0010Model) => {
         row.STAT = "I";
 
       });
+
+      for (var arr of this.contList) {
+        arr.REDAT = this.workingDate;
+      }
+
       this.loadingVisible = true;
       var resultModel = await this.datainsert2(this);
       this.loadingVisible = false;
@@ -1074,13 +1122,13 @@ export class WORRComponent implements OnInit {
     //작업요청 선택 시 RFC는 빈값으로 수행 후 데이터 조정
     if (appStatus === "O") appStatus = "";
 
-    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", "", "", appStatus, "", "", []);
+    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", this.empId, "", appStatus, "", this.appConfig.plant, []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
     if (resultModel[0].E_TYPE !== "S") {
       alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
-      return [];
+      return;
     }
 
     resultModel[0].ITAB_DATA.forEach(async (row: ZPMS0002Model) => {
@@ -1093,9 +1141,14 @@ export class WORRComponent implements OnInit {
 
     //작업요청 선택 시 RFC는 빈값으로 수행 후 데이터 조정
     if (this.selectedAppStatus === "O")
-      returnData = returnData.filter(item => item.STAT1 === "");
+        returnData = returnData.filter(item => item.STAT1 === "");
 
-    return returnData;
+
+    this.orderData = new ArrayStore(
+      {
+        key: ["AUFNR"],
+        data: returnData
+      });
   }
 
   // 상세 데이터 로드
@@ -1109,7 +1162,10 @@ export class WORRComponent implements OnInit {
 
   // 팝업 데이터 로드
   public popupdataLoad = async (iminfo: ImateInfo, dataService: ImateDataService) => {
-    var idat1 = this.zpmF002Models[0].ITAB_DATA1[0].IDAT1;
+
+    var selectData = this.gcOrderGrid.instance.getSelectedRowsData();
+
+    var idat1 = selectData[0].IDAT1;
     if (idat1 === null)
       idat1 = new Date("9999-12-31");
 
@@ -1169,15 +1225,15 @@ export class WORRComponent implements OnInit {
 
   //Data refresh 날짜 새로고침 이벤트
 
-  public refreshDataGrid = async (e: Object) => {
-    this.loadingVisible = true;
-    var orderData = await this.dataLoad(this.imInfo, this.dataService);
-    this.loadingVisible = false;
-    this.orderData = new ArrayStore(
-      {
-        key: ["AUFNR"],
-        data: orderData
-      });
-  }
+  //public refreshDataGrid = async (e: Object) => {
+  //  this.loadingVisible = true;
+  //  var orderData = await this.dataLoad(this.imInfo, this.dataService);
+  //  this.loadingVisible = false;
+  //  this.orderData = new ArrayStore(
+  //    {
+  //      key: ["AUFNR"],
+  //      data: orderData
+  //    });
+  //}
 }
 

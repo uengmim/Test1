@@ -28,6 +28,7 @@ import { CodeInfoType, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { ZSDIFPORTALSAPSDNHISPSndModel, ZSDS5050Model } from '../../../shared/dataModel/MFSAP/ZsdIfPortalSapSdNhispSndProxy';
+import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -84,16 +85,20 @@ export class KSREComponent {
   closeButtonOptions: any;
   popupVisible = false;
   collapsed: any;
-
+  empId: string = "";
+  kunnCodeValue: string | null;
   /*Entery value 선언*/
   kunnrValue!: string | null;
   //비료창고
   lgValue!: string | null;
 
+  roldid: string[] = [];
+
+  lgNmList: T001lModel[] = [];
+
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | 보관검수대비 실출고량";
-    this.dataSource = this.makeAsyncDataSource(service);
     this.kunnCode = appConfig.tableCode("비료납품처");
     this.lgCode = appConfig.tableCode("비료창고");
     //----------------------------------------------------------------------------------------------------------
@@ -108,6 +113,19 @@ export class KSREComponent {
 
     this.kunnrValue = "";
     this.lgValue = "";
+
+    var now = new Date();
+    this.startDate = formatDate(now.setDate(now.getDate() - 1), "yyyy-MM-dd", "en-US");
+    this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US");
+    let userInfo = this.authService.getUser().data;
+
+    this.empId = userInfo?.empId.padStart(10, '0');
+    this.roldid = userInfo.role;
+    if(this.roldid.find(item => item === "ADMIN") !== undefined)
+      this.kunnCodeValue = userInfo?.empId.padStart(10, '0');
+
+    this.getLgortNm();
+
     const that = this;
     //insert,modify,delete 
     this._dataService = dataService;
@@ -125,44 +143,23 @@ export class KSREComponent {
     this.searchButtonOptions = {
       text: '조회',
       onClick: async () => {
-        this.dataLoad();
+        this.loadingVisible = true;
+        await this.dataLoad();
+        this.loadingVisible = false;
       },
     };
     };
-    
-  makeAsyncDataSource(service: Service) {
-    return new CustomStore({
-      loadMode: 'raw',
-      key: ['placeOrder', 'placeDeli', 'PlaceTarget', 'deliNum', "product"],
-      load() {
-        return service.getEmployees();
-      },
-    });
-  }
-
-  get diffInDay() {
-    return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
-  }
-
-  addDataGrid(e: any) {
-    this.dataGrid.instance.addRow();
-  }
-
-
-  saveDataGrid(e: any) {
-    this.dataGrid.instance.saveEditData();
-  }
 
   //데이터로드
   public async dataLoad() {
     var zsds5050: ZSDS5050Model[] = [];
-    var zsdsIf = new ZSDIFPORTALSAPSDNHISPSndModel("", "", this.startDate, new Date(), "", "", this.kunnrEntery3.selectedValue ?? "", "", this.lgEntery.selectedValue ?? "", "",  "", "", "", "", "", "", "", "", "", "", "", "", "", "", zsds5050);
+    var zsdsIf = new ZSDIFPORTALSAPSDNHISPSndModel("", "", this.startDate, this.endDate, "", "", "", "", this.lgValue, "",  "", "", "", "", "", "", "", "", "", "", "", "", "A", "", zsds5050);
     var model: ZSDIFPORTALSAPSDNHISPSndModel[] = [zsdsIf];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSDNHISPSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSDNHISPSndModelList", model, QueryCacheType.None);
 
     this.orderData = new ArrayStore(
       {
-        key: ["VBELN", "POSNR"],
+        key: ["VBELN", "POSNR", "ZVGBEL"],
         data: resultModel[0].T_DATA
       });
   }
@@ -184,6 +181,11 @@ export class KSREComponent {
     if (this.loadePeCount >= 2) {
       this.enteryLoading = true;
       this.loadePeCount = 0;
+
+      var setLgort = this.lgNmList.find(item => item.KUNNR === this.empId);
+      if (setLgort !== undefined && this.roldid.find(item=>item === "ADMIN") === undefined)
+        this.lgValue = setLgort.LGORT;
+
       this.dataLoad();
 
     }
@@ -201,4 +203,12 @@ export class KSREComponent {
       e.component.expandRow(['EnviroCare']);
     }
   };
+
+  async getLgortNm() {
+
+    let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgCode);
+
+    var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
+    this.lgNmList = resultModel;
+  }
 }

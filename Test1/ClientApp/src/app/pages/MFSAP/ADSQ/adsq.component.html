@@ -1,101 +1,194 @@
 <!--검수/미검수현황-->
 
 
-<dx-toolbar style="margin:20px 0px 20px 0px">
+<dx-toolbar style="margin: 20px 0px 20px 0px 20px 0px">
   <dxi-item location="before">
     <div *dxTemplate>
       <div style="float: left; margin-left: 10px;">
-        <dx-date-box [(value)]="startDate" type="date" [width]="150" label="검수시작일" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="startDate" type="date" [width]="150" label="검색시작일" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
       <div style="float: left; margin-left: 10px;">
-        <dx-date-box [(value)]="endDate" type="date" [width]="150" label="검수종료일" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="endDate" type="date" [width]="150" label="검색종료일" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
     </div>
   </dxi-item>
-  <dxi-item location="before" locateInMenu="auto">
-    <div *dxTemplate>
-      <nh-possible-comm [codeInfo]="kunweCode" #kunweCodeDynamic
-                         [dataStoreKey]="dataStoreKey"
-                         valueColumn="KUNNR"
-                         valueDisplayFormat="%NAME1%(%KUNNR%)"
-                         [width]="200"
-                         [gridBoxWidth]="500"
-                         label="대리점"
-                        popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                         (onDataLoaded)="onPEDataLoaded($event)"
-                         (onEntryValueChanged)="onKunweCodeValueChanged($event)"
-                         [(selectedValue)]="kunweValue">
-      </nh-possible-comm>
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px; ">
+      <dx-select-box [dataSource]="selectType"
+                     displayExpr="name"
+                     valueExpr="code"
+                     value="A"
+                     label="검색구분"
+                     labelMode="floating"
+                     (onValueChanged)="onSelectTypeValueChanged($event)"></dx-select-box>
     </div>
   </dxi-item>
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px; ">
+      <dx-select-box [dataSource]="cSpart"
+                     displayExpr="name"
+                     valueExpr="code"
+                     value=""
+                     label="구분"
+                     labelMode="floating"
+                     (onValueChanged)="onCSpartValueChanged($event)"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-table #maEntery
+                         [dataStoreKey]="dataStoreKey"
+                         [codeInfo]="maCode"
+                         valueColumn="MATKL"
+                         valueDisplayFormat="%WGBEZ%(%MATKL%)"
+                         [(selectedValue)]="maValue"
+                         placeholderText="제품구분"
+                         width="200"
+                         label="제품구분"
+                         [gridBoxWidth]="500"
+                         (onDataLoaded)="onPEDataLoaded($event)"
+                         [showClearButton]="true"
+                         class="weight-test"></nh-possible-table>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-table #matnrEntery
+                         [dataStoreKey]="dataStoreKey"
+                         [codeInfo]="matnrCode"
+                         valueColumn="MATNR"
+                         valueDisplayFormat="%MAKTX%(%MATNR%)"
+                         placeholderText="제품명"
+                         label="제품명"
+                         width="200"
+                         [showClearButton]="true"
+                         [gridBoxWidth]="500"
+                         (onDataLoaded)="onPEDataLoaded($event)"
+                         class="weight-test"></nh-possible-table>
+    </div>
+  </dxi-item>
+
+
+
 
   <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
             [height]="25"
-            [options]="searchButtonOptions">  
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+<dx-toolbar style="margin:20px 0px 20px 0px">
+
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px; ">
+      <dx-text-box #baesongText
+                   [showClearButton]="true"
+                   label="배송예정서번호"
+                   labelMode="floating"
+                   [maxLength]="40"
+                   [(value)]="baesongValue"
+                   [width]="400"></dx-text-box>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-comm #statusEntery
+                        dataStoreKey="dataStoreKey"
+                        [codeInfo]="statusCode"
+                        valueColumn="DOMVALUE_L"
+                        valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                        [(selectedValue)]="statusValue"
+                        [gridBoxWidth]="500"
+                        width="300"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        label="배차상태"
+                        labelMode="floating"
+                        [showClearButton]="true"
+                        (onDataLoaded)="onPEDataLoaded($event)"
+                        placeholderText="배차상태">
+      </nh-possible-comm>
+    </div>
+  </dxi-item>
+  <dxi-item location="before" [disabled]="daery">
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-comm [codeInfo]="kunweCode" #kunweCodeDynamic
+                        [dataStoreKey]="dataStoreKey"
+                        valueColumn="KUNNR"
+                        valueDisplayFormat="%NAME1%(%KUNNR%)"
+                        [width]="300"
+                        [gridBoxWidth]="500"
+                        label="대리점"
+                        value="kunweValueA"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        (onDataLoaded)="onPEDataLoaded($event)"
+                        [(selectedValue)]="kunweValue">
+      </nh-possible-comm>
+    </div>
   </dxi-item>
 </dx-toolbar>
 
-<div>
-  <dx-data-grid id="gridContainer"
-                [dataSource]="dataSource"
-                [showBorders]="true"
-                [columnAutoWidth]="true"
-                height="calc(100vh - 230px)"
-                [allowColumnReordering]="true"
-                columnResizingMode="widget"
-                (onContentReady)="contentReady($event)"
-                [rowAlternationEnabled]="true"
-                [remoteOperations]="false"
-                [selection]="{ mode: 'single' }"
-                [allowColumnResizing]="true">
+  <div>
+    <dx-data-grid id="gridContainer"
+                  [dataSource]="dataSource"
+                  [showBorders]="true"
+                  [columnAutoWidth]="true"
+                  height="calc(100vh - 230px)"
+                  [allowColumnReordering]="true"
+                  columnResizingMode="widget"
+                  [rowAlternationEnabled]="true"
+                  [remoteOperations]="false"
+                  [selection]="{ mode: 'single' }"
+                  [allowColumnResizing]="true">
 
-    <dxo-scrolling mode="infinite"></dxo-scrolling>
-    <dxo-paging [enabled]="false"></dxo-paging>
-    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
-    <dxo-paging [pageSize]="10"></dxo-paging>
-    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
-    <dxo-filter-builder [customOperations]="customOperations"
-                        [allowHierarchicalFields]="true">
-    </dxo-filter-builder>
-    <dxo-filter-row [visible]="true"></dxo-filter-row>
+      <dxo-scrolling mode="standard"></dxo-scrolling>
+      <dxo-paging [enabled]="false"></dxo-paging>
+      <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+      <dxo-filter-builder [customOperations]="customOperations"
+                          [allowHierarchicalFields]="true">
+      </dxo-filter-builder>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
 
-    <dxo-sorting mode="single">
-    </dxo-sorting>
-
-    <dxi-column dataField="NH_BUY_NO" caption="검수번호" type="string"></dxi-column>
-    <dxi-column dataField="VKBUR_N" caption="영업소" type="string"></dxi-column>
-    <dxi-column dataField="KUNAG_N" caption="판매처" type="string"></dxi-column>
-    <dxi-column dataField="AGENT_N" caption="대리점" type="string"></dxi-column>
-    <dxi-column dataField="BZTXT" caption="판매지역" type="string"></dxi-column>
-    <dxi-column dataField="KUNWE_N" caption="고객번호" type="string"></dxi-column>
-    <dxi-column dataField="WGBEZ" caption="자재그룹" type="string"></dxi-column>
-    <dxi-column dataField="MAKTX" caption="자재내역" type="string"></dxi-column>
-    <dxi-column dataField="N_FWD_CNT" caption="출고수량" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="MEINS" caption="수량단위" type="string"></dxi-column>
-    <dxi-column dataField="NH_ITEM_CODE" caption="경제통합상품코드" type="string"></dxi-column>
-    <dxi-column dataField="MAKTX_NH" caption="농협제품명" type="string"></dxi-column>
-    <dxi-column dataField="STATUS_N" caption="검수상태" type="string"></dxi-column>
-    <dxi-column dataField="NH_TRADE_DIV_CODE_N" caption="매입거래구분" type="string"></dxi-column>
-    <dxi-column dataField="ZNH_NAME" caption="농협명" type="string"></dxi-column>
-    <dxi-column dataField="NH_BUY_DATE" caption="매입일자" type="date" format="yyyy-MM-dd"></dxi-column>
-    <dxi-column dataField="NH_BUY_QTY" caption="매입수량" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="NH_BUY_AMOUNT" caption="매입단가" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="NH_BUY_SUPPLY_AMOUNT" caption="매입공급액" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="NH_BUY_TAX" caption="매입부가세" type="number" format="#,###"></dxi-column>
-    <dxi-column dataField="NH_TAX_CODE_N" caption="과세구분" type="string"></dxi-column>
+      <dxi-column dataField="NH_BUY_NO" caption="검수번호" type="string"></dxi-column>
+      <dxi-column dataField="VKBUR_N" caption="영업소" type="string"></dxi-column>
+      <dxi-column dataField="KUNAG_N" caption="판매처" type="string"></dxi-column>
+      <dxi-column dataField="AGENT_N" caption="대리점" type="string"></dxi-column>
+      <dxi-column dataField="BZTXT" caption="판매지역" type="string"></dxi-column>
+      <dxi-column dataField="KUNWE_N" caption="고객명" type="string"></dxi-column>
+      <dxi-column dataField="WGBEZ" caption="자재그룹" type="string"></dxi-column>
+      <dxi-column dataField="MAKTX" caption="자재내역" type="string"></dxi-column>
+      <dxi-column dataField="N_FWD_CNT" caption="출고수량" type="number" format="#,###"></dxi-column>
+      <dxi-column dataField="MEINS" caption="수량단위" type="string"></dxi-column>
+      <dxi-column dataField="NH_ITEM_CODE" caption="경제통합상품코드" type="string"></dxi-column>
+      <dxi-column dataField="MAKTX_NH" caption="농협제품명" type="string"></dxi-column>
+      <dxi-column dataField="STATUS_N" caption="검수상태" type="string"></dxi-column>
+      <dxi-column dataField="NH_TRADE_DIV_CODE_N" caption="매입거래구분" type="string"></dxi-column>
+      <dxi-column dataField="ZNH_NAME" caption="농협명" type="string"></dxi-column>
+      <dxi-column dataField="NH_BUY_DATE" caption="매입일자" type="date" format="yyyy-MM-dd"></dxi-column>
+      <dxi-column dataField="NH_BUY_QTY" caption="매입수량" type="number" format="#,###"></dxi-column>
+      <dxi-column dataField="NH_BUY_AMOUNT" caption="매입단가" type="number" format="#,###"></dxi-column>
+      <dxi-column dataField="NH_BUY_SUPPLY_AMOUNT" caption="매입공급액" type="number" format="#,###"></dxi-column>
+      <dxi-column dataField="NH_BUY_TAX" caption="매입부가세" type="number" format="#,###"></dxi-column>
+      <dxi-column dataField="NH_TAX_CODE_N" caption="과세구분" type="string"></dxi-column>
 
 
-    <dxo-search-panel [visible]="true"></dxo-search-panel>
-    <dxo-group-panel [visible]="true"></dxo-group-panel>
-    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
-  </dx-data-grid>
-</div>
+      <dxo-search-panel [visible]="true"></dxo-search-panel>
+      <dxo-group-panel [visible]="true"></dxo-group-panel>
+      <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    </dx-data-grid>
+  </div>
 
-<!-- 로딩 패널-->
-<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
-               [shading]="true" [hideOnOutsideClick]="true">
-</dx-load-panel>
+  <!-- 로딩 패널-->
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>

@@ -7,16 +7,17 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { lastValueFrom } from 'rxjs';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
-import { Service, Employee, Product } from './app.service';
+import { Service, SelectType, CSpart } from './app.service';
 import { formatDate } from '@angular/common';
 import ArrayStore from 'devextreme/data/array_store';
-import { AppInfoService } from '../../../shared/services';
+import { AppInfoService, AuthService } from '../../../shared/services';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { CodeInfoType, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { ZSDEPSOBilldueModel, ZSDS5003Model, ZSDS5004Model } from '../../../shared/dataModel/MFSAP/ZsdEpSoBilldueProxy';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
+import { DxTextBoxComponent } from 'devextreme-angular';
 
 
 if (!/localhost/.test(document.location.host)) {
@@ -33,7 +34,10 @@ if (!/localhost/.test(document.location.host)) {
 
 export class ADSQComponent {
   @ViewChild('kunweCodeDynamic', { static: false }) kunweCodeDynamic!: CommonPossibleEntryComponent;
-
+  @ViewChild('statusEntery', { static: false }) statusEntery!: CommonPossibleEntryComponent;
+  @ViewChild('maEntery', { static: false }) maEntery!: CommonPossibleEntryComponent;
+  @ViewChild('matnrEntery', { static: false }) matnrEntery!: CommonPossibleEntryComponent;
+  @ViewChild('baesongText', { static: false }) baesongText!: DxTextBoxComponent;
   simpleProducts: string[];
   dataSource: any;
   dataList: ZSDS5004Model[] = [];
@@ -68,35 +72,67 @@ export class ADSQComponent {
   saleAmountHeaderFilter: any;
   popupPosition: any;
   columns: any;
-
+  baesongValue: string;
   collapsed: any;
-
+  cSpart: CSpart[];
   //파서블엔트리
-  kunweCode: TableCodeInfo
-
+  kunweCode: TableCodeInfo;
+  statusCode: TableCodeInfo;
+  maCode: TableCodeInfo;
+  matnrCode: TableCodeInfo;
+  selectCSpart: string = "";
   //파서블엔트리 선택값
   kunweValue: string | null = "";
-
+  statusValue: string | null = "";
+  matnrValue: string | null = "";
+  maValue: string | null = "";
+  userid: string = "";
+  kunweValueA: string | null = "";
+  selectType: SelectType[];
+  selectTypeValue: string = "A";
+  daery: boolean = false;
+  empId: string = ""; 
+  rolid: string[] = [];
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
   
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService,
+    private appConfig: AppConfigService, private authService: AuthService) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | 검수/미검수 현황";
 
     let thisObj = this;
 
+    //검색구분
+    this.selectType = service.getSelectType();
+    let userInfo = this.authService.getUser().data;
+    //this.empId = userInfo?.empId.padStart(10, '0');
+    this.rolid = userInfo?.role;
+    this.vorgid = userInfo.orgOption.vorgid.padStart(10, '0');
+    this.corgid = userInfo.orgOption.corgid.padStart(10, '0');
+    this.torgid = userInfo.orgOption.torgid.padStart(10, '0');
+    this.empId = this.corgid;
+
     //데이터 로딩 패널 보이기
     this.loadingVisible = true;
-
+    this.cSpart = service.getCSpart();
     this.endDate = formatDate(this.now.setDate(this.now.getDate()), "yyyy-MM-dd", "en-US");
     this.startDate = new Date();
-    this.startDate = formatDate(this.now.setDate(this.now.getDate() - 7), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(this.now.setDate(this.now.getDate() - 2), "yyyy-MM-dd", "en-US");
 
     this.kunweCode = appConfig.tableCode("RFC_비료고객정보");
+    this.statusCode = appConfig.tableCode("RFC_검수상태");
+    this.maCode = appConfig.tableCode("비료제품구분");
+    this.matnrCode = appConfig.tableCode("비료제품명");
 
     let codeInfos = [
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunweCode)
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunweCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.statusCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode),
     ];
 
     PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
@@ -115,7 +151,7 @@ export class ADSQComponent {
 
         this.dataSource = new ArrayStore(
           {
-            key: ["NH_BUY_NO", "VKBUR_N", "KUNAG_N", "AGENT_N"],
+            key: ["NH_BUY_NO", "VKBUR_N", "KUNAG_N", "AGENT_N", "BZTXT", "KUNWE_N"],
             data: result
           });
 
@@ -124,6 +160,8 @@ export class ADSQComponent {
     };
 
   }
+
+ 
 
   contentReady = (e: any) => {
     if (!this.collapsed) {
@@ -139,11 +177,13 @@ export class ADSQComponent {
   async onPEDataLoaded(e: any) {
     this.loadePeCount++;
     if (this.loadePeCount >= 1) {
+
+
       var result = await this.dataLoad(this._imInfo, this._dataService, this.appConfig)
 
       this.dataSource = new ArrayStore(
         {
-          key: ["VKBUR_N", "KUNAG_N", "NH_BUY_NO"],
+          key: ["NH_BUY_NO", "VKBUR_N", "KUNAG_N", "AGENT_N", "BZTXT", "KUNWE_N", "VBELN", "VGBEL"],
           data: result
         });
 
@@ -157,7 +197,20 @@ export class ADSQComponent {
 
   //데이터 조회
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, appConfig: AppConfigService) {
-    var headCondi = new ZSDS5003Model("admin", this.kunweValue, this.startDate, this.endDate, "B", "", "", "", "", "", "");
+
+    let userInfo = this.authService.getUser().data;
+    this.userid = userInfo?.userId;
+    if (this.userid !== "ADMIN") {
+      this.kunweValue = this.empId;
+      this.kunweValueA = this.kunweValue;
+      this.daery = true;
+    }
+    else {
+      this.daery = false;
+    }
+
+    
+    var headCondi = new ZSDS5003Model(this.authService.getUser().data.userId, this.kunweValue, this.startDate, this.endDate, this.selectTypeValue, this.statusValue, this.maValue, this.matnrValue, "", this.baesongValue, this.selectCSpart, "");
     var condiModel = new ZSDEPSOBilldueModel("", "", headCondi, []);
 
     var condiModelList = [condiModel];
@@ -167,8 +220,36 @@ export class ADSQComponent {
     return this.dataList;
   }
 
+  onCSpartValueChanged(e: any) {
+    this.selectCSpart = e.value;
+    if (this.selectCSpart === "10") {
+      this.maEntery.ChangeCodeInfo(this.appConfig.tableCode("비료제품구분"), "MATKL", "%WGBEZ%(%MATKL%)", "비료제품구분");
+      this.matnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료제품명"), "MATNR", "%MAKTX%(%MATNR%)", "비료제품명");
+      return;
+    }
+    else if (this.selectCSpart === "20") {
+      this.maEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경제품구분"), "MATKL", "%WGBEZ%(%MATKL%)", "비료제품구분");
+      this.matnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경제품명"), "MATNR", "%MAKTX%(%MATNR%)", "친환경제품명");
+      return;
+    }
+  }
   onKunweCodeValueChanged(e: any) {
-
+    this.kunweValue = e.value;
   }
 
+  onSelectTypeValueChanged(e: any) {
+    this.selectTypeValue = e.value;
+  }
+
+  onStatusCodeValueChanged(e: any) {
+    this.statusValue = e.value;
+  }
+
+  onMaCodeValueChanged(e: any) {
+    this.maValue = e.value;
+  }
+
+  onMatnrCodeValueChanged(e: any) {
+    this.matnrValue = e.value;
+  }
 }

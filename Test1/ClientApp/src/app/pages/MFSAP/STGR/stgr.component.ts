@@ -24,7 +24,7 @@ import {
   DxTemplateModule,
   DxTextBoxComponent,
 } from 'devextreme-angular';
-import { AppInfoService } from '../../../shared/services';
+import { AppInfoService, AuthService } from '../../../shared/services';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
@@ -52,8 +52,7 @@ export class STGRComponent {
   @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('ebelnText', { static: false }) ebelnText!: DxTextBoxComponent;
 
-  @ViewChild(DxDataGridComponent, { static: false })
-  dataGrid!: DxDataGridComponent;
+  @ViewChild('orderGridList', { static: false }) orderGridList!: DxDataGridComponent;
 
   //조회버튼
   searchButtonOptions: any;
@@ -145,12 +144,21 @@ export class STGRComponent {
     validationRequestsCallbacks: this.callbacks
   };
 
+  empid: string = "";
+  rolid: string[] = [];
+  isLgortDisabled = false;
+
   popupPosition: any;
   customOperations!: Array<any>;
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService,
+    private appConfig: AppConfigService, private authService: AuthService) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO입고";
     let page = this;
+    //로그인 사용자 정보
+    let usrInfo = authService.getUser().data;
+    this.empid = usrInfo.empId.padStart(10, '0');
+    this.rolid = usrInfo.role;
 
     //QA test용 설정
 
@@ -165,7 +173,7 @@ export class STGRComponent {
 
     //파서블엔트리
     this.lgortInCode = appConfig.tableCode("비료창고");
-    this.matnrCode = appConfig.tableCode("비료제품명");
+    this.matnrCode = appConfig.tableCode("비료친환경제품명");
 
     let codeInfos = [
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgortInCode),
@@ -199,9 +207,11 @@ export class STGRComponent {
     }
     //조회버튼
     this.searchButtonOptions = {
-      icon: 'search',
+      text: '조회',
       onClick: async () => {
-        this.dataGrid.instance.refresh();
+        this.loadingVisible = true;
+        await this.dataLoad(this.dataService, this.appConfig);
+        this.loadingVisible = false;
       },
     };
   };
@@ -244,14 +254,27 @@ export class STGRComponent {
          var sendDataModel = new ZMMSTOGrModel(new ZMMS9000Model("",""), sendData);
          var sendDataList: ZMMSTOGrModel[] = [sendDataModel];
          var result = await this.dataService.RefcCallUsingModel<ZMMSTOGrModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMSTOGrModelList", sendDataList, QueryCacheType.None);
+         var resultMsg = "";
+         for (var row of result[0].CT_LIST) {
+           if (row.TYPE !== "S") {
+             resultMsg = resultMsg + `${row.EBELN}/${row.EBELP} : ${row.MESSAGE} <br/>`
+           }
+         }
 
-         this.gridDataSource = new ArrayStore(
-           {
-             key: ["EBELN", "VBELN_ST"],
-             data: result[0].CT_LIST
-           });
+         if (resultMsg !== "")
+           await alert(resultMsg, "오류");
+         else
+           await alert("저장되었습니다.", "알림");
 
-         alert(`입고처리가 완료되었습니다. 메세지와 상태를 확인해주세요.`, "알림");
+         this.dataLoad(this.dataService, this.appConfig);
+
+         //this.gridDataSource = new ArrayStore(
+         //  {
+         //    key: ["EBELN", "EBELP", "VBELN_ST", "VBELP_ST"],
+         //    data: result[0].CT_LIST
+         //  });
+
+         //alert(`입고처리가 완료되었습니다. 메세지와 상태를 확인해주세요.`, "알림");
 
          /*result[0].CT_LIST.forEach((array : any) => {
            if (array.TYPE === "E") {
@@ -271,12 +294,6 @@ export class STGRComponent {
 
   dbClickDataGrid(e: any) {
     this.popupVisible = false;
-  }
-
-
-  //Data refresh
-  public refreshDataGrid(e: Object) {
-    this.dataGrid.instance.refresh();
   }
 
 
@@ -309,16 +326,26 @@ export class STGRComponent {
    */
   onPEDataLoaded(e: any) {
     this.loadePeCount++;
-    if (this.loadePeCount >= 2)
+    if (this.loadePeCount >= 2) {
+      
+      if (this.rolid.find(item => item !== "ADMIN") !== undefined) {
+        var lValue = this.lgortInCodeDynamic.gridDataSource._array.find(item => item.KUNNR == this.empid);
+        this.lgortValue = lValue.LGORT ?? "";
+        this.isLgortDisabled = true;
+      }
+
+      this.dataLoad(this.dataService, this.appConfig);
       this.loadingVisible = false;
+    }   
   }
 
   //STO입고목록 조회
   public async dataLoad( dataService: ImateDataService, appConfig: AppConfigService) {
 
-    
+    this.orderList = [];
+
     var zmm9000model = new ZMMS9000Model("", "");
-    var condiModel = new ZMMSTOGRDuelistModel(this.ebelnText.value, "", this.lgortInCodeDynamic.selectedValue ?? "", this.matnrCodeDynamic.selectedValue ?? "", "", this.werks, zmm9000model, []);
+    var condiModel = new ZMMSTOGRDuelistModel("", "", this.lgortValue ?? "", this.matnrValue ?? "", "", this.werks, zmm9000model, []);
 
     var condiModelList = [condiModel];
 
@@ -327,20 +354,11 @@ export class STGRComponent {
 
     this.gridDataSource = new ArrayStore(
       {
-        key: ["EBELN", "VBELN_ST"],
+        key: ["EBELN", "EBELP", "VBELN_ST", "VBELP_ST"],
         data: this.orderList
       });
-    return result[0].ET_LIST;
+
+    this.orderGridList.instance.getScrollable().scrollTo(0);
   }
-  getDataGrid(e: any) {
-    let result = e.validationGroup.validate();
-    if (!result.isValid) {
-      alert("필수값을 입력하여 주십시오.", "알림");
-      return;
-    }
-    else {
-      this.dataLoad( this.dataService, this.appConfig);
-      }
-    }
-  }
+}
 

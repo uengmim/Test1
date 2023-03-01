@@ -70,14 +70,29 @@ export class FOICComponent {
   //제품구분
   selectData2: string = "";
   data2!: Data2[];
+
+  empId: string = "";
+  rolid: string[] = [];
+  userid: string = "";
+
+
   //this
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService,
+    private imInfo: ImateInfo, private authService: AuthService) {
 
     appInfo.title = AppInfoService.APP_TITLE + " | 고객주문조회 및 취소";
+
+    let userInfo = this.authService.getUser().data;
+    this.rolid = userInfo?.role;
+    if (this.rolid.find(item => item === "ADMIN") === undefined) {
+      this.empId = userInfo?.empId.padStart(10, '0');
+      this.userid = userInfo?.userId;
+    }
+      
    
     //조회날짜 초기값
     var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 30), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
     //주문문서삭제 버튼 활성화
@@ -130,15 +145,19 @@ export class FOICComponent {
   //고객주문리스트 조회 RFC
   public async dataLoad() {
     var modelList: ZSDS0090Model[] = [];
-    var zsdDocument = new ZSDDOCUMENTCancelModel("", "", "", this.startDate, this.endDate, "", "", "", "", "", "A", this.selectData2, "", "", "", "", modelList, modelList);
+    var zsdDocument = new ZSDDOCUMENTCancelModel("", "", "", this.startDate, this.endDate, this.userid, "", "", "", "", "A", this.selectData2, "", "", "", "", modelList, modelList);
     var list: ZSDDOCUMENTCancelModel[] = [zsdDocument];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDDOCUMENTCancelModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDDOCUMENTCancelModelList", list, QueryCacheType.None);
 
+
+
     this.orderData = new ArrayStore(
       {
-        key: ["VBELN","MBLNR","POSNR_VL","POSNR"],
+        key: ["VBELN", "POSNR", "VBELN_VL", "POSNR_VL"],
         data: resultModel[0].T_DATA
       });
+
+    this.deleteGrid.instance.getScrollable().scrollTo(0);
   }
 
   //제품군 선택 이벤트

@@ -25,6 +25,8 @@ import { TablePossibleEntryComponent } from '../../../shared/components/table-po
 import { CodeInfoType, TableCodeInfo } from '../../../shared/app.utilitys';
 import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
+import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
+import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -82,6 +84,8 @@ export class KSSHComponent {
   zpalValue!: string | null;
   //제품코드
   matnrValue!: string | null;
+  //비료창고
+  lgCodeValue: string | null = null;
 
   //정보
   orderData: any;
@@ -129,6 +133,13 @@ export class KSSHComponent {
   saleAmountHeaderFilter: any;
   customOperations!: Array<any>;
   collapsed: any;
+  empId: string = "";
+  rolid: string[] = [];
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
+
+  lgNmList: T001lModel[] = [];
 
   private loadePeCount: number = 0;
   enteryLoading: boolean = false;
@@ -140,6 +151,13 @@ export class KSSHComponent {
     //정보
 
     this.loadingVisible = true;
+    let userInfo = this.authService.getUser().data;
+    this.rolid = userInfo.role;
+
+    this.vorgid = userInfo.orgOption.vorgid.padStart(10, '0');
+    this.corgid = userInfo.orgOption.corgid.padStart(10, '0');
+    this.torgid = userInfo.orgOption.torgid.padStart(10, '0');
+    this.empId = this.corgid;
 
     this.matnrCode = appConfig.tableCode("비료제품명");
     this.lgCode = appConfig.tableCode("비료창고");
@@ -195,8 +213,6 @@ export class KSSHComponent {
       text: '저장',
       onClick: async () => {
 
-
-
         if (await confirm("저장하시겠습니까?", "알림")) {
 
           var checkModel = this.addFormData;
@@ -239,7 +255,14 @@ export class KSSHComponent {
   //데이터로드
   public async dataLoad() {
     var zsds5050: ZSDS5050Model[] = [];
-    var zsdsIf = new ZSDIFPORTALSAPSDNHISPSndModel("", "", this.startDate, this.endDate, "", "", "", "", this.lgEntery.selectedValue ??"", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", zsds5050);
+    var lgVal = "";
+
+    //var result7110Model = await this.dataService.SelectModelData<ZSDT7110Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7110ModelList", [],
+    //  `MANDT = '${this.appConfig.mandt}' AND KUNNR = '${this.lgEntery.selectedValue}' `, "", QueryCacheType.None);
+    //if (result7110Model.length > 0)
+    //  lgVal = result7110Model[0].LGORT ?? "";
+
+    var zsdsIf = new ZSDIFPORTALSAPSDNHISPSndModel("", "", this.startDate, this.endDate, "", "", "", "", this.lgCodeValue, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", zsds5050);
     var model: ZSDIFPORTALSAPSDNHISPSndModel[] = [zsdsIf];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSDNHISPSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSDNHISPSndModelList", model, QueryCacheType.None);
 
@@ -296,6 +319,9 @@ export class KSSHComponent {
      }
      */
     if (this.loadePeCount >= 7) {
+
+      this.lgCodeValue = this.lgNmList.find(item => item.KUNNR === this.empId)?.LGORT;
+
       this.enteryLoading = true;
       this.loadePeCount = 0;
       this.dataLoad();
@@ -411,5 +437,13 @@ export class KSSHComponent {
     this.zcarnoModiCodeEntery.ClearSelectedValue();
     this.zpalEntery.ClearSelectedValue();
     this.matnrCodeDynamic.ClearSelectedValue();
+  }
+
+  async getLgortNm() {
+
+    let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgCode);
+
+    var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
+    this.lgNmList = resultModel;
   }
 }

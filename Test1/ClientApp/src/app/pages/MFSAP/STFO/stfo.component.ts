@@ -8,7 +8,7 @@ import { lastValueFrom } from 'rxjs';
 import { ZXNSCRFCResultModel } from '../../../shared/dataModel/ZxnscRfcResult';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ImateInfo, QueryCacheType, QueryDataType, QueryMessage, QueryParameter, QueryRunMethod } from '../../../shared/imate/imateCommon';
-import { Service, Employee, State, State2, State3, State4, State5, State6, State7, OrderInfo, PalletType, UnloadInfo, TruckType } from './app.service';
+import { Service, Employee, State, State2, State3, State4, State5, State6, State7, OrderInfo, PalletType, UnloadInfo, TruckType, zStatus } from './app.service';
 import { formatDate } from '@angular/common';
 import ArrayStore from 'devextreme/data/array_store';
 import { confirm, alert } from "devextreme/ui/dialog";
@@ -23,7 +23,7 @@ import {
   DxTextBoxModule,
   DxTemplateModule,
 } from 'devextreme-angular';
-import { AppInfoService } from '../../../shared/services';
+import { AppInfoService, AuthService } from '../../../shared/services';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
@@ -31,6 +31,9 @@ import { ZSDS0050Model, ZSDSTOORDERReceiveModel } from '../../../shared/dataMode
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { ZSDS0060Model, ZSDS0061Model, ZSDSTOORDERManageModel } from '../../../shared/dataModel/MFSAP/ZSdStoOrderManageProxy';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { userInfo } from 'os';
+import { ChangeDetectorRef } from '@angular/core';
+import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 
 
 if (!/localhost/.test(document.location.host)) {
@@ -82,7 +85,7 @@ export class STFOComponent {
   kunnrCode: TableCodeInfo;
   kunweCode: TableCodeInfo;
   matnrCode: TableCodeInfo;
-  inco1Code: TableCodeInfo;
+  inco1Code: CommonCodeInfo;
   tdlnr1Code: TableCodeInfo;
   //tdlnr2Code: TableCodeInfo;
   sublgortOutCode: TableCodeInfo;
@@ -92,6 +95,21 @@ export class STFOComponent {
   //truckTypeCode: TableCodeInfo;
   unloadInfoCode: TableCodeInfo;
   zvkausCode: TableCodeInfo;
+  //zcarnoCode: TableCodeInfo
+
+  kunnrCode2: TableCodeInfo;
+  kunweCode2: TableCodeInfo;
+  matnrCode2: TableCodeInfo;
+  inco1Code2: CommonCodeInfo;
+  tdlnr1Code2: TableCodeInfo;
+  //tdlnr2Code: TableCodeInfo;
+  sublgortOutCode2: TableCodeInfo;
+  stockTypeCode2: TableCodeInfo;
+  /*cancelCode: TableCodeInfo;*/
+  palletTypeCode2: TableCodeInfo;
+  //truckTypeCode: TableCodeInfo;
+  unloadInfoCode2: TableCodeInfo;
+  zvkausCode2: TableCodeInfo;
   //zcarnoCode: TableCodeInfo
 
   //파서블엔트리 선택값
@@ -111,6 +129,21 @@ export class STFOComponent {
   unloadInfoValue: string | null = "";
   zvkausValue: string | null = "";
   zcarnoValue: string | null = "";
+
+  kunnrValue2: string | null = "";
+  kunweValue2: string | null = "";
+  matnrValue2: string | null = "";
+  inco1Value2: string | null = "";
+  tdlnr1Value2: string | null = "";
+  tdlnr2Value2: string | null = "";
+  sublgortOutValue2: string | null = "";
+  stockTypeValue2: string | null = "";
+  /*cancelValue: string | null = "";*/
+  palletTypeValue2: string | null = "";
+  truckTypeValue2: string | null = "";
+  unloadInfoValue2: string | null = "";
+  zvkausValue2: string | null = "";
+  zcarnoValue2: string | null = "";
 
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
@@ -158,6 +191,7 @@ export class STFOComponent {
   saveButtonOptions: any;
   closeButtonOptions: any;
   popupVisible = false;
+  popupVisible2 = false;
   collapsed: any;
 
   //multiseletbox
@@ -168,8 +202,21 @@ export class STFOComponent {
   popupPosition: any;
   customOperations!: Array<any>;
 
+  empid: string = "";
+  rolid: string[] = [];
+  isRoleDisabled = false;
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
+
+  selectYN: boolean = false;
+
   //lgort 선택 값
   lgortValue!: string | null;
+
+  ZStatus: zStatus[] = [];
+
+  lgNmList: T001lModel[] = [];
   //값 체크
   //validation Adapter
   lgortAdapter = {
@@ -181,12 +228,24 @@ export class STFOComponent {
     },
     validationRequestsCallbacks: this.callbacks
   };
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, private imInfo: ImateInfo, private appInfo: AppInfoService,
+    private appConfig: AppConfigService, private authService: AuthService, private cd: ChangeDetectorRef) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO주문-포장재";
     let page = this;
 
-    //QA test용 설정
+    //로그인 사용자 정보
+    let usrInfo = authService.getUser().data;
+    this.rolid = usrInfo.role;
+    this.vorgid = usrInfo.orgOption.vorgid.padStart(10, '0');
+    this.corgid = usrInfo.orgOption.corgid.padStart(10, '0');
+    this.torgid = usrInfo.orgOption.torgid.padStart(10, '0');
+
+    if (this.rolid.find(item => item === "ADMIN") === undefined)
+      this.empid = this.corgid;
+
+    //STO 진행상태
+    this.ZStatus = service.getZStatus();
 
     //데이터 로딩 패널 보이기
     this.loadingVisible = true;
@@ -203,8 +262,8 @@ export class STFOComponent {
 
     this.kunnrCode = appConfig.tableCode("RFC_비료고객정보");
     this.kunweCode = appConfig.tableCode("비료창고");
-    this.matnrCode = appConfig.tableCode("비료제품명");
-    this.inco1Code = appConfig.tableCode("인코텀스");
+    this.matnrCode = appConfig.tableCode("비료친환경제품명");
+    this.inco1Code = appConfig.commonCode("운송방법");
     this.tdlnr1Code = appConfig.tableCode("운송업체");
     /*this.tdlnr2Code = appConfig.tableCode("운송업체");*/
     this.sublgortOutCode = appConfig.tableCode("비료창고");
@@ -216,6 +275,21 @@ export class STFOComponent {
     this.zvkausCode = appConfig.tableCode("RFC_용도");
     /*this.zcarnoCode = appConfig.tableCode("비료차량");*/
 
+    this.kunnrCode2 = appConfig.tableCode("RFC_비료고객정보");
+    this.kunweCode2 = appConfig.tableCode("비료창고");
+    this.matnrCode2 = appConfig.tableCode("비료친환경제품명");
+    this.inco1Code2 = appConfig.commonCode("운송방법");
+    this.tdlnr1Code2 = appConfig.tableCode("운송업체");
+    /*this.tdlnr2Code = appConfig.tableCode("운송업체");*/
+    this.sublgortOutCode2 = appConfig.tableCode("비료창고");
+    this.stockTypeCode2 = appConfig.tableCode("RFC_재고유형");
+    /*this.cancelCode = appConfig.tableCode("RFC_취소코드");*/
+    this.palletTypeCode2 = appConfig.tableCode("RFC_파레트유형");
+    /*this.truckTypeCode = appConfig.tableCode("RFC_화물차종");*/
+    this.unloadInfoCode2 = appConfig.tableCode("RFC_하차정보");
+    this.zvkausCode2 = appConfig.tableCode("RFC_용도");
+    /*this.zcarnoCode = appConfig.tableCode("비료차량");*/
+
     let codeInfos = [
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgortInCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgortOutCode),
@@ -223,7 +297,7 @@ export class STFOComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnrCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunweCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.inco1Code),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.inco1Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr1Code),
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr2Code),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.sublgortOutCode),
@@ -232,6 +306,20 @@ export class STFOComponent {
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.truckTypeCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.unloadInfoCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zvkausCode),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoCode)*/
+
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunnrCode2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.kunweCode2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.matnrCode2),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.inco1Code2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr1Code2),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr2Code),*/
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.sublgortOutCode2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.stockTypeCode2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.palletTypeCode2),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.truckTypeCode),*/
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.unloadInfoCode2),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zvkausCode2),
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoCode)*/
     ];
 
@@ -248,16 +336,18 @@ export class STFOComponent {
     this._dataService = dataService;
     this.rowCount = 0;
 
-    this.orderList = Object.assign(page.dataLoad(imInfo, dataService, appConfig)) as ZSDS0060Model[];
+    this.getLgortNm();
 
-    //메인데이터
-    this.gridDataSource = new CustomStore(
-      {
-        key: ["ZSTVBELN", "EBELN"],
-        load: function (loadOptions) {
-          return page.dataLoad(imInfo, dataService, appConfig);
-        }
-      });
+    //this.orderList = Object.assign(page.dataLoad(imInfo, dataService, appConfig)) as ZSDS0060Model[];
+
+    ////메인데이터
+    //this.gridDataSource = new CustomStore(
+    //  {
+    //    key: ["ZSTVBELN", "EBELN"],
+    //    load: function (loadOptions) {
+    //      return page.dataLoad(imInfo, dataService, appConfig);
+    //    }
+    //  });
 
     //저장버튼 이벤트
     this.saveButtonOptions = {
@@ -281,11 +371,10 @@ export class STFOComponent {
             this.orderInfo.EBELN = result.T_DATA[0].EBELN;
             this.orderInfo.ZABGRU = result.T_DATA[0].ZABGRU;
             this.orderInfo.ZBLOCK = result.T_DATA[0].ZBLOCK;
-            that.popupVisible = false;
-          } else
+          } else {
             alert("저장완료", "알림");
-
-          
+          }
+          this.popupVisible = false;
         }
       }
     };
@@ -294,16 +383,23 @@ export class STFOComponent {
         text: '닫기',
         onClick(e: any) {
           that.popupVisible = false;
+          that.popupVisible2 = false;
         }
     }
     //조회버튼
     this.searchButtonOptions = {
-      icon: 'search',
+      text: '조회',
       onClick: async () => {
-        this.dataGrid.instance.refresh();
+        this.loadingVisible = true;
+        await this.dataLoad(this.imInfo, this.dataService, this.appConfig);
+        this.loadingVisible = false;
       },
     };
   };
+
+  ngAfterViewChecked() {
+    this.cd.detectChanges();
+  }
 
   asyncValidation(params: any) {
     var ad = params;
@@ -334,15 +430,18 @@ export class STFOComponent {
         this.kunweValue = resultValue.LGORT;
       }
 
-      this.orderInfo.LGORT = resultValue.LGORT;
-      this.orderInfo.KUNNR = e.selectedItem.KUNNR;
-      this.orderInfo.NAME1 = e.selectedItem.NAME1;
-      this.orderInfo.CITY1 = e.selectedItem.CITY1;
-      this.orderInfo.STREET = e.selectedItem.STREET;
-      this.orderInfo.TELF1 = e.selectedItem.TELF1;
-      this.orderInfo.MOBILENO = e.selectedItem.MOBILENO;
-    });
-    return;
+      /*if (this.selectYN = false) {*/
+        var kna1Value = this.kunnrCodeDynamic.gridDataSource._array.find(obj => obj.KUNNR == e.selectedValue);
+        this.orderInfo.LGORT = resultValue.LGORT;
+        this.orderInfo.KUNNR = kna1Value.KUNNR;
+        this.orderInfo.NAME1 = kna1Value.NAME1;
+        this.orderInfo.CITY1 = kna1Value.CITY1;
+        this.orderInfo.STREET = kna1Value.STREET;
+        this.orderInfo.TELF1 = kna1Value.TELF1;
+        this.orderInfo.MOBILENO = kna1Value.MOBILENO;
+      //}
+      
+    }, 100);
   }
 
   //자재코드변경
@@ -368,7 +467,7 @@ export class STFOComponent {
 
   //운송방법변경
   oninco1CodeValueChanged(e: any) {
-    this.orderInfo.INCO1 = e.selectedItem.INCO1;
+    this.orderInfo.INCO1 = e.selectedItem.ZCM_CODE3;
     return;
   }
 
@@ -489,8 +588,10 @@ export class STFOComponent {
         else
           alert("취소완료", "알림");
       }
+
+      await this.dataLoad(this.imInfo, this.dataService, this.appConfig);
+
       this.loadingVisible = false;
-      this.dataGrid.instance.refresh();
     }
   }
 
@@ -502,7 +603,9 @@ export class STFOComponent {
         return;
       }
       else {
-        this.dataGrid.instance.refresh();
+        this.loadingVisible = true;
+        this.dataLoad(this.imInfo, this.dataService, this.appConfig);
+        this.loadingVisible = false;
       }
     }
 
@@ -534,8 +637,10 @@ export class STFOComponent {
 
   //주문등록
   requestOrder(e: any) {
+    this.selectYN = false;
     this.clearPossibleEntrys();
 
+    
     var newdata = new ZSDS0050Model("", this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0,
       new Date(), new Date(), "", "", "", "", "", "", "", "", "", "", "", "", "", 0, "", 0, 0, this.werks, "", "", "", "", "", "", "", "",
       new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
@@ -546,7 +651,9 @@ export class STFOComponent {
     this.popupVisible = true;
 
     //0.5초 뒤에 적용(숨김 상태의 컨트롤은 프로퍼티 변동이 안되므로 POPUP창이 보여진 상태에서 변경을 해 주어야 함)
-    setTimeout((that: STFOComponent) => {
+
+    setTimeout(async (that: STFOComponent) => {
+      this.kunnrValue = this.empid;
       that.truckTypeCodeDynamic.ApplyFilter();
     }, 500, this);
   }
@@ -566,32 +673,37 @@ export class STFOComponent {
 
   //오더목록 더블클릭
   orderDBClick(e: any) {
-    var selectedData: ZSDS0060Model = e.data as ZSDS0060Model;
+    this.selectYN = true;
+    this.clearPossibleEntrys();
 
-    this.orderInfo = new ZSDS0050Model(selectedData.ZSTVBELN, this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, selectedData.LGORT, selectedData.NAME1,
-      selectedData.CITY1, selectedData.STREET, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, selectedData.AEDAT, selectedData.EINDT, selectedData.INCO1, selectedData.TDLNR1,
-      selectedData.TDLNR2, selectedData.ZCARTYPE, selectedData.ZCARNO, selectedData.ZDRIVER, selectedData.ZUNLOAD, selectedData.ZPALLTP, selectedData.ZVKAUS,
-      selectedData.REMARK, "", "", selectedData.MATNR, selectedData.ZMENGE1, selectedData.MEINS, 0, 0, selectedData.RESWK, selectedData.RESLO, selectedData.INSMK,
-      selectedData.ZABGRU, selectedData.ZBLOCK, selectedData.EBELN, selectedData.EBELP,
-      selectedData.ZSTATS, "", new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
+    setTimeout(async (that: STFOComponent) => {
+      var selectedData: ZSDS0060Model = e.data as ZSDS0060Model;
 
-    this.kunnrValue = selectedData.KUNNR;
-    this.kunweValue = selectedData.LGORT;
-    this.matnrValue = selectedData.MATNR;
-    this.inco1Value = selectedData.INCO1;
-    this.tdlnr1Value = selectedData.TDLNR1;
-    this.tdlnr2Value = selectedData.TDLNR2;
-    this.sublgortOutValue = selectedData.RESLO;
-    this.stockTypeValue = selectedData.INSMK;
-    /*this.cancelValue = selectedData.;*/
-    this.palletTypeValue = selectedData.ZPALLTP;
-    this.truckTypeValue = selectedData.ZCARTYPE;
-    this.unloadInfoValue = selectedData.ZUNLOAD;
-    this.zvkausValue = selectedData.ZVKAUS;
-    this.zcarnoValue = selectedData.ZCARNO;
+      this.orderInfo = new ZSDS0050Model(selectedData.ZSTVBELN, this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, selectedData.LGORT, selectedData.NAME1,
+        selectedData.CITY1, selectedData.STREET, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, selectedData.AEDAT, selectedData.EINDT, selectedData.INCO1, selectedData.TDLNR1,
+        selectedData.TDLNR2, selectedData.ZCARTYPE, selectedData.ZCARNO, selectedData.ZDRIVER, selectedData.ZUNLOAD, selectedData.ZPALLTP, selectedData.ZVKAUS,
+        selectedData.REMARK, "", "", selectedData.MATNR, selectedData.ZMENGE1, selectedData.MEINS, 0, 0, selectedData.RESWK, selectedData.RESLO, selectedData.INSMK,
+        selectedData.ZABGRU, selectedData.ZBLOCK, selectedData.EBELN, selectedData.EBELP,
+        selectedData.ZSTATS, "", new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
 
-    this.popupStat = true;
-    this.popupVisible = !this.popupVisible;
+      this.kunnrValue2 = selectedData.KUNNR;
+      this.kunweValue2 = selectedData.LGORT;
+      this.matnrValue2 = selectedData.MATNR;
+      this.inco1Value2 = selectedData.INCO1;
+      this.tdlnr1Value2 = selectedData.TDLNR1;
+      this.tdlnr2Value2 = selectedData.TDLNR2;
+      this.sublgortOutValue2 = selectedData.RESLO;
+      this.stockTypeValue2 = selectedData.INSMK;
+      /*this.cancelValue = selectedData.;*/
+      this.palletTypeValue2 = selectedData.ZPALLTP;
+      this.truckTypeValue2 = selectedData.ZCARTYPE;
+      this.unloadInfoValue2 = selectedData.ZUNLOAD;
+      this.zvkausValue2 = selectedData.ZVKAUS;
+      this.zcarnoValue2 = selectedData.ZCARNO;
+
+      this.popupStat = true;
+      this.popupVisible2 = !this.popupVisible;
+    }, 500, this);
   }
 
   onCodeValueChanged(e: any) {
@@ -604,8 +716,19 @@ export class STFOComponent {
    */
   onPEDataLoaded(e: any) {
     this.loadePeCount++;
-    if (this.loadePeCount >= 12)
+    if (this.loadePeCount >= 12) {
+      
+      this.loadingVisible = true;
+
+      var lgortText = this.lgortInCodeDynamic.gridDataSource._array.find(item => item.KUNNR === this.empid);
+      if (lgortText !== undefined)
+        this.lgortValue = lgortText.LGORT;
+
+      this.dataLoad(this.imInfo, this.dataService, this.appConfig)
+
       this.loadingVisible = false;
+    }
+      
 
     //if (e.component.popupTitle === "화물차종")
     //  this.truckTypeCodeDynamic.SetDataFilter(["DOMVALUE_L", "startswith", "A"]);
@@ -629,12 +752,34 @@ export class STFOComponent {
     //return dataSet.tables["ZSDT6030"].getDataObjectAny();
 
     var condiModel = new ZSDSTOORDERManageModel("", "", this.startDate, this.endDate, "",
-      this.lgortInCodeDynamic.selectedValue ?? "", "D", this.lgortOutCodeDynamic.selectedValue ?? "", this.werks, "", this.werks, "", [], [], DIMModelStatus.UnChanged);
+      this.lgortValue ?? "", "D", this.lgortOutCodeDynamic.selectedValue ?? "", this.werks, "", this.werks, "", [], [], DIMModelStatus.UnChanged);
 
     var condiModelList = [condiModel];
 
     var result = await this.dataService.RefcCallUsingModel<ZSDSTOORDERManageModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDSTOORDERManageModelList", condiModelList, QueryCacheType.None);
     this.orderList = result[0].T_DATA;
+
+    for (var row of this.orderList) {
+      if (row.ZCANCEL === "Y")
+        row.ZCANCELNM = "취소가능";
+      else
+        row.ZCANCELNM = "취소불가";
+
+      var statnm = this.ZStatus.find(item => item.code === row.ZSTATS);
+      if (statnm !== undefined)
+        row.ZSTATSNM = statnm.name;
+
+      row.LGOBE = this.lgNmList.find(item => item.LGORT === row.LGORT)?.LGOBE;
+
+      row.RESLOT = this.lgNmList.find(item => item.LGORT === row.RESLO)?.LGOBE;
+    }
+
+    this.gridDataSource = new ArrayStore(
+      {
+        key: ["ZSTVBELN", "EBELN"],
+        data: this.orderList
+      });
+
     return result[0].T_DATA;
   }
 
@@ -650,13 +795,21 @@ export class STFOComponent {
   }
 
   public async cancelData(appConfig: AppConfigService, cancelModelList: ZSDS0061Model[], keyValue:string) {
-    var condiModel = new ZSDSTOORDERManageModel("", "", this.startDate, this.endDate, "",
+    var condiModel = new ZSDSTOORDERManageModel("", "", this.startDate, this.endDate, this.empid,
       this.lgortInCodeDynamic.selectedValue ?? "", "C", this.lgortOutCodeDynamic.selectedValue ?? "", this.werks, "", this.werks, keyValue, cancelModelList, [], DIMModelStatus.UnChanged);
 
     var condiModelList = [condiModel];
 
     var result = await this.dataService.RefcCallUsingModel<ZSDSTOORDERManageModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDSTOORDERManageModelList", condiModelList, QueryCacheType.None);
     return result[0];
+  }
+
+  async getLgortNm() {
+
+    let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgortInCode);
+
+    var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
+    this.lgNmList = resultModel;
   }
 
 }

@@ -18,6 +18,12 @@ export class TruckType {
   name: string = "";
 }
 
+//STO진행상태
+export class zStatus {
+  code: string = "";
+  name: string = "";
+}
+
 //데이터 정보
 export class Employee {
   //관할지사
@@ -177,6 +183,30 @@ const trucktype: TruckType[] = [
     code: "C1",
     name: "유류탱크로리"
   }]
+
+const ZStatus: zStatus[] = [
+  {
+    code: "00",
+    name: "접수"
+  },
+  {
+    code: "01",
+    name: "STO생성"
+  },
+  {
+    code: "02",
+    name: "납품문서생성"
+  },
+  {
+    code: "03",
+    name: "출고전기"
+  },
+  {
+    code: "04",
+    name: "입고"
+  }
+]
+
 
 const employees: Employee[] = [
   {
@@ -567,5 +597,9 @@ export class Service {
 
   getTruckType() {
     return trucktype;
+  }
+
+  getZStatus() {
+    return ZStatus;
   }
 }

@@ -4,7 +4,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService, } from '../../../shared/imate/imateDataAdapter';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { lastValueFrom } from 'rxjs';
+import { async, lastValueFrom } from 'rxjs';
 import { ZXNSCRFCResultModel } from '../../../shared/dataModel/ZxnscRfcResult';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ImateInfo, QueryCacheType, QueryDataType, QueryMessage, QueryParameter, QueryRunMethod } from '../../../shared/imate/imateCommon';
@@ -23,7 +23,7 @@ import {
   DxTextBoxModule,
   DxTemplateModule,
 } from 'devextreme-angular';
-import { AppInfoService } from '../../../shared/services';
+import { AppInfoService, AuthService } from '../../../shared/services';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
@@ -32,6 +32,7 @@ import { CommonPossibleEntryComponent } from '../../../shared/components/comm-po
 import { ZSDS0060Model, ZSDS0061Model, ZSDSTOORDERManageModel } from '../../../shared/dataModel/MFSAP/ZSdStoOrderManageProxy';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { ZSDS0062Model, ZSDSTODELIVERYCancelModel } from '../../../shared/dataModel/MFSAP/ZSdStoDeliveryCancelProxy';
+import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
 
 
 if (!/localhost/.test(document.location.host)) {
@@ -47,8 +48,8 @@ if (!/localhost/.test(document.location.host)) {
 })
 
 export class STCOComponent {
-  @ViewChild('lgortInCodeDynamic', { static: false }) lgortInCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('lgortOutCodeDynamic', { static: false }) lgortOutCodeDynamic!: TablePossibleEntryComponent;
+  @ViewChild('lgortInCodeDynamic', { static: false }) lgortInCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('lgortOutCodeDynamic', { static: false }) lgortOutCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild(DxDataGridComponent, { static: false })
   dataGrid!: DxDataGridComponent;
 
@@ -67,8 +68,8 @@ export class STCOComponent {
   lgortOutCode: TableCodeInfo;
 
   //파서블엔트리 선택값
-  lgortInValue: string | null = "";
-  lgortOutValue: string | null = "";
+  lgortInValue: string | null;
+  lgortOutValue: string | null;
 
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
@@ -96,7 +97,7 @@ export class STCOComponent {
   bukrs: string = "1000";
 
   cancelCodeList: CancelStatus[] = [];
-
+  empId: string = "";
   /**
    * 로딩된 PeCount
    * */
@@ -145,12 +146,16 @@ export class STCOComponent {
 
   popupPosition: any;
   customOperations!: Array<any>;
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+  constructor(private dataService: ImateDataService, service: Service,private authService: AuthService, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO출고진행현황";
     let page = this;
     this.cancelCodeList = service.getCancelStatus();
     //QA test용 설정
+    let userInfo = this.authService.getUser().data;
+
+    this.empId = userInfo?.empId.padStart(10, '0');
+    this.lgortInSelectValue = userInfo?.empId.padStart(10, '0') ?? "";
 
     //데이터 로딩 패널 보이기
     this.loadingVisible = true;
@@ -185,14 +190,7 @@ export class STCOComponent {
     
     this.orderList = Object.assign(page.dataLoad(imInfo, dataService, appConfig)) as ZSDS0062Model[];
 
-    //메인데이터
-    this.gridDataSource = new CustomStore(
-      {
-        key: ["ZVBELN1", "EBELN"],
-        load: function (loadOptions) {
-          return page.dataLoad(imInfo, dataService, appConfig);
-        }
-      });
+
       
     //저장버튼 이벤트
     this.saveButtonOptions = {
@@ -220,19 +218,26 @@ export class STCOComponent {
       }
     };
 
-      this.closeButtonOptions = {
-        text: 'Close',
-        onClick(e: any) {
-          that.popupVisible = false;
-        }
-    }
+    this.closeButtonOptions = {
+      text: 'Close',
+      onClick(e: any) {
+        that.popupVisible = false;
+      }
+    };
+
+    this.searchButtonOptions = {
+      text: '조회',
+      onClick : async (e: any) =>  {
+        await this.dataLoad(imInfo, dataService, appConfig);
+      }
+    };
     
   };
 
 
-  get diffInDay() {
-    return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
-  }
+  //get diffInDay() {
+  //  return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
+  //}
 
   //취소 클릭 이벤트
   async cancelDataB(e: any) {
@@ -341,8 +346,29 @@ export class STCOComponent {
   //STO주문목록 조회
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService, appConfig: AppConfigService) {
 
+    var lgortIn = "";
+    var lgortOut = "";
+
+    if (this.lgortInCodeDynamic.selectedValue == undefined) {
+      this.lgortInCodeDynamic.selectedValue = "";
+    }
+    if (this.lgortOutCodeDynamic.selectedValue == undefined) {
+      this.lgortOutCodeDynamic.selectedValue = "";
+    }
+    var result7110InModel = await this.dataService.SelectModelData<ZSDT7110Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7110ModelList", [],
+      `MANDT = '${this.appConfig.mandt}' AND KUNNR = '${this.lgortInCodeDynamic.selectedValue}' `, "", QueryCacheType.None);
+    var result7110OutModel = await this.dataService.SelectModelData<ZSDT7110Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7110ModelList", [],
+      `MANDT = '${this.appConfig.mandt}' AND KUNNR = '${this.lgortOutCodeDynamic.selectedValue}' `, "", QueryCacheType.None);
+
+    if (result7110InModel.length > 0)
+      lgortIn = result7110InModel[0].LGORT ?? "";
+
+    if (result7110OutModel.length > 0)
+      lgortOut = result7110OutModel[0].LGORT ?? "";
+
+
     var condiModel = new ZSDSTODELIVERYCancelModel("", "", this.startDate, this.endDate, "",
-      this.lgortInSelectValue ?? "", "A", this.lgortOutSelectValue ?? "", this.werks, "", this.werks, "", [], [], DIMModelStatus.UnChanged);
+      lgortIn, "A", lgortOut, this.werks, "", this.werks, "", [], [], DIMModelStatus.UnChanged);
 
     var condiModelList = [condiModel];
 
@@ -356,7 +382,12 @@ export class STCOComponent {
     });
 
     this.orderList = result[0].T_DATA;
-    return result[0].T_DATA;
+    //메인데이터
+    this.gridDataSource = new ArrayStore(
+      {
+        key: ["ZVBELN1", "EBELN"],
+        data: this.orderList
+      });
   }
 
 

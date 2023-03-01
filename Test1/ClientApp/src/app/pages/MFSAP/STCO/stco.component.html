@@ -13,16 +13,20 @@
     </dxi-item>
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <nh-possible-table [codeInfo]="lgortInCode" #lgortInCodeDynamic
-                           [dataStoreKey]="dataStoreKey"
-                           valueColumn="LGORT"
-                           valueDisplayFormat="%LGOBE%"
-                           [width]="200"
-                           [gridBoxWidth]="500"
-                           label="입고창고"
-                           (onDataLoaded)="onPEDataLoaded($event)"
-                           [(selectedValue)]="lgortInSelectValue"
-                           [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]"></nh-possible-table>
+        <nh-possible-comm [codeInfo]="lgortInCode" #lgortInCodeDynamic
+                          [dataStoreKey]="dataStoreKey"
+                          valueColumn="KUNNR"
+                          valueDisplayFormat="%LGOBE%"
+                          [width]="200"
+                          [gridBoxWidth]="500"
+                          label="입고창고"
+                          popupGridScrollMode="standard"
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          comboGridScrollMode="virtual"
+                          (onDataLoaded)="onPEDataLoaded($event)"
+                          [(selectedValue)]="lgortInSelectValue"
+                          [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]"></nh-possible-comm>
         <nbp-validator [adapter]="lgortAdapter">
           <dxi-validation-rule type="required"></dxi-validation-rule>
         </nbp-validator>
@@ -30,15 +34,19 @@
     </dxi-item>
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
-        <nh-possible-table [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
-                           [dataStoreKey]="dataStoreKey"
-                           valueColumn="LGORT"
-                           valueDisplayFormat="%LGOBE%"
-                           [width]="200"
-                           [gridBoxWidth]="500"
-                           [(selectedValue)]="lgortOutSelectValue"
-                           label="출고창고"
-                           (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
+        <nh-possible-comm [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
+                          [dataStoreKey]="dataStoreKey"
+                          valueColumn="KUNNR"
+                          valueDisplayFormat="%LGOBE%"
+                          [width]="200"
+                          popupGridScrollMode="standard"
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          comboGridScrollMode="virtual"
+                          [gridBoxWidth]="500"
+                          [(selectedValue)]="lgortOutSelectValue"
+                          label="출고창고"
+                          (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
       </div>
     </dxi-item>
     <dxi-item location="after" locateInMenu="auto">
@@ -53,11 +61,14 @@
         </dx-button>
       </div>
     </dxi-item>
-    <dxi-item location="after">
-      <div *dxTemplate>
+    <dxi-item location="after"
+              locateInMenu="auto"
+              widget="dxButton"
+              [options]="searchButtonOptions">
+      <!--<div *dxTemplate>
         <dx-button text="조회" (onClick)="getDataGrid($event)">
         </dx-button>
-      </div>
+      </div>-->
     </dxi-item>
   </dx-toolbar>
 
@@ -117,11 +128,11 @@
       <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
     </dx-data-grid>
   </div>
- </div>
-  <!-- 로딩 패널-->
-  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
-                 [shading]="true" [hideOnOutsideClick]="true">
-  </dx-load-panel>
+</div>
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
 
 
 

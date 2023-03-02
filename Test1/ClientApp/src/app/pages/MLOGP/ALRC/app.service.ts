@@ -8,11 +8,11 @@ export class CarSeq {
 const carSeq: CarSeq[] = [
   {
     code: "1",
-    name: "1차운송사"
+    name: "배차의뢰"
   },
   {
     code: "2",
-    name: "2차운송사"
+    name: "배차진행"
   }
 ]
 

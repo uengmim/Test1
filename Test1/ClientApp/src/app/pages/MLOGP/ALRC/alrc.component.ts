@@ -25,6 +25,7 @@ import { ZSDS6430Model, ZSDIFPORTALSAPLELIQSndModel } from '../../../shared/data
 import { ZSDS6440Model, ZSDIFPORTALSAPLELIQRcvModel } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLeLiqRcv';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ThisReceiver } from '@angular/compiler';
+import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -53,8 +54,10 @@ export class ALRCComponent {
   //@ViewChild('tvlvEntery', { static: false }) tvlvEntery!: TablePossibleEntryComponent;
   //@ViewChild('zpalEntery', { static: false }) zpalEntery!: TablePossibleEntryComponent;
   @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnr1Entery', { static: false }) tdlnr1Entery!: CommonPossibleEntryComponent;
   /*@ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeEntery!: CommonPossibleEntryComponent;*/
   @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: CommonPossibleEntryComponent;
+
 
   /* Entry  선언 */
   //출하지점
@@ -74,13 +77,14 @@ export class ALRCComponent {
 
   //2차운송사
   tdlnrCode!: TableCodeInfo;
-
+  //1차운송사
+  tdlnr1Code!: TableCodeInfo;
   //차량번호
   /*zcarnoCode!: TableCodeInfo;*/
 
   //차량번호(수정)
   zcarnoModiCode!: TableCodeInfo;
-
+  lgNmList: T001lModel[] = [];
   /*Entery value 선언*/
   ////출하지점
   //vsValue!: string | null;
@@ -98,6 +102,8 @@ export class ALRCComponent {
   zcarValue!: string | null;
   //2차운송사
   tdlnrValue!: string | null;
+  //1차운송사
+  tdlnr1Value!: string | null;
 
   //차량번호
   /*zcarnoValue!: string | null;*/
@@ -114,7 +120,7 @@ export class ALRCComponent {
 
   carSeq: CarSeq[];
   cSpart: CSpart[];
-
+  selectcarSeq: string = "1";
   selectStatus: string = "10";
   selectCSpart: string = "20";
 
@@ -195,13 +201,26 @@ export class ALRCComponent {
   //배차팝업 선택값
   selectGrid2Data: ZSDS6440Model[] = [];
   //_dataService: ImateDataService;
+  empid: string = "";
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
 
+  rolid: string[] = [];
+  isTdlnrEnabled: boolean = false;
   enteryLoading: boolean = false;
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 배차등록-액상";
 
     let thisObj = this;
-
+    //로그인 사용자 정보
+    let usrInfo = authService.getUser().data;
+    //this.empid = usrInfo.empId.padStart(10, '0');
+    this.rolid = usrInfo.role;
+    this.vorgid = usrInfo.orgOption.vorgid.padStart(10, '0');
+    this.corgid = usrInfo.orgOption.corgid.padStart(10, '0');
+    this.torgid = usrInfo.orgOption.torgid.padStart(10, '0');
+    this.empid = this.torgid;
     this.loadingVisible = true;
 
     //1차2차운송사 구분
@@ -212,12 +231,13 @@ export class ALRCComponent {
  
     //this.vsCode = appConfig.tableCode("출하지점");
     //this.lgCode = appConfig.tableCode("비료창고");
-    this.maraCode = appConfig.tableCode("제품구분");
+    /*this.maraCode = appConfig.tableCode("제품구분");*/
     /*this.dd07tCode = appConfig.tableCode("하차정보");*/
     this.dd07tCarCode = appConfig.tableCode("RFC_화물차종");
     //this.tvlvCode = appConfig.tableCode("용도구분");
     //this.zpalCode = appConfig.tableCode("파레트유형");
     this.tdlnrCode = appConfig.tableCode("운송업체");
+    this.tdlnr1Code = appConfig.tableCode("운송업체");
 
     if (this.selectCSpart === "20") {
       /*this.zcarnoCode = appConfig.tableCode("화학차량");*/
@@ -232,12 +252,13 @@ export class ALRCComponent {
     let codeInfos = [
       //new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.vsCode),
       //new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode),*/
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCarCode),
       //new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tvlvCode),
       //new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zpalCode),
       new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.tdlnrCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.tdlnr1Code),
       /*new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.zcarnoCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.zcarnoModiCode),
     ];
@@ -251,6 +272,9 @@ export class ALRCComponent {
     this.vkausValue = "";
     this.zpalValue = "";
     this.zcarValue = "";
+    this.zcarnoModiValue = "";
+    this.tdlnrValue = "";
+    this.tdlnr1Value = "";
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
@@ -260,7 +284,7 @@ export class ALRCComponent {
     //배차등록 팝업 초기화
     this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: this.endDate, ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" }
 
-    this.dataLoad();
+/*    this.dataLoad();*/
 
     //조회버튼
     this.searchButtonOptions = {
@@ -401,7 +425,7 @@ export class ALRCComponent {
           selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO, selectData[0].KUNAG, selectData[0].NAME1_AG, selectData[0].SPART,
           selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE, selectData[0].ZCARNO,
           selectData[0].ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZSHIPMENT, selectData[0].ZSHIPSTATUS,
-          selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZCONFIRM_CUT, "", selectData[0].ZTEXT, "", "");
+          selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZCONFIRM_CUT, "", selectData[0].ZTEXT, "", "", "");
 
         var sameData = thisObj.orderGridData.filter(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR);
 
@@ -606,24 +630,52 @@ export class ALRCComponent {
     var tdlnr1 = "";
     var tdlnr2 = "";
 
-    if (this.selectStatus === "10")
-      tdlnr1 = this.tdlnrValue ?? "";
-    else
-      tdlnr2 = this.tdlnrValue ?? ""
+    //권한 구분하기(비료, 화학 1차운송사)
+    var tdl1 = this.rolid.find(item => item !== "R28" && item !== "R18" && item !== "R08");
+    //권한 구분하기(비료, 화학 2차운송사)
+    var tdl2 = this.rolid.find(item => item === "R28" || item === "R18" || item !== "R08");
 
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "", tdlnr1, tdlnr2, "", fixData.I_ZSHIPSTATUS, zsds6430);
+    if (tdl1 !== undefined) {
+      tdlnr1 = this.tdlnr1Value ?? "";
+      tdlnr2 = this.tdlnrValue ?? "";
+    }
+    if (tdl2 !== undefined || this.tdlnrValue !== "")
+      tdlnr2 = this.tdlnrValue ?? "";
+
+    if (this.rolid.find(item => item === "ADMIN") === undefined) {
+      if (tdlnr1 === "" && tdlnr2 === "") {
+        alert("1차, 2차 운송사중 하나는 선택해야 합니다.", "알림");
+        return;
+      }
+    }
+
+    //if (this.selectStatus === "10")
+    //  tdlnr1 = this.tdlnrValue ?? "";
+    //else
+    //  tdlnr2 = this.tdlnrValue ?? ""
+
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "", "", tdlnr1, tdlnr2, "", "", fixData.I_ZSHIPSTATUS, zsds6430);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
 
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
 
-    this.orderGridData = resultModel[0].IT_DATA;
+    this.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");
 
     this.orderData = new ArrayStore(
       {
         key: ["VBELN", "POSNR", "ZSEQUENCY"],
         data: this.orderGridData
       });
+
+    this.orderGridData.forEach(async (row: ZSDS6430Model) => {
+      row.LGOBE = this.lgNmList.find(item => item.LGORT === row.LGORT)?.LGOBE;
+      row.ZLGOBE = this.lgNmList.find(item => item.LGORT === row.ZLGORT)?.LGOBE;
+
+      var tdlnr2Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.Z4PARVW);
+      if (tdlnr2Text !== undefined)
+        row.Z4PARVWTXT = tdlnr2Text.NAME1;
+    });
   }
 
   //배차등록
@@ -652,7 +704,7 @@ export class ALRCComponent {
         dataModel = thisObj.orderGridData.filter(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR);
         dataModel.forEach(async (subRow: ZSDS6430Model) => {
           zsd6440list.push(new ZSDS6440Model(subRow.VBELN, subRow.POSNR, subRow.ZSEQUENCY, subRow.KZPOD, subRow.VGBEL, subRow.VGPOS, subRow.TDDAT, subRow.MATNR,
-            subRow.ARKTX, subRow.ZMENGE1, subRow.ZMENGE2, subRow.VRKME, subRow.VSTEL, subRow.ZMENGE4, subRow.ZMENGE3, new Date("9999-12-31"), subRow.BRGEW,
+            subRow.ARKTX, subRow.ZMENGE1, subRow.ZMENGE2, subRow.VRKME, subRow.VSTEL, subRow.ZMENGE4, 0, new Date("9999-12-31"), subRow.BRGEW,
             subRow.GEWEI, subRow.LGORT, subRow.ZLGORT, subRow.INCO1, subRow.VSBED, subRow.KUNNR, subRow.NAME1, subRow.CITY, subRow.STREET, subRow.TELF1,
             subRow.MOBILENO, subRow.KUNAG, subRow.NAME1_AG, subRow.SPART, subRow.WERKS, subRow.LFART, subRow.Z3PARVW, subRow.Z4PARVW, subRow.ZCARTYPE,
             subRow.ZCARNO, subRow.ZDRIVER, subRow.ZDRIVER1, subRow.ZPHONE, subRow.ZPHONE1, subRow.ZSHIPMENT, "30", subRow.ZSHIPMENT_NO,
@@ -686,9 +738,34 @@ export class ALRCComponent {
        });
      }
      */
-    if (this.loadePeCount >= 2) {
-      this.loadingVisible = false;
+    if (this.loadePeCount >= 4) {
+
       this.loadePeCount = 0;
+
+      var role = this.rolid.find(item => item !== "R27" && item !== "R17" && item !== "R07"  && item !== "ADMIN");
+      if (role !== undefined) {
+        //this.isTdlnrEnabled = true;
+        this.tdlnrValue = this.torgid;
+        this.tdlnr1Value = "";
+        this.selectcarSeq = "2";
+        this.selectStatus = "20";
+
+        //배차 권한 1차운송사부분 기능
+        //this.tdlnr1Entery.SetDataFilter(["LIFNR", "=", this.torgid]);
+      }
+
+      var role2 = this.rolid.find(item => item === "R08" || item === "R28" || item === "R18")
+      if (role2 !== undefined)
+        this.isTdlnrEnabled = true;
+
+      var role3 = this.rolid.find(item => item === "R07" || item === "R27" || item === "R17")
+      if (role3 !== undefined)
+        this.tdlnr1Value = this.torgid;
+
+      setTimeout(() => {
+/*        this.dataLoad();*/
+        this.loadingVisible = false;
+      }, 100);
     }
   }
 
@@ -723,36 +800,42 @@ export class ALRCComponent {
 
   //배차등록버튼
   refAddOrder(e: any) {
-    
+    this.clearEntery();
 
+    setTimeout(async () => {
     //this.dataLoad("search");
-    this.popupData = [];
-    var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
-    var ZMENGE = 0;
-    if (selectData.length === 0) {
-      alert("라인을 선택한 후 실행하세요.", "알림");
-      return;
-    } else if (selectData.length === 1) {
-      if (selectData[0].ZMENGE4 === 0)
-        ZMENGE = selectData[0].ZMENGE2;
-      else
-        ZMENGE = selectData[0].ZMENGE4;
+      this.popupData = [];
+      var selectData: ZSDS6430Model[] = this.orderGrid.instance.getSelectedRowsData();
+      var ZMENGE = 0;
+      if (selectData.length === 0) {
+        alert("라인을 선택한 후 실행하세요.", "알림");
+        return;
+      } else if (selectData.length === 1) {
+        if (selectData[0].ZMENGE4 === 0)
+          ZMENGE = selectData[0].ZMENGE2;
+        else
+          ZMENGE = selectData[0].ZMENGE4;
 
-      this.popCarSetData = { ZMENGE4: ZMENGE, ZCARTYPE: selectData[0].ZCARTYPE, ZCARNO: selectData[0].ZCARNO, ZDRIVER: selectData[0].ZDRIVER,
-        ZPHONE: selectData[0].ZPHONE, ZSHIPMENT_DATE: new Date(), ZDRIVER1: selectData[0].ZDRIVER1, ZPHONE1: selectData[0].ZPHONE1, ZSHIPMENT_NO: selectData[0].ZSHIPMENT_NO }
-    } else {
-      this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: new Date(), ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" };
-      this.zcarnoModiValue = "";
-      this.zcarValue = "";
+        this.popCarSetData = { ZMENGE4: ZMENGE, ZCARTYPE: selectData[0].ZCARTYPE, ZCARNO: selectData[0].ZCARNO, ZDRIVER: selectData[0].ZDRIVER,
+          ZPHONE: selectData[0].ZPHONE, ZSHIPMENT_DATE: new Date(), ZDRIVER1: selectData[0].ZDRIVER1, ZPHONE1: selectData[0].ZPHONE1, ZSHIPMENT_NO: selectData[0].ZSHIPMENT_NO
+        }
+
+        this.zcarnoModiValue = selectData[0].ZCARNO;
+        /*this.zcarValue = selectData[0].ZCARTYPE;*/
+      } else {
+        this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: new Date(), ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" };
+        this.zcarnoModiValue = "";
+        /*this.zcarValue = "";*/
       
-      //alert("한 라인만 선택하세요.", "알림");
-      //return;
-    }
+        //alert("한 라인만 선택하세요.", "알림");
+        //return;
+      }
 
-    this.popupCarSetupVisible = true;
+      this.popupCarSetupVisible = true;
 
-    if (selectData.length > 1)
-      this.clearEntery();
+      //if (selectData.length > 1)
+      //    this.clearEntery();
+    }, 100);
   }
 
   //수정더블클릭
@@ -798,7 +881,7 @@ export class ALRCComponent {
       this.popCarSetData.ZCARNO = e.selectedValue;
       this.popCarSetData.ZDRIVER = e.selectedItem.ZDERIVER1;
       this.popCarSetData.ZPHONE = e.selectedItem.ZPHONE1;
-      this.zcarValue = e.selectedItem.ZCARTYPE1;
+      this.popCarSetData.ZCARTYPE = this.zcarValue = e.selectedItem.ZCARTYPE1;
     });
   }
 

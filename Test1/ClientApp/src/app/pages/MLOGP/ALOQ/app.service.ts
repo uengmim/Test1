@@ -17,7 +17,7 @@ const vsGubun: VsGubun[] = [
   },
   {
     code: "9999",
-    name: "임가공"
+    name: "임가공(구성품)"
   }]
 
 

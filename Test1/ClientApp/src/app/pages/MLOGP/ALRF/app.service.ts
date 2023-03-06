@@ -8,11 +8,11 @@ export class CarSeq {
 const carSeq: CarSeq[] = [
   {
     code: "1",
-    name: "1차운송사"
+    name: "배차의뢰"
   },
   {
     code: "2",
-    name: "2차운송사"
+    name: "배차진행"
   }
 ]
 
@@ -32,7 +32,7 @@ const cspart: CSpart[] = [
   },
   {
     code: "9999",
-    name: "임가공"
+    name: "임가공(구성품)"
   }
 ]
 
@@ -52,7 +52,7 @@ const matType: MatType[] = [
   },
   {
     code: "9999",
-    name: "임가공"
+    name: "임가공(구성품)"
   }]
 
 @Injectable()

@@ -203,7 +203,7 @@ export class ALRFComponent {
 
     this.vsCode = appConfig.tableCode("출하지점");
     this.lgCode = appConfig.tableCode("비료창고");
-    this.maraCode = appConfig.tableCode("제품구분");
+    /*this.maraCode = appConfig.tableCode("제품구분");*/
     this.dd07tCode = appConfig.tableCode("RFC_하차정보");
     this.dd07tCarCode = appConfig.tableCode("RFC_화물차종");
     this.tvlvCode = appConfig.tableCode("용도구분");
@@ -216,7 +216,7 @@ export class ALRFComponent {
     let codeInfos = [
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.vsCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCarCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tvlvCode),
@@ -468,7 +468,7 @@ export class ALRFComponent {
   public async dataLoad() {
     let fixData = { I_ZSHIPSTATUS: this.selectStatus };
     var zsds6410: ZSDS6410Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, "", "", this.selectData2, "", this.tdlnrValue ?? "", "", fixData.I_ZSHIPSTATUS, zsds6410);
+    var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, "", "", this.selectData2, "", "", this.tdlnrValue ?? "", "", "", fixData.I_ZSHIPSTATUS, zsds6410);
 
     var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
 
@@ -533,7 +533,7 @@ export class ALRFComponent {
        });
      }
      */
-    if (this.loadePeCount >= 10) {
+    if (this.loadePeCount >= 9) {
       this.enteryLoading = true;
       this.loadePeCount = 0;
       this.dataLoad();

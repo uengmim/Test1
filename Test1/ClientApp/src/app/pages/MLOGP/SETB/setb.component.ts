@@ -139,12 +139,30 @@ export class SETBComponent {
   popupVisible = false;
   collapsed: any;
 
-
+  empid: string = "";
+  rolid: string[] = [];
+  userid: string = "";
+  username: string = "";
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
   //_dataService: ImateDataService;
 
   enteryLoading: boolean = false;
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService,
+    private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 2차운송사지정-액상";
+
+    //로그인 사용자 정보
+    let usrInfo = authService.getUser().data;
+    if (this.rolid.find(item => item === "ADMIN") === undefined) {
+      this.userid = usrInfo.userId;
+      this.username = usrInfo.userName;
+      this.vorgid = usrInfo.orgOption.vorgid.padStart(10, '0');
+      this.corgid = usrInfo.orgOption.corgid.padStart(10, '0');
+      this.torgid = usrInfo.orgOption.torgid.padStart(10, '0');
+      this.empid = this.corgid;
+    }
 
     this.keyArray = ['VBELN', 'POSNR'];
 
@@ -207,6 +225,9 @@ export class SETBComponent {
           selectData.forEach((array: any) => {
             array.Z4PARVW = this.tdlnrValue;
             array.ZSHIPSTATUS = "20";
+            var tdlnrText = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === array.Z4PARVW);
+            if (tdlnrText !== undefined)
+              array.Z4PARVWTXT = tdlnrText.NAME1;
           });
 
           this.popupVisible = false;
@@ -276,18 +297,36 @@ export class SETBComponent {
   //첫화면 데이터 조회 RFC
   public async dataLoad() {
     let fixData = { I_ZSHIPSTATUS: "10" };
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, []);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "", "", this.torgid, "", "", "", fixData.I_ZSHIPSTATUS, []);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
 
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
-    this.orderList = resultModel[0].IT_DATA;
+    /*this.orderList = resultModel[0].IT_DATA;*/
+    this.orderList = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");
     this.orderData = new ArrayStore(
       {
         key: ["VBELN", "POSNR"],
-        data: resultModel[0].IT_DATA
+        data: this.orderList
       });
+    this.orderList.forEach(async (row: ZSDS6430Model) => {
+      var tdlnr1Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.Z3PARVW);
+      if (tdlnr1Text !== undefined)
+        row.Z3PARVWTXT = tdlnr1Text.NAME1;
 
+      var tdlnr2Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.Z4PARVW);
+      if (tdlnr2Text !== undefined)
+        row.Z4PARVWTXT = tdlnr2Text.NAME1;
+
+      var lgortText = this.lgEntery.gridDataSource._array.find(item => item.LGORT === row.LGORT);
+      if (lgortText !== undefined)
+        row.LGOBE = lgortText.LGOBE;
+
+      var zlgortText = this.lgEntery.gridDataSource._array.find(item => item.LGORT === row.ZLGORT);
+      if (zlgortText !== undefined)
+        row.ZLGOBE = zlgortText.LGOBE;
+
+    });
     this.loadingVisible = false;
   }
 
@@ -298,7 +337,7 @@ export class SETBComponent {
     this.orderGrid.instance.getSelectedRowsData().forEach((array: ZSDS6430Model) => {
       zsd6440list.push(new ZSDS6440Model(array.VBELN, array.POSNR, array.ZSEQUENCY, array.KZPOD, array.VGBEL, array.VGPOS,
         array.TDDAT, array.MATNR, array.ARKTX, array.ZMENGE1, array.ZMENGE2, array.VRKME, array.VSTEL,
-        array.ZMENGE4, array.ZMENGE3, new Date("9999-12-31"), array.BRGEW, array.GEWEI, array.LGORT, array.ZLGORT,
+        array.ZMENGE4, 0, new Date("9999-12-31"), array.BRGEW, array.GEWEI, array.LGORT, array.ZLGORT,
         array.INCO1, array.VSBED, array.KUNNR, array.NAME1, array.CITY, array.STREET, array.TELF1,
         array.MOBILENO, array.KUNAG, array.NAME1_AG, array.SPART, array.WERKS, array.LFART, array.Z3PARVW,
         array.Z4PARVW, array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZDRIVER1, array.ZPHONE, array.ZPHONE1,

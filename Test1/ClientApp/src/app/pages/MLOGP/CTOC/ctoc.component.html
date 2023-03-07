@@ -30,28 +30,49 @@
                        labelMode="floating"></dx-select-box>
       </div>
     </dxi-item>
-    <!--
-  <dxi-item location="before" locateInMenu="auto">
-    <div *dxTemplate style="float: left; margin-left: 10px; ">
-      <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
-                        [dataStoreKey]="dataStoreKey"
-                        valueColumn="LIFNR"
-                        valueDisplayFormat="%NAME1%(%LIFNR%)"
-                        width="auto"
-                        label="1차운송사"
-                        labelMode="floating"
-                        [showClearButton]="true"
-                        [(selectedValue)]="tdlnrValue"
-                        [gridBoxWidth]="500"
-                        [validationErrors]="[{type:'required', message:'1차운송사 필수입력'}]"
-                        (onDataLoaded)="onPEDataLoaded($event)">
-        <nbp-validator [adapter]="tdlnrAdapter">
-          <dxi-validation-rule type="required"></dxi-validation-rule>
-        </nbp-validator>
-      </nh-possible-comm>
-    </div>
-  </dxi-item>
-    -->
+
+    <dxi-item location="before" locateInMenu="auto" [disabled]="is1chDisabled">
+      <div *dxTemplate style="float: left; margin-left: 10px; ">
+        <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
+                          [dataStoreKey]="dataStoreKey"
+                          valueColumn="LIFNR"
+                          valueDisplayFormat="%NAME1%(%LIFNR%)"
+                          width="auto"
+                          label="1차운송사"
+                          labelMode="floating"
+                          [showClearButton]="true"
+                          [(selectedValue)]="tdlnrValue"
+                          [gridBoxWidth]="500"
+                          [validationErrors]="[{type:'required', message:'1차운송사 필수입력'}]"
+                          (onDataLoaded)="onPEDataLoaded($event)">
+          <nbp-validator [adapter]="tdlnrAdapter">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+          </nbp-validator>
+        </nh-possible-comm>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto" [disabled]="is2chDisabled">
+      <div *dxTemplate style="float: left; margin-left: 10px; ">
+        <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
+                          [dataStoreKey]="dataStoreKey"
+                          valueColumn="LIFNR"
+                          valueDisplayFormat="%NAME1%(%LIFNR%)"
+                          width="auto"
+                          label="2차운송사"
+                          labelMode="floating"
+                          [showClearButton]="true"
+                          [(selectedValue)]="tdlnr2Value"
+                          [gridBoxWidth]="500"
+                          [validationErrors]="[{type:'required', message:'2차운송사 필수입력'}]"
+                          (onDataLoaded)="onPEDataLoaded($event)">
+          <nbp-validator [adapter]="tdlnrAdapter">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+          </nbp-validator>
+        </nh-possible-comm>
+      </div>
+    </dxi-item>
+
     <dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"

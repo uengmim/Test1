@@ -35,6 +35,7 @@ import { ZSDIFPORTALSAPLE29RcvModel } from '../../../shared/dataModel/MLOGP/ZsdI
 export class CTOCComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent
   @ViewChild('tdlnrEntery', { static: false }) tdlnrEntery!: TablePossibleEntryComponent
+  @ViewChild('tdlnr2Entery', { static: false }) tdlnr2Entery!: TablePossibleEntryComponent
 
   selectedItemKeys: any[] = [];
   selectedRowIndex = -1;
@@ -47,7 +48,9 @@ export class CTOCComponent {
   cSpart: CSpart[];
   Spdata: SpData[];
   tdlnrCode!: TableCodeInfo;
+  tdlnr2Code!: TableCodeInfo;
   tdlnrValue!: string | null;
+  tdlnr2Value!: string | null;
   spartValue: string | null;
   spdataValue: string | null;
 
@@ -96,12 +99,25 @@ export class CTOCComponent {
   selectTextOnEditStart = true;
   selectedOption: string[] = [];
 
-
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
+  rolid: string[] = [];
+  is1chDisabled: boolean = false;
+  is2chDisabled: boolean = false;
 
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 인수확인(화학)";
 
     this.loadingVisible = true;
+
+    //로그인 사용자 정보
+    let usrInfo = authService.getUser().data;
+    this.vorgid = usrInfo.orgOption.vorgid;
+    this.corgid = usrInfo.orgOption.corgid;
+    this.torgid = usrInfo.orgOption.torgid;
+    this.rolid = usrInfo.role;
+
     // 값세팅
     this.spartValue = "20";
     this.spdataValue = "2000";
@@ -112,12 +128,15 @@ export class CTOCComponent {
     this.Spdata = service.getSpData();
     //운송사 code정보
     this.tdlnrCode = appConfig.tableCode("운송업체");
+    //운송사 code정보
+    this.tdlnr2Code = appConfig.tableCode("운송업체");
     //출고일자 Default
     this.wadatIstDate = new Date();
 
     //----------------------------------------------------------------------------------------------------------
     let codeInfos = [
-      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.tdlnrCode)
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.tdlnrCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.tdlnr2Code)
     ];
     PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
     //---------------------------------------------------------------------------------------------------------
@@ -161,7 +180,19 @@ export class CTOCComponent {
   */
 onPEDataLoaded(e: any) {
   this.loadePeCount++; 
-  if (this.loadePeCount >= 1) {
+  if (this.loadePeCount >= 2) {
+
+    if (this.rolid.find(item => item === "ADMIN") === undefined) {
+      if (this.rolid.find(item => item === "R17") !== undefined) {
+        this.tdlnrValue = this.torgid;
+        this.is1chDisabled = true;
+      } else if (this.rolid.find(item => item === "R18") !== undefined) {
+        this.tdlnr2Value = this.torgid;
+        this.is2chDisabled = true;
+      }
+    }
+
+    this.dataLoad();
     this.loadingVisible = false;
     this.loadePeCount = 0;
   }
@@ -171,7 +202,7 @@ onPEDataLoaded(e: any) {
   public async dataLoad() {
 
 
-    var sendModel = new ZSDIFPORTALSAPLE29SndModel("", "", "", "", "", this.spartValue, this.spdataValue, this.wadatIstDate, "", "", "", []);
+    var sendModel = new ZSDIFPORTALSAPLE29SndModel("", "", "", "", "", this.spartValue, this.spdataValue, this.wadatIstDate, this.tdlnrValue, this.tdlnr2Value, "", []);
 
     var sendModelList: ZSDIFPORTALSAPLE29SndModel[] = [sendModel];
 

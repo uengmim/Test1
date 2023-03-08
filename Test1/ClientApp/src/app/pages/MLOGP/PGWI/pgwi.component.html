@@ -3,7 +3,7 @@
   -->
 <div style="margin:10px 10px 0px 10px">
 
-  <dx-toolbar style="margin:20px 0px 50px 0px">
+  <dx-toolbar style="margin:20px 0px 40px 0px">
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
         <div style="float:left; margin-left: 10px;">
@@ -27,12 +27,37 @@
                        [width]="120"
                        type="time"
                        [disabled]="true"
-                       displayFormat="HH:mm:ss"
+                       displayFormat="HH:mm"
                        applyValueMode="useButtons"
                        label="현재시간">
           </dx-date-box>
         </div>
       </div>
+    </dxi-item>
+
+    <dxi-item location="before"
+              locateInMenu="auto">
+      <div *dxTemplate style="margin-left:15px;">
+        <nh-possible-comm #carDataCodeEntery
+                          [dataStoreKey]="dataStoreKey"
+                          [codeInfo]="carDataCode"
+                          valueColumn="ZCARNO"
+                          [showClearButton]="true"
+                          valueDisplayFormat="%ZCARNO%"
+                          width="230"
+                          [(selectedValue)]="carDataValue"
+                          popupGridScrollMode="standard"
+                          placeholderText="차량을 먼저 선택해주세요."
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          [gridBoxWidth]="500"
+                          comboGridScrollMode="virtual"
+                          class="weight-test"
+                          [showDataLoadingPanel]="showDataLoadingPanel"
+                          (onEntryValueChanged)="onZcarNoCodeValueChanged($event)">
+        </nh-possible-comm>
+      </div>
+
     </dxi-item>
     <dxi-item location="before"
               widget="dxButton"
@@ -48,17 +73,28 @@
         </dx-button>
       </div>
     </dxi-item>
+    <dxi-item location="after"
+              locateInMenu="auto"
+              style="width: auto;
+            margin-right: 5px;">
+      <dx-button (onClick)="weighingCertificate()"
+                 [disabled]="!selectedItemKeys.length"
+                 [width]="120"
+                 text="계량증명서">
+      </dx-button>
+    </dxi-item>
 
     <dxi-item location="after"
               locateInMenu="auto"
               style="width: auto;
             margin-right: 5px;">
-      <dx-button (onClick)="deleteRecords()"
+      <dx-button (onClick)="takeOutSpecific()"
                  [disabled]="!selectedItemKeys.length"
                  [width]="100"
-                 text="삭제">
+                 text="반출증">
       </dx-button>
     </dxi-item>
+
 
     <dxi-item location="after"
               widget="dxButton"
@@ -97,6 +133,15 @@
                  [width]="100">
       </dx-button>
     </dxi-item>
+    <dxi-item location="after"
+              locateInMenu="auto"
+              style="width: auto;
+            margin-right: 5px;">
+      <dx-button (onClick)="carCheck()"
+                 [width]="150"
+                 text="차량 입출문 이력">
+      </dx-button>
+    </dxi-item>
   </dx-toolbar>
 
   <dx-box direction="row" width="100%" style="margin-top: 20px;">
@@ -116,7 +161,7 @@
                         [remoteOperations]="true"
                         [columnResizingMode]="columnResizeMode"
                         [columnHidingEnabled]="true"
-                        [keyExpr]="['ZGW_DATE','ZGW_SEQ']"
+                        [keyExpr]="['ZCARNO','ZDRIVER', 'ARKTX','VBELN','POSNR']"
                         [allowColumnReordering]="true"
                         (onSelectionChanged)="selectionChanged($event)"
                         [selection]="{ mode: 'single' }"
@@ -125,7 +170,332 @@
             <!--Datagrid Option-->
             <dxo-paging [pageSize]="5"></dxo-paging>
             <dxo-pager [showInfo]="true"></dxo-pager>
+            <!--Filtering Option-->
+            <dxo-filter-builder [customOperations]="customOperations"
+                                [allowHierarchicalFields]="true">
+            </dxo-filter-builder>
+            <dxo-filter-builder-popup [position]="popupPosition">
+            </dxo-filter-builder-popup>
+            <dxo-header-filter [visible]="true"></dxo-header-filter>
+            <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
+            <!--Data column-->
+            <dxi-column dataField="ZCARNO"
+                        caption="차량번호">
+            </dxi-column>
+            <dxi-column dataField="ZDRIVER"
+                        caption="운전기사명">
+            </dxi-column>
+            <dxi-column dataField="ARKTX"
+                        caption="자재명">
+            </dxi-column>
+            <dxi-column dataField="NAME1"
+                        caption="업체명">
+            </dxi-column>
+            <dxi-column dataField="ZPHONE"
+                        caption="전화번호">
+            </dxi-column>
+          </dx-data-grid>
+        </dxi-item>
+      </dx-form>
+
+      <dx-form width="90%" [formData]="weightData" validationGroup="valiData" style="margin-bottom:10px; margin-top:20px;">
+        <dxi-item itemType="group" caption="" [colCount]="2">
+          <dxi-item dataField="STATUS" [colSpan]="2" editorType="dxTextBox" [editorOptions]="{readOnly: true,height: 50, elementAttr: { class: 'form-text' }}">
+            <dxo-label labelMode="floating" text="현재 상태 "></dxo-label>
+          </dxi-item>
+        </dxi-item>
+      </dx-form>
+      <dx-form id="weightform" #masterform name="weightform" [formData]="weightStartData" (onFieldDataChanged)="onZmenge3keyDown($event)" [colCount]="1" width="90%">
+        <dxi-item itemType="group" caption="">
+
+          <dxi-item dataField="ZGW_ATGEW" editorType="dxNumberBox" id="numberbox" [editorOptions]="{ format : '#,##0',disabled:true,height: 50, elementAttr: { class: 'form-text' }}" #testBox>
+            <dxo-label text="계근중량"></dxo-label>
+            <dxi-validation-rule type="required" message="계근 중량을 입력해주십시오."></dxi-validation-rule>
+          </dxi-item>
+
+          <dxi-item dataField="GEWEI" editorType="dxTextBox" [disabled]="true" [editorOptions]="{ height: 50, elementAttr: { class: 'form-text' } }">
+            <dxo-label text="중량단위"></dxo-label>
+            <dxi-validation-rule type="required" message="중량단위를 입력해주십시오."></dxi-validation-rule>
+          </dxi-item>
+        </dxi-item>
+
+        <dxi-item itemType="group" caption="" [colCount]="2">
+          <dxi-item dataField="ZCARNO" [editorOptions]="{ height: 50, elementAttr: { class: 'form-text' } }">
+            <dxo-label text="차량번호"></dxo-label>
+            <dxi-validation-rule type="required" message="차량 번호를 입력해주십시오."></dxi-validation-rule>
+          </dxi-item>
+          <dxi-item dataField="ZDRIVER" [editorOptions]="{ height: 50, elementAttr: { class: 'form-text' } }">
+            <dxo-label text="운전기사명"></dxo-label>
+            <dxi-validation-rule type="required" message="운전기사명을 입력해주십시오."></dxi-validation-rule>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" caption="" [colCount]="2">
+          <dxi-item dataField="ZGW_NAME1" [colSpan]="2" [editorOptions]="{ height: 50, elementAttr: { class: 'form-text' } }">
+            <dxo-label text="업체명"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group" caption="" [colCount]="2">
+          <dxi-item dataField="ZGW_MAKTX" [colSpan]="2" [editorOptions]="{ height: 50, elementAttr: { class: 'form-text' } }">
+            <dxo-label text="자재명"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+
+
+
+
+        <dxi-item itemType="group" caption="">
+          <dxi-item dataField="ZGW_PER1" [editorOptions]="{ height: 50, elementAttr: { class: 'form-text' } }" [disabled]="true">
+            <dxo-label text="검량자"></dxo-label>
+            <dxi-validation-rule type="required" message="검량자를 입력해주십시오."></dxi-validation-rule>
+          </dxi-item>
+        </dxi-item>
+        <!--<dxi-item itemType="group" caption="">
+          <dxi-item dataField="ZGW_PER2">
+            <dxo-label text="확인자"></dxo-label>
+            <dxi-validation-rule type="required" message="확인자를 입력해주십시오."></dxi-validation-rule>
+          </dxi-item>
+        </dxi-item>-->
+
+      </dx-form>
+      <dx-form [colCount]="1" width="80%" style="margin-top:20px;">
+
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="3">
+
+          <dxi-item></dxi-item>
+
+          <dxi-item itemType="button"
+                    widget="dxButton"
+                    location="before"
+                    [buttonOptions]="weightEnterRegister">
+          </dxi-item>
+
+          <dxi-item></dxi-item>
+
+
+        </dxi-item>
+      </dx-form>
+
+    </dxi-item>
+    <dxi-item [ratio]="1" [baseSize]="600">
+      <dx-form>
+        <dxi-item>
+          <div *dxTemplate="let data of 'content'" style="margin-top:10px;">
+            ※ 현재 계근대 차량 <br><br>
+            <dx-data-grid #carDataGrid
+                          [dataSource]="carData"
+                          [showBorders]="false"
+                          [columnAutoWidth]="true"
+                          [allowColumnResizing]="true"
+                          [repaintChangesOnly]="true"
+                          [remoteOperations]="true"
+                          [columnResizingMode]="columnResizeMode"
+                          (onSelectionChanged)="carSelectionChanged($event)"
+                          [columnHidingEnabled]="true"
+                          [keyExpr]="['ZGW_DATE','ZGW_TIME']"
+                          [allowColumnReordering]="true"
+                          [selection]="{ mode: 'single' }"
+                          height="calc(70vh - 315px)">
+
+              <!--Datagrid Option-->
+              <dxo-paging [enabled]="false"></dxo-paging>
+              <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+              <!--Filtering Option-->
+              <dxo-filter-builder [customOperations]="customOperations"
+                                  [allowHierarchicalFields]="true">
+              </dxo-filter-builder>
+              <dxo-filter-builder-popup [position]="popupPosition">
+              </dxo-filter-builder-popup>
+              <dxo-filter-row [visible]="true"></dxo-filter-row>
+              <dxo-header-filter [visible]="true"></dxo-header-filter>
+              <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+              <!--Data column-->
+              <dxi-column dataField="ZGW_DATE"
+                          dataType="date"
+                          alignment="center"
+                          format="yyyy-MM-dd"
+                          caption="발생일">
+              </dxi-column>
+              <dxi-column dataField="ZGW_TIME"
+                          dataType="time"
+                          alignment="center"
+                          sortOrder="desc"
+                          format="HH:mm:ss"
+                          caption="시간">
+              </dxi-column>
+              <dxi-column dataField="ZCARNO"
+                          caption="차량번호">
+              </dxi-column>
+              <dxi-column dataField="ZDRIVER"
+                          caption="운전기사명">
+              </dxi-column>
+              <dxi-column dataField="ZGW_NAME1"
+                          caption="업체명">
+              </dxi-column>
+              <dxi-column dataField="ZGW_MAKTX"
+                          caption="자재명">
+              </dxi-column>
+              <dxi-column dataField="ZGW_ATGEW"
+                          caption="실중량"
+                          format="#,###">
+              </dxi-column>
+            </dx-data-grid>
+          </div>
+        </dxi-item>
+
+      </dx-form>
+      <dx-form>
+        <dxi-item>
+
+          <div *dxTemplate="let data of 'content'">
+            ※ 출고 완료 차량<br><br>
+            <dx-data-grid class="dx-card wide-card"
+                          #maindataGrid
+                          [dataSource]="mainData"
+                          [showBorders]="false"
+                          [focusedRowEnabled]="true"
+                          [focusedRowIndex]="0"
+                          [columnAutoWidth]="true"
+                          [allowColumnResizing]="true"
+                          [columnResizingMode]="columnResizeMode"
+                          [columnHidingEnabled]="true"
+                          [allowColumnReordering]="true"
+                          (onSelectionChanged)="mainselectionChanged($event)"
+                          [keyExpr]="['ZGW_DATE','ZGW_SEQ']"
+                          [selection]="{ mode: 'single' }"
+                          height="calc(60vh - 315px)">
+
+              <!--Datagrid Option-->
+              <dxo-paging [enabled]="false"></dxo-paging>
+              <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+              <!--Filtering Option-->
+              <dxo-filter-builder [customOperations]="customOperations"
+                                  [allowHierarchicalFields]="true">
+              </dxo-filter-builder>
+              <dxo-filter-builder-popup [position]="popupPosition">
+              </dxo-filter-builder-popup>
+              <dxo-filter-row [visible]="true"></dxo-filter-row>
+              <dxo-header-filter [visible]="true"></dxo-header-filter>
+              <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+              <!--Data column-->
+              <dxi-column dataField="ZGW_GRIR_GUBUN"
+                          alignment="center"
+                          caption="계근대 구분">
+              </dxi-column>
+              <dxi-column dataField="ZGW_DATE"
+                          dataType="date"
+                          alignment="center"
+                          sortOrder="desc"
+                          format="yyyy-MM-dd"
+                          caption="발생일">
+              </dxi-column>
+              <dxi-column dataField="ZGW_SEQ"
+                          alignment="center"
+                          sortOrder="desc"
+                          caption="순번">
+              </dxi-column>
+              <dxi-column dataField="ZCARNO"
+                          caption="차량번호">
+              </dxi-column>
+              <dxi-column dataField="ZDRIVER"
+                          caption="운전기사명">
+              </dxi-column>
+
+              <dxi-column dataField="ZGW_BRGEW"
+                          caption="총중량"
+                          format="#,###">
+              </dxi-column>
+              <dxi-column dataField="ZGW_NTGEW"
+                          caption="공차중량"
+                          format="#,###">
+              </dxi-column>
+              <dxi-column dataField="ZGW_ATGEW"
+                          caption="실중량"
+                          format="#,###">
+              </dxi-column>
+
+              <dxi-column dataField="ZGW_NAME1"
+                          caption="업체명">
+              </dxi-column>
+              <dxi-column dataField="ZGW_MAKTX"
+                          caption="자재명">
+              </dxi-column>
+              <dxi-column dataField="ZGW_GR_TIME"
+                          dataType="time"
+                          alignment="center"
+                          format="HH:mm:ss"
+                          caption="입문시간">
+              </dxi-column>
+              <dxi-column dataField="ZGW_GI_TIME"
+                          dataType="time"
+                          alignment="center"
+                          format="HH:mm:ss"
+                          caption="출문시간">
+              </dxi-column>
+            </dx-data-grid>
+          </div>
+        </dxi-item>
+      </dx-form>
+    </dxi-item>
+  </dx-box>
+
+</div>
+<!--차량 입출문 이력-->
+<dx-popup width="80%"
+          height="80%"
+          margin="20px"
+          [showTitle]="false"
+          [dragEnabled]="false"
+          [hideOnOutsideClick]="true"
+          container=".dx-viewport"
+          [showCloseButton]="false"
+          [(visible)]="PopupVisible">
+  <dxi-toolbar-item text="차량 입출문 이력"
+                    toolbar="top"
+                    location="before">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="CloseButtonOptions">
+  </dxi-toolbar-item>
+  <dx-scroll-view width="100%" height="100%">
+
+
+    <dx-form direction="row" width="100%" style="margin-bottom: 10px;">
+      <dxi-item>
+        <div style="margin-bottom: 5px;">※ 차량 입출문 이력</div>
+      </dxi-item>
+      <dxi-item>
+        <div *dxTemplate="let data of 'content'" style="margin-right: 30px;">
+
+          <dx-data-grid #orderDataGrid
+                        [dataSource]="orderData"
+                        [showBorders]="false"
+                        [columnAutoWidth]="true"
+                        [allowColumnResizing]="true"
+                        [repaintChangesOnly]="true"
+                        [remoteOperations]="true"
+                        [columnResizingMode]="columnResizeMode"
+                        [columnHidingEnabled]="true"
+                        [keyExpr]="['ZGW_DATE','ZGW_TIME']"
+                        [allowColumnReordering]="true"
+                        [selection]="{ mode: 'single' }"
+                        height="calc(100vh - 315px)">
+
+            <!--Datagrid Option-->
+            <dxo-paging [enabled]="false"></dxo-paging>
+            <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+            <!--Filtering Option-->
+            <dxo-filter-builder [customOperations]="customOperations"
+                                [allowHierarchicalFields]="true">
+            </dxo-filter-builder>
+            <dxo-filter-builder-popup [position]="popupPosition">
+            </dxo-filter-builder-popup>
+            <dxo-filter-row [visible]="true"></dxo-filter-row>
             <dxo-header-filter [visible]="true"></dxo-header-filter>
             <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
@@ -133,253 +503,38 @@
             <dxi-column dataField="ZGW_DATE"
                         dataType="date"
                         alignment="center"
-                        sortOrder="desc"
                         format="yyyy-MM-dd"
                         caption="발생일">
             </dxi-column>
-            <dxi-column dataField="ZGW_SEQ"
+            <dxi-column dataField="ZGW_TIME"
+                        dataType="time"
                         alignment="center"
                         sortOrder="desc"
-                        caption="순번">
+                        format="HH:mm:ss"
+                        caption="시간">
             </dxi-column>
             <dxi-column dataField="ZCARNO"
                         caption="차량번호">
             </dxi-column>
-            <dxi-column dataField="TDLNR1"
-                        caption="운송업체">
-            </dxi-column>
-            <dxi-column dataField="ZGW_MATNR"
-                        alignment="center"
-                        caption="자재코드">
+            <dxi-column dataField="ZDRIVER"
+                        caption="운전기사명">
             </dxi-column>
             <dxi-column dataField="ZGW_MAKTX"
                         caption="자재명">
             </dxi-column>
-            <dxi-column dataField="ZGW_LIFNR"
-                        alignment="center"
-                        caption="업체코드">
-            </dxi-column>
             <dxi-column dataField="ZGW_NAME1"
                         caption="업체명">
-            </dxi-column>
-            <dxi-column dataField="ZGW_BRGEW"
-                        caption="총중량"
-                        format="#,###">
-            </dxi-column>
-            <dxi-column dataField="ZGW_NTGEW"
-                        caption="공차중량"
-                        format="#,###">
             </dxi-column>
             <dxi-column dataField="ZGW_ATGEW"
                         caption="실중량"
                         format="#,###">
             </dxi-column>
-            <dxi-column dataField="ZGW_ATGEW_P"
-                        format="#,###"
-                        caption="SAP처리수량">
-            </dxi-column>
-            <dxi-column dataField="ZGW_GR_TIME"
-                        dataType="time"
-                        alignment="center"
-                        format="HH:mm:ss"
-                        caption="입문시간">
-            </dxi-column>
-            <dxi-column dataField="ZGW_GI_TIME"
-                        dataType="time"
-                        alignment="center"
-                        format="HH:mm:ss"
-                        caption="출문시간">
-            </dxi-column>
-            <dxi-column dataField="ZPOST_RUN_MESSAGE"
-                        caption="자동전기오류메시지">
-            </dxi-column>
-            <dxi-column dataField="MBLNR"
-                        caption="자재문서번호">
-            </dxi-column>
           </dx-data-grid>
-        </dxi-item>
-      </dx-form>
 
-      <dx-form width="90%" [formData]="weightData" style="margin-bottom:10px; margin-top:20px;">
-        <dxi-item itemType="group" caption="" [colCount]="2">
-          <dxi-item dataField="STATUS" [colSpan]="2" editorType="dxTextBox" [editorOptions]="{readOnly: true}">
-            <dxo-label labelMode="floating" text="현재 상태 "></dxo-label>
-          </dxi-item>
-        </dxi-item>
-      </dx-form>
-      <dx-form id="weightform" name="weightform" [formData]="weightStartData" [colCount]="1" width="90%">
-        <dxi-item itemType="group" caption="" [colCount]="2">
-          <dxi-item dataField="ZGW_DATE" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true}">
-            <dxo-label text="발생일자"></dxo-label>
-            <dxi-validation-rule type="required" message="발생일자를 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-          <dxi-item dataField="ZGW_GI_TIME" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'HH:mm:ss',type: 'time', useMaskBehavior : true}">
-            <dxo-label text="발생시간"></dxo-label>
-            <dxi-validation-rule type="required" message="발생시간을 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-        </dxi-item>
-
-        <dxi-item itemType="group" caption="" [colCount]="2">
-          <dxi-item dataField="ZCARNO">
-            <dxo-label text="차량번호"></dxo-label>
-            <dxi-validation-rule type="required" message="차량 번호를 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-          <dxi-item dataField="ZDRIVER">
-            <dxo-label text="운전기사명"></dxo-label>
-            <dxi-validation-rule type="required" message="운전기사명을 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-        </dxi-item>
-        <dxi-item itemType="group" caption="" [colCount]="2">
-          <dxi-item dataField="ZGW_MAKTX" [colSpan]="2" [editorOptions]="{ height: 40 }">
-            <dxo-label text="자재명"></dxo-label>
-            <dxi-validation-rule type="required" message="자재명을 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-        </dxi-item>
-
-        <dxi-item itemType="group" caption="" [colCount]="2">
-          <dxi-item dataField="ZGW_NAME1" [colSpan]="2" [editorOptions]="{ height: 40 }">
-            <dxo-label text="업체명"></dxo-label>
-            <dxi-validation-rule type="required" message="업체명을 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-        </dxi-item>
-
-        <dxi-item itemType="group" caption="">
-
-          <dxi-item dataField="ZGW_ATGEW" editorType="dxNumberBox" id="numberbox" [editorOptions]="{ format : '#,##0', height: 40, disabled:true}" #testBox>
-            <dxo-label text="계근중량"></dxo-label>
-            <dxi-validation-rule type="required" message="계근 중량을 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-
-          <dxi-item dataField="GEWEI" editorType="dxTextBox">
-            <dxo-label text="중량단위"></dxo-label>
-            <dxi-validation-rule type="required" message="중량단위를 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-        </dxi-item>
-
-        <dxi-item itemType="group" caption="">
-          <dxi-item dataField="ZGW_PER1">
-            <dxo-label text="검량자"></dxo-label>
-            <dxi-validation-rule type="required" message="검량자를 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-        </dxi-item>
-        <dxi-item itemType="group" caption="">
-          <dxi-item dataField="ZGW_PER2">
-            <dxo-label text="확인자"></dxo-label>
-            <dxi-validation-rule type="required" message="확인자를 입력해주십시오."></dxi-validation-rule>
-          </dxi-item>
-        </dxi-item>
-      </dx-form>
-      <dx-form id="manualRegisData" [colCount]="1" width="80%" style="margin-top:30px;">
-
-        <dxi-item itemType="group" [colCount]="3" [colSpan]="3">
-
-          <dxi-item itemType="button"
-                    widget="dxButton"
-                    location="before"
-                    [buttonOptions]="weightStatementOutput">
-          </dxi-item>
-
-          <dxi-item itemType="button"
-                    widget="dxButton"
-                    location="before"
-                    [buttonOptions]="weightEnterRegister">
-          </dxi-item>
-          <dxi-item itemType="button"
-                    widget="dxButton"
-                    location="before"
-                    [buttonOptions]="weightOutRegister">
-          </dxi-item>
-
-        </dxi-item>
-      </dx-form>
-
-    </dxi-item>
-    <dxi-item [ratio]="1" [baseSize]="600">
-
-      <div *dxTemplate="let data of 'content'">
-        ※ 계근대를 통한 입고관리<br><br>
-        <dx-data-grid class="dx-card wide-card"
-                      #maindataGrid
-                      [dataSource]="mainData"
-                      [showBorders]="false"
-                      [focusedRowIndex]="0"
-                      [columnAutoWidth]="true"
-                      [allowColumnResizing]="true"
-                      [columnResizingMode]="columnResizeMode"
-                      [columnHidingEnabled]="true"
-                      [allowColumnReordering]="true"
-                      [keyExpr]="['ZGW_DATE','ZGW_SEQ']"
-                      [selection]="{ mode: 'single' }"
-                      height="calc(90vh - 155px)">
-
-          <!--Datagrid Option-->
-          <dxo-paging [enabled]="false"></dxo-paging>
-          <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
-
-          <!--Filtering Option-->
-          <dxo-filter-panel [visible]="true"></dxo-filter-panel>
-          <dxo-filter-builder [customOperations]="customOperations"
-                              [allowHierarchicalFields]="true">
-          </dxo-filter-builder>
-          <dxo-filter-builder-popup [position]="popupPosition">
-          </dxo-filter-builder-popup>
-          <dxo-filter-row [visible]="true"></dxo-filter-row>
-          <dxo-header-filter [visible]="true"></dxo-header-filter>
-          <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
-
-          <!--Data column-->
-          <dxi-column dataField="ZGW_DATE"
-                      dataType="date"
-                      alignment="center"
-                      sortOrder="desc"
-                      format="yyyy-MM-dd"
-                      caption="발생일">
-          </dxi-column>
-          <dxi-column dataField="ZGW_SEQ"
-                      alignment="center"
-                      sortOrder="desc"
-                      caption="순번">
-          </dxi-column>
-          <dxi-column dataField="ZCARNO"
-                      caption="차량번호">
-          </dxi-column>
-          <dxi-column dataField="ZGW_MAKTX"
-                      caption="자재명">
-          </dxi-column>
-          <dxi-column dataField="ZGW_NAME1"
-                      caption="업체명">
-          </dxi-column>
-          <dxi-column dataField="ZGW_BRGEW"
-                      caption="총중량"
-                      format="#,###">
-          </dxi-column>
-          <dxi-column dataField="ZGW_NTGEW"
-                      caption="공차중량"
-                      format="#,###">
-          </dxi-column>
-          <dxi-column dataField="ZGW_ATGEW"
-                      caption="실중량"
-                      format="#,###">
-          </dxi-column>
-          <dxi-column dataField="ZGW_ATGEW_P"
-                      format="#,###"
-                      caption="SAP처리수량">
-          </dxi-column>
-          <dxi-column dataField="ZGW_GR_TIME"
-                      dataType="time"
-                      alignment="center"
-                      format="HH:mm:ss"
-                      caption="입문시간">
-          </dxi-column>
-          <dxi-column dataField="ZGW_GI_TIME"
-                      dataType="time"
-                      alignment="center"
-                      format="HH:mm:ss"
-                      caption="출문시간">
-          </dxi-column>
-        </dx-data-grid>
-      </div>
-    </dxi-item>
-  </dx-box>
-
-</div>
+        </div>
+      </dxi-item>
+    </dx-form>
+  </dx-scroll-view>
+</dx-popup>
+<report-viewer #reportViewer style="overflow:auto">
+</report-viewer>

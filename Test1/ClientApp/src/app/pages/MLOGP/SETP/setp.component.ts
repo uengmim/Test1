@@ -278,7 +278,7 @@ export class SETPComponent {
   //첫화면 데이터 조회 RFC
   public async dataLoad() {
     let fixData = { I_ZSHIPSTATUS: "10" };
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, []);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate,"", "", "", "", "", "","", "", fixData.I_ZSHIPSTATUS, []);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
 

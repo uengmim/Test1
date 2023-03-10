@@ -27,6 +27,7 @@ import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZSDIFPORTALSAPGIYCLIQRcvModel, ZSDS6450Model, ZSDT6460Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapGiYcliqRcvProxy';
 import { HeaderData, OilDepot } from '../SHPC/app.service';
 import { ReportViewerComponent } from '../../../shared/components/reportviewer/report-viewer';
+import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -180,6 +181,12 @@ export class SHPDComponent {
   popupVisible4 = false;
   collapsed: any;
 
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
+  rolid: string[] = [];
+  lgNmList: T001lModel[] = [];
+  isDisabledValue: boolean = false;
   //배차팝업 선택값
   selectGrid2Data: ZSDS6450Model[] = [];
   //_dataService: ImateDataService;
@@ -199,32 +206,31 @@ export class SHPDComponent {
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 출하진행현황(유류)-사외창고";
 
+  this.onPEDataLoaded(event);
     let thisObj = this;
 
     this.loadingVisible = true;
+    let userInfo = this.authService.getUser().data;
+
+    this.rolid = userInfo?.role;
+    this.vorgid = userInfo.orgOption.vorgid.padStart(10, '0');
+    this.corgid = userInfo.orgOption.corgid.padStart(10, '0');
+    this.torgid = userInfo.orgOption.torgid.padStart(10, '0');
+
 
     //화학, 유류 구분
     this.cSpart = service.getCSpart();
 
     //파서블엔트리 초기화
-    this.unloadInfoCode = appConfig.tableCode("하차정보");
     this.truckTypeCode = appConfig.tableCode("RFC_화물차종");
     this.tdlnrCode = appConfig.tableCode("운송업체");
     this.tdlnr1Code = appConfig.tableCode("운송업체");
-    this.lgortCode = appConfig.tableCode("유류창고")
+    this.lgortCode = appConfig.tableCode("전체창고")
     this.popTabIndex = 0;
 
-    if (this.selectCSpart === "20") {
-      this.zcarnoCode = appConfig.tableCode("화학차량");
-      this.matnrCode = appConfig.tableCode("화학제품명");
-      this.isPopVisible = true;
-      this.lgortVisible = false;
-    } else {
       this.zcarnoCode = appConfig.tableCode("유류차량");
       this.matnrCode = appConfig.tableCode("유류제품명");
-      this.isPopVisible = false;
-      this.lgortVisible = true;
-    }
+    
 
     //----------------------------------------------------------------------------------------------------------
     let codeInfos = [
@@ -233,7 +239,7 @@ export class SHPDComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnrCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnr1Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.unloadInfoCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgortCode),
     ];
     PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
     //---------------------------------------------------------------------------------------------------------
@@ -246,6 +252,7 @@ export class SHPDComponent {
     this.tdlnrValue = "";
     this.tdlnr1Value = "";
     this.zcarnoValue = "";
+    this.getLgortNm();
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
@@ -283,7 +290,8 @@ export class SHPDComponent {
             alert(result.E_MSG, "알림");
           else {
             await alert("저장되었습니다.", "알림");
-            await this.printRef(null);
+            this.popupVisible = false;
+          //  await this.printRef(null);
           }
             
 
@@ -357,21 +365,15 @@ export class SHPDComponent {
   //첫화면 데이터 조회 RFC
   public async dataLoad() {
     let fixData = { I_ZSHIPSTATUS: "30" };
-    var spartLgort = this.lgortValue;
-    if (this.selectCSpart === "20") {
-      spartLgort = "";
-    }
-    else {
-      spartLgort = this.lgortValue;
-    }
+    
     var zsds6430: ZSDS6430Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", spartLgort, "", this.selectCSpart, this.startDate, this.endDate, "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6430);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", this.lgortValue, "", "30", this.startDate, this.endDate, "", "", "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6430);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
 
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
 
-    this.orderGridData = resultModel[0].IT_DATA;
+    this.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");
 
     this.orderData = new ArrayStore(
       {
@@ -405,129 +407,23 @@ export class SHPDComponent {
 
     this.loadingVisible = false;
 
-    if (selectData[0].VSBED === "Z4") {
-      await alert("온도기준 출고수량은 정산량으로 설정됩니다.", "알림");
-      GIData.ZMENGE3 = GIData.Z_N_WEI_NET;
-    }
-      
-    //if (GIData.ZMENGE3 > selectData[0].ZMENGE3) {
-    //  model.push(new ZSDIFPORTALSAPGIYCLIQRcvModel("출고수량은 납품수량을 넘을 수 없습니다.", "E"));
-    //  return model[0];
-    //}
 
+      
+    GIData.ZREQTYPE = "I"
+    GIData.Z_N_WEI_EMP = 1;
+    GIData.Z_N_WEI_TOT = 1;
+    GIData.Z_N_WEI_TOT_OIL = 1;
+    GIData.Z_N_WEI_NET = GIData.ZMENGE3;
+    GIData.ZSTARTTIME = "00:00:00"
+    GIData.ZENDTIME = "00:00:00"
+    GIData.ZRACK = "1"
+    GIData.ZPUMP= "1"
+    GIData.ZTANK = "1"
+    GIData.ZTEMP = "1"
     this.loadingVisible = true;
 
-    var rfcOilModel: ZSDT6460Model = new ZSDT6460Model(thisObj.appConfig.mandt, GIData.VBELN, GIData.POSNR, GIData.ZSHIPMENT_NO, GIData.ZCARNO, GIData.KUNAG, GIData.VRKME,
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000",
-      "", 0, 0, 0, "00000", "00000", "", "", new Date("0001-01-01"), "000000", "", new Date("0001-01-01"), "000000", DIMModelStatus.UnChanged);
-
-    GIData.ZREQTYPE = "I";
-    oilDepotData.forEach(async (row: OilDepot, index) => {
-      switch (index) {
-        case 0: {
-          rfcOilModel.C_PART01 = index.toString();
-          rfcOilModel.ZTANKLITER1 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC01 = row.N_ALLOC;
-          rfcOilModel.N_CHUL01 = row.N_CHUL;
-          rfcOilModel.S_START01 = row.S_START;
-          rfcOilModel.S_END01 = row.S_END;
-          break;
-        }
-        case 1: {
-          rfcOilModel.C_PART02 = index.toString();
-          rfcOilModel.ZTANKLITER2 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC02 = row.N_ALLOC;
-          rfcOilModel.N_CHUL02 = row.N_CHUL;
-          rfcOilModel.S_START02 = row.S_START;
-          rfcOilModel.S_END02 = row.S_END;
-          break;
-        }
-        case 2: {
-          rfcOilModel.C_PART03 = index.toString();
-          rfcOilModel.ZTANKLITER3 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC03 = row.N_ALLOC;
-          rfcOilModel.N_CHUL03 = row.N_CHUL;
-          rfcOilModel.S_START03 = row.S_START;
-          rfcOilModel.S_END03 = row.S_END;
-          break;
-        }
-        case 3: {
-          rfcOilModel.C_PART04 = index.toString();
-          rfcOilModel.ZTANKLITER4 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC04 = row.N_ALLOC;
-          rfcOilModel.N_CHUL04 = row.N_CHUL;
-          rfcOilModel.S_START04 = row.S_START;
-          rfcOilModel.S_END04 = row.S_END;
-          break;
-        }
-        case 4: {
-          rfcOilModel.C_PART05 = index.toString();
-          rfcOilModel.ZTANKLITER5 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC05 = row.N_ALLOC;
-          rfcOilModel.N_CHUL05 = row.N_CHUL;
-          rfcOilModel.S_START05 = row.S_START;
-          rfcOilModel.S_END05 = row.S_END;
-          break;
-        }
-        case 5: {
-          rfcOilModel.C_PART06 = index.toString();
-          rfcOilModel.ZTANKLITER6 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC06 = row.N_ALLOC;
-          rfcOilModel.N_CHUL06 = row.N_CHUL;
-          rfcOilModel.S_START06 = row.S_START;
-          rfcOilModel.S_END06 = row.S_END;
-          break;
-        }
-        case 6: {
-          rfcOilModel.C_PART07 = index.toString();
-          rfcOilModel.ZTANKLITER7 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC07 = row.N_ALLOC;
-          rfcOilModel.N_CHUL07 = row.N_CHUL;
-          rfcOilModel.S_START07 = row.S_START;
-          rfcOilModel.S_END07 = row.S_END;
-          break;
-        }
-        case 7: {
-          rfcOilModel.C_PART08 = index.toString();
-          rfcOilModel.ZTANKLITER8 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC08 = row.N_ALLOC;
-          rfcOilModel.N_CHUL08 = row.N_CHUL;
-          rfcOilModel.S_START08 = row.S_START;
-          rfcOilModel.S_END08 = row.S_END;
-          break;
-        }
-        case 8: {
-          rfcOilModel.C_PART09 = index.toString();
-          rfcOilModel.ZTANKLITER9 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC09 = row.N_ALLOC;
-          rfcOilModel.N_CHUL09 = row.N_CHUL;
-          rfcOilModel.S_START09 = row.S_START;
-          rfcOilModel.S_END09 = row.S_END;
-          break;
-        }
-        case 9: {
-          rfcOilModel.C_PART10 = index.toString();
-          rfcOilModel.ZTANKLITER10 = row.ZTANKLITER;
-          rfcOilModel.N_ALLOC10 = row.N_ALLOC;
-          rfcOilModel.N_CHUL10 = row.N_CHUL;
-          rfcOilModel.S_START10 = row.S_START;
-          rfcOilModel.S_END10 = row.S_END;
-          break;
-        }
-      }
-    });
-
-    model = [new ZSDIFPORTALSAPGIYCLIQRcvModel("", "", [GIData], [rfcOilModel])];
+    model = [new ZSDIFPORTALSAPGIYCLIQRcvModel("", "", [GIData], [])];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPGIYCLIQRcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPGIYCLIQRcvModelList", model, QueryCacheType.None);
-    debugger;
     this.loadingVisible = false;
 
     return resultModel[0];
@@ -541,21 +437,7 @@ export class SHPDComponent {
       
     });
 
-    //var zsd6440list: ZSDS6440Model[] = this.popupData;
-
-    //zsd6440list.forEach(async (row: ZSDS6440Model) => {
-    //  row.ZSHIPSTATUS = "30";
-    //});
-
-    //var createModel = new ZSDIFPORTALSAPLELIQRcvModel("", "", modelList);
-    //var createModelList: ZSDIFPORTALSAPLELIQRcvModel[] = [createModel];
-
-    //var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQRcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQRcvModelList", createModelList, QueryCacheType.None);
-    //return insertModel[0];
-
   }
-
-
 
   /**
  * 파서블 엔트리 데이터 로딩 완료
@@ -571,9 +453,18 @@ export class SHPDComponent {
        });
      }
      */
-    if (this.loadePeCount >= 7) {
+    if (this.loadePeCount >= 6) {
       this.loadingVisible = false;
       this.loadePeCount = 0;
+      if (this.rolid.find(item => item === "ADMIN") === undefined) {
+        var lgVal = this.lgNmList.find(item => item.KUNNR === this.corgid);
+        if (lgVal !== undefined)
+          this.lgortValue = lgVal.LGORT;
+        else
+          this.lgortValue = "6000";
+
+        this.isDisabledValue = true;
+      }
     }
   }
 
@@ -592,9 +483,16 @@ export class SHPDComponent {
       this.popHeaderData.ZMENGE2 = selectData[0].ZMENGE2;
       this.popHeaderData.ZMENGE4 = selectData[0].ZMENGE4;
 
+      var ZMENGE = 0;
+
+      //출고수량이 없으면 배차수량으로 대신함
+      if (selectData[0].ZMENGE3 === 0)
+        ZMENGE = selectData[0].ZMENGE4;
+      else
+        ZMENGE = selectData[0].ZMENGE3;
       //팝업 아이템정보 입력
       this.popItemData = new ZSDS6450Model(selectData[0].VBELN, selectData[0].POSNR, "", selectData[0].ZSHIPSTATUS, selectData[0].KZPOD, selectData[0].VGBEL,
-        selectData[0].VGPOS, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE3,
+        selectData[0].VGPOS, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, ZMENGE,
         new Date(), selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].KUNNR, selectData[0].KUNAG, selectData[0].SPART,
         selectData[0].WERKS, selectData[0].LFART, 0, 0, 0, 0, "", "", "", "", "000000", "000000", selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE,
         selectData[0].ZCARNO, selectData[0].ZDRIVER, selectData[0].ZDRIVER1, "", selectData[0].ZPHONE, selectData[0].ZPHONE1, "", "", selectData[0].ZSHIPMENT_NO,
@@ -670,7 +568,6 @@ export class SHPDComponent {
       let params: ParameterDictionary =
       {
         "dbTitle": this.appConfig.dbTitle,
-        "sPart": selectData.SPART,
         "Ivbeln": selectData.VBELN,
         "Tddat": selectData.TDDAT
       };
@@ -736,6 +633,13 @@ export class SHPDComponent {
     this.truckTypeCodeDynamic.ClearSelectedValue();
     this.tdlnrCodeDynamic.ClearSelectedValue();
     this.zcarnoCodeDynamic.ClearSelectedValue();
+  }
+  async getLgortNm() {
+
+    let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgortCode);
+
+    var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
+    this.lgNmList = resultModel;
   }
 }
 

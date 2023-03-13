@@ -89,7 +89,7 @@ export class SBIVComponent {
     zmm3140.push(new ZMMS3140Model(lgort, "", "O", "0000302512", "", "", "", "", "", ""));
     var zmc = new ZMMCURRStockModel("X", "1000", zmm3120, zmm3140);
     var model: ZMMCURRStockModel[] = [zmc];
-    console.log(model);
+
     var resultModel = await this.dataService.RefcCallUsingModel<ZMMCURRStockModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMCURRStockModelList", model, QueryCacheType.None);
     this.forestData = new ArrayStore(
       {

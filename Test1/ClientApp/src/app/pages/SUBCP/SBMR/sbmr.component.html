@@ -141,6 +141,10 @@
                             valueDisplayFormat="%NAME1%(%LIFNR%)"
                             [(selectedValue)]="lifnrValue"
                             [gridBoxWidth]="500"
+                            popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                             width="auto"
                             label="업체정보"
                             labelMode="floating"
@@ -182,6 +186,10 @@
                               valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
                               [(selectedValue)]="StatusValue"
                               [gridBoxWidth]="500"
+                              popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                               label="배차상태"
                               labelMode="floating"
                               [showClearButton]="true"
@@ -208,7 +216,7 @@
               [showBorders]="true"
               [columnAutoWidth]="true"
               (onEditorPreparing)="onEditorPreparing($event)"
-              height="calc(100vh - 300px)"
+              height="calc(100vh - 250px)"
               (onRowUpdating)="gridDataUpdating($event)"
               [columnResizingMode]="columnResizeMode">
   <dxo-paging [pageSize]="10"></dxo-paging>
@@ -268,8 +276,11 @@
               caption="요청자이름" [allowEditing]="false">
   </dxi-column>
 
-  <dxi-column dataField="ZSHIP_STATUS"
+  <dxi-column dataField="ZSHIP_STATUS_NM"
               caption="배차상태" [allowEditing]="false">
+  </dxi-column>
+  <dxi-column dataField="ZSHIP_STATUS"
+              caption="배차상태" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_R_DATE_C"
@@ -403,16 +414,20 @@
           <dxi-item dataField="MATNR" [label]="{text: '자재번호'}">
             <div style="float: left; width:100%">
 
-              <nh-possible-table [codeInfo]="matnrCode" #matnrCodeDynamic
+              <nh-possible-comm [codeInfo]="matnrCode" #matnrCodeDynamic
                                  [dataStoreKey]="dataStoreKey"
                                  [(selectedValue)]="matnrValue"
                                  valueColumn="MATNR"
                                  valueDisplayFormat="%MAKTX%(%MATNR%)"
                                  width="auto"
                                  [gridBoxWidth]="500"
+                                 popupGridScrollMode="standard"
+                                    [popupGridPagingMode]="true"
+                                    [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                  (onDataLoaded)="onPEDataLoaded($event)"
                                  (onEntryValueChanged)="onmatnrCodeValueChanged($event)">
-              </nh-possible-table>
+              </nh-possible-comm>
             </div>
           </dxi-item>
 

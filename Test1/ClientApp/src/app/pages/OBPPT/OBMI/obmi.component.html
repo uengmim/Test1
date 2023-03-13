@@ -66,8 +66,9 @@
                             [showClearButton]="true"
                             [(selectedValue)]="questionCodeValue"
                             popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                            [popupGridPagingMode]="true"
+                            [popupGridPageSize]="10"
+                            comboGridScrollMode="virtual"
                             (onDataLoaded)="onQSTIONDataLoaded($event)"
                             placeholderText="질문을 선택하여 주십시오."
                             [validationErrors]="[{type:'required', message:'질문을 선택하여 주십시오.'}]"
@@ -89,11 +90,11 @@
       </dxi-item>
     </dxi-item>
     <dxi-item itemType="group" [colCount]="2" [colSpan]="2" style="margin-top:5px;">
-      <dxi-item dataField="LOGPW" [label]="{text: '비밀번호'}" [editorOptions]="{ mode: 'password', maxLength: 20 }">
+      <dxi-item dataField="LOGPW" [label]="{text: '비밀번호'}" [editorOptions]="{ mode: 'password', maxLength: 255 }">
         <dxi-validation-rule type="required" message="비밀번호를 입력해주십시오.">
         </dxi-validation-rule>
       </dxi-item>
-      <dxi-item dataField="LOGPW_CHK"[label]="{text: '비밀번호 확인'}" [editorOptions]="{ mode: 'password', maxLength: 20 }">
+      <dxi-item dataField="LOGPW_CHK"[label]="{text: '비밀번호 확인'}" [editorOptions]="{ mode: 'password', maxLength: 255 }">
         <dxi-validation-rule type="required"
                              message="비밀번호 확인을 해주십시오.">
         </dxi-validation-rule>

@@ -32,6 +32,9 @@ import { ActivatedRoute } from '@angular/router';
 import { format } from 'crypto-js';
 import { ZMMT1320MaxKeyModel } from '../../../shared/dataModel/OWHP/Zmmt1320MaxKeyProxy';
 import { ZMMT1311GroupByModel } from '../../../shared/dataModel/OWHP/Zmmt1311GroupByProxy';
+import { ZCMT0020Model } from '../../../shared/dataModel/common/zcmt0020';
+import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
+import { DomainModel } from '../../../shared/dataModel/common/Domain';
 /**
  *
  *자재불출요청(임가공) component
@@ -58,7 +61,7 @@ export class SBMRComponent {
   @ViewChild('Request_Date', { static: false }) Request_Date!: DxValidatorComponent
   @ViewChild('ZSHIP_STATUS', { static: false }) ZSHIP_STATUS!: DxValidatorComponent
   @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: TablePossibleEntryComponent;
-  @ViewChild('StatusEntery', { static: false }) StatusEntery!: TablePossibleEntryComponent;
+  @ViewChild('StatusEntery', { static: false }) StatusEntery!: CommonPossibleEntryComponent;
 
   /**
  * 데이터 스토어 키
@@ -150,6 +153,8 @@ export class SBMRComponent {
 
   displayModel: ZMMT1320Model[] = [];
 
+  statusCodeInfo: DomainModel[] = [];
+
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService,
     private router: Router, private imInfo: ImateInfo, private authService: AuthService, private route: ActivatedRoute) {
     appInfo.title = AppInfoService.APP_TITLE + " | 자재불출요청(임가공)";
@@ -202,7 +207,6 @@ export class SBMRComponent {
     this.addButtonOptions  = {
       text: "등록",
       onClick: async (e: any) => {
-        console.log(this.valiData);
         let result = this.takeForm.instance.validate();
 
           if (!result.isValid) {
@@ -269,7 +273,7 @@ export class SBMRComponent {
           zmmt1320List.push(new ZMMT1320Model(this.appConfig.mandt, VBELN, this.appConfig.plant, this.authService.getUser().data?.deptId ?? "",
             array.MATNR, "", "", array.MEINS, array.SC_R_MENGE, this.popupData2.SC_R_DATE_R,
             this.popupData2.SC_R_DATE, formatDate(new Date(), "HH:mm:ss", "en-US"), this.popupData2.SC_R_NAME, "", "", "", "",
-            "", "", "", "", "", "", "", "", "", undefined,0, undefined, "000000",
+            "", "", "", "", "", "", "", "", "", undefined, 0, undefined, "000000",
             "", 0, undefined, "000000", "", 0, undefined, "000000", "", "", "", "", "", "", "", "", undefined, "000000", "", undefined, "000000", "", "", DIMModelStatus.Add));
           VBELN = (parseInt(VBELN) + 1).toString();
         });
@@ -439,7 +443,6 @@ export class SBMRComponent {
 
     console.info(`DATA LOAD COUNT: ${this.loadePeCount}`);
     if (this.loadePeCount >= 3) {
-
       if (this.paramFlag == "sbmo") {
         this.lifnrValue = this.paramLifnr;
         this.lifnrValue = this.paramLifnr;
@@ -492,7 +495,6 @@ export class SBMRComponent {
     var giDateFormat = this.SupplyData.GIRequest_Date.replaceAll('-', ""); //출하요청일자 (From)
     var arDateFormat = this.SupplyData.ARRequest_Date.replaceAll('-', ""); //도착요청일자 (TO)
     var whereCondi;
-    console.log(this.StatusEntery.selectedText);
     if (this.StatusEntery.selectedText != "") {
       whereCondi = `MANDT = '${thisObj.appConfig.mandt}' AND LIFNR = '${selectedValue}' AND SC_R_DATE BETWEEN '${giDateFormat}' AND '${arDateFormat}' AND ZSHIP_STATUS = '${this.StatusValue}'`;
 
@@ -500,7 +502,6 @@ export class SBMRComponent {
 
       whereCondi = `MANDT = '${thisObj.appConfig.mandt}' AND LIFNR = '${selectedValue}' AND SC_R_DATE BETWEEN '${giDateFormat}' AND '${arDateFormat}' AND ZSHIP_STATUS LIKE '%${this.StatusValue ?? ""}'`;
     }
-    console.log(whereCondi);
 
     //if (thisObj.StatusValue !== null)
     //  whereCondi = whereCondi + ` AND ZSHIP_STATUS = '${thisObj.StatusValue}'`;
@@ -510,8 +511,13 @@ export class SBMRComponent {
 
     var matList = await this.getNewData(thisObj);
 
+
+    let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("sbmr", this.appConfig, this.zshipCode);
+    this.statusCodeInfo = dataSet.tables["CODES"].getDataObject(DomainModel);
+
     resultModel.forEach(async (row: ZMMT1320Model) => {
       row.MAKTX = matList.find(item => item.MATNR === row.IDNRK)?.MAKTX;
+      row.ZSHIP_STATUS_NM = "[" + row.ZSHIP_STATUS + "]"+this.statusCodeInfo.find(item => item.DOMVALUE_L === row.ZSHIP_STATUS)?.DDTEXT;
     });
 
     this.drawalData = new ArrayStore(
@@ -591,7 +597,7 @@ export class SBMRComponent {
           array.SC_G_MENGE, array.SC_G_DATE ?? nullDate, array.SC_G_TIME ?? "000000", array.ZPOST_RUN_MESSAGE, array.SC_A_MENGE, array.SC_A_DATE ?? nullDate, array.SC_A_TIME ?? "000000", array.SC_A_NAME, array.MBLNR, array.MJAHR,
           array.ZEILE, array.MBLNR_C, array.MJAHR_C, array.ZEILE_C, array.ERNAM, array.ERDAT, array.ERZET, array.AENAM, array.AEDAT, array.AEZET, array.MAKTX, array.NAME1, DIMModelStatus.Delete));
       });
-      console.log(zmmt1320List);
+
       var rowCount1 = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", zmmt1320List);
   
       this.dataLoad(this.imInfo, this.dataService, this);
@@ -627,7 +633,7 @@ export class SBMRComponent {
     var selectData = this.drawalGrid.instance.getSelectedRowsData();
 
     var zmmt1320List: ZMMT1320Model[] = [];
-    var check = selectData.findIndex(obj => obj.ZSHIP_STATUS != "50" ||  obj.SC_A_NAME == "");
+    var check = selectData.findIndex(obj => obj.ZSHIP_STATUS != "60" ||  obj.SC_A_NAME == "");
     
     //폼 데이터 초기화
     this.takeFormData = { SC_A_DATE: new Date(), SC_A_TIME: formatDate(new Date(), "HH:mm:ss", "en-US"), SC_A_NAME: "" };

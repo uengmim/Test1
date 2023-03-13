@@ -28,11 +28,11 @@ import { alert, confirm } from "devextreme/ui/dialog";
 
 
 @Component({
-  templateUrl: 'vioq.component.html',
+  templateUrl: 'vioo.component.html',
   providers: [ImateDataService]
 })
 
-export class VIOQComponent {
+export class VIOOComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent
   @ViewChild('orderDataGrid', { static: false }) orderDataGrid!: DxDataGridComponent;
   @ViewChild('mainDataGrid', { static: false }) mainDataGrid!: DxDataGridComponent;
@@ -72,7 +72,7 @@ export class VIOQComponent {
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 차량 입출문 현황";
+    appInfo.title = AppInfoService.APP_TITLE + " | 차량 입출문 이력 조회";
 
 
     //조회날짜 초기값
@@ -96,65 +96,39 @@ export class VIOQComponent {
 
 
   //데이터로드
-  public async dataLoad(dataService: ImateDataService, thisObj: VIOQComponent) {
+  public async dataLoad(dataService: ImateDataService, thisObj: VIOOComponent) {
 
     var sdate = formatDate(this.startDate, "yyyyMMdd", "en-US")
     var edate = formatDate(this.endDate, "yyyyMMdd", "en-US")
-    var resultModel = await dataService.SelectModelData<ZMMT3050Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3050ModelList", [],
+    var resultModel = await dataService.SelectModelData<ZMMT3051Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3051ModelList", [],
       `MANDT = '${thisObj.appConfig.mandt}' AND ZGW_DATE >= ${sdate} AND ZGW_DATE <= ${edate}`, "", QueryCacheType.None);
 
     this.orderData = new ArrayStore(
       {
-        key: ["ZGW_DATE", "ZGW_SEQ"],
+        key: ["ZGW_DATE", "ZGW_TIME"],
         data: resultModel
       });
     this.orderDataGrid.instance.getScrollable().scrollTo(0);
 
-    if (resultModel.length > 0) {
-      resultModel.forEach(async (array: any) => {
-        if (array.ZGW_GRIR_GUBUN == "GR") {
-          array.ZGW_GRIR_GUBUN = "입고"
-        } else {
-          array.ZGW_GRIR_GUBUN = "출고"
-
-        }
-      });
-    }
   }
   //데이터 삭제
-  public async deleteRecords(thisObj: VIOQComponent) {
+  public async deleteRecords(thisObj: VIOOComponent) {
     let selectData = this.orderDataGrid.instance.getSelectedRowsData()[0];
     let fmZGWDate = formatDate(new Date(selectData.ZGW_DATE), 'yyyyMMdd', "en-US");
 
     if (await confirm("삭제하시겠습니까?", "알림")) {
       var dataService = this.dataService
-      var result3050Model = await dataService.SelectModelData<ZMMT3050Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3050ModelList", [],
-        `MANDT = '${thisObj.appConfig.mandt}' AND ZGW_DATE = '${fmZGWDate}' AND ZGW_SEQ = '${selectData.ZGW_SEQ}'`, "", QueryCacheType.None);
-      this.zmmt3050 = result3050Model[0];
-      this.zmmt3050.ModelStatus = DIMModelStatus.Delete;
-      var model3050List: ZMMT3050Model[] = [thisObj.zmmt3050];
-
 
       var result3051Model = await dataService.SelectModelData<ZMMT3051Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3051ModelList", [],
-        `MANDT = '${thisObj.appConfig.mandt}' AND ZGW_DATE = '${fmZGWDate}' AND ZGW_TIME = '${selectData.ZGW_GR_TIME.replace(/:/g, '')}'`, "", QueryCacheType.None);
-      if (result3051Model.length > 0) {
+        `MANDT = '${thisObj.appConfig.mandt}' AND ZGW_DATE = '${fmZGWDate}' AND ZGW_TIME = '${selectData.ZGW_TIME.replace(/:/g, '')}'`, "", QueryCacheType.None);
+      this.zmmt3051 = result3051Model[0];
+      this.zmmt3051.ModelStatus = DIMModelStatus.Delete;
+      var model3051List: ZMMT3051Model[] = [thisObj.zmmt3051];
 
-        this.zmmt3051 = result3051Model[0];
-        this.zmmt3051.ModelStatus = DIMModelStatus.Delete;
-        var model3051List: ZMMT3051Model[] = [thisObj.zmmt3051];
-        this.rowCount2 = await this.dataService.ModifyModelData<ZMMT3051Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3051ModelList", model3051List);
-      }
-      var result3051ModelData = await dataService.SelectModelData<ZMMT3051Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3051ModelList", [],
-        `MANDT = '${thisObj.appConfig.mandt}' AND ZGW_DATE = '${fmZGWDate}' AND ZGW_TIME = '${selectData.ZGW_GI_TIME.replace(/:/g, '')}'`, "", QueryCacheType.None);
-      if (result3051ModelData.length > 0) {
-        this.zmmt3051Data = result3051ModelData[0];
-        this.zmmt3051Data.ModelStatus = DIMModelStatus.Delete;
-        var modelzmmt3051List: ZMMT3051Model[] = [thisObj.zmmt3051Data];
-        this.rowCount3 = await this.dataService.ModifyModelData<ZMMT3051Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3051ModelList", modelzmmt3051List);
-      }
+
       alert("삭제되었습니다.", "알림");
 
-      this.rowCount1 = await this.dataService.ModifyModelData<ZMMT3050Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3050ModelList", model3050List);
+      this.rowCount1 = await this.dataService.ModifyModelData<ZMMT3051Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3051ModelList", model3051List);
 
       this.dataLoad(this.dataService, this);
     }
@@ -163,45 +137,19 @@ export class VIOQComponent {
   //반출증 클릭
   takeOutSpecific() {
     let selectData = this.orderDataGrid.instance.getSelectedRowsData()[0];
-    if (selectData.ZGW_GRIR_GUBUN == "입고") {
-      alert("입고는 반출증을 뽑을 수 없습니다.", "알림");
-      return;
-    }
 
-      /*let selectData = this.orderGrid.instance.getSelectedRowsData()[0];*/
-      let params: ParameterDictionary =
-      {
-        "dbTitle": this.appConfig.dbTitle,
-        "mandt": this.appConfig.mandt,
-        "izgwGubun": "G",
-        "izgwSeq": selectData.ZGW_SEQ,
-        "izgwDate": selectData.ZGW_DATE
-      };
-
-    setTimeout(() => { this.reportViewer.printReport("Discharge", params) });
-    
-  }
-
-  //계량증명서 클릭
-  weighingCertificate() {
-    let selectData = this.orderDataGrid.instance.getSelectedRowsData()[0];
     /*let selectData = this.orderGrid.instance.getSelectedRowsData()[0];*/
-
     let params: ParameterDictionary =
     {
       "dbTitle": this.appConfig.dbTitle,
       "mandt": this.appConfig.mandt,
       "izgwGubun": "G",
-      "izgwSeq": selectData.ZGW_SEQ,
+      "izgwSeq": "",
       "izgwDate": selectData.ZGW_DATE
     };
 
-    if (selectData.ZGW_MATNR == 103 || selectData.ZGW_MAKTX == "불화규산") {
-      setTimeout(() => { this.reportViewer.printReport("Discharge_ver2", params) });
+    setTimeout(() => { this.reportViewer.printReport("Discharge", params) });
 
-    } else {
-      setTimeout(() => { this.reportViewer.printReport("WeighingCertificate", params) });
-    }
   }
   selectionChanged(data: any) {
     this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);

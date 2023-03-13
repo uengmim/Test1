@@ -1,4 +1,4 @@
-<!--차량입출문 현황-->
+<!--차량입출문 이력 조회-->
 <div style="margin:10px 10px 0px 10px">
 
   <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
@@ -24,29 +24,16 @@
         </dx-button>
       </div>
     </dxi-item>
-
-    <dxi-item location="after"
+    <!--<dxi-item location="after"
               locateInMenu="auto"
-              style="width: auto;
-            margin-right: 5px;">
-      <dx-button (onClick)="weighingCertificate()"
-                 [disabled]="!selectedItemKeys.length"
-                 [width]="120"
-                 text="계량증명서"
-                 style="margin-top:4px;">
-      </dx-button>
-    </dxi-item>
-
-    <dxi-item location="after"
-              locateInMenu="auto"
-              style="width: auto;margin-right: 5px;" >
+              style="width: auto;margin-right: 5px;">
       <dx-button (onClick)="takeOutSpecific()"
                  [disabled]="!selectedItemKeys.length"
                  [width]="100"
                  text="반출증"
                  style="margin-top:4px;">
       </dx-button>
-    </dxi-item>
+    </dxi-item>-->
     <dxi-item location="after"
               locateInMenu="auto"
               style="width: auto;
@@ -69,7 +56,7 @@
                 [columnResizingMode]="columnResizeMode"
                 [columnHidingEnabled]="true"
                 [allowColumnReordering]="true"
-                [keyExpr]="['ZGW_DATE','ZGW_SEQ']"
+                [keyExpr]="['ZGW_DATE','ZGW_TIME']"
                 [selection]="{ mode: 'single' }"
                 height="calc(100vh - 190px)"
                 [(selectedRowKeys)]="selectedRows"
@@ -92,21 +79,18 @@
     <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
     <!--Data column-->
-    <dxi-column dataField="ZGW_GRIR_GUBUN"
-                alignment="center"
-                caption="계근대 구분">
-    </dxi-column>
     <dxi-column dataField="ZGW_DATE"
                 dataType="date"
                 alignment="center"
-                sortOrder="desc"
                 format="yyyy-MM-dd"
                 caption="발생일">
     </dxi-column>
-    <dxi-column dataField="ZGW_SEQ"
+    <dxi-column dataField="ZGW_TIME"
+                dataType="time"
                 alignment="center"
                 sortOrder="desc"
-                caption="순번">
+                format="HH:mm:ss"
+                caption="시간">
     </dxi-column>
     <dxi-column dataField="ZCARNO"
                 caption="차량번호">
@@ -114,36 +98,17 @@
     <dxi-column dataField="ZDRIVER"
                 caption="운전기사명">
     </dxi-column>
-    <dxi-column dataField="ZGW_NAME1"
-                caption="업체명">
-    </dxi-column>
     <dxi-column dataField="ZGW_MAKTX"
                 caption="자재명">
     </dxi-column>
-    <dxi-column dataField="ZGW_BRGEW"
-                caption="총중량"
-                format="#,###">
-    </dxi-column>
-    <dxi-column dataField="ZGW_NTGEW"
-                caption="공차중량"
-                format="#,###">
+    <dxi-column dataField="ZGW_NAME1"
+                caption="업체명">
     </dxi-column>
     <dxi-column dataField="ZGW_ATGEW"
                 caption="실중량"
                 format="#,###">
     </dxi-column>
-    <dxi-column dataField="ZGW_GR_TIME"
-                dataType="time"
-                alignment="center"
-                format="HH:mm:ss"
-                caption="입문시간">
-    </dxi-column>
-    <dxi-column dataField="ZGW_GI_TIME"
-                dataType="time"
-                alignment="center"
-                format="HH:mm:ss"
-                caption="출문시간">
-    </dxi-column>
+
   </dx-data-grid>
 </div>
 <report-viewer #reportViewer style="overflow:auto">

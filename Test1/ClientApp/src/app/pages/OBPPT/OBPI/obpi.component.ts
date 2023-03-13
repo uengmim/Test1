@@ -13,9 +13,9 @@ import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
-  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxButtonComponent, DxSelectBoxComponent
+  DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxButtonComponent, DxSelectBoxComponent, DxPopoverComponent
 } from 'devextreme-angular';
-import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
+import { AttachFileInfo, CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { AuthService } from '../../../shared/services';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { ThemeManager } from '../../../shared/app.utilitys';
@@ -36,6 +36,9 @@ import { ZMMBIDDtlModel, ZMMS8020Model } from '../../../shared/dataModel/OBPPT/Z
 import { ZMMRFQRtnModel, ZMMS8031Model, ZMMS8032Model } from '../../../shared/dataModel/OBPPT/ZmmRfcRtn';
 import { ZMMT8300Model } from '../../../shared/dataModel/OBPPT/Zmmt8300';
 import { Seq } from './app.service';
+import { OfficeXPUtility } from '../../../shared/officeXp.utility';
+import { AttachFileComponent } from '../../../shared/components/attach-file/attach-file.component';
+import { ZMMBIDTextModel } from '../../../shared/dataModel/OBPPT/ZmmBidText';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -66,6 +69,12 @@ export class OBPIComponent {
   @ViewChild('bizpmtagbox', { static: false }) bizpmtagbox!: DxTagBoxComponent;
   @ViewChild('selectbox', { static: false }) selectbox!: DxSelectBoxComponent;
   @ViewChild('dataItem', { static: false }) dataItem!: DxiItemComponent;
+  @ViewChild('PrgstatusCodeItem', { static: false }) PrgstatusCodeItem!: DxiItemComponent;
+  @ViewChild('AttachFile', { static: false }) AttachFile!: AttachFileComponent;
+  @ViewChild(DxPopoverComponent) popover !: DxPopoverComponent;
+  @ViewChild('popoverList', { static: false }) popoverList!: DxPopoverComponent;
+  @ViewChild('popoverDetail', { static: false }) popoverDetail!: DxPopoverComponent;
+  @ViewChild('popoverEst', { static: false }) popoverEst!: DxPopoverComponent;
 
   callbacks = [];
 
@@ -96,6 +105,8 @@ export class OBPIComponent {
   BusinessCategoryCode: TableCodeInfo;
   categoryCode: CommonCodeInfo;
 
+  editingMode: boolean = false;
+  editingModeTwo: boolean = false;
 
   //구분 value
   PrgstatusCodeValue: string | null = null;
@@ -108,6 +119,7 @@ export class OBPIComponent {
   localappConfig: AppConfigService;
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
+  popuploadingVisible: boolean = false;
 
   //질문 파서블엔트리 값
   questionCodeValue: string | null = null;
@@ -130,6 +142,37 @@ export class OBPIComponent {
   //견적제출 상세정보 팝업
   estimatepopupVisible = false;
   listSearchpopupVisible = false;
+
+  noText: string = "조회된 공고가 없습니다.";
+  target: any;
+  //--------------------------------------------------------------------
+
+  /**
+   * 첨부 파일들
+   * */
+  attachFiles: AttachFileInfo[] = [];
+  attachFilesTwo: AttachFileInfo[] = [];
+
+  /**
+   * 업로드 문서 번호
+   * */
+  uploadDocumentNo: string;
+  uploadDocumentNoTwo: string;
+
+  /**
+   * OffcieXP 유틸리티
+   * */
+  offceXPUtility: OfficeXPUtility;
+
+  /*
+   *첨부파일 팝업
+   */
+  takePopupVisible: boolean = false;
+  takePopupVisibleTwo: boolean = false;
+  //--------------------------------------------------------------------
+
+
+
   //질문 파서블 엔트리 유효성 체크
   PrgstatusAdapter =
     {
@@ -160,6 +203,8 @@ export class OBPIComponent {
   saveButtonOptions: any;
   //팝업 닫기 버튼
   popupcloseButtonOptions: any;
+  closeButtonOptions: any;
+  closeButtonOptionsTwo: any;
   //팝업 조회 버튼
   popupinquiryButtonOptions: any;
   //팝업 엑셀 버튼
@@ -215,6 +260,9 @@ export class OBPIComponent {
   //그리드 수정제한
   isEditing: boolean = true;
 
+  //
+  Longtext: string;
+
   //줄 선택
   selectedRowIndex = -1;
   selectedItemKeys: any[] = [];
@@ -239,6 +287,9 @@ export class OBPIComponent {
     http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private router: Router) {
     appInfo.title = AppInfoService.APP_TITLE + " | 구매공고현황";
 
+    this.loadingVisible = true;
+    this.offceXPUtility = new OfficeXPUtility(http, appConfig);
+
     this.displayExpr = "";
     this.localappConfig = appConfig;
 
@@ -247,14 +298,14 @@ export class OBPIComponent {
     this.PrgstatusCodeValue = "1";
     //this.RegulationValue = "1";
 
-    if (!(authService.getUser().data?.pin == "" || authService.getUser().data?.pin == null || authService.getUser().data?.pin == undefined)) {
+    if (!(authService.getUser().data?.deptId == "guest")) {
       this.btnVisible = !this.btnVisible;
     }
     this.zmmt8360 = new ZMMT8360Model(this.appConfig.mandt, "", "", "", "", new Date, "", new Date, "", 0, 0, 0, "", "", "", "", "", new Date, "", "", new Date, "", DIMModelStatus.UnChanged);
 
     //date
     var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 90), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(now.setDate(now.getDate() - 40), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
     this.nowgretdDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
     this.now1gretdDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
@@ -301,7 +352,18 @@ export class OBPIComponent {
 
     const that = this;
     /*this.getCodeInfo();*/
-
+    this.closeButtonOptions = {
+      text: '닫기',
+      onClick(e: any) {
+        that.takePopupVisible = false;
+      }
+    }
+    this.closeButtonOptionsTwo = {
+      text: '닫기',
+      onClick(e: any) {
+        that.takePopupVisibleTwo = false;
+      }
+    }
     //팝업 조회 버튼
     this.popupinquiryButtonOptions = {
       text: '조회',
@@ -311,8 +373,6 @@ export class OBPIComponent {
         this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
 
         this.detailFormData = this.selectGridData[0];
-        await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
-        this.loadingVisible = false;
 
       },
     };
@@ -365,119 +425,130 @@ export class OBPIComponent {
             key: ["BIDNO"],
             data: select8370Result
           });
+        this.estimateDataGrid.instance.getScrollable().scrollTo(0);
+
         this.loadingVisible = false;
 
       },
     };
     //견적팝업 저장 버튼
     this.estimatepopupsaveButtonOptions = {
-      text: '저장',
+      text: '제출',
       onClick: async (e: any, thisObj: OBPIComponent) => {
 
 
-          this.loadingVisible = true;
-          var makeYn = false;
-          var estmakeYn = false;
-          var rfqcstData = false;
-          var rfqamtData = false;
-          var rfqvatData = false;
-          var gretdData = false;
-          var checkData = this.estimateDetailFormData
-          var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
-          let userInfo = this.authService.getUser().data;
-          var lifnr = userInfo?.deptId ?? "";
-          var result8300Model = await this.dataService.SelectModelData<ZMMT8300Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8300ModelList", [],
-            `MANDT = '${this.appConfig.mandt}' AND BIDNO  = '${bidno}' `, "", QueryCacheType.None);
-          var data8300 = result8300Model;
-          let nowDate = formatDate(new Date(), "yyyyMMdd", "en-US")
-          let nowTime = formatDate(new Date(), "HHmmss", "en-US")
-          let rfqdthDate = formatDate(data8300[0].RFQDTH, "yyyyMMdd", "en-US")
-          let rfqdttDate = data8300[0].RFQDTT.replace(/:/g, '');
+        var makeYn = false;
+        var estmakeYn = false;
+        var rfqcstData = false;
+        var rfqamtData = false;
+        var rfqvatData = false;
+        var gretdData = false;
+        var checkData = this.estimateDetailFormData
+        var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
+        let userInfo = this.authService.getUser().data;
+        var lifnr = userInfo?.deptId ?? "";
+        var result8300Model = await this.dataService.SelectModelData<ZMMT8300Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8300ModelList", [],
+          `MANDT = '${this.appConfig.mandt}' AND BIDNO  = '${bidno}' `, "", QueryCacheType.None);
+        var data8300 = result8300Model;
+        let nowDate = formatDate(new Date(), "yyyyMMdd", "en-US")
+        let nowTime = formatDate(new Date(), "HHmmss", "en-US")
+        let rfqdthDate = formatDate(data8300[0].RFQDTH, "yyyyMMdd", "en-US")
+        let rfqdttDate = data8300[0].RFQDTT.replace(/:/g, '');
 
-          if (this.nowgretdDate == "" || this.nowgretdDate == null || this.nowgretdDate == undefined) {
-            gretdData = true;
-          }
-          if (gretdData) {
-            alert(`납품 가능 일자가 입력되지 않았습니다.`, "알림");
+        if (this.nowgretdDate == "" || this.nowgretdDate == null || this.nowgretdDate == undefined) {
+          gretdData = true;
+        }
+        if (gretdData) {
+          alert(`납품 가능 일자가 입력되지 않았습니다.`, "알림");
+          return;
+        }
+
+        if (this.RegulationValue == null) {
+          alert("결재조건을 필수로 입력하십시오.", "알림");
+          return;
+        }
+        let nowDDDate = formatDate(new Date(this.nowgretdDate), "yyyyMMdd", "en-US")
+
+        let dlvdtDate = formatDate(data8300[0].DLVDT, "yyyyMMdd", "en-US")
+
+
+        if (parseInt(dlvdtDate) < parseInt(nowDDDate)) {
+          alert("납기일자 이후에는 납품이 불가능합니다.", "알림");
+          return;
+        }
+        //단가가 빈값이면 alert
+        this.estpopupData._array.forEach((array: any) => {
+          if (array.CONPR == 0 || array.CONPR == null || array.CONPR == "") {
+            estmakeYn = true;
             return;
           }
-          let nowDDDate = formatDate(new Date(this.nowgretdDate), "yyyyMMdd", "en-US")
+        });
+        if (estmakeYn) {
+          alert(`단가를 필수로 입력해주세요.`, "알림");
+          return;
+        }
 
-          let dlvdtDate = formatDate(data8300[0].DLVDT, "yyyyMMdd", "en-US")
-
-
-          if (parseInt(dlvdtDate) < parseInt(nowDDDate)) {
-            alert("납기일자 이후에는 납품이 불가능합니다.", "알림");
-            return;
-          } 
-          //단가가 빈값이면 alert
+        //메이커 여부가 X일때
+        if (this.estimateFormData.MAKERYN == "X") {
           this.estpopupData._array.forEach((array: any) => {
-            if (array.CONPR == 0 || array.CONPR == null || array.CONPR == "") {
-              estmakeYn = true;
+            //8370에서 MAKER가 빈값이면 alert
+            if (array.MAKER == "" || array.MAKER == null) {
+              makeYn = true;
               return;
+
             }
           });
-          if (estmakeYn) {
-            alert(`단가를 필수로 입력해주세요.`, "알림");
-            return;
+          if (makeYn) {
+            alert(`메이커를 필수로 입력해주세요.`, "알림");
+            return
           }
 
-          //메이커 여부가 X일때
-          if (this.estimateFormData.MAKERYN == "X") {
-            this.estpopupData._array.forEach((array: any) => {
-              //8370에서 MAKER가 빈값이면 alert
-              if (array.MAKER == "" || array.MAKER == null) {
-                makeYn = true;
-                return;
+        }
+        if (Number.isNaN(checkData.RFQCST) || checkData.RFQCST == 0) {
+          rfqcstData = true;
+        }
+        if (rfqcstData) {
+          alert(`견적 공급가가 계산되지 않았습니다.`, "알림");
+          return;
+        }
+        if (Number.isNaN(checkData.RFQVAT) || checkData.RFQVAT == 0) {
+          rfqvatData = true;
+        }
+        if (rfqvatData) {
+          alert(`견적 부가세가 계산되지 않았습니다.`, "알림");
+          return;
+        }
 
-              }
-            });
-            if (makeYn) {
-              alert(`메이커를 필수로 입력해주세요.`, "알림");
-              return
-            }
-
-          }
-          if (Number.isNaN(checkData.RFQCST) || checkData.RFQCST == 0) {
-            rfqcstData = true;
-          }
-          if (rfqcstData) {
-            alert(`견적 공급가가 계산되지 않았습니다.`, "알림");
-            return;
-          }
-          if (Number.isNaN(checkData.RFQVAT) || checkData.RFQVAT == 0) {
-            rfqvatData = true;
-          }
-          if (rfqvatData) {
-            alert(`견적 부가세가 계산되지 않았습니다.`, "알림");
-            return;
-          }
-
-          if (Number.isNaN(checkData.RFQAMT) || checkData.RFQAMT == 0) {
-            rfqamtData = true;
-          }
-          if (rfqamtData) {
-            alert(`견적 총액이 계산되지 않았습니다.`, "알림");
-            return;
-          }
+        if (Number.isNaN(checkData.RFQAMT) || checkData.RFQAMT == 0) {
+          rfqamtData = true;
+        }
+        if (rfqamtData) {
+          alert(`견적 총액이 계산되지 않았습니다.`, "알림");
+          return;
+        }
         if (await confirm("저장하시겠습니까?", "알림")) {
-
+          this.popuploadingVisible = true;
           if (!makeYn && !estmakeYn && !rfqamtData && !rfqvatData) {
             if (parseInt(rfqdthDate) > parseInt(nowDate)) {
               var resultModel = await this.datainsert(this);
               if (resultModel?.ES_RESULT.TYPE !== "S") {
-                alert(`저장을 하지 못했습니다.\n\nSAP 메시지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
+                alert(`견적 제출에 실패하였습니다.<br>오류메세지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
               } else {
-                alert(`저장 하였습니다.\n\nSAP 메시지: ${resultModel.ES_RESULT.MESSAGE}`, "알림");
+                // 파일첨부 저장 같이 넣어주기
+                this.AttachFile.upload();
+                alert(`견적 제출이 완료되었습니다.`, "알림");
               }
             }
             else if (parseInt(rfqdthDate) == parseInt(nowDate)) {
               if (parseInt(rfqdttDate) > parseInt(nowTime)) {
                 var resultModel = await this.datainsert(this);
                 if (resultModel?.ES_RESULT.TYPE !== "S") {
-                  alert(`저장을 하지 못했습니다.\n\nSAP 메시지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
+                  alert(`견적 제출에 실패하였습니다.<br>오류메세지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
                 } else {
-                  alert(`저장 하였습니다.\n\nSAP 메시지: ${resultModel.ES_RESULT.MESSAGE}`, "알림");
+
+                  // 파일첨부 저장 같이 넣어주기
+                  this.AttachFile.upload();
+                  alert(`견적 제출이 완료되었습니다.`, "알림");
                 }
               } else {
                 alert("견적 마감된 공고입니다.", "알림");
@@ -492,12 +563,12 @@ export class OBPIComponent {
         this.estimatepopupVisible = false;
         this.dataLoad(this.imInfo, this.dataService);
         this.statusDataGrid.instance.refresh();
-        this.loadingVisible = false;
+        this.popuploadingVisible = false;
       },
 
     }
 
-    
+
     //견적내역저장 버튼
     this.listSearchSaveButtonOptions = {
       text: '저장',
@@ -513,118 +584,125 @@ export class OBPIComponent {
         if (this.listSearchDetailFormData.RFQSEQ !== select8360Result[0].RFQSEQ) {
           alert("이전 차수는 수정할 수 없습니다.", "알림");
           return;
-        } {
+        }
+        else {
 
-            this.loadingVisible = true;
-            var makeYn = false;
-            var estmakeYn = false;
-            var rfqcstData = false;
-            var rfqamtData = false;
-            var rfqvatData = false;
-            var gretdData = false;
-            var checkData = this.listSearchDetailFormData
-            var result8300Model = await this.dataService.SelectModelData<ZMMT8300Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8300ModelList", [],
-              `MANDT = '${this.appConfig.mandt}' AND BIDNO  = '${bidno}' `, "", QueryCacheType.None);
-            var data8300 = result8300Model;
-            let nowDate = formatDate(new Date(), "yyyyMMdd", "en-US")
-            let nowTime = formatDate(new Date(), "HHmmss", "en-US")
-            let rfqdthDate = formatDate(data8300[0].RFQDTH, "yyyyMMdd", "en-US")
-            let rfqdttDate = data8300[0].RFQDTT.replace(/:/g, '');
+          var makeYn = false;
+          var estmakeYn = false;
+          var rfqcstData = false;
+          var rfqamtData = false;
+          var rfqvatData = false;
+          var gretdData = false;
+          var checkData = this.listSearchDetailFormData
+          var result8300Model = await this.dataService.SelectModelData<ZMMT8300Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8300ModelList", [],
+            `MANDT = '${this.appConfig.mandt}' AND BIDNO  = '${bidno}' `, "", QueryCacheType.None);
+          var data8300 = result8300Model;
+          let nowDate = formatDate(new Date(), "yyyyMMdd", "en-US")
+          let nowTime = formatDate(new Date(), "HHmmss", "en-US")
+          let rfqdthDate = formatDate(data8300[0].RFQDTH, "yyyyMMdd", "en-US")
+          let rfqdttDate = data8300[0].RFQDTT.replace(/:/g, '');
 
-            if (select8360Result[0].RFQRST == "") {
-              if (this.now1gretdDate == "" || this.now1gretdDate == null || this.now1gretdDate == undefined) {
-                gretdData = true;
-              }
-              if (gretdData) {
-                alert("납품 가능 일자가 입력되지 않았습니다.", "알림");
+          if (select8360Result[0].RFQRST == "") {
+            if (this.now1gretdDate == "" || this.now1gretdDate == null || this.now1gretdDate == undefined) {
+              gretdData = true;
+            }
+            if (gretdData) {
+              alert("납품 가능 일자가 입력되지 않았습니다.", "알림");
+              return;
+            }
+
+            if (this.RegulationValue == null) {
+              alert("결재조건을 필수로 입력하십시오.", "알림");
+              return;
+            }
+            let nowDDDate = formatDate(new Date(this.nowgretdDate), "yyyyMMdd", "en-US")
+
+            let dlvdtDate = formatDate(data8300[0].DLVDT, "yyyyMMdd", "en-US")
+
+
+            if (parseInt(dlvdtDate) < parseInt(nowDDDate)) {
+              alert("납기일자 이후에는 납품이 불가능합니다.", "알림");
+              return;
+            }
+
+            //단가가 빈값이면 alert
+            this.listSearchDataSource._array.forEach((array: any) => {
+              if (array.RFQCST == "" || array.RFQCST == null || array.RFQCST == 0) {
+                estmakeYn = true;
                 return;
               }
-              let nowDDDate = formatDate(new Date(this.nowgretdDate), "yyyyMMdd", "en-US")
-
-              let dlvdtDate = formatDate(data8300[0].DLVDT, "yyyyMMdd", "en-US")
-
-
-              if (parseInt(dlvdtDate) < parseInt(nowDDDate)) {
-                alert("납기일자 이후에는 납품이 불가능합니다.", "알림");
-                return;
-              }
-
-              //단가가 빈값이면 alert
+            });
+            if (estmakeYn) {
+              alert(`단가를 필수로 입력해주세요.`, "알림");
+            }
+            //메이커 여부가 X일때
+            if (this.listSearchFormData.MAKERYN == "X") {
               this.listSearchDataSource._array.forEach((array: any) => {
-                if (array.RFQCST == "" || array.RFQCST == null || array.RFQCST == 0) {
-                  estmakeYn = true;
+                //8370에서 MAKER가 빈값이면 alert
+                if (array.MAKER == "" || array.MAKER == null) {
+                  makeYn = true;
                   return;
+
                 }
               });
-              if (estmakeYn) {
-                alert(`단가를 필수로 입력해주세요.`, "알림");
-              }
-              //메이커 여부가 X일때
-              if (this.listSearchFormData.MAKERYN == "X") {
-                this.listSearchDataSource._array.forEach((array: any) => {
-                  //8370에서 MAKER가 빈값이면 alert
-                  if (array.MAKER == "" || array.MAKER == null) {
-                    makeYn = true;
-                    return;
-
-                  }
-                });
-                if (makeYn) {
-                  alert(`메이커를 필수로 입력해주세요.`, "알림");
-                }
-
+              if (makeYn) {
+                alert(`메이커를 필수로 입력해주세요.`, "알림");
               }
 
-              //단가가 빈값이면 alert
-              this.listSearchDataSource._array.forEach((array: any) => {
-                if (array.RFQCST == "" || array.RFQCST == null || array.RFQCST == 0 || array.RFQCST == "") {
-                  estmakeYn = true;
-                  return;
-                }
-              });
-              if (estmakeYn) {
-                alert(`단가를 필수로 입력해주세요.`, "알림");
-              }
-              if (Number.isNaN(checkData.RFQCST1) || checkData.RFQCST1 == 0) {
-                rfqcstData = true;
-              }
-              if (rfqcstData) {
-                alert(`견적 공급가가 계산되지 않았습니다.`, "알림");
+            }
+
+            //단가가 빈값이면 alert
+            this.listSearchDataSource._array.forEach((array: any) => {
+              if (array.RFQCST == "" || array.RFQCST == null || array.RFQCST == 0 || array.RFQCST == "") {
+                estmakeYn = true;
                 return;
               }
-              if (Number.isNaN(checkData.RFQVAT) || checkData.RFQVAT == 0) {
-                rfqvatData = true;
-              }
-              if (rfqvatData) {
-                alert(`견적 부가세가 계산되지 않았습니다.`, "알림");
-                return;
-              }
+            });
+            if (estmakeYn) {
+              alert(`단가를 필수로 입력해주세요.`, "알림");
+            }
+            if (Number.isNaN(checkData.RFQCST1) || checkData.RFQCST1 == 0) {
+              rfqcstData = true;
+            }
+            if (rfqcstData) {
+              alert(`견적 공급가가 계산되지 않았습니다.`, "알림");
+              return;
+            }
+            if (Number.isNaN(checkData.RFQVAT) || checkData.RFQVAT == 0) {
+              rfqvatData = true;
+            }
+            if (rfqvatData) {
+              alert(`견적 부가세가 계산되지 않았습니다.`, "알림");
+              return;
+            }
 
-              if (Number.isNaN(checkData.RFQAMT) || checkData.RFQAMT == 0) {
-                rfqamtData = true;
-              }
-              if (rfqamtData) {
-                alert(`견적 총액이 계산되지 않았습니다.`, "알림");
-                return;
-              }
-              if (await confirm("수정하시겠습니까?", "알림")) {
+            if (Number.isNaN(checkData.RFQAMT) || checkData.RFQAMT == 0) {
+              rfqamtData = true;
+            }
+            if (rfqamtData) {
+              alert(`견적 총액이 계산되지 않았습니다.`, "알림");
+              return;
+            }
+            if (await confirm("수정하시겠습니까?", "알림")) {
 
               if (!makeYn && !estmakeYn && !rfqcstData && !rfqamtData && !rfqvatData) {
                 if (parseInt(rfqdthDate) > parseInt(nowDate)) {
                   var resultModel = await this.dataUpdateInsert(this);
                   if (resultModel?.ES_RESULT.TYPE !== "S") {
-                    alert(`저장을 하지 못했습니다.\n\nSAP 메시지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
+                    alert(`견적 수정에 실패하였습니다.<vr>오류 메시지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
                   } else {
-                    alert(`저장 하였습니다.\n\nSAP 메시지: ${resultModel.ES_RESULT.MESSAGE}`, "알림");
+                    this.AttachFile.upload();
+                    alert(`견적 내용이 수정되었습니다.`, "알림");
                   }
                 }
                 else if (parseInt(rfqdthDate) == parseInt(nowDate)) {
                   if (parseInt(rfqdttDate) > parseInt(nowTime)) {
                     var resultModel = await this.dataUpdateInsert(this);
                     if (resultModel?.ES_RESULT.TYPE !== "S") {
-                      alert(`저장을 하지 못했습니다.\n\nSAP 메시지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
+                      alert(`견적 수정에 실패하였습니다.<vr>오류 메시지: ${resultModel?.ES_RESULT.MESSAGE}`, "알림");
                     } else {
-                      alert(`저장 하였습니다.\n\nSAP 메시지: ${resultModel.ES_RESULT.MESSAGE}`, "알림");
+                      this.AttachFile.upload();
+                      alert(`견적 내용이 수정되었습니다.`, "알림");
                     }
                   } else {
                     alert("견적 마감된 공고입니다.", "알림");
@@ -638,15 +716,15 @@ export class OBPIComponent {
 
               this.dataLoad(this.imInfo, this.dataService);
 
-              this.loadingVisible = false;
-            } else {
-              alert("견적 결과가 나온 공고는 수정할 수 없습니다.", "알림");
             }
           }
-        
+          else {
+            alert("견적 결과가 나온 공고는 수정할 수 없습니다.", "알림");
+          }
+
         }
-        },
-      
+      },
+
     }
     //견적팝업 엑셀 버튼
     this.estimateexportSelectedData = {
@@ -720,9 +798,7 @@ export class OBPIComponent {
 
     var zmmt8320Model = new ZMMT8320Model(this.appConfig.mandt, "", LIFNR, BIZNO, "", "", new Date(), "", new Date(), "00:00:00", "", new Date(), "00:00:00", DIMModelStatus.UnChanged)
     var modelList: ZMMT8320Model[] = [zmmt8320Model];
-    this.loadingVisible = true;
     var resultModel = await dataService.RefcCallUsingModel<ZMMT8320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8320ModelList", modelList, QueryCacheType.None);
-    this.loadingVisible = false;
     return resultModel[0];
 
   }
@@ -741,9 +817,8 @@ export class OBPIComponent {
 
     var modelList: ZMMBIDMstModel[] = [zmmbidmstModel];
 
-    this.loadingVisible = true;
     var resultModel = await dataService.RefcCallUsingModel<ZMMBIDMstModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDMstModelList", modelList, QueryCacheType.None);
-    this.loadingVisible = false;
+
 
     if (resultModel[0].ES_RESULT.TYPE !== "S") {
       alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].ES_RESULT.MESSAGE}`, "알림");
@@ -771,6 +846,12 @@ export class OBPIComponent {
 
 
     var result = await parent.dataService.RefcCallUsingModel<ZMMBIDDtlModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDDtlModelList", modeldtlList, QueryCacheType.None);
+
+    result[0].ET_DATA.forEach(array => {
+      if (array.MATNR_LONG == "") {
+        array.MATNR_LONG = array.MATNRT;
+      }
+    });
 
     return result;
 
@@ -860,7 +941,7 @@ export class OBPIComponent {
 
       var zmms8031Model = new ZMMS8031Model("U", thisObj.listSearchFormData.BIDNO, lifnr, thisObj.listSearchDetailFormData.RFQSEQ, thisObj.listSearchFormData.BIZNO, gretdDate,
         thisObj.listSearchDetailFormData.PAYTY, thisObj.listSearchDetailFormData.RFQCST, thisObj.listSearchDetailFormData.RFQVAT, thisObj.listSearchDetailFormData.RFQAMT,
-        "", DIMModelStatus.Modify);
+        this.attachFiles.length > 0 ? "X" : "", DIMModelStatus.Modify);
 
       this.listselectGridData = this.listSearchDataSource._array;
 
@@ -939,6 +1020,13 @@ export class OBPIComponent {
 
     this.rowCount1 = await this.dataService.ModifyModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", model8360List);
     this.rowCount2 = await this.dataService.ModifyModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", this.zmmt8370);
+    //첨부파일 같이 삭제
+    console.log("seq : " + select8360Result[0].RFQSEQ);
+    if (select8360Result[0].RFQSEQ == "001") {
+      this.AttachFile.deleteDocument(null);
+      var result = this.offceXPUtility.deleteDocument(this.uploadDocumentNo);
+      console.log(result);
+    }
     this.listSearchpopupVisible = false;
   }
 
@@ -978,6 +1066,7 @@ export class OBPIComponent {
 
     this.rowCount1 = await this.dataService.ModifyModelData<ZMMT8360Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", model8360List);
     this.rowCount2 = await this.dataService.ModifyModelData<ZMMT8370Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", this.zmmt8370);
+
   }
   //전체 버튼
   allCategory(thisObj: OBPIComponent) {
@@ -1006,7 +1095,6 @@ export class OBPIComponent {
   }
   //날짜 클릭
   dateCheck(e: any) {
-    console.log("테스트용");
     var staDate = new Date(this.startDate);
     var endDate = new Date(this.endDate);
 
@@ -1018,11 +1106,7 @@ export class OBPIComponent {
       this.dataLoad(this.imInfo, this.dataService);
     }
   }
-  a(e: any) {
-    console.log("신규메소드");
-  }
   DLVDTCheck: any = async (e: any) => {
-    console.log(e);
     var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
     setTimeout(async () => {
 
@@ -1033,7 +1117,6 @@ export class OBPIComponent {
           `MANDT = '${this.appConfig.mandt}' AND BIDNO  = '${bidno}' `, "", QueryCacheType.None);
 
         var data8300 = result8300Model;
-        console.log(this.nowgretdDate);
         let nowDate = formatDate(new Date(e.value), "yyyyMMdd", "en-US")
 
         let dlvdtDate = formatDate(data8300[0].DLVDT, "yyyyMMdd", "en-US")
@@ -1050,21 +1133,32 @@ export class OBPIComponent {
   //상세내용
   DetailData: any = async (thisObj: OBPIComponent) => {
     try {
+      this.popuploadingVisible = true;
       this.selectedItemKeys.forEach(async (key: any) => {
-        this.loadingVisible = true;
         var userInfo = this.authService.getUser().data;
         var bidno = this.selectedItemKeys[0].BIDNO.padStart(15, '0');
         var lifnr = userInfo?.deptId ?? "";
         this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
-        this.estimateFormData = this.selectGridData[0];
-        if (this.estimateFormData.RFQPYN == "") {
-          Object.assign(this.estimateFormData, { RFQPYN: "첨부파일 없음" });
+
+        if (this.selectGridData[0].RFQPYN == "") {
+          Object.assign(this.selectGridData[0], { RFQPYNM: "없음" });
         } else {
-          Object.assign(this.estimateFormData, { RFQPYN: "첨부파일 있음" });
+          Object.assign(this.selectGridData[0], { RFQPYNM: "있음" });
         }
+
+        this.estimateFormData = this.selectGridData[0];
+
+        //조회용 파일 첨부 팝업 띄우기
+        this.editingMode = false;
+        this.attachFiles = [];
+        this.uploadDocumentNo = `MM${this.estimateFormData.BIDNO.padStart(15, '0')}`;
+        this.offceXPUtility.getOffiXpAttachFileInfo(`MM${this.estimateFormData.BIDNO.padStart(15, '0')}`).then((fileInfos) => {
+          this.attachFiles = fileInfos
+        });
+
         //사업자등록번호, 회사명
         this.estimateFormData = Object.assign(this.estimateFormData, { BIZNO: userInfo?.pin, NAME1: userInfo?.deptName });
-        var result8360Model =  await this.dataService.SelectModelData<ZMMT8360Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
+        var result8360Model = await this.dataService.SelectModelData<ZMMT8360Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
           `MANDT = '${this.appConfig.mandt}' AND BIDNO = '${bidno}' AND LIFNR = '${lifnr}'`, "RFQSEQ DESC", QueryCacheType.None);
 
         if (result8360Model.length > 0) {
@@ -1080,7 +1174,7 @@ export class OBPIComponent {
             if (resultData != undefined) {
               Object.assign(array, {
                 MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-                MEINS: resultData.MEINS
+                MEINS: resultData.MEINS, MATNR_LONG: resultData.MATNR_LONG, KMATN_SPEC: resultData.KMATN_SPEC
               });
             }
           });
@@ -1089,6 +1183,8 @@ export class OBPIComponent {
               key: ["BIDNO", "BANFN", "BNFPO"],
               data: result8370Model
             });
+          this.estimateDataGrid.instance.getScrollable().scrollTo(0);
+          this.popuploadingVisible = false;
         }
 
         else if (result8360Model.length == 0) {
@@ -1102,7 +1198,7 @@ export class OBPIComponent {
             if (resultData != undefined) {
               Object.assign(array, {
                 MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-                MEINS: resultData.MEINS
+                MEINS: resultData.MEINS, MATNR_LONG: resultData.MATNR_LONG, KMATN_SPEC: resultData.KMATN_SPEC
               });
             }
           });
@@ -1111,6 +1207,8 @@ export class OBPIComponent {
               key: ["BIDNO", "BANFN", "BNFPO"],
               data: resultModel[0].ET_DATA
             });
+          this.estimateDataGrid.instance.getScrollable().scrollTo(0);
+
         }
 
         var data: Array<any> = this.popupData._array;
@@ -1136,31 +1234,59 @@ export class OBPIComponent {
               array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
             }
           }
-          this.loadingVisible = false;
+
 
         });
 
       });
 
       this.statuspopupVisible = !this.statuspopupVisible;
+
+
+      setTimeout(() => {
+        this.popuploadingVisible = false;
+      }, 10000);
+
     } catch (error) {
-      alert("error", "알림");
+      alert("오류가 발생했습니다.", "알림");
     }
 
   }
   //견적제출
   Duplication: any = async (thisObj: OBPIComponent) => {
-    console.log("zz");
+
+
     this.selectedItemKeys.forEach(async (key: any) => {
+      this.popuploadingVisible = true;
       this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+      var userData = this.authService.getUser().data;
+
+      this.editingMode = true;
+      this.attachFiles = [];
+      this.uploadDocumentNo = `MM${this.selectGridData[0].BIDNO.padStart(15, '0')}${(userData?.pin ?? "").padStart(10, '0')}`;
+      this.offceXPUtility.getOffiXpAttachFileInfo(`MM${this.selectGridData[0].BIDNO.padStart(15, '0')}${(userData?.pin ?? "").padStart(10, '0')}`).then((fileInfos) => {
+        this.attachFiles = fileInfos
+      });
+      if (this.attachFiles.length > 0)
+        Object.assign(this.selectGridData[0], { RFQPYNM: "있음" });
+      else
+        Object.assign(this.selectGridData[0], { RFQPYNM: "없음" });
+
+
       this.estimateFormData = this.selectGridData[0];
+
       Object.assign(this.estimateDetailFormData, { RFQCST: "", RFQVAT: "", RFQAMT: "" });
 
-      if (this.estimateFormData.RFQPYN == "") {
-        Object.assign(this.estimateFormData, { RFQPYN: "첨부파일 없음" });
-      } else {
-        Object.assign(this.estimateFormData, { RFQPYN: "첨부파일 있음" });
-      }
+
+
+      //조회용 파일 첨부 팝업 띄우기
+      this.editingModeTwo = false;
+      this.attachFilesTwo = [];
+      this.uploadDocumentNoTwo = `MM${this.estimateFormData.BIDNO.padStart(15, '0')}`;
+      this.offceXPUtility.getOffiXpAttachFileInfo(`MM${this.estimateFormData.BIDNO.padStart(15, '0')}`).then((fileInfos) => {
+        this.attachFilesTwo = fileInfos
+      });
+
       var checkFlag = false;
 
       let userInfo = this.authService.getUser().data;
@@ -1222,7 +1348,6 @@ export class OBPIComponent {
           }
           if (checkFlag) {
             if (data8300[0].ANLOC != "" && data8300[0].ANDTH != null) {
-              console.log(result8320Model);
               if (result8320Model.length == 0) {
                 alert("현장설명회 미 참석으로 견적 제출이 불가합니다.", "알림");
                 return;
@@ -1235,7 +1360,7 @@ export class OBPIComponent {
               }
             }
 
-           this.estimatepopupVisible = !this.estimatepopupVisible;
+            this.estimatepopupVisible = !this.estimatepopupVisible;
 
             this.loadingVisible = true;
             var result8370Model = await this.datagridLoad(this.dataService, this);
@@ -1248,8 +1373,9 @@ export class OBPIComponent {
 
               if (resultData != undefined) {
                 Object.assign(array, {
-                  MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-                  MEINS: resultData.MEINS, CONPR: resultData.CONPR, MAKER: resultData.MAKER, REMARK: resultData.REMARK
+                  MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE, 
+                  MEINS: resultData.MEINS, CONPR: resultData.CONPR, MAKER: resultData.MAKER, REMARK: resultData.REMARK,
+                  MATNR_LONG: resultData.MATNR_LONG, KMATN_SPEC: resultData.KMATN_SPEC
 
                 });
               }
@@ -1264,10 +1390,14 @@ export class OBPIComponent {
                 key: ["BIDNO", "BANFN", "BNFPO"],
                 data: resultModel[0].ET_DATA
               });
+            this.estimateDataGrid.instance.getScrollable().scrollTo(0);
+
           }
           else {
-            alert("견적결과가 재견적일 경우에만 견적제출이 가능합니다.", "알림");
+            alert("견적결과가 재견적일 경우에만 견적제출이 가능합니다.\t<br> ( 견적 수정 및 삭제는 견적 내역에서 가능합니다. )", "알림");
           }
+
+
         });
       }
 
@@ -1316,7 +1446,7 @@ export class OBPIComponent {
             }
             if (checkFlag) {
               if (data8300[0].ANLOC != "" && data8300[0].ANDTH != null) {
-                console.log(result8320Model);
+
                 if (result8320Model.length == 0) {
                   alert("현장설명회 미 참석으로 견적 제출이 불가합니다.", "알림");
                   return;
@@ -1342,7 +1472,8 @@ export class OBPIComponent {
                 if (resultData != undefined) {
                   Object.assign(array, {
                     MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-                    MEINS: resultData.MEINS, CONPR: resultData.CONPR, MAKER: resultData.MAKER, REMARK: resultData.REMARK
+                    MEINS: resultData.MEINS, CONPR: resultData.CONPR, MAKER: resultData.MAKER, REMARK: resultData.REMARK,
+                    MATNR_LONG: resultData.MATNR_LONG, KMATN_SPEC: resultData.KMATN_SPEC
 
                   });
                 }
@@ -1357,10 +1488,11 @@ export class OBPIComponent {
                   key: ["BIDNO", "BANFN", "BNFPO"],
                   data: resultModel[0].ET_DATA
                 });
-              
+              this.estimateDataGrid.instance.getScrollable().scrollTo(0);
+
             }
             else {
-              alert("견적결과가 재견적일 경우에만 견적제출이 가능합니다.", "알림");
+              alert("견적결과가 재견적일 경우에만 견적제출이 가능합니다.\t<br> ( 견적 수정 및 삭제는 견적 내역에서 가능합니다. )", "알림");
             }
           });
         } else {
@@ -1371,120 +1503,139 @@ export class OBPIComponent {
         alert("견적 제출 마감 시간 경과되었습니다.<br> 공고 상세 내용을 참조해주세요", "알림");
       }
     });
+
+    this.popuploadingVisible = false;
   }
 
 
 
   ListSearch: any = async (thisObj: OBPIComponent) => {
-    this.loadingVisible = true;
+
+    this.popuploadingVisible = true;
+
     var userData = this.authService.getUser().data;
     var selectData = this.statusDataGrid.instance.getSelectedRowsData()[0];
 
+    var bidno = selectData.BIDNO.padStart(15, '0');
+    var lifnr = (userData?.deptId ?? "").padStart(10, '0');
+
+    var bizNo = (userData?.pin ?? "").padStart(10, '0');
+
+    //조회용 파일 첨부 팝업 띄우기
+    this.editingMode = true;
+    this.attachFiles = [];
+    this.uploadDocumentNo = `MM${bidno}${bizNo}`;
+    this.offceXPUtility.getOffiXpAttachFileInfo(`MM${bidno}${bizNo}`).then((fileInfos) => {
+      this.attachFiles = fileInfos
+    });
+
+    //조회용 파일 첨부 팝업 띄우기
+    this.editingModeTwo = false;
+    this.attachFilesTwo = [];
+    this.uploadDocumentNoTwo = `MM${bidno}`;
+    this.offceXPUtility.getOffiXpAttachFileInfo(`MM${bidno}`).then((fileInfos) => {
+      this.attachFilesTwo = fileInfos
+      Object.assign(selectData, { RFQPYNM: "있음" });
+    });
+
     this.regulationEntery.ClearSelectedValue();
     this.resultEntery.ClearSelectedValue();
-    
-      this.listSearchFormData = selectData;
-
-      this.listSearchFormData.BIZNO = userData?.pin ?? "";
-      this.listSearchFormData.NAME1 = userData?.deptName ?? "";
-
-      this.selectList = [];
-      for (var i = 1; i <= parseInt(selectData.RFQSEQ ?? 0); i++) {
-          var seq = i.toString().padStart(3, '0');
-          this.selectList.push(new Seq(seq, "[차수] " + seq));
-        }
-      this.seqSelect = selectData.RFQSEQ.padStart(3, '0');;
 
 
-      this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+    this.listSearchFormData = selectData;
 
-      this.listSearchFormData = this.selectGridData[0];
-      this.listSearchFormData = Object.assign(this.listSearchFormData, { BIZNO: userData?.pin, NAME1: userData?.deptName });
-      if (this.selectGridData[0].RFQPYN == "") {
-        Object.assign(this.listSearchFormData, { RFQPYN: "첨부파일 없음" });
-      } else {
-        Object.assign(this.listSearchFormData, { RFQPYN: "첨부파일 있음" });
-      }
+    this.listSearchFormData.BIZNO = userData?.pin ?? "";
+    this.listSearchFormData.NAME1 = userData?.deptName ?? "";
 
-      var result8370Model = await this.datagridLoad(this.dataService, this);
-      var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+    this.selectList = [];
+    for (var i = 1; i <= parseInt(selectData.RFQSEQ ?? 0); i++) {
+      var seq = i.toString().padStart(3, '0');
+      this.selectList.push(new Seq(seq, "[차수] " + seq));
+    }
+    this.seqSelect = selectData.RFQSEQ.padStart(3, '0');;
 
-      var bidno = this.listSearchFormData.BIDNO.padStart(15, '0');
-      var lifnr = userData?.deptId ?? "";
-      var select8360Result = await this.dataService.SelectModelData<ZMMT8360Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
-        `MANDT = '${this.appConfig.mandt}' AND BIDNO = '${bidno}' AND LIFNR = '${lifnr}'`, "RFQSEQ DESC", QueryCacheType.None);
+
+    this.selectGridData = this.statusDataGrid.instance.getSelectedRowsData();
+
+    this.listSearchFormData = this.selectGridData[0];
+    this.listSearchFormData = Object.assign(this.listSearchFormData, { BIZNO: userData?.pin, NAME1: userData?.deptName });
+
+    var result8370Model = await this.datagridLoad(this.dataService, this);
+    var resultModel = await this.detaildataLoad(this, this.selectedItemKeys[0].BIDNO);
+
+
+    var select8360Result = await this.dataService.SelectModelData<ZMMT8360Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8360ModelList", [],
+      `MANDT = '${this.appConfig.mandt}' AND BIDNO = '${bidno}' AND LIFNR = '${lifnr}'`, "RFQSEQ DESC", QueryCacheType.None);
 
     if (select8360Result.length > 0) {
       this.nowgretdDate = select8360Result[0].GRETD
       this.ResultValue = select8360Result[0].RFQRST
-        this.listSearchDetailFormData = select8360Result[0];
-        this.listSearchDetailFormData = Object.assign(this.listSearchDetailFormData, {
-          GRETD: select8360Result[0].GRETD, PAYTY: select8360Result[0].PAYTY, RFQSEQ: select8360Result[0].RFQSEQ,
-          RFQCST: select8360Result[0].RFQCST, RFQVAT: select8360Result[0].RFQVAT, RFQAMT: select8360Result[0].RFQAMT
-        });
+      this.listSearchDetailFormData = select8360Result[0];
+      this.listSearchDetailFormData = Object.assign(this.listSearchDetailFormData, {
+        GRETD: select8360Result[0].GRETD, PAYTY: select8360Result[0].PAYTY, RFQSEQ: select8360Result[0].RFQSEQ,
+        RFQCST: select8360Result[0].RFQCST, RFQVAT: select8360Result[0].RFQVAT, RFQAMT: select8360Result[0].RFQAMT
+      });
 
-        //8370
-        var result8370Model = await this.dataService.SelectModelData<ZMMT8370Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", [],
-          `MANDT = '${this.appConfig.mandt}' AND BIDNO = '${bidno}' AND LIFNR = '${lifnr}' AND RFQSEQ = '${select8360Result[0].RFQSEQ}'`, "RFQSEQ DESC", QueryCacheType.None);
-        result8370Model.forEach((array: any) => {
-          var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO && obj.BANFN == array.BANFN);
+      //8370
+      var result8370Model = await this.dataService.SelectModelData<ZMMT8370Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8370ModelList", [],
+        `MANDT = '${this.appConfig.mandt}' AND BIDNO = '${bidno}' AND LIFNR = '${lifnr}' AND RFQSEQ = '${select8360Result[0].RFQSEQ}'`, "RFQSEQ DESC", QueryCacheType.None);
+      result8370Model.forEach((array: any) => {
+        var resultData = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO && obj.BANFN == array.BANFN);
 
-          if (resultData != undefined) {
-            Object.assign(array, {
-              MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-              MEINS: resultData.MEINS
-            });
-          }
-        });
-        this.RegulationValue = "1";
-        this.listSearchDataSource = new ArrayStore(
-          {
-            key: ["BIDNO", "BANFN", "BNFPO"],
-            data: result8370Model
+        if (resultData != undefined) {
+          Object.assign(array, {
+            MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
+            MEINS: resultData.MEINS, MATNR_LONG: resultData.MATNR_LONG, KMATN_SPEC: resultData.KMATN_SPEC
           });
-        var data: Array<any> = this.listSearchDataSource._array;
-        data.forEach(async (array: any) => {
-
-          var MENGEdata = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
-
-          if (MENGEdata != undefined) {
-            if (this.listSearchFormData.BIDRUL == "A") {
-              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
-              array.RFQVAT = parseInt(array.RFQCST1) * 0.1
-              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
-            }
-
-            else {
-              array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
-              if (this.listSearchFormData.VATTY == "OUT") {
-                array.RFQVAT = parseInt(array.RFQCST1) * 0.1
-              } else {
-                array.RFQVAT = "0"
-              }
-              array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
-            }
-          }
-          this.loadingVisible = false;
-
+        }
+      });
+      this.RegulationValue = "1";
+      this.listSearchDataSource = new ArrayStore(
+        {
+          key: ["BIDNO", "BANFN", "BNFPO"],
+          data: result8370Model
         });
-        this.listSearchpopupVisible = !this.listSearchpopupVisible;
+      this.estimateDataGrid.instance.getScrollable().scrollTo(0);
 
-      } else {
-        alert("견적 내역이 없습니다.", "알림");
+      var data: Array<any> = this.listSearchDataSource._array;
+      data.forEach(async (array: any) => {
 
-      }
-    
+        var MENGEdata = resultModel[0].ET_DATA.find(obj => obj.BNFPO == array.BNFPO);
 
+        if (MENGEdata != undefined) {
+          if (this.listSearchFormData.BIDRUL == "A") {
+            array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+            array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+            array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+          }
+
+          else {
+            array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
+            if (this.listSearchFormData.VATTY == "OUT") {
+              array.RFQVAT = parseInt(array.RFQCST1) * 0.1
+            } else {
+              array.RFQVAT = "0"
+            }
+            array.RFQAMT = parseInt(array.RFQCST1) + parseInt(array.RFQVAT)
+          }
+        }
+        this.loadingVisible = false;
+
+      });
+      this.listSearchpopupVisible = !this.listSearchpopupVisible;
+
+
+    } else {
+      alert("견적 내역이 없습니다.", "알림");
+
+    }
+    this.popuploadingVisible = false;
 
   }
 
 
   movePage(e: any) {
     this.router.navigate(['obmr']);
-  }
-  //자료첨부
-  test() {
-
   }
   selectionChanged(data: any) {
     this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
@@ -1506,7 +1657,7 @@ export class OBPIComponent {
 
     var row = e.data;
     if (this.estimateFormData.BIDRUL == "A") {
-      if (row.CONPR == 0 || row.CONPR == undefined || Number.isNaN(row.CONPR) ) {
+      if (row.CONPR == 0 || row.CONPR == undefined || Number.isNaN(row.CONPR)) {
         row.CONPR = 0
       }
       row.RFQCST = parseInt(row.MENGE) * parseInt(row.CONPR);
@@ -1572,7 +1723,7 @@ export class OBPIComponent {
       if (resultData != undefined) {
         Object.assign(array, {
           MATNR: resultData.MATNR, MATNRT: resultData.MATNRT, MENGE: resultData.MENGE,
-          MEINS: resultData.MEINS
+          MEINS: resultData.MEINS, MATNR_LONG: resultData.MATNR_LONG, KMATN_SPEC: resultData.KMATN_SPEC
         });
       }
     });
@@ -1660,7 +1811,6 @@ export class OBPIComponent {
 
       let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
-      console.info(resultModel);
 
       //---------------------------------------------------------------------------------
       dataSet = await this.dataService.dbSelectToDataSet(
@@ -1669,7 +1819,6 @@ export class OBPIComponent {
 
       resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
-      console.info(resultModel);
 
     }
   }
@@ -1682,7 +1831,6 @@ export class OBPIComponent {
 
       let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
-      console.info(resultModel);
 
       //---------------------------------------------------------------------------------
       dataSet = await this.dataService.dbSelectToDataSet(
@@ -1691,7 +1839,6 @@ export class OBPIComponent {
 
       resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
-      console.info(resultModel);
 
     }
   }
@@ -1704,7 +1851,6 @@ export class OBPIComponent {
 
       let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
-      console.info(resultModel);
 
       //---------------------------------------------------------------------------------
       dataSet = await this.dataService.dbSelectToDataSet(
@@ -1713,8 +1859,97 @@ export class OBPIComponent {
 
       resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
-      console.info(resultModel);
 
+    }
+  }
+
+  fileShowPopup() {
+
+    this.takePopupVisible = true;
+
+  }
+
+  fileBidShowPopup() {
+
+    this.takePopupVisibleTwo = true;
+
+  }
+  attachFileChanged(e: any) {
+
+    if (this.attachFiles.length > 0) {
+      if (this.estimatepopupVisible)
+        this.estimateFormData.RFQPYNM = "있음";
+      else if (this.listSearchpopupVisible)
+        this.listSearchFormData.RFQPYNM = "있음";
+
+    }
+    else {
+      if (this.estimatepopupVisible)
+        this.estimateFormData.RFQPYNM = "없음";
+      else if (this.listSearchpopupVisible)
+        this.listSearchFormData.RFQPYNM = "없음";
+    }
+  }
+
+  async onCellHoverChangedDetail(e: any) {
+    if (e.rowType == "data" && e.rowIndex >= 0) {
+      if (e.column.dataField === "MATNRT") {
+
+        var zmmtTextModel = new ZMMBIDTextModel(new ZMMS9000Model("", ""), e.data.BANFN, e.data.BNFPO, []);
+        var modelList: ZMMBIDTextModel[] = [zmmtTextModel];
+
+        var resultModel = await this.dataService.RefcCallUsingModel<ZMMBIDTextModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDTextModelList", modelList, QueryCacheType.None);
+        this.Longtext = resultModel[0].ET_DATA[0].TDLINE;
+        
+        //this.Longtext = e.rowIndex + "테스트";
+        if (e.eventType === "mouseover") {
+          this.target = e.cellElement;
+          this.popoverDetail.instance.show();
+        }
+        if (e.eventType === "mouseout") {
+          this.popoverDetail.instance.hide();
+        }
+      }
+    }
+  }
+  async onCellHoverChangedList(e: any) {
+    if (e.rowType == "data" && e.rowIndex >= 0) {
+      if (e.column.dataField === "MATNRT") {
+        var zmmtTextModel = new ZMMBIDTextModel(new ZMMS9000Model("", ""), e.data.BANFN, e.data.BNFPO, []);
+        var modelList: ZMMBIDTextModel[] = [zmmtTextModel];
+
+        var resultModel = await this.dataService.RefcCallUsingModel<ZMMBIDTextModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDTextModelList", modelList, QueryCacheType.None);
+        this.Longtext = resultModel[0].ET_DATA[0].TDLINE;
+
+        //this.Longtext = e.rowIndex + "테스트";
+        if (e.eventType === "mouseover") {
+          this.target = e.cellElement;
+          this.popoverList.instance.show();
+        }
+        if (e.eventType === "mouseout") {
+          this.popoverList.instance.hide();
+        }
+      }
+    }
+  }
+   async onCellHoverChangedEst(e: any) {
+    if (e.rowType == "data" && e.rowIndex >= 0) {
+      if (e.column.dataField === "MATNRT") {
+        var zmmtTextModel = new ZMMBIDTextModel(new ZMMS9000Model("", ""), e.data.BANFN, e.data.BNFPO, []);
+        var modelList: ZMMBIDTextModel[] = [zmmtTextModel];
+
+        var resultModel = await this.dataService.RefcCallUsingModel<ZMMBIDTextModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMBIDTextModelList", modelList, QueryCacheType.None);
+        this.Longtext = resultModel[0].ET_DATA[0].TDLINE;
+        
+        //this.Longtext = e.rowIndex + "테스트";
+        if (e.eventType === "mouseover") {
+          this.target = e.cellElement;
+          this.popoverEst.instance.show();
+        }
+        if (e.eventType === "mouseout") {
+          this.popoverEst.instance.hide();
+        }
+      }
     }
   }
 }

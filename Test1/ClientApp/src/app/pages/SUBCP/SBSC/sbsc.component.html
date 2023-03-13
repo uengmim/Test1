@@ -1,0 +1,553 @@
+ <!--toolbar-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div style="float:left;width:auto">
+        <dx-date-box [(value)]="now" type="date" label="조회일" labelmode="floating" displayFormat="yyyy-MM-dd" [width]="120"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;" [disabled]="!btnVisible">
+    <div *dxTemplate style="margin-left:15px;">
+      <nh-possible-comm #CodeEntery
+                        dataStoreKey="dataStoreKey"
+                        [codeInfo]="lifnrCode"
+                        valueColumn="LIFNR"
+                        valueDisplayFormat="%NAME1%(%LIFNR%)"
+                        [(selectedValue)]="lifnrValue"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        width="auto"
+                        label="업체정보"
+                        labelMode="floating"
+                        [showClearButton]="true"
+                        (onDataLoaded)="onPEDataLoaded($event)">
+      </nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px;">
+      <nh-possible-comm #maktEntery
+                        [dataStoreKey]="dataStoreKey"
+                        [codeInfo]="maktCode"
+                        valueColumn="MATNR"
+                        valueDisplayFormat="%MAKTX%(%MATNR%)"
+                        placeholderText="제품명"
+                        label="제품명"
+                        width="220"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        [showClearButton]="true"
+                        [(selectedValue)]="matnrValue"
+                        [gridBoxWidth]="500"
+                        (onDataLoaded)="onPEDataLoaded($event)"
+                        (onEntryValueChanged)="onCodeChanged($event)"
+                        labelMode="floating"
+                        class="weight-test">
+      </nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25">
+    <dx-button stylingMode="contained"
+               (onClick)="movePage($event)"
+               text="구성품 수불현황"
+               type="normal">
+    </dx-button>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+
+<dx-data-grid #manufacturGrid
+              [dataSource]="statusData"
+              [remoteOperations]="false"
+              [focusedRowIndex]="0"
+              [allowColumnReordering]="true"
+              [allowColumnResizing]="true"
+              [rowAlternationEnabled]="true"
+              [showBorders]="true"
+              (onSelectionChanged)="selectionChanged($event)"
+              [columnAutoWidth]="true"
+              height="calc(100vh - 155px)"
+              [columnResizingMode]="columnResizeMode">
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+  <dxo-selection mode="single"></dxo-selection>
+  <dxo-filter-row visible="true"></dxo-filter-row>
+  <dxo-header-filter visible="true"></dxo-header-filter>
+
+  <dxo-search-panel [visible]="true"
+                    [highlightCaseSensitive]="true"></dxo-search-panel>
+
+  <!--Data column-->
+  <dxi-column dataField="MATKL"
+              caption="제품그룹"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+
+  <dxi-column dataField="MATNR"
+              caption="자재코드"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+
+  <dxi-column dataField="MAKTX"
+              caption="품명"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+  <dxi-column dataField="MEINS"
+              caption="기본단위"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_P_MENGE"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산지시량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_P_MENGE_M"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산지시량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_P_MENGE_Y"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산지시량(년)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_P_MENGE_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산지시량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_P_MENGE_M_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산지시량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_P_MENGE_Y_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산지시량(년)">
+  </dxi-column>
+  <dxi-column dataField="PRD_PI_MENGE"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_PI_MENGE_M"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_PI_MENGE_Y"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산량(년)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_PI_MENGE_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_PI_MENGE_M_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_PI_MENGE_Y_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="생산량(년)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_A_MENGE"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="입고량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_A_MENGE_M"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="입고량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_A_MENGE_Y"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="입고량(년)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_A_MENGE_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="입고량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_A_MENGE_M_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="입고량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_A_MENGE_Y_MT"
+
+              alignment="right"
+              caption="입고량(년)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_SD_MENGE"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출하량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_SD_MENGE_M"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출하량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_SD_MENGE_Y"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출하량(년)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_SD_MENGE_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출하량(일)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_SD_MENGE_M_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출하량(월)">
+  </dxi-column>
+
+  <dxi-column dataField="PRD_SD_MENGE_Y_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출하량(년)">
+  </dxi-column>
+
+  <dxi-column dataField="LGORT"
+              alignment="right"
+              caption="저장위치">
+  </dxi-column>
+
+  <dxi-column dataField="LABST"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="가용재고">
+  </dxi-column>
+
+  <dxi-column dataField="INSME"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="품질재고">
+  </dxi-column>
+
+  <dxi-column dataField="SPEME"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="고결/파포등">
+  </dxi-column>
+
+  <dxi-column dataField="LABST_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="가용재고">
+  </dxi-column>
+
+  <dxi-column dataField="INSME_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="품질재고">
+  </dxi-column>
+
+  <dxi-column dataField="SPEME_MT"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="고결/파동포">
+  </dxi-column>
+
+  <dxo-summary>
+    <dxi-total-item column="MEINS"
+                    alignment="right"
+                    summaryType="count"
+                    displayFormat="{0}">
+    </dxi-total-item>
+    <dxi-total-item column="PRD_P_MENGE"
+                    dataType="number"
+                    valueFormat="#,##0.###"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_P_MENGE_M"
+                    dataType="number"
+                    valueFormat="#,##0.###"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_P_MENGE_Y"
+                    dataType="number"
+                    summaryType="sum"
+                    valueFormat="#,##0.###"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_P_MENGE_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_P_MENGE_M_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_P_MENGE_Y_MT"
+                    dataType="number"
+                    valueFormat="#,##0.###"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_PI_MENGE"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_PI_MENGE_M"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_PI_MENGE_Y"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_PI_MENGE_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_PI_MENGE_M_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_PI_MENGE_Y_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_A_MENGE"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_A_MENGE_M"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_A_MENGE_Y"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_A_MENGE_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_A_MENGE_M_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_A_MENGE_Y_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_SD_MENGE"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_SD_MENGE_M"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_SD_MENGE_Y"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_SD_MENGE_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_SD_MENGE_M_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="PRD_SD_MENGE_Y_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="LABST"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="INSME"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="SPEME"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="LABST_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="INSME_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+
+    <dxi-total-item column="SPEME_MT"
+                    valueFormat="#,##0.###"
+                    dataType="number"
+                    summaryType="sum"
+                    displayFormat="{0}">
+    </dxi-total-item>
+  </dxo-summary>
+</dx-data-grid>

@@ -14,6 +14,7 @@ import {
 } from 'devextreme-angular';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import ArrayStore from 'devextreme/data/array_store';
+import { AuthService } from '../../../shared/services';
 
 /**
  *
@@ -47,10 +48,17 @@ export class SBIBComponent {
   saleAmountHeaderFilter: any;
   customOperations!: Array<any>;
 
+  empid: string = "";
 
-  constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+
+  constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private appConfig: AppConfigService,
+    private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 재고현황확인(대리점)";
     //this._dataService = dataService;
+
+    //로그인 사용자 정보
+    let usrInfo = authService.getUser().data;
+    this.empid = usrInfo.empId.padStart(10, '0');
 
     //조회버튼
     this.searchButtonOptions = {
@@ -68,7 +76,7 @@ export class SBIBComponent {
   public async dataLoad(dataService: ImateDataService) {
     var zmm3120: ZMMS3120Model[] = [];
     var zmm3140: ZMMS3140Model[] = [];
-    zmm3140.push(new ZMMS3140Model("", "", "W", "", "", "", "", "", "", ""));
+    zmm3140.push(new ZMMS3140Model("", "", "W", this.empid, "", "", "", "", "", ""));
     var zmc = new ZMMCURRStockModel("", "1000", zmm3120, zmm3140);
     var model: ZMMCURRStockModel[] = [zmc];
     var resultModel = await this.dataService.RefcCallUsingModel<ZMMCURRStockModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMCURRStockModelList", model, QueryCacheType.None);

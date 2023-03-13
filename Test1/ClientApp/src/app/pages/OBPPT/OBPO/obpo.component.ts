@@ -40,8 +40,10 @@ export class OBPOComponent {
   userInfo: any;
 
   ynList: any;
+
   selectBoxValue: any;
 
+  noText: string = "조회된 데이터가 없습니다.";
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service : Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 구매발주확인";
 
@@ -56,7 +58,7 @@ export class OBPOComponent {
     // 접수구분 콤보박스 세팅
 
     this.ynList = service.getYnGubun();
-    this.selectBoxValue = "ALL";
+    this.selectBoxValue = "";
 
 
     this.poDate = formatDate(new Date(), "yyyy-MM-dd", "en-US");
@@ -117,6 +119,15 @@ export class OBPOComponent {
         key: ["EBELN", "EBELP"],
         data: resultModel[0].ET_DATA
       });
+    this.poGrid.instance.getScrollable().scrollTo(0);
+
+    if (this.selectBoxValue == "ALL") {
+      this.poGrid.instance.clearFilter();
+    } else if (this.selectBoxValue == "X") {
+      this.poGrid.instance.filter(['LABNR', '<>', ""]);
+    } else {
+      this.poGrid.instance.filter(['LABNR', '=', ""]);
+    }
     /*
     this.poData = new ArrayStore(
       {

@@ -101,6 +101,8 @@ export class SBMOComponent {
   formancepopupcloseButtonOptions: any;
   strationpopupcloseButtonOptions: any;
 
+  dateEditOption: any;
+
   //자재불출요청
   GIRequestButtonOptions: any;
 
@@ -546,9 +548,13 @@ export class SBMOComponent {
         var a = resultModel.map(object => { return parseInt(object.SEQ); });
         index = Math.max(...a);
       }
+
+      this.dateEditOption = { showClearButton: true, min: formatDate(selectData[0].PRD_P_ACPT_DATE, "yyyy-MM-dd", "en-US") };
+
       if (selectData[0].PRD_STATUS === "10" || selectData[0].PRD_STATUS === "20") {
-        gridResult.push(Object.assign(new ZMMT1330Model(this.appConfig.mandt, this.productGrid.instance.getSelectedRowsData()[0].EBELN, this.productGrid.instance.getSelectedRowsData()[0].EBELP, (index + 1).toString().padStart(3, '0'),
-          this.authService.getUser().data?.deptId ?? "", this.productGrid.instance.getSelectedRowsData()[0].MATNR, this.productGrid.instance.getSelectedRowsData()[0].TXZ01, "", 0, 0, new Date(), 0,
+        var data = this.productGrid.instance.getSelectedRowsData()[0];
+        gridResult.push(Object.assign(new ZMMT1330Model(this.appConfig.mandt, data.EBELN, data.EBELP, (index + 1).toString().padStart(3, '0'),
+          this.authService.getUser().data?.deptId ?? "", data.MATNR, data.TXZ01, data.MEINS, 0, 0, new Date(), 0,
           new Date("0001-01-01"), "", 0, 0, null, "", "",
           "", "", "", "", "", "", new Date("0001-01-01"), "000000", "", new Date("0001-01-01"), "000000", DIMModelStatus.Add), { FLAG: "I", DATA_DATE: formatDate(new Date(), 'yyyy-MM-dd', 'en-US'), PRD_G_DATE: formatDate(new Date(), 'yyyy-MM-dd', 'en-US'), PRD_G_NAME: this.ReceptionistData.PRD_P_ACPT_NAME  }));
         this.registSelectKey = [{ SEQ: (index + 1).toString().padStart(3, '0') }];
@@ -1034,7 +1040,6 @@ export class SBMOComponent {
           });
         }
 
-        console.log(zmmt1331List);
         var Insert30Model = await this.dataService.ModifyModelData<ZMMT1330Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1330ModelList", zmmt1330List);
 
         if (zmmt1331List.length > 0)
@@ -1118,7 +1123,7 @@ export class SBMOComponent {
       }
 
       data.unshift(Object.assign(new ZMMT1330Model(this.appConfig.mandt, this.productGrid.instance.getSelectedRowsData()[0].EBELN, this.productGrid.instance.getSelectedRowsData()[0].EBELP, (index + 1).toString().padStart(3, '0'),
-        this.authService.getUser().data?.deptId ?? "", this.productGrid.instance.getSelectedRowsData()[0].MATNR, this.productGrid.instance.getSelectedRowsData()[0].TXZ01, "", 0, 0, new Date(), 0,
+        this.authService.getUser().data?.deptId ?? "", this.productGrid.instance.getSelectedRowsData()[0].MATNR, this.productGrid.instance.getSelectedRowsData()[0].TXZ01, this.productGrid.instance.getSelectedRowsData()[0].MEINS, 0, 0, new Date(), 0,
         new Date("0001-01-01"), "", 0, 0, null, "", "",
         "", "", "", "", "", "", new Date("0001-01-01"), "000000", "", new Date("0001-01-01"), "000000", DIMModelStatus.Add), { FLAG: "I", DATA_DATE: formatDate(new Date(), 'yyyy-MM-dd', 'en-US'), PRD_G_DATE: formatDate(new Date(), 'yyyy-MM-dd', 'en-US'), PRD_G_NAME: "세기명" }));
 
@@ -1238,7 +1243,7 @@ export class SBMOComponent {
       });
       var array = this.productGrid.instance.getSelectedRowsData()[0];
 
-      zmmt1310List.push(new ZMMT1310Model(array.MANDT, array.EBELN, array.EBELP, array.LIFNR, array.MATNR, array.TXZ01, array.MEINS, "20",
+      zmmt1310List.push(new ZMMT1310Model(array.MANDT, array.EBELN, array.EBELP, array.LIFNR, array.MATNR, array.TXZ01, array.MEINS, resultModel.length>0 ? "20" : "10",
         array.PRD_P_MENGE, array.PRD_P_MENGE_MT, array.PRD_P_DATE, array.PRD_P_NAME, array.PRD_P_DEPT_NAME, array.PRD_P_DATE_RFR,
         array.PRD_P_DATE_RTO, array.PRD_TYPE, array.PRD_TEXT, array.PRD_P_ACPT_DATE, array.PRD_P_ACPT_NAME, piMsum,
         array.PRD_PI_MENGE_MT, piMsum === 0 ? formatDate12 : lastDate, gMsum, gMsum === 0 ? formatDate12 : lastDate2, "세기", array.PRD_A_MENGE,
@@ -1285,9 +1290,13 @@ export class SBMOComponent {
 
       }
 
-      this.dataLoad(this.iminfo, this.dataService, this);
+      var newData = await this.dataLoad(this.iminfo, this.dataService, this);
 
       this.saveData = [];
+
+      var selectKey = this.productGrid.instance.getSelectedRowsData()[0];
+      var findData = newData.find(obj => obj.EBELN == selectKey.EBELN);
+      this.popupData = [findData];
 
       alert("삭제되었습니다.", "알림");
     }
@@ -1315,6 +1324,8 @@ export class SBMOComponent {
   insertPopup(e: any) {
     var select30ModelCnt = this.registGrid.instance.getSelectedRowsData().length;
     var select30Model = this.registGrid.instance.getSelectedRowsData()[0];
+
+    this.registGrid.instance.closeEditCell();
 
     if (select30ModelCnt == 0) {
       alert("생산결과를 선택해주세요.", "알림")

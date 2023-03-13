@@ -1,4 +1,4 @@
-<!--차량입출문 현황-->
+<!--석고 차량입출문 현황-->
 <div style="margin:10px 10px 0px 10px">
 
   <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
@@ -25,39 +25,7 @@
       </div>
     </dxi-item>
 
-    <dxi-item location="after"
-              locateInMenu="auto"
-              style="width: auto;
-            margin-right: 5px;">
-      <dx-button (onClick)="weighingCertificate()"
-                 [disabled]="!selectedItemKeys.length"
-                 [width]="120"
-                 text="계량증명서"
-                 style="margin-top:4px;">
-      </dx-button>
-    </dxi-item>
 
-    <dxi-item location="after"
-              locateInMenu="auto"
-              style="width: auto;margin-right: 5px;" >
-      <dx-button (onClick)="takeOutSpecific()"
-                 [disabled]="!selectedItemKeys.length"
-                 [width]="100"
-                 text="반출증"
-                 style="margin-top:4px;">
-      </dx-button>
-    </dxi-item>
-    <dxi-item location="after"
-              locateInMenu="auto"
-              style="width: auto;
-            margin-right: 5px;">
-      <dx-button (onClick)="deleteRecords(this)"
-                 [disabled]="!selectedItemKeys.length"
-                 [width]="100"
-                 style="margin-top:4px;"
-                 text="삭제">
-      </dx-button>
-    </dxi-item>
 
   </dx-toolbar>
 
@@ -69,7 +37,7 @@
                 [columnResizingMode]="columnResizeMode"
                 [columnHidingEnabled]="true"
                 [allowColumnReordering]="true"
-                [keyExpr]="['ZGW_DATE','ZGW_SEQ']"
+                [keyExpr]="['DOCNO','LFDAT','VBELN']"
                 [selection]="{ mode: 'single' }"
                 height="calc(100vh - 190px)"
                 [(selectedRowKeys)]="selectedRows"
@@ -92,21 +60,20 @@
     <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
     <!--Data column-->
-    <dxi-column dataField="ZGW_GRIR_GUBUN"
+    <dxi-column dataField="DOCNO"
                 alignment="center"
-                caption="계근대 구분">
+                caption="관리번호">
     </dxi-column>
-    <dxi-column dataField="ZGW_DATE"
+    <dxi-column dataField="LFDAT"
                 dataType="date"
                 alignment="center"
                 sortOrder="desc"
                 format="yyyy-MM-dd"
-                caption="발생일">
+                caption="납품일">
     </dxi-column>
-    <dxi-column dataField="ZGW_SEQ"
+    <dxi-column dataField="VBELN"
                 alignment="center"
-                sortOrder="desc"
-                caption="순번">
+                caption="판매문서">
     </dxi-column>
     <dxi-column dataField="ZCARNO"
                 caption="차량번호">
@@ -114,31 +81,40 @@
     <dxi-column dataField="ZDRIVER"
                 caption="운전기사명">
     </dxi-column>
-    <dxi-column dataField="ZGW_NAME1"
+    <dxi-column dataField="KUNNR"
+                caption="고객번호">
+    </dxi-column>
+    <dxi-column dataField="NAME1"
                 caption="업체명">
     </dxi-column>
-    <dxi-column dataField="ZGW_MAKTX"
+    <dxi-column dataField="MATNR"
                 caption="자재명">
     </dxi-column>
-    <dxi-column dataField="ZGW_BRGEW"
+    <dxi-column dataField="BRGEW"
                 caption="총중량"
                 format="#,###">
     </dxi-column>
-    <dxi-column dataField="ZGW_NTGEW"
+    <dxi-column dataField="NTGEW"
                 caption="공차중량"
                 format="#,###">
     </dxi-column>
-    <dxi-column dataField="ZGW_ATGEW"
+    <dxi-column dataField="GIGEW"
                 caption="실중량"
                 format="#,###">
     </dxi-column>
-    <dxi-column dataField="ZGW_GR_TIME"
+    <dxi-column dataField="VRKME"
+                caption="단위">
+    </dxi-column>
+    <dxi-column dataField="PER1X"
+                caption="검량자">
+    </dxi-column>
+    <dxi-column dataField="GRZET"
                 dataType="time"
                 alignment="center"
                 format="HH:mm:ss"
                 caption="입문시간">
     </dxi-column>
-    <dxi-column dataField="ZGW_GI_TIME"
+    <dxi-column dataField="GIZET"
                 dataType="time"
                 alignment="center"
                 format="HH:mm:ss"

@@ -24,7 +24,7 @@ const data2: Data2[] = [
 
   {
     code: '9999',
-    name: '임가공(구성품)'
+    name: '임가공'
   },
 ];
 

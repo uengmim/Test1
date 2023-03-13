@@ -41,8 +41,9 @@
                           label="구분"
                           [(selectedValue)]="PrgstatusCodeValue"
                           popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          comboGridScrollMode="virtual"
                           (onDataLoaded)="onPrgstatusDataLoaded($event)"
                           [validationErrors]="[{type:'required', message:'구분을 선택하여 주십시오.'}]"
                           [showClearButton]="true">
@@ -113,6 +114,7 @@
                 [rowAlternationEnabled]="true"
                 [showBorders]="true"
                 [columnAutoWidth]="true"
+                [noDataText]="noText"
                 height="calc(100vh - 155px)"
                 [columnResizingMode]="columnResizeMode"
                 (onSelectionChanged)="selectionChanged($event)">
@@ -273,12 +275,12 @@
                       location="before">
     </dxi-toolbar-item>
     <!--
-  <dxi-toolbar-item widget="dxButton"
-                    toolbar="top"
-                    location="after"
-                    [options]="estimateexportSelectedData">
-  </dxi-toolbar-item>
-    -->
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="estimateexportSelectedData">
+    </dxi-toolbar-item>
+      -->
     <dxi-toolbar-item widget="dxButton"
                       toolbar="top"
                       location="after"
@@ -340,7 +342,7 @@
                          text="첨부확인"
                          type="normal"
                          style="margin-left: 100px;"
-                         (onClick)="test()"
+                         (onClick)="fileUploadPopup()"
                          [width]="150">
               </dx-button>
 
@@ -352,7 +354,7 @@
         <dx-form id="8360popupForm" [formData]="estimateDetailFormData" style="margin-top:10px;">
           <dxi-item itemType="group" [colCount]="3" [colSpan]="2" style="margin-top:5px;">
             <dxi-item dataField="GRETD" [disabled]="true" editorType="dxDateBox" [editorOptions]="{ height: 30, dataType:'date',  displayFormat:'yyyy-MM-dd' , readOnly: true}"><dxo-label text="납품가능 일자 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"></dxo-label></dxi-item>
-            <dxi-item dataField="PAYTY" [disabled]="true" [label]="{text: '결제조건      '}" [editorOptions]="{ height: 30 , readOnly: true}">
+            <dxi-item dataField="PAYTY" [disabled]="true" [label]="{text: '결재조건      '}" [editorOptions]="{ height: 30 , readOnly: true}">
               <div *dxTemplate>
                 <nh-possible-comm #regulationEntery
                                   dataStoreKey="obmr"
@@ -366,9 +368,10 @@
                                   popupGridScrollMode="standard"
                                   [popupGridPagingMode]="true"
                                   [popupGridPageSize]="10"
-                                  placeholderText="결제조건을 선택하여 주십시오."
+                                  comboGridScrollMode="virtual"
+                                  placeholderText="결재조건을 선택하여 주십시오."
                                   (onDataLoaded)="onRegulationDataLoaded($event)"
-                                  [validationErrors]="[{type:'required', message:'결제조건을 선택하여 주십시오.'}]"
+                                  [validationErrors]="[{type:'required', message:'결재조건을 선택하여 주십시오.'}]"
                                   (onEntryValueChanged)="onRegulationCodeValueChanged($event)">
                 </nh-possible-comm>
               </div>
@@ -393,10 +396,11 @@
                       [allowColumnReordering]="true"
                       [allowColumnResizing]="true"
                       [rowAlternationEnabled]="true"
+                      [wordWrapEnabled]="true"
                       [showBorders]="true"
                       keyExpr="BNFPO"
                       [columnAutoWidth]="true"
-                      height="calc(50vh - 155px)"
+                      height="calc(50vh - 50px)"
                       [columnResizingMode]="columnResizeMode">
           <dxo-paging [pageSize]="10"></dxo-paging>
           <dxo-scrolling mode="infinite"></dxo-scrolling>
@@ -409,28 +413,47 @@
           <dxo-filter-row visible="true"></dxo-filter-row>
           <dxo-header-filter visible="true"></dxo-header-filter>
 
+          <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+
           <dxi-column dataField="BANFN"
                       caption="PR번호"
                       dataType="string"
                       alignment="center"
-                      [allowEditing]="false">
+                      [allowEditing]="false"
+                      [fixed]="true">
           </dxi-column>
 
           <dxi-column dataField="BNFPO"
                       caption="항번"
                       dataType="string"
                       alignment="center"
-                      [allowEditing]="false">
+                      [allowEditing]="false"
+                      [fixed]="true">
           </dxi-column>
 
           <dxi-column dataField="MATNR"
                       caption="자재번호"
                       dataType="string"
                       alignment="center"
-                      [allowEditing]="false">
+                      width="120"
+                      [allowEditing]="false"
+                      [fixed]="true">
           </dxi-column>
           <dxi-column dataField="MATNRT"
                       caption="내역"
+                      [visible]="false"
+                      dataType="string"
+                      [allowEditing]="false">
+          </dxi-column>
+          <dxi-column dataField="MATNR_LONG"
+                      caption="내역"
+                      width="300"
+                      dataType="string"
+                      [allowEditing]="false">
+          </dxi-column>
+          <dxi-column dataField="KMATN_SPEC"
+                      caption="주장비스펙"
+                      width="200"
                       dataType="string"
                       [allowEditing]="false">
           </dxi-column>
@@ -439,12 +462,14 @@
                       caption="요청수량"
                       dataType="string"
                       alignment="right"
+                      width="80"
                       [allowEditing]="false"
                       format="#,###.###">
           </dxi-column>
 
           <dxi-column dataField="MEINS"
                       caption="수량단위"
+                      width="100"
                       dataType="string"
                       alignment="center"
                       [allowEditing]="false"
@@ -453,6 +478,7 @@
 
           <dxi-column dataField="RFQCST"
                       caption="견적단가"
+                      width="120"
                       dataType="string"
                       alignment="right"
                       [allowEditing]="false"
@@ -461,6 +487,7 @@
 
           <dxi-column dataField="RFQCST1"
                       caption="견적공급가"
+                      width="120"
                       dataType="string"
                       alignment="right"
                       [allowEditing]="false"
@@ -469,6 +496,7 @@
 
           <dxi-column dataField="RFQVAT"
                       caption="견적부가세"
+                      width="120"
                       dataType="string"
                       alignment="right"
                       [allowEditing]="false"
@@ -477,6 +505,7 @@
 
           <dxi-column dataField="RFQAMT"
                       caption="견적총액"
+                      width="120"
                       dataType="string"
                       alignment="right"
                       [allowEditing]="false"
@@ -485,12 +514,14 @@
 
           <dxi-column dataField="MAKER"
                       caption="메이커"
+                      width="120"
                       dataType="string"
                       [allowEditing]="false">
           </dxi-column>
 
           <dxi-column dataField="REMARK"
                       caption="비고"
+                      width="120"
                       dataType="string"
                       [allowEditing]="false">
           </dxi-column>
@@ -599,12 +630,13 @@
                       style="margin-bottom:10px"
                       horizontalAlignment="center"
                       locateInMenu="center">
-              <dx-file-uploader selectButtonText="자료첨부"
-                                labelText=""
-                                accept="image/*"
-                                [width]="150"
-                                uploadMode="useForm">
-              </dx-file-uploader>
+              <dx-button stylingMode="contained"
+                         text="자료첨부"
+                         type="normal"
+                         style="margin-left: 100px;"
+                         (onClick)="fileUploadPopup()"
+                         [width]="150">
+              </dx-button>
 
             </dxi-item>
           </dxi-item>
@@ -646,8 +678,9 @@
                                   [showClearButton]="true"
                                   placeholderText="보증방법을 선택하여 주십시오."
                                   popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                                  [popupGridPagingMode]="true"
+                                  [popupGridPageSize]="10"
+                                  comboGridScrollMode="virtual"
                                   (onDataLoaded)="onAssuranceDataLoaded($event)"
                                   [(selectedValue)]="AssuranceValue"
                                   [validationErrors]="[{type:'required', message:'보증 방법을 선택하여 주십시오.'}]"
@@ -679,7 +712,7 @@
             </dxi-item>
           </dxi-item>
           <dxi-item class="scrollview_view" style="min-height:50px;">
-            <dx-text-area [height]="90" [readOnly]="true" [(value)]="value" style="background-color: rgba(191, 191, 191, 0.15);">
+            <dx-text-area [height]="90" [readOnly]="true" [(value)]="firstText" style="background-color: rgba(191, 191, 191, 0.15);">
             </dx-text-area>
           </dxi-item>
           <dxi-item horizontalAlignment="center">
@@ -688,7 +721,7 @@
             </div>
           </dxi-item>
           <dxi-item class="scrollview_view" style="min-height:50px;">
-            <dx-text-area [height]="90" [readOnly]="true" [(value)]="value" style="background-color: rgba(191, 191, 191, 0.15);">
+            <dx-text-area [height]="90" [readOnly]="true" [(value)]="secondText" style="background-color: rgba(191, 191, 191, 0.15);">
             </dx-text-area>
           </dxi-item>
           <dxi-item horizontalAlignment="center">
@@ -709,9 +742,10 @@
                       [allowColumnResizing]="true"
                       [rowAlternationEnabled]="true"
                       [showBorders]="true"
+                      [wordWrapEnabled]="true"
                       keyExpr="BNFPO"
                       [columnAutoWidth]="true"
-                      height="calc(50vh - 155px)"
+                      height="calc(50vh - 50px)"
                       [columnResizingMode]="columnResizeMode">
           <dxo-paging [pageSize]="10"></dxo-paging>
           <dxo-scrolling mode="infinite"></dxo-scrolling>
@@ -720,6 +754,8 @@
                        [allowAdding]="false"
                        [allowUpdating]="true">
           </dxo-editing>
+
+          <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
           <dxo-selection mode="single"></dxo-selection>
           <dxo-filter-row visible="true"></dxo-filter-row>
           <dxo-header-filter visible="true"></dxo-header-filter>
@@ -728,24 +764,42 @@
                       caption="PR번호"
                       dataType="string"
                       alignment="center"
-                      [allowEditing]="false">
+                      [allowEditing]="false"
+                      [fixed]="true">
           </dxi-column>
 
           <dxi-column dataField="BNFPO"
                       caption="항번"
                       dataType="string"
                       alignment="center"
-                      [allowEditing]="false">
+                      [allowEditing]="false"
+                      [fixed]="true">
           </dxi-column>
 
           <dxi-column dataField="MATNR"
                       caption="자재번호"
                       dataType="string"
                       alignment="center"
-                      [allowEditing]="false">
+                      width="120"
+                      [allowEditing]="false"
+                      [fixed]="true">
           </dxi-column>
           <dxi-column dataField="MATNRT"
                       caption="내역"
+                      dataType="string"
+                      [visible]="false"
+                      [allowEditing]="false">
+          </dxi-column>
+
+          <dxi-column dataField="MATNR_LONG"
+                      caption="내역"
+                      width="300"
+                      dataType="string"
+                      [allowEditing]="false">
+          </dxi-column>
+          <dxi-column dataField="KMATN_SPEC"
+                      caption="주장비스펙"
+                      width="200"
                       dataType="string"
                       [allowEditing]="false">
           </dxi-column>
@@ -754,6 +808,7 @@
                       caption="요청수량"
                       dataType="string"
                       alignment="right"
+                      width="80"
                       [allowEditing]="false"
                       format="#,###">
           </dxi-column>
@@ -761,6 +816,7 @@
           <dxi-column dataField="MEINS"
                       caption="수량단위"
                       dataType="string"
+                      width="100"
                       alignment="center"
                       [allowEditing]="false"
                       format="#,###">
@@ -769,6 +825,7 @@
           <dxi-column dataField="RFQCST"
                       caption="견적단가"
                       dataType="string"
+                      width="120"
                       alignment="right"
                       [allowEditing]="false"
                       format="#,###">
@@ -776,6 +833,7 @@
 
           <dxi-column dataField="RFQCST1"
                       caption="견적공급가"
+                      width="120"
                       dataType="string"
                       alignment="right"
                       [allowEditing]="false"
@@ -784,6 +842,7 @@
 
           <dxi-column dataField="RFQVAT"
                       caption="견적부가세"
+                      width="120"
                       dataType="string"
                       alignment="right"
                       [allowEditing]="false"
@@ -792,6 +851,7 @@
 
           <dxi-column dataField="RFQAMT"
                       caption="견적총액"
+                      width="120"
                       dataType="string"
                       alignment="right"
                       [allowEditing]="false"
@@ -800,12 +860,14 @@
 
           <dxi-column dataField="MAKER"
                       caption="메이커"
+                      width="120"
                       dataType="string"
                       [allowEditing]="false">
           </dxi-column>
 
           <dxi-column dataField="REMARK"
                       caption="비고"
+                      width="120"
                       dataType="string"
                       [allowEditing]="false">
           </dxi-column>
@@ -831,3 +893,33 @@
 
   </dx-popup>
 </div>
+
+
+<dx-popup width="50%"
+          height="50%"
+          [showTitle]="true"
+          title="첨부파일"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="takePopupVisible">
+
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeFileButtonOptions ">
+  </dxi-toolbar-item>
+
+  <attach-file #AttachFile
+               selectButtonText="첨부파일 선택"
+               uploadMode="useButtons"
+               labelText="첨부 파일을 여기에 끌어다 놓으십시오."
+               [multiple]="true"
+               [value]="attachFiles"
+               [uploadDocumentNo]="uploadDocumentNo"
+               direction="vertical"
+               [editingMode]="editingMode"
+               [fileListHeight]="200">
+  </attach-file>
+</dx-popup>

@@ -1,5 +1,18 @@
   <!--toolbar-->
 <dx-toolbar style="height: 40px; margin-top: 5px;">
+  <!--<dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="width: auto;
+            margin-left: 5px;
+            margin-right: 5px;">
+    <dx-button stylingMode="contained"
+               text="VOC기본코드"
+               type="normal"
+               class="weight-test-btn"
+               (onClick)="getVocBaseCode($event)">
+    </dx-button>
+  </dxi-item>-->
 
   <dxi-item location="after"
             widget="dxButton"
@@ -9,6 +22,7 @@
               margin-right: 5px;">
     <dx-button stylingMode="contained"
                text="등록"
+               (onClick)="getVocDataSave($event)"
                type="normal">
     </dx-button>
   </dxi-item>
@@ -38,9 +52,14 @@
   <dxi-item itemType="group" [colCount]="6" style="margin-top:5px">
     <dxi-item dataField="PLANT" [label]="{text: '사업장'}" [editorOptions]="{ height: 30 }" [colSpan]="2">
       <nh-possible-comm #siteEntery
-                        dataStoreKey="dataStoreKey"
+                        dataStoreKey=""
                         label="사업장"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'사업장을 선택 하십시오.'}]"
                         [(selectedValue)]="selSite"
                         class="weight-test">
@@ -54,6 +73,11 @@
                         dataStoreKey=""
                         label="사업부"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'사업부를 선택 하십시오.'}]"
                         [(selectedValue)]="selBunit"
                         class="weight-test">
@@ -73,6 +97,11 @@
                         dataStoreKey=""
                         label="고객유형"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'고객유형을 선택 하십시오.'}]"
                         [(selectedValue)]="selCystmerType"
                         class="weight-test">
@@ -86,8 +115,14 @@
                         dataStoreKey=""
                         label="지역"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'지역을 선택 하십시오.'}]"
                         [(selectedValue)]="selArea"
+                        (onEntryValueChanged)="onAreaCodeValueChanged($event)"
                         class="weight-test">
         <nbp-validator [adapter]="areaAdapter">
           <dxi-validation-rule type="required"></dxi-validation-rule>
@@ -97,8 +132,12 @@
     <dxi-item [colSpan]="1">
       <nh-possible-comm #domesticEntery
                         dataStoreKey=""
-                        label="select"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'지역을 선택 하십시오.'}]"
                         [(selectedValue)]="selDomestic"
                         class="weight-test">
@@ -118,9 +157,13 @@
     <dxi-item dataField="CULTURE_TYPE" [label]="{text: '재배형태'}" [editorOptions]="{ height: 30 }" [colSpan]="2">
       <nh-possible-comm #culytivateTypeEntery
                         dataStoreKey=""
-                        label="재배형태"
                         width="100%"
-                        [validationErrors]="[{type:'required', message:'재배형태를 선택 하십시오.'}]"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        [validationErrors]="[{type:'required', message:'재배형태를 입력 하십시오.'}]"
                         [(selectedValue)]="selCulytivateType"
                         class="weight-test">
         <nbp-validator [adapter]="culytivateTypeAdapter">
@@ -133,26 +176,40 @@
     </dxi-item>
     <dxi-item dataField="PARTNM" [editorOptions]="{ height: 30 }" [colSpan]="1">
       <dxo-label text="제품명" [visible]="false"></dxo-label>
-      <nh-possible-comm #partnmQtyUnitEntery
+      <nh-possible-comm #maktEntery
                         dataStoreKey=""
+                        [codeInfo]="maktCode"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        valueColumn="MATNR"
+                        valueDisplayFormat="%MAKTX%(%MATNR%)"
                         [validationErrors]="[{type:'required', message:'제품명을 선택 하십시오.'}]"
-                        [(selectedValue)]="selPartnmQtyUnit"
+                        [(selectedValue)]="matnrValue"
+                        (onDataLoaded)="onPEDataLoaded($event)"
                         class="weight-test">
         <nbp-validator [adapter]="partnmQtyAdapter">
           <dxi-validation-rule type="required"></dxi-validation-rule>
         </nbp-validator>
       </nh-possible-comm>
     </dxi-item>
-    <dxi-item dataField="ERROR_CNT" [label]="{text: '불량수량'}" [editorOptions]="{ height: 30 }" [colSpan]="1" width="100%">
+    <dxi-item dataField="ERROR_CNT" [label]="{text: '불량수량'}" editorType="dxNumberBox" [editorOptions]="{ height: 30,format: '#,###', type: 'number' }" [colSpan]="1" width="100%">
       <dxi-validation-rule type="required"></dxi-validation-rule>
     </dxi-item>
-    <dxi-item dataField="ERROR_CNT" [editorOptions]="{ height: 30 }" [colSpan]="1">
+    <dxi-item dataField="UNIT" [editorOptions]="{ height: 30 }" [colSpan]="1">
       <dxo-label text="단위" [visible]="false"></dxo-label>
       <nh-possible-comm #rejectQtyUnitEntery
                         dataStoreKey=""
                         width="100%"
-                        [validationErrors]="[{type:'required', message:'불량수량 단위를 선택 하십시오.'}]"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        [validationErrors]="[{type:'required', message:'불량수량단위를 입력 하십시오.'}]"
                         [(selectedValue)]="selRejectQtyUnit"
                         class="weight-test">
         <nbp-validator [adapter]="rejectQtyUnitAdapter">
@@ -168,6 +225,11 @@
                         dataStoreKey=""
                         label="제품군"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'제품군을 선택 하십시오.'}]"
                         [(selectedValue)]="selProductGroup"
                         class="weight-test">
@@ -177,7 +239,21 @@
       </nh-possible-comm>
     </dxi-item>
     <dxi-item dataField="DEPARTMENT" [label]="{text: '소속부서'}" [editorOptions]="{ height: 30 }" [colSpan]="2" width="100%">
-      <dxi-validation-rule type="required"></dxi-validation-rule>
+      <nh-possible-comm #departmentEntery
+                        dataStoreKey=""
+                        width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        [validationErrors]="[{type:'required', message:'소속부서를 선택 하십시오.'}]"
+                        [(selectedValue)]="selDepartment"
+                        class="weight-test">
+        <nbp-validator [adapter]="departmentAdapter">
+          <dxi-validation-rule type="required"></dxi-validation-rule>
+        </nbp-validator>
+      </nh-possible-comm>
     </dxi-item>
     <dxi-item dataField="REGISTER" [label]="{text: '등록자'}" [editorOptions]="{ height: 30 }" [colSpan]="1" width="100%">
       <dxi-validation-rule type="required"></dxi-validation-rule>
@@ -187,8 +263,13 @@
       <nh-possible-comm #registerEntery
                         dataStoreKey=""
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'등록자명을 선택 하십시오.'}]"
-                        [(selectedValue)]="selREGISTER"
+                        [(selectedValue)]="selRegister"
                         class="weight-test">
         <nbp-validator [adapter]="registerAdapter">
           <dxi-validation-rule type="required"></dxi-validation-rule>
@@ -218,6 +299,11 @@
                         dataStoreKey=""
                         label="민원종류"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'민원종류를 선택 하십시오.'}]"
                         [(selectedValue)]="selVocType"
                         class="weight-test">
@@ -231,6 +317,11 @@
                         dataStoreKey=""
                         label="민원원인"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'민원원인을 선택 하십시오.'}]"
                         [(selectedValue)]="selVocCause"
                         class="weight-test">
@@ -244,14 +335,19 @@
   <dxi-item itemType="group" [colCount]="6" style="margin-top:5px">
     <dxi-item dataField="CROPS" [label]="{text: '사용작물'}" [editorOptions]="{ height: 30 }" [colSpan]="2" width="100%">
     </dxi-item>
-    <dxi-item dataField="AMOUNT" [label]="{text: '시비량'}" [editorOptions]="{ height: 30 }" [colSpan]="1" width="100%">
+    <dxi-item dataField="AMOUNT" [label]="{text: '시비량'}" editorType="dxNumberBox" [editorOptions]="{ height: 30,format: '#,###', type: 'number' }" [colSpan]="1" width="100%">
       <dxi-validation-rule type="required"></dxi-validation-rule>
     </dxi-item>
-    <dxi-item dataField="AMOUNT" [editorOptions]="{ height: 30 }" [colSpan]="1">
+    <dxi-item dataField="UNIT2" [editorOptions]="{ height: 30 }" [colSpan]="1">
       <dxo-label text="단위" [visible]="false"></dxo-label>
       <nh-possible-comm #manureQtyUnitEntery
                         dataStoreKey=""
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'시비량단위를 입력 하십시오.'}]"
                         [(selectedValue)]="selManureQtyUnit"
                         class="weight-test">
@@ -267,13 +363,25 @@
   </dxi-item>
 
   <dxi-item itemType="group" [colCount]="6" style="margin-top:5px">
-    <dxi-item dataField="MONTH" [label]="{text: '사용개월'}" [editorOptions]="{ height: 30 }" [colSpan]="2" width="100%">
+    <dxi-item dataField="MONTH" [label]="{text: '사용개월'}" editorType="dxNumberBox" [editorOptions]="{ height: 30, format: '#,###', type: 'number' }" [colSpan]="1" width="100%">
+    </dxi-item>
+    <dxi-item [colSpan]="1">
+      <div class="dx-field">
+        <div class="dx-field-label">개월</div>
+        <div class="dx-field-value" style="width: auto; float: left;">
+        </div>
+      </div>
     </dxi-item>
     <dxi-item dataField="PRODPLANT" [label]="{text: '생산공장'}" [editorOptions]="{ height: 30 }" [colSpan]="2">
       <nh-possible-comm #factoryEntery
                         dataStoreKey=""
                         label="생산공장"
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'생산공장을 입력 하십시오.'}]"
                         [(selectedValue)]="selFactory"
                         class="weight-test">
@@ -290,6 +398,11 @@
       <nh-possible-comm #inChargesCodeEntery
                         dataStoreKey=""
                         width="100%"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [validationErrors]="[{type:'required', message:'담당자를 입력 하십시오.'}]"
                         [(selectedValue)]="selInChargePerson"
                         class="weight-test">
@@ -301,26 +414,24 @@
   </dxi-item>
 
   <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-    <dxi-item dataField="ACTCONT" [label]="{text: '조치내용'}" [editorOptions]="{ height: 60 }" [colSpan]="2" width="100%">
+    <dxi-item dataField="ACTCONT" [label]="{text: '조치내용'}" [editorOptions]="{ height: 90 }" [colSpan]="2" width="100%">
       <dxi-validation-rule type="required"></dxi-validation-rule>
     </dxi-item>
   </dxi-item>
 
   <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-    <dxi-item dataField="REMARKS" [label]="{text: '특기사항'}" [editorOptions]="{ height: 60 }" [colSpan]="2" width="100%">
+    <dxi-item dataField="REMARKS" [label]="{text: '특기사항'}" [editorOptions]="{ height: 90 }" [colSpan]="2" width="100%">
     </dxi-item>
   </dxi-item>
 
-  <dxi-item location="before">
+  <dxi-item location="before" style="margin-top:10px">
     <div class="label"><b>고객불만현상이미지 첨부</b></div>
   </dxi-item>
 
-  <dxi-item itemType="group" [colCount]="9">
+  <!--<dxi-item itemType="group" [colCount]="9">
     <dxi-item location="before" [colSpan]="1">
       <dx-file-uploader selectButtonText="파일등록"
                         labelText=""
-                        id="dx-fileuploader"
-                        class="dx-fileuploader"
                         accept="image/*"
                         width="150px"
                         style="padding:0px;"
@@ -329,98 +440,120 @@
     </dxi-item>
     <dxi-item style="margin-top:18px" dataField="" [colSpan]="8">
       <dx-text-box>
-      </dx-text-box>
+  </dx-text-box>
     </dxi-item>
+  </dxi-item>-->
+
+  <dxi-item location="after">
+    <dx-button stylingMode="contained"
+               text="파일등록"
+               type="normal"
+               (onClick)="filePopup()"
+               [width]="120">
+    </dx-button>
   </dxi-item>
 
-  <dxi-item location="before">
+  <dxi-item location="before" style="margin-top:10px">
     <div class="label"><b>민원발생 보고</b></div>
   </dxi-item>
 
   <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-    <dxi-item dataField="" [colSpan]="2" [editorOptions]="{ height: 60 }">
+    <dxi-item dataField="" [colSpan]="2" [editorOptions]="{ height: 90 }">
     </dxi-item>
   </dxi-item>
 
-  <dxi-item location="before">
+  <dxi-item location="before" style="margin-top:10px">
     <div class="label"><b>공문 첨부 파일(파일명을 문서명으로)</b></div>
   </dxi-item>
 
-  <dxi-item itemType="group" [colCount]="9">
-    <dxi-item location="before" [colSpan]="1">
-      <dx-file-uploader selectButtonText="등록파일정보"
-                        labelText=""
-                        id="dx-fileuploader"
-                        class="dx-fileuploader"
-                        accept="image/*"
-                        width="150px"
-                        style="padding:0px;"
-                        uploadMode="useForm">
-      </dx-file-uploader>
+  <dxi-item itemType="group" [colCount]="9" [colSpan]="2">
+    <dxi-item location="after" [colCount]="1">
+      <dx-button stylingMode="contained"
+                 text="파일등록정보"
+                 type="normal"
+                 (onClick)="filePopup()"
+                 [width]="150">
+      </dx-button>
     </dxi-item>
-    <dxi-item style="margin-top:18px" dataField="" [colSpan]="8">
+    <dxi-item [colSpan]="8">
       <dx-text-box>
       </dx-text-box>
     </dxi-item>
   </dxi-item>
 
-  <dxi-item location="before">
+  <!--<dxi-item itemType="group" [colCount]="1" [colSpan]="1">
+    <dxi-item dataField="REMARKS" [label]="{text: '등록파일정보'}" [colSpan]="1" width="100%">
+    </dxi-item>
+  </dxi-item>-->
+
+  <dxi-item location="before" style="margin-top:10px">
     <div class="label"><b>결재선 지정</b></div>
   </dxi-item>
 
   <dxi-item itemType="group" [colCount]="9">
-    <dxi-item location="before" [colSpan]="1">
-      <dx-file-uploader selectButtonText="결재선지정"
-                        labelText=""
-                        id="dx-fileuploader"
-                        class="dx-fileuploader"
-                        accept="image/*"
-                        width="150px"
-                        style="padding:0px;"
-                        uploadMode="useForm">
-      </dx-file-uploader>
+    <dxi-item location="before"
+              widget="dxButton"
+              locateInMenu="auto"
+              [colSpan]="1"
+              style="margin-top:17px;">
+      <dx-button stylingMode="contained"
+                 text="결재선지정"
+                 type="normal">
+      </dx-button>
     </dxi-item>
 
-    <dxi-item dataField=""  [colSpan]="4" [editorOptions]="{ height: 60 }">
+    <dxi-item [colSpan]="4">
+      <div class="options">
+        <div class="caption"></div>
+        <div class="option">
+          <div>검토자결재순서</div>
+          <dx-text-box></dx-text-box>
+        </div>
+      </div>
     </dxi-item>
 
-    <dxi-item dataField=""  [colSpan]="4" [editorOptions]="{ height: 60 }">
+    <dxi-item [colSpan]="4">
+      <div class="options">
+        <div class="caption"></div>
+        <div class="option">
+          <div>승인자결재순서</div>
+          <dx-text-box></dx-text-box>
+        </div>
+      </div>
     </dxi-item>
   </dxi-item>
 
-  <!--<dxi-item itemType="group" [colCount]="8" [colSpan]="4">
-    <dxi-item location="before">
-      <dx-file-uploader selectButtonText="결재선지정"
-                        labelText=""
-                        id="dx-fileuploader"
-                        class="dx-fileuploader"
-                        accept="image/*"
-                        width="150px"
-                        style="padding:0px;"
-                        uploadMode="useForm">
-      </dx-file-uploader>
-    </dxi-item>
-    <dxi-item style="margin-top:18px" dataField="" [colSpan]="7">
-      <dx-text-box>
-      </dx-text-box>
-    </dxi-item>
-  </dxi-item>-->
+  <!--<dx-box direction="row" width="100%" [height]="75">
+    <dxi-item class="rect demo-dark" [ratio]="1"> 결재선지정 </dxi-item>
+    <dxi-item class="rect demo-light" [ratio]="2"></dxi-item>
+    <dxi-item class="rect demo-dark" [ratio]="1"></dxi-item>
+  </dx-box>
 
-  <dxi-item location="before">
+  <dx-box direction="row" width="100%" [height]="125">
+    <dxi-item class="rect demo-dark" [ratio]="1"> Left Bar </dxi-item>
+    <dxi-item class="rect demo-light" [ratio]="1"> Content </dxi-item>
+    <dxi-item class="rect demo-dark" [ratio]="1"> Right Bar </dxi-item>
+  </dx-box>
+  <dx-box direction="row" width="100%" [height]="125">
+    <dxi-item class="rect demo-dark" [ratio]="1"> Left Bar </dxi-item>
+    <dxi-item class="rect demo-light" [ratio]="1"> Content </dxi-item>
+    <dxi-item class="rect demo-dark" [ratio]="1"> Right Bar </dxi-item>
+  </dx-box>-->
+
+  <dxi-item location="before" style="margin-top:10px">
     <div class="label"><b>본사담당자 지정</b></div>
   </dxi-item>
 
   <dxi-item itemType="group" [colCount]="9">
-    <dxi-item location="before" [colSpan]="1">
-      <dx-file-uploader selectButtonText="담당자"
-                        labelText=""
-                        id="dx-fileuploader"
-                        class="dx-fileuploader"
-                        accept="image/*"
-                        width="150px"
-                        style="padding:0px;"
-                        uploadMode="useForm">
-      </dx-file-uploader>
+    <dxi-item location="before"
+              widget="dxButton"
+              locateInMenu="auto"
+              [colSpan]="1"
+              style="margin-top:17px;">
+      <dx-button stylingMode="contained"
+                 text="담당자"
+                 type="normal">
+      </dx-button>
     </dxi-item>
     <dxi-item style="margin-top:18px" dataField="" [colSpan]="8">
       <dx-text-box>
@@ -428,12 +561,41 @@
     </dxi-item>
   </dxi-item>
 
-  <dxi-item location="before">
+  <dxi-item location="before" style="margin-top:10px">
     <div class="label"><b>개선사항 코멘트</b></div>
   </dxi-item>
 
   <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
-    <dxi-item dataField="" [colSpan]="2" [editorOptions]="{ height: 60 }">
+    <dxi-item dataField="" [colSpan]="2" [editorOptions]="{ height: 90 }">
     </dxi-item>
   </dxi-item>
 </dx-form>
+
+<dx-popup width="50%"
+          height="50%"
+          [showTitle]="true"
+          title="파일등록"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="filePopupVisible">
+
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+
+  <attach-file #AttachFile
+               selectButtonText="첨부파일 선택"
+               labelText="첨부 파일을 여기에 끌어다 놓으십시오."
+               uploadMode="useButtons"
+               [multiple]="true"
+               [value]="attachFiles"
+               [uploadDocumentNo]="uploadDocumentNo"
+               direction="vertical"
+               [fileListHeight]="200">
+  </attach-file>
+</dx-popup>
+

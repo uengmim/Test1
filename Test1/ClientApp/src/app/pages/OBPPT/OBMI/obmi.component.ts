@@ -28,6 +28,7 @@ import notify from 'devextreme/ui/notify';
 import { async } from 'rxjs';
 import { DxiItemComponent } from 'devextreme-angular/ui/nested';
 import { alert, confirm } from "devextreme/ui/dialog";
+import { SHA256 } from 'crypto-js';
 
 const sendRequest = function (value: any) {
   const invalidEmail = 'test@dx-email.com';
@@ -161,7 +162,6 @@ export class OBMIComponent {
       useSubmitBehavior: true,
       disabled: true,
       onClick: async (e: any) => {
-        console.log(this.searchID);
         var result = await this.dataLoad(this.imInfo, this.dataService, this, 'Pw');
         if (result.length == 0 ) {
           alert("해당 아이디의 이메일과 사업자번호를 입력하여 주십시오.", "알림");
@@ -249,26 +249,13 @@ export class OBMIComponent {
 
       var userPW = thisObj.searchID.LOGPW
 
-      var maininsertData = new ZMMT8100Model(this.appConfig.mandt, resultModel[0].BIZNO, resultModel[0].LIFNR, resultModel[0].NAME1, resultModel[0].APPST, resultModel[0].LOGID, userPW,
+      var maininsertData = new ZMMT8100Model(this.appConfig.mandt, resultModel[0].BIZNO, resultModel[0].LIFNR, resultModel[0].NAME1, resultModel[0].APPST, resultModel[0].LOGID, SHA256(userPW).toString(),
         resultModel[0].MACID, resultModel[0].INTIP, resultModel[0].J_1KFREPRE, resultModel[0].ADDHQ, resultModel[0].HOUSE_NO, resultModel[0].SEARCHTERM1, resultModel[0].J_1KFTIND, resultModel[0].J_1KFTBUS,
         resultModel[0].POSTL_COD1, resultModel[0].BIZPM, resultModel[0].LICNO, resultModel[0].OFFNM, resultModel[0].TELF1, resultModel[0].TELF2, resultModel[0].FAX, resultModel[0].E_MAIL, resultModel[0].BRANCH,
-        resultModel[0].BIZTY, resultModel[0].LIFTY, resultModel[0].COUNTRY, resultModel[0].QSTION, resultModel[0].ANSWER, resultModel[0].REQDT, resultModel[0].IUPDT, resultModel[0].INVDT, resultModel[0].CREDT,
-        resultModel[0].CREGD, resultModel[0].EVAYN, resultModel[0].LSTDT, resultModel[0].LSTID, resultModel[0].STODT, resultModel[0].STOID, resultModel[0].DUEDT, resultModel[0].ZWELS, resultModel[0].ZTERM,
-        resultModel[0].KALSK, resultModel[0].REMARK, this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
-      //등록 요청 일자
-      maininsertData.REQDT = now;
-      //정보 수정 일자
-      maininsertData.IUPDT = now;
-      //개인 정보 동의일
-      maininsertData.INVDT = now;
-      //신용 평가 기간
-      maininsertData.CREDT = minDate;
-      //최종 승인 일자
-      maininsertData.LSTDT = minDate;
-      //사용 중지 일자
-      maininsertData.STODT = minDate;
-      //유효 일자
-      maininsertData.DUEDT = minDate;
+        resultModel[0].BIZTY, resultModel[0].LIFTY, resultModel[0].COUNTRY, resultModel[0].QSTION, resultModel[0].ANSWER, resultModel[0].REQDT ?? minDate, resultModel[0].IUPDT ?? now, resultModel[0].INVDT ?? minDate, resultModel[0].CREDT ?? minDate,
+        resultModel[0].CREGD, resultModel[0].EVAYN, resultModel[0].LSTDT ?? minDate, resultModel[0].LSTID, resultModel[0].STOID, resultModel[0].ZWELS, resultModel[0].ZTERM,
+        resultModel[0].KALSK, resultModel[0].REMARK, resultModel[0].WAERS, resultModel[0].APPNO, this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
+
       //레코드 생성일
       maininsertData.ERDAT = now;
       //입력시간
@@ -280,7 +267,6 @@ export class OBMIComponent {
       var mainmodelList: ZMMT8100Model[] = [maininsertData];
 
       this.rowCount1 = await this._dataService.ModifyModelData<ZMMT8100Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", mainmodelList);
-      console.log("rowCount1" + this.rowCount1);
     }
     catch (error) {
       alert("비밀번호 재설정 중 오류가 발생했습니다. 담당자에게 문의해주세요.", "알림");
@@ -296,16 +282,12 @@ export class OBMIComponent {
 
       let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
 
-      console.info(resultModel);
-
       //---------------------------------------------------------------------------------
       dataSet = await this.dataService.dbSelectToDataSet(
         PossibleEntryDataStore.createCommQueryMessage(this.appConfig, this.questionCode, null)
       );
 
       resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
 
     }
   }

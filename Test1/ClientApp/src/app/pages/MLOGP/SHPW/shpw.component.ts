@@ -29,6 +29,9 @@ import { ZMMT1320Model } from '../../../shared/dataModel/OWHP/Zmmt1320Proxy';
 import { async } from 'rxjs';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZMMGOODSMVTCommonModel, ZMMS3130Model } from '../../../shared/dataModel/OWHP/ZmmGoodsmvtCommonProxy';
+import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
+import { ChangeDetectorRef } from '@angular/core';
+import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 //필터
 const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
@@ -48,6 +51,7 @@ export class SHPWComponent {
   @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
   @ViewChild('vsEntery', { static: false }) vsEntery!: CommonPossibleEntryComponent;
   @ViewChild('lgEntery', { static: false }) lgEntery!: CommonPossibleEntryComponent;
+  @ViewChild('lglgEntery', { static: false }) lglgEntery!: CommonPossibleEntryComponent;
   @ViewChild('maraEntery', { static: false }) maraEntery!: CommonPossibleEntryComponent;
   @ViewChild('dd07tEntery', { static: false }) dd07tEntery!: CommonPossibleEntryComponent;
   @ViewChild('dd07tCarEntery', { static: false }) dd07tCarEntery!: CommonPossibleEntryComponent;
@@ -62,6 +66,7 @@ export class SHPWComponent {
   @ViewChild('reportViewer', { static: false }) reportViewer!: ReportViewerComponent;
   @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('immatnrCodeDynamic', { static: false }) immatnrCodeDynamic!: CommonPossibleEntryComponent;
+  @ViewChild('popFormDynamic', { static: false }) popFormDynamic!: DxFormComponent;
   /* Entry  선언 */
   //제품코드
   matnrCode!: TableCodeInfo;
@@ -139,6 +144,8 @@ export class SHPWComponent {
   isColVisible: boolean = true;
 
   isDisableField: boolean = false;
+  //비료창고
+  lgCodeValue: string | null = null;
 
   selectStatus: string = "30";
   selectData2: string = "1000";
@@ -186,7 +193,7 @@ export class SHPWComponent {
   searchButtonOptions: any;
   //상세 추가 버튼
   addDetailButtonOptions: any;
-
+  FormData: any = {};
   //편집 취소 버튼
   cancelEditButtonOptions: any;
   loadPanelOption: any;
@@ -198,6 +205,7 @@ export class SHPWComponent {
   //팝업데이터
   popupData: any; // 팝업위
   addFormData!: any; //팝업아래
+  imaddFormData!: any; //팝업아래
   //필터
   popupPosition: any;
   saleAmountHeaderFilter: any;
@@ -208,6 +216,15 @@ export class SHPWComponent {
   closeButtonOptions4: any;
   popupVisible = false;
   popupVisibleIm = false;
+  empId: string = "";
+  rolid: string[] = [];
+  vorgid: string = "";
+  corgid: string = "";
+  torgid: string = "";
+
+  lgNmList: T001lModel[] = [];
+
+  isDisabled: boolean = false;
 
   collapsed: any;
   //배차팝업 선택값
@@ -215,14 +232,28 @@ export class SHPWComponent {
   //_dataService: ImateDataService;
 
   enteryLoading: boolean = false;
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService,
+    private imInfo: ImateInfo, private authService: AuthService, private cd: ChangeDetectorRef) {
     appInfo.title = AppInfoService.APP_TITLE + " | 출하진행현황-포장재(사외창고)";
 
     this.loadingVisible = true;
 
+    let userInfo = this.authService.getUser().data;
+
+    //this.empId = userInfo?.empId.padStart(10, '0');
+    this.rolid = userInfo?.role;
+    this.vorgid = userInfo.orgOption.vorgid.padStart(10, '0');
+    this.corgid = userInfo.orgOption.corgid.padStart(10, '0');
+    this.torgid = userInfo.orgOption.torgid.padStart(10, '0');
+    this.empId = this.corgid;
+
+    ////임시하드코딩 로직
+    //if (this.empId === "0000300043")
+    //  this.empId = "0000102960";
+
     this.vsCode = appConfig.tableCode("출하지점");
     this.lgCode = appConfig.tableCode("비료창고");
-    this.maraCode = appConfig.tableCode("제품구분");
+   /* this.maraCode = appConfig.tableCode("제품구분");*/
     this.dd07tCode = appConfig.tableCode("RFC_하차정보");
     this.dd07tCarCode = appConfig.tableCode("RFC_화물차종");
     this.tvlvCode = appConfig.tableCode("용도구분");
@@ -232,13 +263,13 @@ export class SHPWComponent {
     this.zcarnoCode = appConfig.tableCode("비료차량");
     this.zcarnoModiCode = appConfig.tableCode("비료차량");
     this.z4parvwCode = appConfig.commonCode("운송사");
-    this.matnrCode = appConfig.tableCode("비료제품명");
+    this.matnrCode = appConfig.tableCode("비료친환경제품명");
     this.immatnrCode = appConfig.tableCode("임가공제품명");
     //----------------------------------------------------------------------------------------------------------
     let codeInfos = [
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.vsCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgCode),
-      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode),
+      /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCarCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tvlvCode),
@@ -254,7 +285,7 @@ export class SHPWComponent {
     PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
     //---------------------------------------------------------------------------------------------------------
     //this._dataService = dataService;
-
+    this.lgCodeValue = "";
     this.vsValue = "";
     this.lgValue = "";
     this.zunloadValue = "";
@@ -270,9 +301,11 @@ export class SHPWComponent {
     this.immatnrValue = "";
     //date
     var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(now.setDate(now.getDate() - 1), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
     const that = this;
+
+    this.getLgortNm();
 
     //정보
     this.data2 = service.getData2();
@@ -324,11 +357,12 @@ export class SHPWComponent {
           else if (result.EV_TYPE === "S") {
 
             alert("출고처리 완료", "알림");
+
             this.popupVisible = false;
             this.popupVisibleIm = false;
-            
-            this.dataLoad(this);
-            this.print(this);
+            this.TeansactionPrint(this);
+            await this.dataLoad(this);
+
           }
         }
       },
@@ -361,6 +395,10 @@ export class SHPWComponent {
     //};
 
 
+  }
+
+  ngAfterViewChecked() {
+    this.cd.detectChanges();
   }
 
   public async dateLoad(dataService: ImateDataService) {
@@ -439,16 +477,31 @@ export class SHPWComponent {
     let fixData = { I_ZSHIPSTATUS: this.selectStatus };
     var zsds6410: ZSDS6410Model[] = [];
     thisObj.orderGridData = [];
+    //if (this.lgEntery.selectedValue == undefined) {
+    //  this.lgEntery.selectedValue = "";
+    //}
+
+    //var lgortVal = "";
+    //var role = this.rolid.find(item => item === "ADMIN");
+    
+    //if (role === undefined) {
+    //  var result7110Model = await this.dataService.SelectModelData<ZSDT7110Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7110ModelList", [],
+    //    `MANDT = '${this.appConfig.mandt}' AND KUNNR = '${this.empId}' `, "", QueryCacheType.None);
+
+    //  if (result7110Model.length > 0)
+    //    lgortVal = result7110Model[0].LGORT ?? "X";
+    //}
 
     //포장재 or 임가공
     if (thisObj.selectData2 !== "9999") {
-      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, "", "", this.selectData2, "", this.tdlnrValue ?? "", "", fixData.I_ZSHIPSTATUS, zsds6410);
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgCodeValue, "", this.startDate, this.endDate, "", "", this.selectData2, "X", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6410);
 
       var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
 
       var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
       thisObj.orderGridData = resultModel[0].IT_DATA;
 
+      /*thisObj.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");*/
     } else {
 
       var whereCondi = " AND ( ( A.MBLNR = '' AND A.MBLNR_C = '' ) OR ( A.MBLNR <> '' AND A.MBLNR_C <> '' ) )"
@@ -460,7 +513,7 @@ export class SHPWComponent {
       thisObj.imOrderList.forEach(async (row: ZMMT1320Model) => {
         thisObj.orderGridData.push(new ZSDS6410Model(row.VBELN, "", "", "", "", "", "", "", row.SC_R_DATE, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
           row.MEINS, "9999", row.SC_L_MENGE, 0, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
-          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", ""));
+          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", "", "", "", "", ""));
       })
     }
 
@@ -558,6 +611,7 @@ export class SHPWComponent {
  */
   onPEDataLoaded(e: any) {
     this.loadePeCount++;
+
     console.info(`DATA LOAD COUNT: ${this.loadePeCount}`);
     /*
      if (e.component.ClearSelectedValue != undefined) {
@@ -566,7 +620,17 @@ export class SHPWComponent {
        });
      }
      */
-    if (this.loadePeCount >= 14) {
+    if (this.loadePeCount >= 9) {
+      if (this.rolid.find(item => item === "ADMIN") === undefined) {
+        var lgVal = this.lgNmList.find(row => row.KUNNR === this.empId);
+        if (lgVal !== undefined)
+          this.lgCodeValue = lgVal.LGORT;
+        else
+          this.lgCodeValue = "3000";
+
+        this.isDisabled = true;
+      }
+
       this.loadePeCount = 0;
       this.dataLoad(this);
       this.loadingVisible = false;
@@ -577,8 +641,10 @@ export class SHPWComponent {
   //출고버튼
   async refAddOrder(e: any) {
 
+    this.clearEntery();
+    this.addFormData = [(this.addFormData)];
     //0.5초 뒤에 적용(숨김 상태의 컨트롤은 프로퍼티 변동이 안되므로 POPUP창이 보여진 상태에서 변경을 해 주어야 함)
-    setTimeout(async () => {
+    setTimeout(() => {
       var selectData = this.orderGrid.instance.getSelectedRowsData();
       this.popupData = { VBELN: selectData[0].VBELN, POSNR: selectData[0].POSNR, ZMENGE2: selectData[0].ZMENGE2, ZMENGE4: selectData[0].ZMENGE4, ARKTX: selectData[0].ARKTX }
       /*    this.addFormData = { MATNR: selectData[0].MATNR }*/
@@ -594,7 +660,7 @@ export class SHPWComponent {
       this.zunloadValue = selectData[0].ZUNLOAD;
       this.zpalValue = selectData[0].ZPALLTP;
       this.vkausValue = selectData[0].ZVKAUS;
-      this.zcarValue = selectData[0].ZCARTYPE;
+      /*this.zcarValue = selectData[0].ZCARTYPE;*/
       this.tdlnrValue = selectData[0].Z4PARVW
       this.zcarnoModiValue = selectData[0].ZCARNO;
       /*this.matnrValue = selectData[0].MATNR;*/
@@ -609,7 +675,7 @@ export class SHPWComponent {
         this.immatnrValue = selectData[0].MATNR;
       }
 
-    }, 100, this);
+    }, 500, this);
   }
 
 
@@ -636,7 +702,7 @@ export class SHPWComponent {
   onZcartypeCodeValueChanged(e: any) {
     setTimeout(() => {
       this.addFormData.ZCARTYPE = e.selectedValue;
-    });
+    }, 100);
   }
   //1차운송사
   onTdlnrCode1ValueChanged(e: any) {
@@ -676,7 +742,7 @@ export class SHPWComponent {
       this.addFormData.ZDRIVER = e.selectedItem.ZDRIVER;
       this.addFormData.ZPHONE = e.selectedItem.ZPHONE;
       this.zcarValue = e.selectedItem.ZCARTYPE;
-    });
+    }, 100);
   }
 
   //수정 차량번호 선택이벤트
@@ -686,7 +752,7 @@ export class SHPWComponent {
       this.addFormData.ZDRIVER = e.selectedItem.ZDRIVER;
       this.addFormData.ZPHONE = e.selectedItem.ZPHONE;
       this.zcarValue = e.selectedItem.ZCARTYPE;
-    });
+    }, 100);
   }
 
   public clearEntery() {
@@ -695,26 +761,26 @@ export class SHPWComponent {
     this.tvlvEntery.ClearSelectedValue();
     this.zpalEntery.ClearSelectedValue();
     this.dd07tCarEntery.ClearSelectedValue();
-    this.zcarnoCodeEntery.ClearSelectedValue();
+    /*this.zcarnoCodeEntery.ClearSelectedValue();*/
     this.zcarnoModiCodeEntery.ClearSelectedValue();
     /*    this.z4parvwCodeEntery.ClearSelectedValue();*/
     this.tdlnrEntery.ClearSelectedValue();
   }
 
   //화물 위수탁증
-  async print(e: any) {
-    var selectData = this.orderGrid.instance.getSelectedRowsData();
-    let params: ParameterDictionary =
-    {
-      "dbTitle": this.appConfig.dbTitle,
-      "itddatFrom": selectData[0].TDDAT,
-      "itddatTo": selectData[0].TDDAT,
-      "ivbeln": selectData[0].VBELN,
-      "mandt": this.appConfig.mandt
-    };
+  //async TeansactionPrint(e: any) {
+  //  var selectData = this.orderGrid.instance.getSelectedRowsData();
+  //  let params: ParameterDictionary =
+  //  {
+  //    "dbTitle": this.appConfig.dbTitle,
+  //    "itddatFrom": selectData[0].TDDAT,
+  //    "itddatTo": selectData[0].TDDAT,
+  //    "ivbeln": selectData[0].VBELN,
+  //    "mandt": this.appConfig.mandt
+  //  };
 
-    setTimeout(() => { this.reportViewer.OpenReport("SHPQReport", params) });
-  }
+  //  setTimeout(() => { this.reportViewer.printReport("owReport", params) });
+  //}
 
   //거래명세서
   async TeansactionPrint(e: any) {
@@ -729,10 +795,20 @@ export class SHPWComponent {
       "itddatFrom": selectData[0].TDDAT,
       "itddatTo": selectData[0].TDDAT,
       "ivbeln": selectData[0].VBELN,
-      "mandt": this.appConfig.mandt
+      /*      "vbelnvl": "",*/
+      "mandt": this.appConfig.mandt,
+      "ivstel": selectData[0].VSTEL
     };
 
-    setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction", params) });
+    setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction3", params) });
+  }
+
+  async getLgortNm() {
+
+    let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgCode);
+
+    var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
+    this.lgNmList = resultModel;
   }
 }
 

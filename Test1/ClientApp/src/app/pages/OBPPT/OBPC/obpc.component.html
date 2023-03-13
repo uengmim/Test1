@@ -18,14 +18,14 @@
 
     <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
       <div *dxTemplate style="margin-top:7px;">
-          <dx-select-box #ynSelect
-                         [dataSource]="ynList"
-                         displayExpr="name"
-                         valueExpr="code"
-                         (onValueChanged)="selectApply($event)"
-                         label="접수구분"
-                         labelMode="floating"
-                         [(value)]="selectBoxValue"></dx-select-box>
+        <dx-select-box #ynSelect
+                       [dataSource]="ynList"
+                       displayExpr="name"
+                       valueExpr="code"
+                       (onValueChanged)="selectApply($event)"
+                       label="접수구분"
+                       labelMode="floating"
+                       [(value)]="selectBoxValue"></dx-select-box>
       </div>
     </dxi-item>
 
@@ -64,8 +64,9 @@
                 [focusedRowIndex]="0"
                 [selection]="{ mode: 'single' }"
                 (onSelectionChanged)="selectedChanged($event)"
-                height="calc(100vh - 300px)"
+                height="calc(100vh - 400px)"
                 [columnAutoWidth]="true"
+                [noDataText]="noText"
                 [allowColumnReordering]="true"
                 columnResizingMode="widget"
                 [allowColumnResizing]="true">
@@ -78,7 +79,9 @@
 
     <!--Data column-->
     <dxi-column dataField="CONDT"
-                caption="계약일자">
+                caption="계약일자"
+                dataType="date"
+                format="yyyy-MM-dd">
     </dxi-column>
 
     <dxi-column dataField="CONNO"
@@ -87,26 +90,36 @@
     <dxi-column dataField="CONNM"
                 caption="계약건명">
     </dxi-column>
-    <dxi-column dataField="DUEDT"
-                caption="납기일자">
-    </dxi-column>
-    <dxi-column dataField="BIZDT"
-                caption="거래처접수일자">
-    </dxi-column>
-    <dxi-column dataField="GRDATE"
-                caption="자재 납품일자">
-    </dxi-column>
     <dxi-column dataField="BIDNO"
                 caption="구매공고번호">
     </dxi-column>
+    <dxi-column dataField="BIDSTT"
+                caption="공고상태">
+    </dxi-column>
+    <dxi-column dataField="DUEDT"
+                caption="납기일자"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+    <dxi-column dataField="BIZDT"
+                caption="거래처접수일자"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+    <dxi-column dataField="GRDATE"
+                caption="자재 납품일자"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
     <dxi-column dataField="MOMDT"
-                caption="구매부서 각서접수일">
+                caption="구매부서 각서접수일"
+                dataType="date"
+                format="yyyy-MM-dd">
     </dxi-column>
 
 
 
   </dx-data-grid>
-
   <!-- 하단 계약 폼 -->
   <div>
 
@@ -115,32 +128,43 @@
              width="100%"
              style="margin:20px 10px 20px 10px" [colCount]="4">
 
+
       <dxi-item itemType="group" [colCount]="3" [colSpan]="3" style="margin-top:5px">
+        <dxi-item class="scrollview_view" style="min-height:50px;" [colSpan]="3">
+          <dx-text-area [height]="90" [readOnly]="true" [(value)]="content" style="background-color: rgba(191, 191, 191, 0.15);">
+          </dx-text-area>
+        </dxi-item>
+
         <dxi-item dataField="CONNM" [colSpan]="3" [disabled]="true">
           <dxo-label text="계약명"></dxo-label>
         </dxi-item>
 
-        <dxi-item dataField="CONDT"  editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date'}" [disabled]="true">
+        <dxi-item dataField="CONDT" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date'}" [disabled]="true">
           <dxo-label text="계약일자"></dxo-label>
         </dxi-item>
 
         <dxi-item dataField="CONNO" [disabled]="true">
           <dxo-label text="계약번호"></dxo-label>
         </dxi-item>
-         
-        <dxi-item dataField="BIZDT"  editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date'}" [disabled]="true">
+
+        <dxi-item #conInDate dataField="BIZDT" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', disabled : true}" [disabled]="false">
           <dxo-label text="계약서 접수일자"></dxo-label>
         </dxi-item>
 
       </dxi-item>
 
-      <dxi-item itemType="group" [colCount]="1" style="margin-top:5px">
-        <dxi-item dataField="Notes" [editorOptions]="{ height: 90 }" [colSpan]="1">
+      <dxi-item itemType="group" [colCount]="3" style="margin-top:5px; " [editorOptions]="{ height: 90 }">
+        <dxi-item horizontalAlignment="center" [colSpan]="3">
+          <div style="width: 200px; text-align: center;">
+            <dx-check-box height="90" [(value)]="checkValue" #chkgbox text="동의"  [disabled]="btnDisabledValue"></dx-check-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="Notes" [colSpan]="1">
           <dxo-label text="계약서접수버튼" [visible]="false"></dxo-label>
           <div *dxTemplate>
             <dx-button template="applyTemplate"
                        [text]="applyButtonText"
-                      (onClick)="apply()"
+                       (onClick)="apply()"
                        [disabled]="btnDisabledValue"
                        [width]="80" [height]="70" type="success">
               <div *dxTemplate="let data of 'applyTemplate'">
@@ -149,10 +173,25 @@
             </dx-button>
           </div>
         </dxi-item>
+        <dxi-item dataField="Notes" [colSpan]="1">
+          <dxo-label text="자료첨부" [visible]="false"></dxo-label>
+          <div *dxTemplate>
+            <dx-button template="fileTemplate"
+                       [(text)]="fileShowButtonText"
+                       (onClick)="fileShowPopup()"
+                       [(visible)]="btnVisible"
+                       [disabled]="btnFileDisabledValue"
+                       [width]="80" [height]="70" type="success">
+              <div *dxTemplate="let data of 'fileTemplate'">
+                <div [innerHtml]="data.text" style="height: 90px; line-height: 30px;"></div>
+              </div>
+            </dx-button>
+          </div>
+        </dxi-item>
       </dxi-item>
 
       <dxi-item style="min-height:50px;" [colSpan]="4">
-        <div style="background-color: rgba(191, 191, 191, 0.15); height: 50px; width: 82%; font-size:12pt; text-align:center; line-height:50px; color:midnightblue">
+        <div style="background-color: rgba(191, 191, 191, 0.15); height: 50px; width: 91%; font-size:12pt; text-align:center; line-height:50px; color:midnightblue">
           <div>
             계약서 / 청렴계약이행각서 / 계약보증금 지급각서 등을 출력할 수 있습니다.
           </div>
@@ -164,7 +203,38 @@
   </div>
 
 </div>
-  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [showIndicator]="true" [showPane]="true"
-                 [shading]="true" [hideOnOutsideClick]="true">
-  </dx-load-panel>
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
 
+
+<dx-popup width="50%"
+          height="50%"
+          [showTitle]="true"
+          title="첨부파일"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="takePopupVisible">
+
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeFileButtonOptions">
+  </dxi-toolbar-item>
+
+  <attach-file #AttachFile
+               selectButtonText="첨부파일 선택"
+               uploadMode="useButtons"
+               labelText="첨부 파일을 여기에 끌어다 놓으십시오."
+               [multiple]="true"
+               [value]="attachFiles"
+               [uploadDocumentNo]="uploadDocumentNo"
+               direction="vertical"
+               [editingMode]="editingMode"
+               (uploadComplete)="uploadComplete($event)"
+               (valueChanged)="attachFileChanged($event)"
+               [fileListHeight]="200">
+  </attach-file>
+</dx-popup>

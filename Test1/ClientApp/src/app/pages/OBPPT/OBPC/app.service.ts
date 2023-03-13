@@ -20,10 +20,14 @@ const ynGubun: YnGubun[] = [
     name: "미접수"
   }]
 
+const Content = '';
 
 @Injectable()
 export class Service {
   getYnGubun() {
     return ynGubun;
+  }
+  getContent() {
+    return Content;
   }
 }

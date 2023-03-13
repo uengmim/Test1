@@ -14,13 +14,17 @@ import {
   DxDateBoxModule,
 } from 'devextreme-angular';
 import { VocCodeInfo } from '../../../shared/dataModel/QMSIF/VocCodeInfo';
-import { ArrayCodeInfo, TableColumnInfo } from '../../../shared/app.utilitys';
+import { ArrayCodeInfo, AttachFileInfo, CodeInfoType, CommonCodeInfo, TableCodeInfo, TableColumnInfo } from '../../../shared/app.utilitys';
 import { VocPersonnfo } from '../../../shared/dataModel/QMSIF/VocPersonInfo';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { VocInfData } from '../../../shared/dataModel/QMSIF/VocInfData';
 import { QmsInfResult } from '../../../shared/dataModel/QMSIF/QmsInfResult';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { AuthService } from '../../../shared/services';
+import { PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { ZCMT0020Model } from '../../../shared/dataModel/common/zcmt0020';
+import { OfficeXPUtility } from '../../../shared/officeXp.utility';
+
 
 
 //필터
@@ -44,7 +48,7 @@ export class VOCRComponent {
   @ViewChild('bunitEntery', { static: false }) bunitEntery!: CommonPossibleEntryComponent;
   @ViewChild('cystmerTypeEntery', { static: false }) cystmerTypeEntery!: CommonPossibleEntryComponent;
   @ViewChild('areaEntery', { static: false }) areaEntery!: CommonPossibleEntryComponent;
-  @ViewChild('selculytivateTypeEntery', { static: false }) culytivateTypeEntery!: CommonPossibleEntryComponent;
+  @ViewChild('culytivateTypeEntery', { static: false }) culytivateTypeEntery!: CommonPossibleEntryComponent;
   @ViewChild('partnmQtyUnitEntery', { static: false }) partnmQtyUnitEntery!: CommonPossibleEntryComponent;
   @ViewChild('rejectQtyUnitEntery', { static: false }) rejectQtyUnitEntery!: CommonPossibleEntryComponent;
   @ViewChild('productGroupEntery', { static: false }) productGroupEntery!: CommonPossibleEntryComponent;
@@ -54,7 +58,7 @@ export class VOCRComponent {
   @ViewChild('domesticEntery', { static: false }) domesticEntery!: CommonPossibleEntryComponent;
   @ViewChild('overseaEntery', { static: false }) overseaEntery!: CommonPossibleEntryComponent;
   @ViewChild('registerEntery', { static: false }) registerEntery!: CommonPossibleEntryComponent;
-
+  @ViewChild('departmentEntery', { static: false }) departmentEntery!: CommonPossibleEntryComponent;
 
   dataSource: any;
 
@@ -64,6 +68,7 @@ export class VOCRComponent {
   //날짜 조회
   startDate: any;
   endDate: any;
+
   //date box
   now: any = new Date();
   value: Date = new Date(1981, 3, 27);
@@ -79,19 +84,83 @@ export class VOCRComponent {
   customOperations!: Array<any>;
 
   callbacks = [];
+  vocData: any;
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
+  //팝업 닫기
+  closeButtonOptions: any;
+
+  //제품명엔트리 값
+  matnrValue: any;
+  maktCode: TableCodeInfo;
+
+  private loadePeCount: number = 0;
+
+  //UI 데이터 로딩 패널
+  loadingVisible: boolean = false;
+
+  /**
+ * 첨부 파일들
+ * */
+  attachFiles: AttachFileInfo[] = [];
+
+  /**
+   * 업로드 문서 번호
+   * */
+  uploadDocumentNo: string;
+
+  /**
+   * OffcieXP 유틸리티
+   * */
+  offceXPUtility: OfficeXPUtility;
+
+  /*
+   *첨부파일 팝업
+   */
+  filePopupVisible: boolean = false;
+
+  /**
+* 데이터 스토어 키
+* */
+  dataStoreKey: string = "vocr";
+  selectData: any;
+
+  domesticCode: ArrayCodeInfo;
+  overseaCode: ArrayCodeInfo;
+  areaCode: ArrayCodeInfo;
+
+  constructor(private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private appConfig: AppConfigService, private iminfo: ImateInfo,
+    private authService: AuthService) {
 
    //_dataService: ImateDataService;
 
-    appInfo.title = AppInfoService.APP_TITLE + " | MODEL TEST1";
+    const that = this;
+
+    this.getVocBaseCode()
+
+    appInfo.title = AppInfoService.APP_TITLE + " | VOC등록";
+
+    this.maktCode = appConfig.tableCode("제품코드");
+    this.matnrValue = "";
+    let codeInfos = [
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maktCode),
+    ];
+
+    PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
 
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 7), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
+    //팝업닫기버튼
+    this.closeButtonOptions = {
+      text: '닫기',
+      onClick(e: any) {
+        that.filePopupVisible = false;
+      }
+    }
   }
+
 
   //시비량 선택
   selManureQtyUnit: string | null = null;
@@ -170,8 +239,7 @@ export class VOCRComponent {
       },
       validationRequestsCallbacks: this.callbacks
     };
-
-
+  
   //제품명 선택
   selPartnmQtyUnit: string | null = null;
   partnmQtyAdapter =
@@ -185,7 +253,7 @@ export class VOCRComponent {
       validationRequestsCallbacks: this.callbacks
     };
 
-  //불량단위 선택
+  //불량수량 단위 선택
   selRejectQtyUnit: string | null = null;
   rejectQtyUnitAdapter =
     {
@@ -262,8 +330,21 @@ export class VOCRComponent {
       },
       validationRequestsCallbacks: this.callbacks
     };
+
+  //지역해외 선택
+  selOversea: string | null = null;
+  overseaAdapter =
+    {
+      getValue: () => {
+        return this.selOversea;
+      },
+      applyValidationResults: (e: any) => {
+        this.overseaEntery.validationStatus = e.isValid ? "valid" : "invalid"
+      },
+      validationRequestsCallbacks: this.callbacks
+    };
   
-  //담당자 선택
+  //지시담당자 선택
   selInChargePerson: string | null = null;
   inChargePersonAdapter =
     {
@@ -276,15 +357,28 @@ export class VOCRComponent {
       validationRequestsCallbacks: this.callbacks
     };
 
-  //담당자 선택
-  selREGISTER: string | null = null;
+  //등록자 선택
+  selRegister: string | null = null;
   registerAdapter =
     {
       getValue: () => {
-        return this.selREGISTER;
+        return this.selRegister;
       },
       applyValidationResults: (e: any) => {
         this.registerEntery.validationStatus = e.isValid ? "valid" : "invalid"
+      },
+      validationRequestsCallbacks: this.callbacks
+    };
+
+  //소속부서 선택
+  selDepartment: string | null = null;
+  departmentAdapter =
+    {
+      getValue: () => {
+        return this.selDepartment;
+      },
+      applyValidationResults: (e: any) => {
+        this.departmentEntery.validationStatus = e.isValid ? "valid" : "invalid"
       },
       validationRequestsCallbacks: this.callbacks
     };
@@ -293,12 +387,13 @@ export class VOCRComponent {
    * QMS VOC 기본 코드
    * @param e
    */
-  async getVocBaseCode(e: any) {
+
+  async getVocBaseCode() {
 
     //VOC 기초 코드 정보
     let vocBaseCodeQuery = new QueryMessage(QueryRunMethod.Alone, "vocBaseCode", "#func", "NBPDataModels@NAMHE.CustomFunction.QmsVocBaseCodeInterface", [], []);
     var resultSet = await this.dataService.dbSelectToDataSet([vocBaseCodeQuery])
-
+    
     //사업장
     var site = resultSet.getDataObject("site", VocCodeInfo);
     //사업부
@@ -327,6 +422,8 @@ export class VOCRComponent {
     var manureQtyUnit = resultSet.getDataObject("manureQtyUnit", VocCodeInfo);
     //담당자
     var InCharges = resultSet.getDataObject("inCharge", VocPersonnfo);
+    //소속부서
+    //var department = resultSet.getDataObject("Department", VocCodeInfo); 
 
     //배열 코드정보를 만든다.
     //시비량 단위
@@ -346,15 +443,15 @@ export class VOCRComponent {
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //지역
-    let areaCode = new ArrayCodeInfo("지역", ["code"], area,
+    this.areaCode = new ArrayCodeInfo("지역", ["code"], area,
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //지역국내
-    let domesticCode = new ArrayCodeInfo("지역국내", ["code"], domestic,
+    this.domesticCode = new ArrayCodeInfo("지역국내", ["code"], domestic,
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //지역해외
-    let overseaCode = new ArrayCodeInfo("지역해외", ["code"], oversea,
+    this.overseaCode = new ArrayCodeInfo("지역해외", ["code"], oversea,
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //재배형태
@@ -370,16 +467,20 @@ export class VOCRComponent {
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //민원종류
-    let vocTypeCode = new ArrayCodeInfo("제품군", ["code"], vocType,
+    let vocTypeCode = new ArrayCodeInfo("민원종류", ["code"], vocType,
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //민원원인
-    let vocCauseCode = new ArrayCodeInfo("제품군", ["code"], vocCause,
+    let vocCauseCode = new ArrayCodeInfo("민원원인", ["code"], vocCause,
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //생산공장
     let factoryCode = new ArrayCodeInfo("생산공장", ["code"], factory,
       [new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
+
+    //소속부서
+    //let departmentCode = new ArrayCodeInfo("소속부서", ["code"], department,
+      //[new TableColumnInfo("code", "코드"), new TableColumnInfo("codenm", "설명")]);
 
     //파서블 엔터리의 코드 정보를 변경 한다.
     //시비량 단위
@@ -395,13 +496,13 @@ export class VOCRComponent {
     this.cystmerTypeEntery.ChangeCodeInfo(cystmerTypeCode, "code", "%codenm%(%code%)")
 
     //지역
-    this.areaEntery.ChangeCodeInfo(areaCode, "code", "%codenm%(%code%)")
+    this.areaEntery.ChangeCodeInfo(this.areaCode, "code", "%codenm%(%code%)")
 
     //지역국내
-    this.domesticEntery.ChangeCodeInfo(domesticCode, "code", "%codenm%(%code%)")
+    this.domesticEntery.ChangeCodeInfo(this.domesticCode, "code", "%codenm%(%code%)")
 
     //지역해외
-    this.overseaEntery.ChangeCodeInfo(overseaCode, "code", "%codenm%(%code%)")
+    //this.overseaEntery.ChangeCodeInfo(this.overseaCode, "code", "%codenm%(%code%)")
 
     //재배형태
     this.culytivateTypeEntery.ChangeCodeInfo(culytivateTypeCode, "code", "%codenm%(%code%)")
@@ -420,6 +521,9 @@ export class VOCRComponent {
 
     //생산공장
     this.factoryEntery.ChangeCodeInfo(factoryCode, "code", "%codenm%(%code%)")
+
+    //소속부서
+    //this.departmentEntery.ChangeCodeInfo(departmentCode, "code", "%codenm(%code%)")
 
     //배열 코드정보를 만든다.
     let inChargesCode = new ArrayCodeInfo("담당자", ["id"], InCharges,
@@ -456,18 +560,39 @@ export class VOCRComponent {
   //Data refresh 날짜 새로고침 이벤트
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
-
   }
 
-  /*onAreaCodeValueChanged(e: any) {
-    setTimeout(() => {
-      this.vocData.AREA = e.selectedValue;
-      if (this.vocData.AREA === "해외") {
-        this.domesticEntery.ChangeCodeInfo(this.vocConfig.VocCodeInfo("해외지역"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "운송방법")
-      }
-      else if (this.vocData.AREA === "국내") {
+  onPEDataLoaded(e: any) {
+    this.loadePeCount++;
+  }
 
+  //지역코드 변경
+  onAreaCodeValueChanged(e: any) {
+    setTimeout(() => {
+      //this.vocData.AREA = e.selectedValue;
+      //국내
+      if (e.selectedValue === "D") {
+        this.domesticEntery.ChangeCodeInfo(this.domesticCode, "code", "%codenm%(%code%)");
+        //this.domesticEntery.ChangeCodeInfo(this.appConfig.commonCode("국내지역"), "code", "%codenm%(%code%)", "해외지역")
       }
+      //해외
+      else if (e.selectedValue === "E") {
+        this.domesticEntery.ChangeCodeInfo(this.overseaCode, "code", "%codenm%(%code%)");
+      }
+      //기타
+      else if (e.selectedValue === "ETC") {
+        this.domesticEntery.ChangeCodeInfo(this.domesticCode, "code", "%codenm%(%code%)");
+      }
+      //터키
+      else if (e.selectedValue === "C") {
+        this.domesticEntery.ChangeCodeInfo(this.overseaCode, "code", "%codenm%(%code%)");
+     }
     });
-  }*/
+  }
+
+  // 첨부파일
+  filePopup() {
+    this.filePopupVisible = true;
+  }
 }
+

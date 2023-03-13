@@ -14,7 +14,7 @@ import { Service } from './app.service';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStore, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import {
   DxDataGridComponent, DxTextBoxComponent, DxTagBoxModule, DxFormModule, DxFormComponent, DxTagBoxComponent, DxCheckBoxComponent, DxValidationGroupComponent } from 'devextreme-angular';
-import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
+import { AttachFileInfo, CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { ZCMT0020Model } from '../../../shared/dataModel/common/zcmt0020';
 import { AuthService } from '../../../shared/services';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
@@ -31,6 +31,10 @@ import { async } from 'rxjs';
 import { alert, confirm } from "devextreme/ui/dialog";
 import dxValidator from 'devextreme/ui/validator';
 import { DxiItemComponent, DxiValidationRuleComponent } from 'devextreme-angular/ui/nested';
+import { OfficeXPUtility } from '../../../shared/officeXp.utility';
+import { AttachFileComponent } from '../../../shared/components/attach-file/attach-file.component';
+import { LFA1BpModel } from '../../../shared/dataModel/OBPPT/Lfa1Bp';
+import { SHA256 } from 'crypto-js';
 
 const sendRequest = function (value: any) {
   const invalidEmail = 'test@dx-email.com';
@@ -60,10 +64,12 @@ export class OBMRComponent  {
   @ViewChild('businessClassEntery', { static: false }) businessClassEntery!: CommonPossibleEntryComponent;
   @ViewChild('accountClassEntery', { static: false }) accountClassEntery!: CommonPossibleEntryComponent;
   @ViewChild('questionCodeEntery', { static: false }) questionCodeEntery!: CommonPossibleEntryComponent;
+  @ViewChild('AttachFile', { static: false }) AttachFile!: AttachFileComponent;
 
   @ViewChild('countryEntery', { static: false }) countryEntery!: CommonPossibleEntryComponent;
   @ViewChild('bizpmtagbox', { static: false }) bizpmtagbox!: DxTagBoxComponent;
-  @ViewChild('chkgbox', { static: false }) chkgbox!: DxCheckBoxComponent;;
+  @ViewChild('chkgbox1', { static: false }) chkgbox1!: DxCheckBoxComponent;;
+  @ViewChild('chkgbox2', { static: false }) chkgbox2!: DxCheckBoxComponent;;
   @ViewChild('valueRule', { static: false }) valueRule!: DxiValidationRuleComponent;
 
   callbacks = [];
@@ -88,6 +94,7 @@ export class OBMRComponent  {
   selectedValue: string;
   //팝업 닫기
   compopupcloseButtonOptions: any;
+  closeButtonOptions: any;
 
   //국가 파서블엔트리 값
   countryValue: string | null = null;
@@ -98,8 +105,34 @@ export class OBMRComponent  {
   questionCodeValue: string | null = null;
 
 
+  //--------------------------------------------------------------------
+
+  /**
+   * 첨부 파일들
+   * */
+  attachFiles: AttachFileInfo[] = [];
+
+  /**
+   * 업로드 문서 번호
+   * */
+  uploadDocumentNo: string;
+
+  /**
+   * OffcieXP 유틸리티
+   * */
+  offceXPUtility: OfficeXPUtility;
+
+  /*
+   *첨부파일 팝업
+   */
+  takePopupVisible: boolean = false;
+  //--------------------------------------------------------------------
+
+
   //이메일 룰
   emailPattern: any = /^[^0-9]+$/;
+  
+
 
   //국가 파서블 엔트리 유효성 체크
   countryAdapter =
@@ -189,13 +222,17 @@ export class OBMRComponent  {
   deviceInfo: any;
   casResult: any;
   //텍스트박스 데이터
-  value: string;
+  firstText: string;
+  secondText: string;
 
   //버튼 제한
   isDisabled: boolean = false;
 
   //그리드 수정제한
   isEditing: boolean = true;
+
+  // 중복아이디값 체크
+  dupId: string = "";
 
   /**
  * 로딩된 PeCount
@@ -209,8 +246,12 @@ export class OBMRComponent  {
  * @param authService 사용자 인증 서버스
  */
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, private appInfo: AppInfoService,
+    service: Service, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService, private httpClient: HttpClient) {
     appInfo.title = AppInfoService.APP_TITLE + " | 회원가입 요청";
+
+    this.loadingVisible = true;
+
     //possible-entry
     this.roleGridBoxOpened = false;
     this.statusGridBoxOpened = false;
@@ -220,17 +261,24 @@ export class OBMRComponent  {
     this.selectedValue = "Z100";
     this.selectedLike = "A%";
     //텍스트박스 데이터
-    this.value = service.getContent();
+    this.firstText = service.getContent("first");
+    this.secondText = service.getContent("second");
 
     this.accountClassValue = "1";
     this.businessClassValue = "1";
     this.countryValue = "KR";
 
+    
+
+    //첨부파일
+
+    this.offceXPUtility = new OfficeXPUtility(httpClient, appConfig);
+
     this.rowCount1 = 0;
     this.rowCount2 = 0;
     //회원가입 폼 데이터
     this.register = new ZMMT8100Model(this.appConfig.mandt, "", "", "", "Q", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "",
-      "", "", "1", "1", "KR", "", "", new Date(), new Date(), new Date(), new Date(), "", "", new Date(), "", new Date(), "", new Date(), "", "", "", "", this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
+      "", "", "1", "1", "KR", "", "", new Date(), new Date(), new Date(), new Date(), "", "", new Date(), "", "", "", "", "", "", "KRW", "", this.appConfig.interfaceId, new Date(), "", this.appConfig.interfaceId, new Date(), "", DIMModelStatus.UnChanged);
 
     setTimeout(async (that: OBMRComponent) => {
       //mac 가져오기
@@ -280,30 +328,50 @@ export class OBMRComponent  {
       useSubmitBehavior: true,
       onClick: async (e: any) => {
 
-        var value = this.chkgbox.value;
+        var chk1 = this.chkgbox1.value;
+        var chk2 = this.chkgbox2.value;
         let result = e.validationGroup.validate();
         let formresult = this.masterform.instance.validate();
         var bsresult = await this.bsDataLoad(this.imInfo, this.dataService, this);
+        var bpresult = await this.bpDataLoad(this.imInfo, this.dataService, this);
+
+        var DataResult = await dataService.SelectModelData<ZMMT8100Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8100ModelList", [],
+          `MANDT = '${this.appConfig.mandt}' AND UPPER(MACID) = UPPER('${this.register.MACID}') `, "", QueryCacheType.None);
+
+        if (DataResult.length > 0) {
+          alert("이미 다른ID에 등록된 컴퓨터입니다.", "알림");
+          return;
+        }
+
+
         //필수값을 입력 안했을 때
         if (!formresult.isValid || !result.isValid) {
           alert("필수값을 입력하여 주십시오.", "알림");
           return;
 
         }
+        if (bsresult.length > 0) {
+          alert("중복된 사업자 번호가 있습니다.", "알림");
+          return;
+        }
+        if (bpresult.length > 0) {
+          alert("중복된 사업자 번호가 있습니다.", "알림");
+          return;
+        }
+
+        if (this.dupId != this.register.LOGID) {
+          alert("아이디 중복체크가 필요합니다.", "알림");
+          return;
+        }
+
         //필수값을 입력 했을 때
         else {
           //동의를 눌렀으면
-          if (value == true) {
+          if (chk1 && chk2) {
             if (await confirm("회원가입 요청하시겠습니까?", "알림")) {
-              if (bsresult.length > 0) {
-                alert("중복된 사업자 번호가 있습니다.", "알림");
-              } else {
-
-                  this.dataInsert(this)
-                  alert("회원가입 요청이 완료되었습니다.", "알림");
-                  this.form.instance.getButton("applyBtn")?.option("disabled", true);
-                
-              }
+                this.uploadDocumentNo = "MM" + this.register.BIZNO;
+                this.dataInsert(this);
+                this.form.instance.getButton("applyBtn")?.option("disabled", true);
             }
           } else {
             alert("동의를 눌러주세요.", "알림");
@@ -328,6 +396,12 @@ export class OBMRComponent  {
         that.comPopupVisible = false;
       },
     };
+    this.closeButtonOptions = {
+      text: '닫기',
+      onClick(e: any) {
+        that.takePopupVisible = false;
+      }
+    }
 
   }
   async ngOnInit() {
@@ -346,92 +420,11 @@ export class OBMRComponent  {
  * 파서블 엔트리 데이터 로딩 완료
  * @param e
  */
-  async onBIZTYEDataLoaded(e: any) {
+  async onDataLoaded(e: any) {
     this.loadePeCount++;
-    if (this.loadePeCount >= 3) {
-      setTimeout(() => { this.loadingVisible = false });
-
-      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmr", this.appConfig, this.businessClassCode);
-
-      let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
-      //---------------------------------------------------------------------------------
-      dataSet = await this.dataService.dbSelectToDataSet(
-        PossibleEntryDataStore.createCommQueryMessage(this.appConfig, this.businessClassCode, null)
-      );
-
-      resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
-    }
-  }
-  async onLIFTYDataLoaded(e: any) {
-    this.loadePeCount++;
-    if (this.loadePeCount >= 3) {
-      setTimeout(() => { this.loadingVisible = false });
-
-      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmr", this.appConfig, this.accountClassCode);
-
-      let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
-      //---------------------------------------------------------------------------------
-      dataSet = await this.dataService.dbSelectToDataSet(
-        PossibleEntryDataStore.createCommQueryMessage(this.appConfig, this.accountClassCode, null)
-      );
-
-      resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
-    }
-  }
-  async onQSTIONDataLoaded(e: any) {
-    this.loadePeCount++;
-    if (this.loadePeCount >= 3) {
-      setTimeout(() => { this.loadingVisible = false });
-
-      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmr", this.appConfig, this.questionCode);
-
-      let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
-      //---------------------------------------------------------------------------------
-      dataSet = await this.dataService.dbSelectToDataSet(
-        PossibleEntryDataStore.createCommQueryMessage(this.appConfig, this.questionCode, null)
-      );
-
-      resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
-    }
-  }
-  async onCategoryataLoaded(e: any) {
-    this.loadePeCount++;
-    if (this.loadePeCount >= 3) {
-      setTimeout(() => { this.loadingVisible = false });
-
-      let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet("obmr", this.appConfig, this.categoryCode);
-
-      let resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
-      //---------------------------------------------------------------------------------
-      dataSet = await this.dataService.dbSelectToDataSet(
-        PossibleEntryDataStore.createCommQueryMessage(this.appConfig, this.categoryCode, null)
-      );
-
-      resultModel = dataSet?.tables["ZCMT0020"].getDataObject(ZCMT0020Model);
-
-      console.info(resultModel);
-
+    console.log(this.loadePeCount);
+    if (this.loadePeCount >= 4) {
+      setTimeout(() => { this.loadingVisible = false }, 2000);
     }
   }
   /**
@@ -443,6 +436,11 @@ export class OBMRComponent  {
 
   //아이디중복 검사
   async Duplication() {
+    if (this.register.LOGID == "") {
+      alert("아이디를 입력하세요.", "알림");
+      return;
+    }
+
     var result = await this.dataLoad(this.imInfo, this.dataService, this);
     if (result.length > 0) {
       alert("중복된 아이디가 있습니다.", "알림");
@@ -450,15 +448,13 @@ export class OBMRComponent  {
     } else {
       alert("사용 가능한 아이디입니다.", "알림")
       this.form.instance.getButton("applyBtn")?.option("disabled", false);
-      
     }
+    this.dupId = this.register.LOGID;
   }
 
   //팝업이벤트
   showPopup(popupMode: any, data: any): void {
     this.formData = {};
-    console.log(data);
-    console.log(this.formData);
 
     this.formData = data;
     this.popupMode = popupMode;
@@ -523,13 +519,21 @@ export class OBMRComponent  {
 
     return resultBsModel;
   }
+  // 사업자번호 데이터 로드(BP)
+  public async bpDataLoad(iminfo: ImateInfo, dataService: ImateDataService, thisObj: OBMRComponent) {
+
+    var resultBpModel = await dataService.SelectModelData<LFA1BpModel[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.LFA1BpList", [thisObj.appConfig.mandt, thisObj.register.BIZNO],
+      "", "", QueryCacheType.None);
+
+    return resultBpModel;
+  }
   //  데이터 삽입
   public async dataInsert(thisObj: OBMRComponent) {
     try {
       let now = new Date();
       let minDate = new Date("0001-01-01");
       let nowTime = formatDate(new Date(), "HH:mm:ss", "en-US");
-      var maininsertData = thisObj.register as ZMMT8100Model;
+      var maininsertData = Object.assign({}, thisObj.register) as ZMMT8100Model;
       var subinsertData = thisObj.register as ZMMT8110Model;
       //등록 요청 일자
       maininsertData.REQDT = now;
@@ -541,16 +545,15 @@ export class OBMRComponent  {
       maininsertData.CREDT = minDate;
       //최종 승인 일자
       maininsertData.LSTDT = minDate;
-      //사용 중지 일자
-      maininsertData.STODT = minDate;
-      //유효 일자
-      maininsertData.DUEDT = minDate;
       //레코드 생성일
       maininsertData.ERDAT = now;
       //입력시간
       maininsertData.AEZET = nowTime;
       //최종 변경 시간
       maininsertData.ERZET = nowTime;
+
+      //비밀번호해싱
+      maininsertData.LOGPW = SHA256(maininsertData.LOGPW).toString();
 
 
       maininsertData.ModelStatus = DIMModelStatus.Add;
@@ -579,9 +582,16 @@ export class OBMRComponent  {
 
       this.rowCount2 = await thisObj.dataService.ModifyModelData<ZMMT8110Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8110ModelList", submodelList);
 
+
+      // 파일첨부 저장 같이 넣어주기
+      this.AttachFile.upload();
+
+
+      alert("회원가입 요청이 완료되었습니다.", "알림");
     }
     catch (error) {
       alert("error", "알림");
+      console.log(error);
     }
   }
   //비밀번호 확인
@@ -602,5 +612,10 @@ export class OBMRComponent  {
       this.statusGridBoxOpened = false;
       this.ref.detectChanges();
     }
+  }
+
+  // 첨부파일
+  fileUploadPopup() {
+    this.takePopupVisible = true;
   }
 }

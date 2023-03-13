@@ -15,7 +15,7 @@
     </div>
   </dxi-item>
 
-  <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
+  <dxi-item location="before" locateInMenu="auto" [disabled]="isDisabled">
     <div *dxTemplate style="margin-left:15px;">
       <nh-possible-comm #arehouseEntery
                         [dataStoreKey]="dataStoreKey"
@@ -40,15 +40,23 @@
             widget="dxButton"
             locateInMenu="auto"
             [height]="25"
+            [options]="changeButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
             [options]="searchButtonOptions">
   </dxi-item>
 </dx-toolbar>
 
-<dx-data-grid id="grid"
+<dx-data-grid id="grid" #dataGrid
               [dataSource]="mainGridData"
               [showBorders]="true"
               [focusedRowIndex]="0"
               columnResizingMode="widget"
+              [selection]="{ mode: 'single' }"
               [allowColumnReordering]="true"
               [columnAutoWidth]="true"
               [allowColumnResizing]="true"
@@ -78,13 +86,9 @@
 
   <dxi-column dataField="MAKTX" caption="자재명" dataType="string">  </dxi-column>
 
-  <dxi-column dataField="LABST" caption="가용재고" dataType="number" format="#,###.###">  </dxi-column>
-
-  <dxi-column dataField="INSME" caption="검사재고" dataType="number" format="#,###.###">  </dxi-column>
-
   <dxi-column dataField="SPEME" caption="보류재고" dataType="number" format="#,###.###">  </dxi-column>
 
-  <dxi-column dataField="UMLME" caption="이동중재고" dataType="number" format="#,###.###">  </dxi-column>
+  <dxi-column dataField="LABST" caption="가용재고" dataType="number" format="#,###.###">  </dxi-column>
 
   <dxi-column dataField="MEINS" caption="기본단위" dataType="string">  </dxi-column>
 
@@ -112,3 +116,59 @@
                [shading]="true" [hideOnOutsideClick]="true">
 </dx-load-panel>
 
+
+
+<dx-popup width="500px"
+          height="auto"
+          [showTitle]="true"
+          title="재고유형전환"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="popupVisible">
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="saveButtonOptions">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+
+  <div id="form-container">
+    <dx-form id="orderInfo"
+             [(formData)]="changeFormData"
+             width="100%"
+             (onFieldDataChanged)="form_fieldDataChanged($event)"
+             style="margin-top:10px">
+
+      <dxi-item itemType="group" caption="" [colCount]="4">
+        <dxi-item dataField="MAKTX" editorType="dxTextBox" disabled="true" [colSpan]="3">
+          <dxo-label text="자재명"></dxo-label>
+        </dxi-item>
+        <dxi-item dataField="MEINS" editorType="dxTextBox" disabled="true" [colSpan]="1">
+          <dxo-label text="단위"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="" [colCount]="2">
+        <dxi-item dataField="SPEME" editorType="dxNumberBox" disabled="true" [colSpan]="1" [editorOptions]="{ format: '#,##0.###', type: 'decimal' }">
+          <dxo-label text="현보류재고"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="INPUT" editorType="dxNumberBox" [colSpan]="1" [editorOptions]="{ format: '#,##0.###', type: 'decimal'}">
+          <dxo-label text="가용전환수량"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="" [colCount]="1">
+        <dxi-item dataField="MEMO" editorType="dxTextBox" [colSpan]="1">
+          <dxo-label text="메모"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+    </dx-form>
+  </div>
+</dx-popup>

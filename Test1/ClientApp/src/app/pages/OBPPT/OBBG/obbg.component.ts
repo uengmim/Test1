@@ -12,7 +12,7 @@ import { parseDate } from 'devextreme/localization';
 import { alert, confirm } from "devextreme/ui/dialog";
 import { List, Enumerable } from 'linqts'
 import { deepCopy } from '../../../shared/imate/utility/object-copy';
-import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
+import { AttachFileInfo, CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
@@ -28,6 +28,10 @@ import { AuthService } from '../../../shared/services';
 import { AppInfoService } from '../../../shared/services/app-info.service';
 import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { Seq } from './app.service';
+import { OfficeXPUtility } from '../../../shared/officeXp.utility';
+import { HttpClient } from '@angular/common/http';
+import { AttachFileComponent } from '../../../shared/components/attach-file/attach-file.component';
+import { SHA256 } from 'crypto-js';
 
 /*입찰신청투찰 Component*/
 
@@ -41,6 +45,10 @@ export class OBBGComponent {
   @ViewChild('bidGrid', { static: false }) bidGrid!: DxDataGridComponent;
   @ViewChild('gretdIn', { static: false }) gretdIn!: DxiItemComponent;
   @ViewChild('PrgstatusEntry', { static: false }) PrgstatusEntry!: CommonPossibleEntryComponent;
+  @ViewChild('AttachFile', { static: false }) AttachFile!: AttachFileComponent;
+  @ViewChild('bidListDataGrid', { static: false }) bidListDataGrid!: DxDataGridComponent;
+  @ViewChild('estimateDataGrid', { static: false }) estimateDataGrid!: DxDataGridComponent;
+  @ViewChild('bidDataGrid', { static: false }) bidDataGrid!: DxDataGridComponent;
 
 
   callbacks = [];
@@ -54,6 +62,7 @@ export class OBBGComponent {
   //gird 데이터
   bidList!: ArrayStore;
   dtlList: any;
+  checkCss: any;
 
   //숨김처리변수
   loadingVisible: boolean = false;
@@ -110,7 +119,6 @@ export class OBBGComponent {
   RegulationValue: any;
   PrgstatusCodeValue: string | null = null;
 
-  openFlag: boolean;
 
   //질문 파서블 엔트리 유효성 체크
   PrgstatusAdapter =
@@ -133,11 +141,47 @@ export class OBBGComponent {
   checkBoxValue: any;
   checkListBoxValue: any;
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 입찰신청투찰";
+
+  noText: string = "조회된 공고가 없습니다.";
+
+  //--------------------------------------------------------------------
+
+  /**
+   * 첨부 파일들
+   * */
+  attachFiles: AttachFileInfo[] = [];
+
+  /**
+   * 업로드 문서 번호
+   * */
+  uploadDocumentNo: string;
+
+  /**
+   * OffcieXP 유틸리티
+   * */
+  offceXPUtility: OfficeXPUtility;
+
+  /*
+   *첨부파일 팝업
+   */
+  takePopupVisible: boolean = false;
 
 
-    this.openFlag = false;
+  closeFileButtonOptions: any;
+
+
+  editingMode: boolean = false;
+
+  //--------------------------------------------------------------------
+
+
+
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService, http: HttpClient) {
+    appInfo.title = AppInfoService.APP_TITLE + " | 입찰/투찰";
+
+    this.offceXPUtility = new OfficeXPUtility(http, appConfig);
+
+
     this.PrgstatusCodeValue = "3";
     this.RegulationCode = appConfig.commonCode("결재조건");
     this.PrgstatusCode = appConfig.commonCode("공고진행상태");
@@ -156,7 +200,7 @@ export class OBBGComponent {
     this.bizNoValue = this.userInfo?.pin ?? "";
 
     this.bidcstValue = 0;
-    this.startDate = formatDate(new Date().setDate(new Date().getDate() - 90), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(new Date().setDate(new Date().getDate() - 40), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
 
@@ -165,7 +209,12 @@ export class OBBGComponent {
       text: '닫기',
       onClick: async () => {
         this.detailVisible = false;
-        console.log(this.detailVisible);
+      },
+    };
+    this.closeFileButtonOptions = {
+        text: '닫기',
+      onClick: async () => {
+        this.takePopupVisible = !this.takePopupVisible;
       },
     };
 
@@ -202,7 +251,7 @@ export class OBBGComponent {
       onClick: async (e: any) => {
         if (this.checkCloseing(this.bidFormData, null)) {
 
-          if (this.bidFormData.VATTY == "OUT") {
+          if (this.bidFormData.VATTY == "IN") {
 
             this.bidFormData.BIDCAST_I = this.bidcstValue;
             this.bidFormData.BIDVAT_I = Math.floor(this.bidcstValue * 0.1) / 10 * 10;
@@ -217,9 +266,13 @@ export class OBBGComponent {
           if (await confirm("투찰하시겠습니까 ? ", "저장알림")) {
 
 
-
             if (this.bidFormData.BIDCST_I === 0) {
               alert("입력된 투찰금액이 없습니다.", "알림");
+              return;
+            }
+            else if (this.bidFormData.GRETD === null) {
+              alert("입력된 납품 가능일자가 없습니다.", "알림");
+              return;
             }
             else if (this.checkVisible && !this.checkBoxValue) {
               alert("입력하신 투찰금액에 대한 동의가 필요합니다.", "알림");
@@ -237,6 +290,9 @@ export class OBBGComponent {
                 `MANDT = '${this.appConfig.mandt}' AND BIDNO = '${this.bidFormData.BIDNO.padStart(15, '0')}' AND LIFNR = '${lifnr.padStart(10, '0')}' AND BIDSEQ = '${seq}'`, "", QueryCacheType.None);
 
               if (resultModel.length > 0) {
+
+                // 파일첨부 저장 같이 넣어주기
+                this.AttachFile.upload();
                 alert("투찰 제출이 완료되었습니다.", "알림");
                 this.bidVisible = !this.bidVisible;
                 this.dataLoad();
@@ -251,7 +307,7 @@ export class OBBGComponent {
     this.modifyButtonOptions = {
       text: '저장',
       onClick: async (e: any) => {
-        if (this.bidListFormData.VATTY == "OUT") {
+        if (this.bidListFormData.VATTY == "IN") {
           this.bidListFormData.BIDCST = this.bidListcstValue;
           this.bidListFormData.BIDVAT = Math.floor(this.bidListcstValue * 0.1) / 10 * 10;
           this.bidListFormData.BIDAMT_I = this.bidListFormData.BIDCST + this.bidListFormData.BIDVAT;
@@ -266,6 +322,11 @@ export class OBBGComponent {
 
           if (this.bidListFormData.BIDCST === 0) {
             alert("입력된 투찰금액이 없습니다.", "알림");
+            return;
+          }
+          else if (this.bidListFormData.GRETD === null) {
+            alert("입력된 납품 가능일자가 없습니다.", "알림");
+            return;
           }
           else if (this.checkListVisible && !this.checkListBoxValue) {
             alert("입력하신 투찰금액에 대한 동의가 필요합니다.", "알림");
@@ -277,13 +338,16 @@ export class OBBGComponent {
               this.appConfig.interfaceId, new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), this.appConfig.interfaceId, new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), DIMModelStatus.Modify);
 
             var modelList: ZMMT8510Model[] = [model];
-            console.log(model);
+
             var result = await this.dataService.ModifyModelData<ZMMT8510Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8510ModelList", modelList);
 
             var resultModel = await dataService.SelectModelData<ZMMT8510Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8510ModelList", [],
               `MANDT = '${this.appConfig.mandt}' AND BIDNO = '${this.bidListFormData.BIDNO.padStart(15, '0')}' AND LIFNR = '${lifnr.padStart(10, '0')}' AND BIDSEQ = '${seq}'`, "", QueryCacheType.None);
 
             if (resultModel.length > 0) {
+
+              // 파일첨부 저장 같이 넣어주기
+              this.AttachFile.upload();
               alert("투찰 수정이 완료되었습니다.", "알림");
 
               var reulstList = await this.bidListDataLoad(this.bidListFormData.BIDNO, this.seqSelect);
@@ -296,6 +360,8 @@ export class OBBGComponent {
                 data: resultGrid.ET_DATA
 
               });
+              this.bidListDataGrid.instance.getScrollable().scrollTo(0);
+
             }
           }
         }
@@ -358,6 +424,8 @@ export class OBBGComponent {
         data: resultModel[0].ET_DATA
 
       });
+      this.bidGrid.instance.getScrollable().scrollTo(0);
+
     }
     else {
       this.bidList = new ArrayStore({
@@ -365,6 +433,8 @@ export class OBBGComponent {
         data: resultModel[0].ET_DATA
 
       });
+      this.bidGrid.instance.getScrollable().scrollTo(0);
+
     }
 
 
@@ -378,7 +448,7 @@ export class OBBGComponent {
 
     var queryModel = await this.dataService.SelectModelData<ZMMT8510Custom[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT8510CustomModelList",
       ['3', 'MM', 'MM832', this.appConfig.mandt, BIDNO.padStart(15, '0'), lifnr.padStart(10, '0'), SEQ.padStart(3, '0')], "", "", QueryCacheType.None);
-    console.log(queryModel[0]);
+
     return queryModel[0];
   }
   /**
@@ -412,6 +482,17 @@ export class OBBGComponent {
     this.detailData.BIZNO = this.userInfo?.pin ?? "";
     this.detailData.NAME1 = this.userInfo?.deptName ?? "";
     this.detailData.RFQAMT = parseInt(this.detailData.RFQAMT);
+    var lifnr = this.userInfo?.deptId ?? "";
+
+    var bizno = this.userInfo?.pin ?? "";
+
+    //조회용 파일 첨부 팝업 띄우기
+    this.editingMode = false;
+    this.attachFiles = [];
+    this.uploadDocumentNo = `MM${this.detailData.BIDNO.padStart(15, '0')}${bizno.padStart(10, '0')}`;
+    this.offceXPUtility.getOffiXpAttachFileInfo(`MM${this.detailData.BIDNO.padStart(15, '0')}${bizno.padStart(10, '0')}`).then((fileInfos) => {
+      this.attachFiles = fileInfos
+    });
 
 
     var result = await this.detaildataLoad(selectData.BIDNO, selectData.RFQSEQ ?? "");
@@ -421,6 +502,7 @@ export class OBBGComponent {
       data: result.ET_DATA
 
     });
+    this.estimateDataGrid.instance.getScrollable().scrollTo(0);
 
     this.dtlList._array.forEach(async (array: any) => {
 
@@ -435,7 +517,7 @@ export class OBBGComponent {
 
         else {
           array.RFQCST1 = parseInt(array.MENGE) * parseInt(array.RFQCST);
-          if (this.detailData.VATTY == "OUT") {
+          if (this.detailData.VATTY == "IN") {
             array.RFQVAT = parseInt(array.RFQCST1) * 0.1
           } else {
             array.RFQVAT = "0"
@@ -449,7 +531,8 @@ export class OBBGComponent {
   }
   async Bid() {
     var selectData = this.bidGrid.instance.getSelectedRowsData()[0];
-    
+    this.RegulationValue = selectData.PAYTY;
+
     if (this.checkCloseing(selectData, null)) {
 
       this.bidFormData = {};
@@ -478,6 +561,15 @@ export class OBBGComponent {
       this.bidFormData.BIDVAT = parseInt(this.bidFormData.BIDVAT) ?? 0;
       this.bidFormData.BIDAMT = parseInt(this.bidFormData.BIDAMT) ?? 0;
 
+      var lifnr = this.userInfo?.deptId ?? "";
+      //조회용 파일 첨부 팝업 띄우기
+      this.editingMode = true;
+      this.attachFiles = [];
+      this.uploadDocumentNo = `MM${this.bidFormData.BIDNO.padStart(15, '0')}${this.bidFormData.BIZNO.padStart(10, '0')}`;
+      this.offceXPUtility.getOffiXpAttachFileInfo(`MM${this.bidFormData.BIDNO.padStart(15, '0')}${this.bidFormData.BIZNO.padStart(10, '0')}`).then((fileInfos) => {
+        this.attachFiles = fileInfos
+      });
+
       var result = await this.detaildataLoad(selectData.BIDNO, selectData.RFQSEQ ?? "");
 
       this.bidGridData = new ArrayStore({
@@ -485,8 +577,12 @@ export class OBBGComponent {
         data: result.ET_DATA
 
       });
+      this.bidDataGrid.instance.getScrollable().scrollTo(0);
 
-      this.bidVisible = !this.bidVisible;
+      setTimeout(() => {
+
+        this.bidVisible = !this.bidVisible;
+      }, 1000);
       
     }
   }
@@ -495,6 +591,8 @@ export class OBBGComponent {
 
     var selectData = this.bidGrid.instance.getSelectedRowsData()[0];
     var checkSeq = selectData.BIDSEQ ?? 0;
+    this.RegulationValue = selectData.PAYTY;
+
     if (checkSeq < 1) {
       alert("투찰 내역이 존재하지 않습니다.", "알림");
     }
@@ -514,17 +612,23 @@ export class OBBGComponent {
       }
 
       this.seqSelect = selectData.BIDSEQ.padStart(3, '0');;
-      console.log(this.seqSelect);
 
-      this.openFlag = true;
+
+      var lifnr = this.userInfo?.deptId ?? "";
+
+      //조회용 파일 첨부 팝업 띄우기
+      this.editingMode = true;
+      this.attachFiles = [];
+      this.uploadDocumentNo = `MM${this.bidListFormData.BIDNO.padStart(15, '0')}${this.bidListFormData.BIZNO.padStart(10, '0')}`;
+      this.offceXPUtility.getOffiXpAttachFileInfo(`MM${this.bidListFormData.BIDNO.padStart(15, '0')}${this.bidListFormData.BIZNO.padStart(10, '0')}`).then((fileInfos) => {
+        this.attachFiles = fileInfos
+      });
+
       var reulstList = await this.bidListDataLoad(selectData.BIDNO, selectData.BIDSEQ);
-      console.log("확인 : ");
-      console.log(reulstList);
-      console.log(this.bidListFormData);
+
       Object.assign(this.bidListFormData, reulstList);
-      console.log(this.bidListFormData);
       Object.assign(this.bidListFormData, { MAXSEQ: selectData.BIDSEQ ?? 0, BIZNO: this.userInfo?.pin ?? "" });
-      console.log(this.bidListFormData);
+
       this.bidListcstValue = this.bidListFormData.BIDCST ?? 0;
 
       if (this.checkCloseing(this.bidListFormData, "")) {
@@ -551,7 +655,11 @@ export class OBBGComponent {
         data: resultGrid.ET_DATA
 
       });
-      this.bidListVisible = !this.bidListVisible;
+      this.bidListDataGrid.instance.getScrollable().scrollTo(0);
+
+      setTimeout(() => {
+        this.bidListVisible = !this.bidListVisible;
+      }, 1000);
     }
   }
   //날짜 클릭
@@ -586,10 +694,9 @@ export class OBBGComponent {
   }
   async seqChange(e: any) {
 
-    this.openFlag = true;
 
     var reulstList = await this.bidListDataLoad(this.bidListFormData.BIDNO, this.seqSelect);
-    console.log(reulstList);
+
     Object.assign(this.bidListFormData, reulstList);
     this.bidListcstValue = reulstList.BIDCST;
     
@@ -620,11 +727,12 @@ export class OBBGComponent {
       data: resultGrid.ET_DATA
 
     });
+    this.bidListDataGrid.instance.getScrollable().scrollTo(0);
+
   }
 
   checkCloseing(selectData: any, alertFlag: any) {
 
-    console.log(selectData);
     //현재날짜 문자열 변환
     let nowDate = formatDate(new Date(), "yyyyMMdd", "en-US");
     //현재시간 문자열 변환
@@ -637,8 +745,6 @@ export class OBBGComponent {
     let endDate = selectData.BIFDTH
     //입찰마감시간
     let endTime = selectData.BIFDTT.replace(/:/g, '');
-    console.log(nowDate + "," + staDate + "," + endDate);
-    console.log(nowTime + "," + staTime + "," + endTime);
     if (selectData.BIDST == "6") {
       return true;
     }
@@ -646,15 +752,18 @@ export class OBBGComponent {
       alertFlag ?? alert("투찰이 불가능합니다.[공고상태]", "알림");
       return false;
     }
+    /*
     if (nowDate < staDate) {
       // 입찰개시일자 전이면
-      alertFlag ?? alert("입찰 개시 전입니다.", "알림");
+      alertFlag ?? alert(`입찰 개시 ${parseInt(staDate) - parseInt(nowDate)}일 전입니다.`, "알림");
       return false;
     }
+    */
     if (nowDate > endDate) {
       alertFlag ?? alert("입찰이 마감되었습니다.", "알림");
       return false;
     }
+    /*
     if (nowDate == staDate) {
       if (nowTime < staTime) {
         //입찰개시시간 전이면
@@ -662,8 +771,8 @@ export class OBBGComponent {
         return false;
       }
     }
+    */
     if (nowDate == endDate) {  //입찰 마감 시간 후라면
-      console.log(nowTime > endTime);
       if (nowTime > endTime) {
         alertFlag ?? alert("입찰이 마감되었습니다.", "알림");
         return false;
@@ -676,68 +785,81 @@ export class OBBGComponent {
     this.deleteButtonOptions = { visible: flag };
     this.gretdIn.editorOptions = { disabled: !flag };
     this.cstDisabled = !flag;
+    SHA256.toString();
   }
 
   amt(e: any) {
-    if (e.value > this.bidFormData.RFQCST) {
-      alert("견적가 이상 입력이 불가능합니다.", "알림");
-      e.component.option('value', 0);
-    }
-    else {
-      if (e.value != 0) {
-        if (this.bidFormData.VATTY == "OUT") {
-          this.bidFormData.BIDCST_I = e.value;
-          this.bidFormData.BIDVAT_I = Math.floor(e.value * 0.1) / 10 * 10;
-          this.bidFormData.BIDAMT_I = this.bidFormData.BIDCST_I + this.bidFormData.BIDVAT_I;
-        }
-        else {
-          this.bidFormData.BIDCST_I = e.value;
-          this.bidFormData.BIDVAT_I = 0;
-          this.bidFormData.BIDAMT_I = e.value;
-        }
-        if (parseInt(this.bidFormData.BIDAMT_I) < parseInt(this.bidFormData.RFQAMT) * 0.7) {
-          alert("총 금액차이 70%이상입니다.", "투찰금액 알림");
-          this.checkBoxValue = false;
-          this.checkVisible = true;
-        } else {
-          this.checkVisible = false;
-        }
-      }
-    }
-
-  }
-
-  amtList(e: any) {
-    if (!this.openFlag) {
-      if (e.value > this.bidListFormData.RFQCST) {
+    if (this.bidVisible) {
+      if (e.value > this.bidFormData.RFQCST) {
         alert("견적가 이상 입력이 불가능합니다.", "알림");
         e.component.option('value', 0);
       }
       else {
         if (e.value != 0) {
-          if (this.bidListFormData.VATTY == "OUT") {
-            this.bidListFormData.BIDCST = e.value;
-            this.bidListFormData.BIDVAT = Math.floor(e.value * 0.1) / 10 * 10;
-            this.bidListFormData.BIDAMT_I = this.bidListFormData.BIDCST + this.bidListFormData.BIDVAT;
+          if (this.bidFormData.VATTY == "IN") {
+            this.bidFormData.BIDCST_I = e.value;
+            this.bidFormData.BIDVAT_I = Math.floor(e.value * 0.1) / 10 * 10;
+            this.bidFormData.BIDAMT_I = this.bidFormData.BIDCST_I + this.bidFormData.BIDVAT_I;
           }
           else {
-            this.bidListFormData.BIDCST = e.value;
-            this.bidListFormData.BIDVAT = 0;
-            this.bidListFormData.BIDAMT = e.value;
+            this.bidFormData.BIDCST_I = e.value;
+            this.bidFormData.BIDVAT_I = 0;
+            this.bidFormData.BIDAMT_I = e.value;
           }
-          if (parseInt(this.bidListFormData.BIDAMT) < parseInt(this.bidListFormData.RFQAMT) * 0.7) {
-            alert("총 금액차이 70%이상입니다.", "투찰금액 알림");
-            this.checkListBoxValue = false;
-            this.checkListVisible = true;
+          if (parseInt(this.bidFormData.BIDAMT_I) < parseInt(this.bidFormData.RFQAMT) * 0.5) {
+            alert("총 금액차이 50%이상입니다.", "투찰금액 알림");
+            this.checkBoxValue = false;
+            this.checkVisible = true;
           } else {
-            this.checkListVisible = false;
+            this.checkVisible = false;
           }
         }
       }
 
     }
-    else {
-      this.openFlag = false;
+  }
+
+  amtList(e: any) {
+    if (this.bidListVisible) {
+      if (this.checkCloseing(this.bidListFormData, "")) {
+        console.log(this.bidListFormData.BIDRST);
+        console.log(this.bidListFormData.BIDRST == "");
+        if (this.bidListFormData.BIDRST == "") {
+
+
+          if (e.value > this.bidListFormData.RFQCST) {
+            alert("견적가 이상 입력이 불가능합니다.", "알림");
+            e.component.option('value', 0);
+          }
+          else {
+            if (e.value != 0) {
+              if (this.bidListFormData.VATTY == "IN") {
+                this.bidListFormData.BIDCST = e.value;
+                this.bidListFormData.BIDVAT = Math.floor(e.value * 0.1) / 10 * 10;
+                this.bidListFormData.BIDAMT = this.bidListFormData.BIDCST + this.bidListFormData.BIDVAT;
+              }
+              else {
+                this.bidListFormData.BIDCST = e.value;
+                this.bidListFormData.BIDVAT = 0;
+                this.bidListFormData.BIDAMT = e.value;
+              }
+              //20230207 장대리님요청으로 50%이상
+              if (parseInt(this.bidListFormData.BIDAMT) < parseInt(this.bidListFormData.RFQAMT) * 0.5) {
+                alert("총 금액차이 50%이상입니다.", "투찰금액 알림");
+                this.checkListBoxValue = false;
+                this.checkListVisible = true;
+              } else {
+                this.checkListVisible = false;
+              }
+            }
+          }
+
+      }
+        }
     }
+  }
+
+  fileShowPopup() {
+    this.takePopupVisible = true;
   }
 }

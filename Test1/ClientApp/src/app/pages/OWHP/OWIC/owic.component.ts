@@ -1,5 +1,5 @@
 /*
- * 재고현황확인
+ * 재고유형변경 보류->가용
  */
 import { NgModule, Component, enableProdMode, ViewChild, Input, AfterViewInit } from '@angular/core';
 import 'devextreme/data/odata/store';
@@ -24,6 +24,9 @@ import { CommonPossibleEntryComponent } from '../../../shared/components/comm-po
 import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
 import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 import ArrayStore from 'devextreme/data/array_store';
+import { confirm, alert } from "devextreme/ui/dialog";
+import { ZMMGOODSMVTCommonModel, ZMMS3130Model } from '../../../shared/dataModel/OWHP/ZmmGoodsmvtCommonProxy';
+import { changeForm } from './app.service';
 
 
 
@@ -33,12 +36,12 @@ const getOrderDay = function (rowData: any): number {
 };
 
 @Component({
-  templateUrl: 'owib.component.html',
+  templateUrl: 'owic.component.html',
   providers: [ImateDataService, Service]
 })
 
-export class OWIBComponent {
-  @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
+export class OWICComponent {
+  @ViewChild('dataGrid', { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild('arehouseEntery', { static: false }) arehouseEntery!: CommonPossibleEntryComponent;
 
   //data
@@ -72,7 +75,11 @@ export class OWIBComponent {
   //데이터 조회 버튼
   searchButtonOptions: any;
   exportSelectedData: any;
+  changeButtonOptions: any;
+  saveButtonOptions: any;
+  closeButtonOptions: any;
 
+  changeFormData: changeForm;
 
   //detail 편집 모드 설정
   startEditAction = 'click';
@@ -88,6 +95,8 @@ export class OWIBComponent {
   kunweValueA: string | null = "";
 
   private loadePeCount: number = 0;
+
+  popupVisible = false;
 
   //줄 선택
   selectedRowIndex = -1;
@@ -107,13 +116,15 @@ export class OWIBComponent {
 
   lgNmList: T001lModel[] = [];
 
+  isDisabled: boolean = false;
+
   /**
 * 데이터 스토어 키
 * */
-  dataStoreKey: string = "owib";
+  dataStoreKey: string = "owic";
 
   constructor(private dataService: ImateDataService, service: Service, imInfo: ImateInfo, http: HttpClient, private appInfo: AppInfoService, private appConfig: AppConfigService, private authService: AuthService) {
-    appInfo.title = AppInfoService.APP_TITLE + " | 재고현황확인";
+    appInfo.title = AppInfoService.APP_TITLE + " | 재고유형변경 보류->가용";
     let page = this;
 
     this.loadingVisible = true;
@@ -139,6 +150,8 @@ export class OWIBComponent {
     this.lgortValue = "";
 
     this.getLgortNm();
+
+    this.changeFormData = { MATNR: "", MAKTX: "", SPEME: 0, LABST: 0, INPUT: 0, MEMO: "", LGORT: "", MEINS: "" };
 
     //정보
     this.sort = service.getSort();
@@ -182,48 +195,103 @@ export class OWIBComponent {
       },
     };
 
+    this.changeButtonOptions = {
+      text: '보류->가용',
+      onClick: async () => {
+        var selectData = this.dataGrid.instance.getSelectedRowsData();
+        if (selectData.length === 0) {
+          await alert("한 라인을 선택 후 실행하세요.", "알림");
+          return;
+        }
 
+        if (selectData[0].SPEME === 0) {
+          await alert("변환할 보류재고가 없습니다.", "알림");
+          return;
+        }
 
-    //필터
-    this.saleAmountHeaderFilter = [{
-      text: 'Less than $100',
-      value: ['oilSetAmount', '<', 3000],
-    }, {
-      text: '$100 - $200',
-      value: [
-        ['PARoilSetAmountAM9', '>=', 3000],
-        ['oilSetAmount', '<', 5000],
-      ],
-    }, {
-      text: '$300 - $400',
-      value: [
-        ['oilSetAmount', '>=', 5000],
-        ['oilSetAmount', '<', 10000],
-      ],
-    }, {
-      text: '$400 - $500',
-      value: [
-        ['oilSetAmount', '>=', 10000],
-        ['oilSetAmount', '<', 20000],
-      ],
-    }, {
-      text: 'Greater than $500',
-      value: ['oilSetAmount', '>=', 20000],
-    }];
-    this.customOperations = [{
-      name: 'weekends',
-      caption: 'Weekends',
-      dataTypes: ['date'],
-      icon: 'check',
-      hasValue: false,
-      calculateFilterExpression() {
-        return [[getOrderDay, '=', 0], 'or', [getOrderDay, '=', 6]];
+        this.changeFormData.MATNR = selectData[0].MATNR;
+        this.changeFormData.MAKTX = selectData[0].MAKTX;
+        this.changeFormData.LGORT = selectData[0].LGORT;
+        this.changeFormData.SPEME = selectData[0].SPEME;
+        this.changeFormData.MEINS = selectData[0].MEINS;
+        this.changeFormData.INPUT = 0;
+        this.changeFormData.MEMO = "";
+
+        this.popupVisible = true;
       },
-    }];
+    };
+
+    this.saveButtonOptions = {
+      text: '저장',
+      onClick: async () => {
+
+        if (this.changeFormData.INPUT < 0) {
+          alert("0보다작은 수량은 입력할 수 없습니다.", "오류");
+          return;
+        }
+
+        if (this.changeFormData.INPUT > this.changeFormData.SPEME) {
+          alert("보류수량보다 많은 수량은 입력할 수 없습니다.", "오류");
+          this.changeFormData.INPUT = this.changeFormData.SPEME;
+          return;
+        }
+
+        var textCount = encodeURI(this.changeFormData.MEMO).split(/%..|./).length - 1;
+        if (textCount > 25) {
+          alert("입력된 메모가 너무깁니다.", "오류");
+          return;
+        }
+
+        if (await confirm("저장 하시겠습니까?", "알림")) {
+          this.loadingVisible = true;
+          var result: ZMMGOODSMVTCommonModel = await this.saveChangeMattype();
+          this.loadingVisible = false;
+
+          if (result.E_MBLNR === "") {
+            await alert("저장이 실패했습니다.", "오류");
+            return;
+          } else {
+            await alert(`저장이 완료되었습니다. 문서번호 : ${result.E_MBLNR}`, "알림");
+            await this.dataLoad(this);
+            return;
+          }
+
+          this.popupVisible = false;
+        }
+      },
+    };
+
+    this.closeButtonOptions = {
+      text: '닫기',
+      onClick: async () => {
+        this.popupVisible = false;
+      },
+    };
+  }
+
+  form_fieldDataChanged(e) {
+    if (e.dataField === "INPUT") {
+      if (e.value < 0) {
+        alert("0보다작은 수량은 입력할 수 없습니다.", "오류");
+        return;
+      }
+
+      if (e.value > this.changeFormData.SPEME) {
+        alert("보류수량보다 많은 수량은 입력할 수 없습니다.", "오류");
+        this.changeFormData.INPUT = this.changeFormData.SPEME;
+        return;
+      }
+    } else if (e.dataField === "MEMO") {
+      var textCount = encodeURI(e.value).split(/%..|./).length - 1;
+      if (textCount > 25) {
+        alert("입력된 메모가 너무깁니다.", "오류");
+        return;
+      }
+    }
   }
 
 
-  private async dataLoad(thisObj: OWIBComponent) {
+  private async dataLoad(thisObj: OWICComponent) {
 
     var model: ZMMS3140Model = new ZMMS3140Model(this.lgortValue, "", "", "", "", "", "", this.selectData, "", "", DIMModelStatus.UnChanged);
     var rfcModelList: ZMMCURRStockModel[] = [new ZMMCURRStockModel("", "1000", [], [model], DIMModelStatus.UnChanged)];
@@ -253,6 +321,9 @@ export class OWIBComponent {
       else
         this.lgortValue = "3000";
 
+      if (this.rolid.find(item => item === "ADMIN") === undefined)
+        this.isDisabled = true;
+
       this.loadePeCount = 0;
       
       this.dataLoad(this);
@@ -266,5 +337,20 @@ export class OWIBComponent {
 
     var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
     this.lgNmList = resultModel;
+  }
+
+  private async saveChangeMattype() {
+
+    //바피 모델
+    var zmms3130List = [new ZMMS3130Model(this.changeFormData.MATNR, this.changeFormData.LGORT, "", "", "", this.changeFormData.INPUT, this.changeFormData.MEINS,
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0)];
+
+    var zmmGoodsMVT = [new ZMMGOODSMVTCommonModel([], "", "", "", "X", new Date(), "04", this.changeFormData.MEMO, "343",
+      this.appConfig.plant, new Date(), "", zmms3130List)];
+
+    //바피 실행
+    var runGoodsMVT = await this.dataService.RefcCallUsingModel<ZMMGOODSMVTCommonModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMGOODSMVTCommonModelList", zmmGoodsMVT, QueryCacheType.None);
+
+    return runGoodsMVT[0];
   }
 }

@@ -16,7 +16,7 @@
               [buttonOptions]="saveButtonOptions">
     </dxi-item>
     <dxi-item itemType="group" [colCount]="4" [colSpan]="2" style="margin-top:5px">
-      <dxi-item dataField="LOGID" [label]="{text: '아이디(ID)'}" [editorOptions]="{ height: 30, maxLength: 20 }">
+      <dxi-item dataField="LOGID" [label]="{text: '아이디(ID)'}" [editorOptions]="{ height: 30, maxLength: 15 }">
         <dxi-validation-rule id="valueRule" type="required" message="ID를 입력해주십시오."></dxi-validation-rule>
       </dxi-item>
       <dxi-item location="after"
@@ -109,10 +109,6 @@
                              message="Email is already registered"
                              [validationCallback]="asyncValidation">
         </dxi-validation-rule>
-        <dxi-validation-rule type="pattern"
-                             [pattern]="emailPattern"
-                             message="E-Mail 형식과 맞지 않습니다.">
-        </dxi-validation-rule>
       </dxi-item>
 
       <dxi-item dataField="QSTION" [label]="{text: '질문'}" [editorOptions]="{ height: 30 }">
@@ -127,11 +123,12 @@
                             width="100%"
                             [showClearButton]="true"
                             [(selectedValue)]="questionCodeValue"
-                            (onDataLoaded)="onQSTIONDataLoaded($event)"
+                            (onDataLoaded)="onDataLoaded($event)"
                             placeholderText="질문을 선택하여 주십시오."
                             popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                            [popupGridPagingMode]="true"
+                            [popupGridPageSize]="10"
+                            comboGridScrollMode="virtual"
                             [validationErrors]="[{type:'required', message:'질문을 선택하여 주십시오.'}]"
                             (onEntryValueChanged)="onQuestionCodeCodeValueChanged($event)">
             <nbp-validator [adapter]="questionAdapter">
@@ -177,12 +174,12 @@
         <dxi-validation-rule type="required" message="취급업종을 입력해주십시오."></dxi-validation-rule>
       </dxi-item>
       <dxi-item location="after">
-        <dx-file-uploader selectButtonText="자료첨부"
-                          labelText=""
-                          accept="image/*"
-                          width="150px"
-                          uploadMode="useForm">
-        </dx-file-uploader>
+        <dx-button stylingMode="contained"
+                   text="자료첨부"
+                   type="normal"
+                   (onClick)="fileUploadPopup()"
+                   [width]="160">
+        </dx-button>
       </dxi-item>
     </dxi-item>
 
@@ -191,21 +188,23 @@
         <dxi-validation-rule type="required" message="국가를 입력해주십시오."></dxi-validation-rule>
         <div *dxTemplate>
           <nh-possible-comm #countryEntery
-                             dataStoreKey="obmr"
-                             [codeInfo]="countryCode"
-                             valueColumn="LAND1"
-                             valueDisplayFormat="%LAND1%-%LANDX%"
-                             [gridBoxWidth]="500"
-                             width="100%"
-                             [showClearButton]="true"
-                             [searchPanel]="true"
+                            dataStoreKey="obmr"
+                            [codeInfo]="countryCode"
+                            valueColumn="LAND1"
+                            valueDisplayFormat="%LAND1%-%LANDX%"
+                            [gridBoxWidth]="500"
+                            width="100%"
+                            [showClearButton]="true"
+                            [searchPanel]="true"
                             popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                             [(selectedValue)]="countryValue"
-                             placeholderText="국가를 선택하여 주십시오."
-                             [validationErrors]="[{type:'required', message:'국가를 선택하여 주십시오.'}]"
-                             (onEntryValueChanged)="onCountryCodeValueChanged($event)">
+                            [popupGridPagingMode]="true"
+                            [popupGridPageSize]="10"
+                            comboGridScrollMode="virtual"
+                            [(selectedValue)]="countryValue"
+                            (onDataLoaded)="onDataLoaded($event)"
+                            placeholderText="국가를 선택하여 주십시오."
+                            [validationErrors]="[{type:'required', message:'국가를 선택하여 주십시오.'}]"
+                            (onEntryValueChanged)="onCountryCodeValueChanged($event)">
             <nbp-validator [adapter]="countryAdapter">
               <dxi-validation-rule type="required" message="국가를 입력해주십시오."></dxi-validation-rule>
             </nbp-validator>
@@ -227,10 +226,11 @@
                             [showClearButton]="true"
                             [(selectedValue)]="businessClassValue"
                             popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                            [popupGridPagingMode]="true"
+                            [popupGridPageSize]="10"
+                            comboGridScrollMode="virtual"
                             placeholderText="사업자구분을 선택하여 주십시오."
-                            (onDataLoaded)="onBIZTYEDataLoaded($event)"
+                            (onDataLoaded)="onDataLoaded($event)"
                             [validationErrors]="[{type:'required', message:'사업자구분을 선택하여 주십시오.'}]"
                             (onEntryValueChanged)="onBusinessClassCodeValueChanged($event)">
             <nbp-validator [adapter]="businessAdapter">
@@ -253,9 +253,10 @@
                             [showClearButton]="true"
                             [(selectedValue)]="accountClassValue"
                             popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                            (onDataLoaded)="onLIFTYDataLoaded($event)"
+                            [popupGridPagingMode]="true"
+                            [popupGridPageSize]="10"
+                            comboGridScrollMode="virtual"
+                            (onDataLoaded)="onDataLoaded($event)"
                             placeholderText="거래처구분을 선택하여 주십시오."
                             [validationErrors]="[{type:'required', message:'거래처구분을 선택하여 주십시오.'}]"
                             (onEntryValueChanged)="onAccountClassCodeValueChanged($event)">
@@ -267,30 +268,64 @@
       </dxi-item>
     </dxi-item>
 
- 
+
     <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
       <dxi-item dataField="REMARK" [label]="{text: '비고'}" [editorOptions]="{ height: 60  , maxLength: 50 }" [colSpan]="2">
       </dxi-item>
     </dxi-item>
 
     <dxi-item class="scrollview_view" style="min-height:50px;">
-      <dx-text-area [height]="90" [readOnly]="true" [(value)]="value" style="background-color: rgba(191, 191, 191, 0.15);">
+      <dx-text-area [height]="90" [readOnly]="true" [(value)]="firstText" style="background-color: rgba(191, 191, 191, 0.15);">
       </dx-text-area>
     </dxi-item>
     <dxi-item horizontalAlignment="center">
       <div class="dx-field-value">
-        <dx-check-box [value]="false" #chkgbox text="동의합니다."></dx-check-box>
+        <dx-check-box [value]="false" #chkgbox1 text="동의합니다."></dx-check-box>
       </div>
     </dxi-item>
-    <dxi-item class="scrollview_view" style="min-height:50px;">
-      <dx-text-area [height]="90" [readOnly]="true" [(value)]="value" style="background-color: rgba(191, 191, 191, 0.15);">
+    <dxi-item class="scrollview_view" style="min-height:30px;">
+      <dx-text-area [height]="60" [readOnly]="true" [(value)]="secondText" style="background-color: rgba(191, 191, 191, 0.15);">
       </dx-text-area>
     </dxi-item>
     <dxi-item horizontalAlignment="center">
       <div class="dx-field-value">
-        <dx-check-box [value]="false" #chkgbox text="동의합니다."></dx-check-box>
+        <dx-check-box [value]="false" #chkgbox2 text="동의합니다."></dx-check-box>
       </div>
     </dxi-item>
   </dx-form>
 
 </div>
+
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
+
+
+<dx-popup width="50%"
+          height="50%"
+          [showTitle]="true"
+          title="첨부파일"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="takePopupVisible">
+
+
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+
+  <attach-file #AttachFile
+               selectButtonText="첨부파일 선택"
+               labelText="첨부 파일을 여기에 끌어다 놓으십시오."
+               uploadMode="useButtons"
+               [multiple]="true"
+               [value]="attachFiles"
+               [uploadDocumentNo]="uploadDocumentNo"
+               direction="vertical"
+               [fileListHeight]="200">
+  </attach-file>
+</dx-popup>

@@ -38,23 +38,24 @@
                      (onValueChanged)="onData2ValueChanged($event)"></dx-select-box>
     </div>
   </dxi-item>
-  <dxi-item location="before">
+  <dxi-item location="before" [disabled]="isDisabled">
     <div style="float: left; margin-left: 10px; ">
       <nh-possible-comm #lgEntery
-                         [dataStoreKey]="dataStoreKey"
-                         [codeInfo]="lgCode"
-                         valueColumn="LGORT"
-                         valueDisplayFormat="%LGOBE%(%LGORT%)"
-                         placeholderText="비료창고"
+                        [dataStoreKey]="dataStoreKey"
+                        [codeInfo]="lgCode"
+                        valueColumn="LGORT"
+                        valueDisplayFormat="%LGOBE%(%LGORT%)"
+                        placeholderText="비료창고"
                         popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                         width="200"
-                         label="비료창고"
-                         [gridBoxWidth]="500"
-                         (onDataLoaded)="onPEDataLoaded($event)"
-                         [showClearButton]="true"
-                         class="weight-test"></nh-possible-comm>
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        [(selectedValue)]="lgCodeValue"
+                        width="200"
+                        label="비료창고"
+                        [gridBoxWidth]="500"
+                        (onDataLoaded)="onPEDataLoaded($event)"
+                        [showClearButton]="true"
+                        class="weight-test"></nh-possible-comm>
     </div>
   </dxi-item>
 
@@ -85,19 +86,19 @@
                         (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
     </div>
   </dxi-item>-->
-  <dxi-item location="after" [visible]="false">
+  <!--<dxi-item location="after" [visible]="false">
     <div *dxTemplate>
       <dx-button text="화물위수탁증" (onClick)="print($event)">
       </dx-button>
     </div>
-  </dxi-item>
+  </dxi-item>-->
   <dxi-item location="after">
     <div *dxTemplate>
       <dx-button text="출고처리" (onClick)="refAddOrder($event)">
       </dx-button>
     </div>
   </dxi-item>
-  <dxi-item location="after">
+  <dxi-item location="after" [visible]="false">
     <!--[visible]="certificate"-->
     <div *dxTemplate>
       <dx-button text="거래명세서" (onClick)="TeansactionPrint($event)">
@@ -185,36 +186,19 @@
   <dxi-column dataField="VBELN"
               caption="납품문서번호">
   </dxi-column>
-
-  <dxi-column dataField="POSNR"
-              [visible]="isColVisible"
-              caption="납품품번">
-  </dxi-column>
-  <dxi-column dataField="ZSEQUENCY"
-              [visible]="isColVisible"
-              caption="납품분할순번">
-  </dxi-column>
-  <dxi-column dataField="VGBEL"
-              [visible]="isColVisible"
-              caption="주문번호">
-  </dxi-column>
-  <dxi-column dataField="VGPOS"
-              [visible]="isColVisible"
-              caption="주문품번">
-  </dxi-column>
-  <dxi-column dataField="NAME1"
-              caption="납품처명">
-  </dxi-column>
-  <dxi-column dataField="STREET"
-              caption="납품주소">
-  </dxi-column>
   <dxi-column dataField="TDDAT"
               caption="운송계획일"
               dataType="date"
               format="yyyy-MM-dd">
   </dxi-column>
-  <dxi-column dataField="SPART"
-              caption="제품군">
+  <dxi-column dataField="ZCARNO"
+              caption="차량번호">
+  </dxi-column>
+  <dxi-column dataField="ZDRIVER"
+              caption="운전기사명">
+  </dxi-column>
+  <dxi-column dataField="ZPHONE"
+              caption="기사전화번호">
   </dxi-column>
   <dxi-column dataField="ARKTX"
               caption="자재명">
@@ -225,9 +209,48 @@
   <dxi-column dataField="ZMENGE2"
               caption="납품수량">
   </dxi-column>
+  <dxi-column dataField="ZMENGE4"
+              caption="배차수량">
+  </dxi-column>
+  <dxi-column dataField="ZPALLTP"
+              caption="파레트유형">
+  </dxi-column>
+  <dxi-column dataField="ZPALLETQTY"
+              caption="파레트수량">
+  </dxi-column>
   <dxi-column dataField="VRKME"
               caption="단위">
   </dxi-column>
+  <dxi-column dataField="NAME1"
+              caption="납품처명">
+  </dxi-column>
+  <dxi-column dataField="STREET"
+              caption="납품주소">
+  </dxi-column>
+  <dxi-column dataField="BRGEW"
+              caption="출하총중량">
+  </dxi-column>
+  <dxi-column dataField="ZTEXT"
+              caption="특기사항">
+  </dxi-column>
+  <dxi-column dataField="총중량"
+              caption="BRGEW">
+  </dxi-column>
+  <dxi-column dataField="GEWEI"
+              caption="중량단위">
+  </dxi-column>
+  <dxi-column dataField="POSNR"
+              [visible]="isColVisible"
+              caption="납품품번">
+  </dxi-column>
+  <dxi-column dataField="ZSEQUENCY"
+              [visible]="isColVisible"
+              caption="납품분할순번">
+  </dxi-column>
+  <dxi-column dataField="ZSHIPMENT_NO"
+              caption="배차번호">
+  </dxi-column>
+
   <dxi-column dataField="VSTEL"
               [visible]="isColVisible"
               caption="출하지점">
@@ -235,25 +258,24 @@
   <dxi-column dataField="LGORT"
               caption="저장위치">
   </dxi-column>
-  <dxi-column dataField="ZMENGE4"
-              caption="배차수량">
-  </dxi-column>
+
   <dxi-column dataField="ZMENGE3"
               caption="출고수량">
+  </dxi-column>
+
+  <dxi-column dataField="VGBEL"
+              [visible]="isColVisible"
+              caption="주문번호">
   </dxi-column>
   <dxi-column dataField="WADAT_IST"
               caption="출고전기일"
               dataType="date"
               format="yyyy-MM-dd">
   </dxi-column>
-  <dxi-column dataField="BRGEW"
-              caption="출하총중량">
-  </dxi-column>
-  <dxi-column dataField="GEWEI"
-              caption="중량단위">
-  </dxi-column>
 
-  <dxi-column dataField="CITY1"
+
+
+  <dxi-column dataField="CITY"
               caption="납품도시">
   </dxi-column>
 
@@ -265,7 +287,7 @@
 
 </dx-data-grid>
 
-<report-viewer #reportViewer hostUrl="specificationOnTransaction"></report-viewer>
+<report-viewer #reportViewer hostUrl="owReport"></report-viewer>
 <!-- 로딩 패널-->
 <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
                [shading]="true" [hideOnOutsideClick]="true">
@@ -328,17 +350,18 @@
             <dxo-label text="자재명"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm [codeInfo]="matnrCode" #matnrCodeDynamic
-                                 [dataStoreKey]="dataStoreKey"
-                                 [(selectedValue)]="matnrValue"
-                                 valueColumn="MATNR"
-                                 valueDisplayFormat="%MAKTX%(%MATNR%)"
+                                [dataStoreKey]="dataStoreKey"
+                                [(selectedValue)]="matnrValue"
+                                valueColumn="MATNR"
+                                valueDisplayFormat="%MAKTX%(%MATNR%)"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 width="auto"
-                                 [gridBoxWidth]="500"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 (onEntryValueChanged)="onmatnrCodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                width="auto"
+                                [gridBoxWidth]="500"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                (onEntryValueChanged)="onmatnrCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
           <dxi-item dataField="Z3PARVW" [disabled]="true">
@@ -352,8 +375,9 @@
                                 [showClearButton]="true"
                                 [(selectedValue)]="tdlnrValue1"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                 [gridBoxWidth]="500"
                                 (onDataLoaded)="onPEDataLoaded($event)"
                                 (onEntryValueChanged)="onTdlnrCode1ValueChanged($event)"></nh-possible-comm>
@@ -371,8 +395,9 @@
                                 [showClearButton]="true"
                                 [(selectedValue)]="tdlnrValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                 [gridBoxWidth]="500"
                                 (onDataLoaded)="onPEDataLoaded($event)"
                                 (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
@@ -392,20 +417,21 @@
             <dxo-label text="파레트유형"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm #zpalEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="zpalCode"
-                                 valueColumn="DOMVALUE_L"
-                                 valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
-                                 width="auto"
-                                 [(selectedValue)]="zpalValue"
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zpalCode"
+                                valueColumn="DOMVALUE_L"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="zpalValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZpalltpCodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZpalltpCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
           <dxi-item dataField="ZPALLETQTY" editorType="dxNumberBox" [editorOptions]="{ displayFormat: '#,###', type: 'number' }"><dxo-label text="파레트수량"></dxo-label></dxi-item>
@@ -413,83 +439,87 @@
             <dxo-label text="하차정보"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm #dd07tEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="dd07tCode"
-                                 valueColumn="DOMVALUE_L"
-                                 valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
-                                 width="auto"
-                                 [showClearButton]="true"
-                                 [(selectedValue)]="zunloadValue"
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="dd07tCode"
+                                valueColumn="DOMVALUE_L"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [showClearButton]="true"
+                                [(selectedValue)]="zunloadValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZunloadCodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZunloadCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
           <dxi-item dataField="ZVKAUS">
             <dxo-label text="용도"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm #tvlvEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="tvlvCode"
-                                 valueColumn="ABRVW"
-                                 valueDisplayFormat="%BEZEI%(%ABRVW%)"
-                                 width="auto"
-                                 [(selectedValue)]="vkausValue"
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="tvlvCode"
+                                valueColumn="ABRVW"
+                                valueDisplayFormat="%BEZEI%(%ABRVW%)"
+                                width="auto"
+                                [(selectedValue)]="vkausValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZvkausCodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZvkausCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
           <dxi-item dataField="ZCARTYPE" [disabled]="false">
             <dxo-label text="화물차종"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm #dd07tCarEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="dd07tCarCode"
-                                 valueColumn="DOMVALUE_L"
-                                 [showClearButton]="true"
-                                 valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
-                                 width="auto"
-                                 [(selectedValue)]="zcarValue"
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="dd07tCarCode"
+                                valueColumn="DOMVALUE_L"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="zcarValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
           <dxi-item dataField="ZCARNO">
             <dxo-label text="차량번호"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm #zcarnoModiCodeEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="zcarnoModiCode"
-                                 valueColumn="ZCARNO"
-                                 [showClearButton]="true"
-                                 valueDisplayFormat="%ZCARNO%"
-                                 width="auto"
-                                 [(selectedValue)]="zcarnoModiValue"
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zcarnoModiCode"
+                                valueColumn="ZCARNO"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%ZCARNO%"
+                                width="auto"
+                                [(selectedValue)]="zcarnoModiValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
         </dxi-item>
@@ -512,7 +542,7 @@
 </dx-popup>
 
 <!--출고처리(거래명세서) 팝업(임가공용)-->
-<dx-popup width="90%"
+<!--<dx-popup width="90%"
           height="70%"
           [showTitle]="true"
           title="출고처리(거래명세서)"
@@ -526,14 +556,14 @@
               locateInMenu="auto"
               [height]="25"
               [options]="shipmentProcessing">
-    </dxi-item>
+    </dxi-item>-->
     <!--<dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"
               [height]="25"
               [options]="cancelEditButtonOptions">
     </dxi-item>-->
-    <dxi-item location="after"
+    <!--<dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"
               [height]="25"
@@ -552,7 +582,7 @@
       </dx-form>
     </div>
     <div id="form-container">
-      <dx-form id="popupForm" [formData]="addFormData">
+      <dx-form id="popupForm2" [(formData)]="addFormData">
         <dxi-item itemType="group"
                   caption="출고정보"
                   [colCount]="3"
@@ -567,17 +597,18 @@
             <dxo-label text="자재명"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm [codeInfo]="immatnrCode" #immatnrCodeDynamic
-                                 [dataStoreKey]="dataStoreKey"
-                                 [(selectedValue)]="immatnrValue"
-                                 valueColumn="MATNR"
-                                 valueDisplayFormat="%MAKTX%(%MATNR%)"
+                                [dataStoreKey]="dataStoreKey"
+                                [(selectedValue)]="immatnrValue"
+                                valueColumn="MATNR"
+                                valueDisplayFormat="%MAKTX%(%MATNR%)"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 width="auto"
-                                 [gridBoxWidth]="500"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 (onEntryValueChanged)="onimmatnrCodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                width="auto"
+                                [gridBoxWidth]="500"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                (onEntryValueChanged)="onimmatnrCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
           <dxi-item dataField="Z3PARVW" [disabled]="true">
@@ -591,8 +622,9 @@
                                 [showClearButton]="true"
                                 [(selectedValue)]="tdlnrValue1"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                 [gridBoxWidth]="500"
                                 (onDataLoaded)="onPEDataLoaded($event)"
                                 (onEntryValueChanged)="onTdlnrCode1ValueChanged($event)"></nh-possible-comm>
@@ -610,8 +642,9 @@
                                 [showClearButton]="true"
                                 [(selectedValue)]="tdlnrValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
                                 [gridBoxWidth]="500"
                                 (onDataLoaded)="onPEDataLoaded($event)"
                                 (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
@@ -632,42 +665,44 @@
             <dxo-label text="화물차종"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm #dd07tCarEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="dd07tCarCode"
-                                 valueColumn="DOMVALUE_L"
-                                 [showClearButton]="true"
-                                 valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
-                                 width="auto"
-                                 [(selectedValue)]="zcarValue"
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="dd07tCarCode"
+                                valueColumn="DOMVALUE_L"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="zcarValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
           <dxi-item dataField="ZCARNO">
             <dxo-label text="차량번호"></dxo-label>
             <div *dxTemplate>
               <nh-possible-comm #zcarnoModiCodeEntery
-                                 [dataStoreKey]="dataStoreKey"
-                                 [codeInfo]="zcarnoModiCode"
-                                 valueColumn="ZCARNO"
-                                 [showClearButton]="true"
-                                 valueDisplayFormat="%ZCARNO%"
-                                 width="auto"
-                                 [(selectedValue)]="zcarnoModiValue"
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zcarnoModiCode"
+                                valueColumn="ZCARNO"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%ZCARNO%"
+                                width="auto"
+                                [(selectedValue)]="zcarnoModiValue"
                                 popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                 [gridBoxWidth]="500"
-                                 class="weight-test"
-                                 (onDataLoaded)="onPEDataLoaded($event)"
-                                 [showDataLoadingPanel]="showDataLoadingPanel"
-                                 (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-comm>
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcarno1CodeValueChanged($event)"></nh-possible-comm>
             </div>
           </dxi-item>
         </dxi-item>
@@ -687,4 +722,4 @@
       </dx-form>
     </div>
   </dx-scroll-view>
-</dx-popup>
+</dx-popup>-->

@@ -20,9 +20,9 @@
                         [gridBoxWidth]="500"
                         label="입고창고"
                         popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                comboGridScrollMode="virtual"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         (onDataLoaded)="onPEDataLoaded($event)"
                         (onEntryValueChanged)="onlgortInCodeValueChanged($event)"
                         [(selectedValue)]="lgortValue"
@@ -51,7 +51,7 @@
                         (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-comm>
     </div>
   </dxi-item>
-  <dxi-item location="before" locateInMenu="auto">
+  <!--<dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
       <dx-select-box [dataSource]="gubunList"
                      displayExpr="name"
@@ -61,7 +61,14 @@
                      labelMode="floating"
                      (onValueChanged)="onGubunValueChanged($event)"></dx-select-box>
     </div>
+  </dxi-item>-->
+  <dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="참조주문등록" (onClick)="requestOrder('add')">
+      </dx-button>
+    </div>
   </dxi-item>
+
   <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button text="주문등록" (onClick)="requestOrder($event)">
@@ -75,16 +82,15 @@
     </div>
   </dxi-item>
   <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
             [options]="searchButtonOptions">
-    <div *dxTemplate>
-      <dx-button text="조회" (onClick)="getDataGrid($event)">
-      </dx-button>
-    </div>
   </dxi-item>
 </dx-toolbar>
 
 <div>
-  <dx-data-grid id="gridContainer"
+  <dx-data-grid id="gridContainer" #gridDataList
                 [dataSource]="gridDataSource"
                 [showBorders]="true"
                 [focusedRowIndex]="0"
@@ -167,7 +173,7 @@
 
     <div id="form-container">
       <dx-form id="orderInfo"
-               [formData]="orderInfo"
+               [(formData)]="orderInfo"
                [disabled]="popupStat"
                [colCount]="1"
                width="100%"
@@ -447,7 +453,7 @@
                                   (onEntryValueChanged)="ontdlnr1CodeValueChanged($event)"></nh-possible-comm>
               </div>
             </dxi-item>
-            <dxi-item dataField="TDLNR2">
+            <!--<dxi-item dataField="TDLNR2">
               <dxo-label text="실제운송사"></dxo-label>
               <div *dxTemplate>
                 <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2CodeDynamic
@@ -464,9 +470,9 @@
                                   (onDataLoaded)="onPEDataLoaded($event)"
                                   (onEntryValueChanged)="ontdlnr2CodeValueChanged($event)"></nh-possible-comm>
               </div>
-            </dxi-item>
+            </dxi-item>-->
           </dxi-item>
-          <dxi-item itemType="group" caption="" [colCount]="3">
+          <!--<dxi-item itemType="group" caption="" [colCount]="3">
             <dxi-item dataField="ZCARNO" editorType="dxTextBox">
               <dxo-label text="차량번호"></dxo-label>
               <div *dxTemplate>
@@ -490,11 +496,11 @@
               </div>
             </dxi-item>
             <dxi-item dataField="ZDRIVER" editorType="dxTextBox">
-              <dxo-label text="운전기사명"></dxo-label>
+              <dxo-label text="운전기사명"></dxo-label>-->
               <!--<div *dxTemplate>
                 <dx-text-box [disabled]="popupStat"></dx-text-box>
               </div>-->
-            </dxi-item>
+            <!--</dxi-item>
 
             <dxi-item dataField="ZCARTYPE">
               <dxo-label text="화물차종"></dxo-label>
@@ -516,7 +522,7 @@
               </div>
             </dxi-item>
 
-          </dxi-item>
+          </dxi-item>-->
         </dxi-item>
 
         <dxi-item itemType="group" caption="출고정보" [colCount]="1" style="margin-top:20px">

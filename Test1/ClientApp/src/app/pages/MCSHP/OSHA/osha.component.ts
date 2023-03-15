@@ -70,7 +70,6 @@ export class OSHAComponent {
   value: Date = new Date(1981, 3, 27);
   min: Date = new Date(1900, 0, 1);
   dateClear = new Date(2015, 11, 1, 6);
-  OraDbTitle: string;
 
 
   //detail 편집 모드 설정
@@ -88,7 +87,6 @@ export class OSHAComponent {
     //정보
     this.OilShip = [];
     this.ChemShip = [];
-    this.OraDbTitle = "NCOIL"
 
     //date
     var now = new Date();
@@ -166,7 +164,7 @@ export class OSHAComponent {
 
       });
 
-      var carDataResult: CarbynmfModel[] = await this.dataService.SelectModelData<CarbynmfModel[]>(this.OraDbTitle, "NBPDataModels", "NAMHE.Model.CarbynmfModelList", [],
+      var carDataResult: CarbynmfModel[] = await this.dataService.SelectModelData<CarbynmfModel[]>(this.appConfig.ncoilTitle, "NBPDataModels", "NAMHE.Model.CarbynmfModelList", [],
         `BYILJA >= '${parseInt(sdate)}' AND BYILJA <= '${parseInt(edate)}'`, "", QueryCacheType.None);
 
       this.OilShipData.forEach(async (array: OilShip) => {
@@ -244,7 +242,7 @@ export class OSHAComponent {
 
       });
 
-      var cheDataResult = await this.dataService.SelectModelData<CHMWkodModel[]>(this.OraDbTitle, "NBPDataModels", "NAMHE.Model.CHMWkodModelList", [],
+      var cheDataResult = await this.dataService.SelectModelData<CHMWkodModel[]>(this.appConfig.ncoilTitle, "NBPDataModels", "NAMHE.Model.CHMWkodModelList", [],
         `JIYYMM >= '${parseInt(sdate)}' AND JIYYMM <= '${parseInt(edate)}'`, "", QueryCacheType.None);
 
       this.ChemShipData.forEach(async (array: ChemShip) => {

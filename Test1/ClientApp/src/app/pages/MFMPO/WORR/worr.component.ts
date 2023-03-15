@@ -30,6 +30,11 @@ import { TablePossibleEntryComponent } from '../../../shared/components/table-po
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import dxTextBox from 'devextreme/ui/text_box';
 import { async } from '@angular/core/testing';
+import { exportDataGrid as exportDataGridToPdf } from 'devextreme/pdf_exporter';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import jsPDF from 'jspdf';
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -222,7 +227,8 @@ export class WORRComponent implements OnInit {
  * @param authService 사용자 인증 서버스
  */
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, service: Service, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private authService: AuthService, private appInfo: AppInfoService,
+    private http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, service: Service) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 작업결과등록";
     //possible-entry
     this.isGridBoxOpened = false;
@@ -277,9 +283,34 @@ export class WORRComponent implements OnInit {
 
     //엑셀버튼
     this.exportSelectedData = {
-      icon: 'export',
-      onClick: () => {
-        //this.dataGrid.instance.exportToExcel(true);
+      icon: 'print',
+      text: "프린터",
+      onClick: async () => {
+        const doc = new jsPDF('landscape', 'mm', [297, 210]);
+        let malgun = await this.http.get('assets/malgun.ttf', { responseType: "text" }).toPromise();
+
+        doc.addFileToVFS('malgun.ttf', malgun);
+        doc.addFont('malgun.ttf', 'malgun', 'normal');
+        doc.setFont('malgun');
+        doc.setLanguage("ko-KR");
+
+        exportDataGridToPdf({
+          jsPDFDocument: doc,
+          component: this.gcOrderGrid.instance,
+          margin: { top: 10, left: 5, right: 5, bottom: 5 },
+          customizeCell: function (options) {
+            const { gridCell, pdfCell } = options;
+
+            if (gridCell.rowType === 'data') {
+              pdfCell.font = { size: 10 };
+              pdfCell.wordWrapEnabled = true;
+            }
+          }
+        }).then(() => {
+          doc.autoPrint({ variant: 'non-conform' });
+          doc.output('dataurlnewwindow');
+          //doc.save('wost.pdf');
+        })
 
       },
     };
@@ -503,7 +534,7 @@ export class WORRComponent implements OnInit {
   //메인 더블클릭시 팝업
   async dblClick(e: any) {
     /*this.showPopup('Add', {}); //change undefined to {}*/
-    this.popupVisible = true;
+    
 
     this.loadingVisible = true;
     this.isPopupVisible = false;
@@ -515,8 +546,10 @@ export class WORRComponent implements OnInit {
     this.equipFormData.EQUNR_DESC = e.data.EQUNR_DESC;
     this.equipFormData.AUFNR = e.data.AUFNR;
     this.equipFormData.KTEXT = e.data.KTEXT;
+    this.equipFormData.STAT = e.data.STAT;
 
     await this.detaildatareload(this);
+    this.popupVisible = true;
     this.loadingVisible = false;
     //this.showPopup('Add', {}); //change undefined to {}
   }
@@ -535,7 +568,9 @@ export class WORRComponent implements OnInit {
     thisObj.workList = resultModel[0].ITAB_DATA6;
     thisObj.contList = resultModel[0].ITAB_DATA5;
 
+    
     thisObj.FaultInfo = resultModel[0].ITAB_DATA4
+
     thisObj.matUseList = resultModel[0].ITAB_DATA3;
 
     var checkStat = thisObj.contList.find(row => row.STAT === "I" || row.STAT === "C");
@@ -641,10 +676,27 @@ export class WORRComponent implements OnInit {
   addRow: any = async (e: any) => {
     this.loadingVisible = true;
 
-    var resultModel = await this.popupdataLoad(this.imInfo, this.dataService) as ZPMF0006Model;
+    this.contractList = new ArrayStore(
+      {
+        key: ["EBELN", "EBELP"],
+        data: []
+      });
 
+    var selectData = this.gcOrderGrid.instance.getSelectedRowsData();
+
+    //잘못된 단가도출을 방지하기위해 로그인 업체코드와 데이터 업체코드 체크로직 추가
+    if (this.rolid.find(item => item === "ADMIN") === undefined) {
+      if (this.empId !== selectData[0].PARNR.toString().padStart(10, "0")) {
+        await alert("로그인 업체와 데이터가 상이합니다.</br>담당자에게 문의하세요.", "알림");
+        return;
+      }
+    }
+
+    var resultModel = await this.popupdataLoad(this.imInfo, this.dataService) as ZPMF0006Model;
+    this.loadingVisible = false;
     if (resultModel.ITAB_DATA2.length === 0) {
       alert("해당 W/O에 단가항목정보가 없습니다.", "알림");
+      
       return;
     }
 
@@ -671,6 +723,7 @@ export class WORRComponent implements OnInit {
       });
 
     this.gcMatList.instance.clearSelection();
+    this.gcMatList.instance.getScrollable().scrollTo(0);
 
     var selectKeys = [];
     for (var row of this.workList) {
@@ -681,8 +734,8 @@ export class WORRComponent implements OnInit {
     /*this.gcMatList.instance.selectRows(selectKeys, false);*/
 
     this.loadingVisible = false;
-
-    this.showPopup('Add', {}); //change undefined to {}
+    this.isPopupVisible = true;
+    //this.showPopup('Add', {}); //change undefined to {}
   }
 
   //고장추가 팝업
@@ -820,7 +873,10 @@ export class WORRComponent implements OnInit {
         row.AEDAT = new Date();
     });
     var zpmt0020List: ZPMT0020Model[] = thisObj.workList as ZPMT0020Model[];
-    var zpms0009List: ZPMS0009Model[] = thisObj.FaultInfo as ZPMS0009Model[];
+    var zpms0009List: ZPMS0009Model[] = [];
+
+    if (this.equipFormData.STAT === "REL")
+      zpms0009List = thisObj.FaultInfo as ZPMS0009Model[];
 
     var ZPMF0003Modellist = new ZPMF0003Model("", "", thisObj.selectedOrderItemKeys[0].AUFNR, [], zpms0009List, zpmt0010List, zpmt0020List, [], DIMModelStatus.UnChanged);
 
@@ -1125,11 +1181,16 @@ export class WORRComponent implements OnInit {
     var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", this.empId, "", appStatus, "", this.appConfig.plant, []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
+    console.log(`저장진입 - > ${formatDate(new Date(), "yyyy-MM-dd hh:mm:ss", "en-US")}`);
+
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0001Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0001ModelList", modelList, QueryCacheType.None);
     if (resultModel[0].E_TYPE !== "S") {
       alert(`자료를 가져오지 못했습니다.\n\nSAP 메시지: ${resultModel[0].E_MSG}`, "알림");
       return;
     }
+    console.log(resultModel);
+
+    console.log(`RFC호출후 -> ${formatDate(new Date(), "yyyy-MM-dd hh:mm:ss", "en-US")}`);
 
     resultModel[0].ITAB_DATA.forEach(async (row: ZPMS0002Model) => {
       if (row.STAT1 === "") row.STATNAME = "작업요청";
@@ -1141,7 +1202,9 @@ export class WORRComponent implements OnInit {
 
     //작업요청 선택 시 RFC는 빈값으로 수행 후 데이터 조정
     if (this.selectedAppStatus === "O")
-        returnData = returnData.filter(item => item.STAT1 === "");
+      returnData = returnData.filter(item => item.STAT1 === "");
+
+    console.log(`RFC결과 반복문 후 -> ${formatDate(new Date(), "yyyy-MM-dd hh:mm:ss", "en-US")}`);
 
 
     this.orderData = new ArrayStore(
@@ -1149,6 +1212,8 @@ export class WORRComponent implements OnInit {
         key: ["AUFNR"],
         data: returnData
       });
+
+    console.log(`ArrayStore 후 -> ${formatDate(new Date(), "yyyy-MM-dd hh:mm:ss", "en-US")}`);
   }
 
   // 상세 데이터 로드
@@ -1169,7 +1234,7 @@ export class WORRComponent implements OnInit {
     if (idat1 === null)
       idat1 = new Date("9999-12-31");
 
-    var zpf0006Model = new ZPMF0006Model("", "", idat1, this.zpmF002Models[0].ITAB_DATA1[0].PARNR, this.zpmF002Models[0].ITAB_DATA1[0].WERKS, []);
+    var zpf0006Model = new ZPMF0006Model("", "", idat1, selectData[0].PARNR, this.zpmF002Models[0].ITAB_DATA1[0].WERKS, []);
     var modelList: ZPMF0006Model[] = [zpf0006Model];
 
     var resultModel = await dataService.RefcCallUsingModel<ZPMF0006Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZPMF0006ModelList", modelList, QueryCacheType.None);
@@ -1235,5 +1300,36 @@ export class WORRComponent implements OnInit {
   //      data: orderData
   //    });
   //}
+
+
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: e.component,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `W/O 작업결과등록_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    e.cancel = true;
+  }
 }
 

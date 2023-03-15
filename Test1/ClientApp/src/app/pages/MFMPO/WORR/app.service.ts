@@ -35,6 +35,7 @@ export class equipFormModel {
   EQUNR_DESC?: string;
   AUFNR?: string;
   KTEXT?: string;
+  STAT?: string;
 }
 
 //오더데이터

@@ -66,9 +66,11 @@
                 [columnResizingMode]="columnResizeMode"
                 (onSelectionChanged)="selectionOrderChanged($event)"
                 (onRowDblClick)="dblClick($event)"
-                (onContentReady)="contentReady($event)">
+                (onContentReady)="contentReady($event)"
+                (onExporting)="onExportingOrderData($event)">
     <dxo-paging [pageSize]="10"></dxo-paging>
-    <dxo-scrolling mode="infinite"></dxo-scrolling>
+    <dxo-scrolling mode="virtual" showScrollbar="always"></dxo-scrolling>
+    <dxo-export [enabled]="true"></dxo-export>
 
     <dxo-selection mode="single"></dxo-selection>
     <dxo-filter-row visible="true"></dxo-filter-row>
@@ -137,9 +139,9 @@
     </dxi-column>
 
     <!--<dxi-column dataField="AUART"
-                caption="오더유형"
-                dataType="string">
-    </dxi-column>-->
+              caption="오더유형"
+              dataType="string">
+  </dxi-column>-->
 
     <dxi-column dataField="GSTRP"
                 caption="시작일"
@@ -157,11 +159,15 @@
                 caption="통지번호"
                 dataType="string">
     </dxi-column>
+    <dxi-column dataField="EBELN"
+                caption="구매문서번호"
+                dataType="string">
+    </dxi-column>
 
     <!--<dxi-column dataField="GSBER_DESC"
-                caption="사업영역"
-                dataType="string">
-    </dxi-column>-->
+              caption="사업영역"
+              dataType="string">
+  </dxi-column>-->
 
     <dxi-column dataField="QTY_REQ_TOT"
                 caption="요청금액"

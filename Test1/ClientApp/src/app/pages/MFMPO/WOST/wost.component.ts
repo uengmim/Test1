@@ -103,6 +103,8 @@ export class WOSTComponent {
   popupMode = 'Add';
   customOperations: Array<any>;
 
+  selectBUDAT: any;
+
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
 
@@ -132,6 +134,8 @@ export class WOSTComponent {
       this.empId = userInfo?.empId.padStart(10, '0');
 
     this.appStatus = service.getAppStatusList();
+
+    this.selectBUDAT = formatDate(new Date(), "yyyy-MM-dd", "en-US");
 
     //date
     var now = new Date();
@@ -266,6 +270,8 @@ export class WOSTComponent {
     else
       this.isDisabled = false;
 
+    this.selectBUDAT = formatDate(new Date(), "yyyy-MM-dd", "en-US");
+
     //this.showPopup('Add', {}); //change undefined to {}
     //this.dataGrid.instance.saveEditData();
     this.loadingVisible = true;
@@ -296,12 +302,6 @@ export class WOSTComponent {
 
     }
 
-    this.MaterialList = new ArrayStore(
-      {
-        key: ["AUFNR", "RSNUM", "RSPOS", "WERKS", "LGORT", "MATNR"],
-        data: this.matUseList
-      });
-
     resultModel[0].ITAB_DATA4.forEach(async (row: ZPMS0009Model) => {
       if (row.KATALOGART === "C") {
         row.KATALNAME = "손상";
@@ -317,6 +317,12 @@ export class WOSTComponent {
         row.SORT = 3;
       }
     });
+
+    this.MaterialList = new ArrayStore(
+      {
+        key: ["AUFNR", "RSNUM", "RSPOS", "WERKS", "LGORT", "MATNR"],
+        data: this.matUseList
+      });
 
     this.FaultInfo = new ArrayStore(
       {
@@ -495,7 +501,7 @@ export class WOSTComponent {
     
     var zpms0012: ZPMS0012Model[] = [];
     this.matUseList.forEach(async (row: ZPMS0004Model) => {
-      zpms0012.push(new ZPMS0012Model("", row.RSNUM, row.RSPOS, row.LGORT, row.MATNR, row.QTY_INPUT??0, 0, row.MEINS));
+      zpms0012.push(new ZPMS0012Model("", row.RSNUM, row.RSPOS, row.LGORT, row.MATNR, row.QTY_INPUT ?? 0, 0, row.MEINS, this.selectBUDAT));
     });
 
     var zpf0003Model = new ZPMF0003Model("", "", this.orderInfo.AUFNR, [], [], [], [], zpms0012);

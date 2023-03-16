@@ -70,7 +70,14 @@
   </dxi-item>
 
 
-
+  
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="margin-left:10px;"
+            [height]="25"
+            [options]="excelButtonOptions">
+  </dxi-item>
 
   <dxi-item location="after"
             widget="dxButton"
@@ -78,6 +85,7 @@
             [height]="25"
             [options]="searchButtonOptions">
   </dxi-item>
+
 </dx-toolbar>
 <dx-toolbar style="margin:20px 0px 20px 0px">
 
@@ -137,7 +145,7 @@
 </dx-toolbar>
 
   <div>
-    <dx-data-grid id="gridContainer"
+    <dx-data-grid id="gridContainer" #dataGrid
                   [dataSource]="dataSource"
                   [showBorders]="true"
                   [columnAutoWidth]="true"
@@ -147,6 +155,7 @@
                   [rowAlternationEnabled]="true"
                   [remoteOperations]="false"
                   [selection]="{ mode: 'single' }"
+                  (onExporting)="onExportingOrderData($event)"
                   [allowColumnResizing]="true">
 
       <dxo-scrolling mode="standard"></dxo-scrolling>
@@ -158,33 +167,52 @@
                           [allowHierarchicalFields]="true">
       </dxo-filter-builder>
       <dxo-filter-row [visible]="true"></dxo-filter-row>
-
-      <dxi-column dataField="NH_BUY_NO" caption="검수번호" type="string"></dxi-column>
+      <dxi-column dataField="LGORT_N" caption="출고지" type="string"></dxi-column>
+      <dxi-column dataField="KUNWE_N" caption="고객명" type="string"></dxi-column>
+      <dxi-column dataField="MAKTX" caption="자재내역" type="string"></dxi-column>
+      <dxi-column dataField="N_FWD_CNT" caption="출고수량" type="number" format="#,###"></dxi-column>
+      <dxi-column dataField="STATUS_N" caption="검수상태" type="string"></dxi-column>
+      <dxi-column dataField="NH_BUY_DATE" caption="검수일자" type="string"></dxi-column>
+      <dxi-column dataField="NH_BUY_QTY" caption="검수수량" type="string"></dxi-column>
+      <dxi-column dataField="NH_TAX_CODE_N" caption="과세구분" type="string"></dxi-column>
+      <dxi-column dataField="INCO1_N" caption="운송방법" type="string"></dxi-column>
+      <dxi-column dataField="ZPALLTP" caption="파레트유형" type="string"></dxi-column>
+      <dxi-column dataField="ZPALLETQTY" caption="파레트수량" dataType="number" format="#,###"></dxi-column>
+      <dxi-column dataField="NH_DELVADV_DOC_IDENT" caption="배송예정서 전표번호" type="string"></dxi-column>
       <dxi-column dataField="VKBUR_N" caption="영업소" type="string"></dxi-column>
       <dxi-column dataField="KUNAG_N" caption="판매처" type="string"></dxi-column>
       <dxi-column dataField="AGENT_N" caption="대리점" type="string"></dxi-column>
       <dxi-column dataField="BZTXT" caption="판매지역" type="string"></dxi-column>
-      <dxi-column dataField="KUNWE_N" caption="고객명" type="string"></dxi-column>
       <dxi-column dataField="WGBEZ" caption="자재그룹" type="string"></dxi-column>
-      <dxi-column dataField="MAKTX" caption="자재내역" type="string"></dxi-column>
       <dxi-column dataField="N_FWD_CNT" caption="출고수량" type="number" format="#,###"></dxi-column>
       <dxi-column dataField="MEINS" caption="수량단위" type="string"></dxi-column>
       <dxi-column dataField="NH_ITEM_CODE" caption="경제통합상품코드" type="string"></dxi-column>
       <dxi-column dataField="MAKTX_NH" caption="농협제품명" type="string"></dxi-column>
-      <dxi-column dataField="STATUS_N" caption="검수상태" type="string"></dxi-column>
       <dxi-column dataField="NH_TRADE_DIV_CODE_N" caption="매입거래구분" type="string"></dxi-column>
       <dxi-column dataField="ZNH_NAME" caption="농협명" type="string"></dxi-column>
-      <dxi-column dataField="NH_BUY_DATE" caption="매입일자" type="date" format="yyyy-MM-dd"></dxi-column>
-      <dxi-column dataField="NH_BUY_QTY" caption="매입수량" type="number" format="#,###"></dxi-column>
       <dxi-column dataField="NH_BUY_AMOUNT" caption="매입단가" type="number" format="#,###"></dxi-column>
       <dxi-column dataField="NH_BUY_SUPPLY_AMOUNT" caption="매입공급액" type="number" format="#,###"></dxi-column>
       <dxi-column dataField="NH_BUY_TAX" caption="매입부가세" type="number" format="#,###"></dxi-column>
-      <dxi-column dataField="NH_TAX_CODE_N" caption="과세구분" type="string"></dxi-column>
+      <dxi-column dataField="NH_BUY_NO" caption="검수번호" type="string"></dxi-column>
+
+
+
+
 
 
       <dxo-search-panel [visible]="true"></dxo-search-panel>
       <dxo-group-panel [visible]="true"></dxo-group-panel>
       <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+
+      <dxo-summary>
+        <dxi-total-item column="N_FWD_CNT"
+                        dataType="number"
+                        valueFormat="#,##0.###"
+                        summaryType="sum"
+                        displayFormat="출고수량 합계 : {0}">
+        </dxi-total-item>
+      </dxo-summary>
     </dx-data-grid>
   </div>
 

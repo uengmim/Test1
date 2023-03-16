@@ -17,7 +17,11 @@ import { AppConfigService } from '../../../shared/services/appconfig.service';
 import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { ZSDEPSOBilldueModel, ZSDS5003Model, ZSDS5004Model } from '../../../shared/dataModel/MFSAP/ZsdEpSoBilldueProxy';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
-import { DxTextBoxComponent } from 'devextreme-angular';
+import { DxDataGridComponent, DxTextBoxComponent } from 'devextreme-angular';
+
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
+import { exportDataGrid } from 'devextreme/excel_exporter';
 
 
 if (!/localhost/.test(document.location.host)) {
@@ -38,6 +42,7 @@ export class ADSQComponent {
   @ViewChild('maEntery', { static: false }) maEntery!: CommonPossibleEntryComponent;
   @ViewChild('matnrEntery', { static: false }) matnrEntery!: CommonPossibleEntryComponent;
   @ViewChild('baesongText', { static: false }) baesongText!: DxTextBoxComponent;
+  @ViewChild('dataGrid', { static: false }) dataGrid!: DxDataGridComponent;
   simpleProducts: string[];
   dataSource: any;
   dataList: ZSDS5004Model[] = [];
@@ -54,6 +59,7 @@ export class ADSQComponent {
   data: any;
   backButtonOption: any;
   searchButtonOptions: any;
+  excelButtonOptions: any;
   //insert,modify,delete 
   rowCount: number;
   _dataService: ImateDataService;
@@ -158,6 +164,12 @@ export class ADSQComponent {
         this.loadingVisible = false;
       },
     };
+    this.excelButtonOptions = {
+      text: "엑셀다운로드",
+      onClick: async (e: any) => {
+        this.onExportingOrderData(e);
+      }
+    };
 
   }
 
@@ -252,4 +264,35 @@ export class ADSQComponent {
   onMatnrCodeValueChanged(e: any) {
     this.matnrValue = e.value;
   }
+
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e: any) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: this.dataGrid.instance,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `검수/미검수 현황_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    /*e.cancel = true;*/
+  }
+
 }

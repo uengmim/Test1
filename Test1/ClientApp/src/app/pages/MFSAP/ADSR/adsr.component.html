@@ -71,6 +71,13 @@
 
 
 
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            style="margin-left:10px;"
+            [height]="25"
+            [options]="excelButtonOptions">
+  </dxi-item>
 
   <dxi-item location="after"
             widget="dxButton"
@@ -107,15 +114,15 @@
                         [popupGridPagingMode]="true"
                         [popupGridPageSize]="10"
                         comboGridScrollMode="virtual"
-                        label="배차상태"
+                        label="검수상태"
                         labelMode="floating"
                         [showClearButton]="true"
                         (onDataLoaded)="onPEDataLoaded($event)"
-                        placeholderText="배차상태">
+                        placeholderText="검수상태">
       </nh-possible-comm>
     </div>
   </dxi-item>
-  <dxi-item location="before" locateInMenu="auto">
+  <dxi-item location="before" locateInMenu="auto" [disabled] ="daery">
     <div style="float: left; margin-left: 10px; ">
       <nh-possible-comm [codeInfo]="lgortInCode" #lgortInCodeDynamic
                         [dataStoreKey]="dataStoreKey"
@@ -138,7 +145,7 @@
 </dx-toolbar>
 
   <div>
-    <dx-data-grid id="gridContainer"
+    <dx-data-grid id="gridContainer" #girdData
                   [dataSource]="dataSource"
                   [showBorders]="true"
                   [columnAutoWidth]="true"
@@ -148,6 +155,7 @@
                   [rowAlternationEnabled]="true"
                   [remoteOperations]="false"
                   [selection]="{ mode: 'single' }"
+                  (onExporting)="onExportingOrderData($event)"
                   [allowColumnResizing]="true">
 
       <dxo-scrolling mode="standard"></dxo-scrolling>
@@ -161,6 +169,8 @@
       <dxo-filter-row [visible]="true"></dxo-filter-row>
 
       <dxi-column dataField="NH_BUY_NO" caption="검수번호" type="string"></dxi-column>
+      <dxi-column dataField="NH_DELVADV_DOC_IDENT" caption="배송예정서 전표번호" type="string"></dxi-column>
+      <dxi-column dataField="NH_TAX_CODE_N" caption="과세구분" type="string"></dxi-column>
       <dxi-column dataField="VKBUR_N" caption="영업소" type="string"></dxi-column>
       <dxi-column dataField="KUNAG_N" caption="판매처" type="string"></dxi-column>
       <dxi-column dataField="AGENT_N" caption="대리점" type="string"></dxi-column>
@@ -180,8 +190,9 @@
       <dxi-column dataField="NH_BUY_AMOUNT" caption="매입단가" type="number" format="#,###"></dxi-column>
       <dxi-column dataField="NH_BUY_SUPPLY_AMOUNT" caption="매입공급액" type="number" format="#,###"></dxi-column>
       <dxi-column dataField="NH_BUY_TAX" caption="매입부가세" type="number" format="#,###"></dxi-column>
-      <dxi-column dataField="NH_TAX_CODE_N" caption="과세구분" type="string"></dxi-column>
-
+      <dxi-column dataField="ZPALLTP" caption="파레트유형" type="string"></dxi-column>
+      <dxi-column dataField="ZPALLETQTY" caption="파레트수량" dataType="number" format="#,###"></dxi-column>
+      <dxi-column dataField="INCO1_N" caption="운송방법" type="string"></dxi-column>
 
       <dxo-search-panel [visible]="true"></dxo-search-panel>
       <dxo-group-panel [visible]="true"></dxo-group-panel>

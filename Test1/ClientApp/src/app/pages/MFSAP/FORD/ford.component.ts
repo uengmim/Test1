@@ -27,6 +27,7 @@ import { ZSDEPSOENTRYInfoModel, ZSDS3013Model, ZSDS3014Model } from '../../../sh
 import { ZSDCREATESODoModel, ZSDS3100Model, ZSDS6001Model, ZSDS6002Model } from '../../../shared/dataModel/MFSAP/ZsdCreateSodoProxy';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { ZSDT1100Model } from '../../../shared/dataModel/MFSAP/zsdt1100';
+import { deepCopy } from '../../../shared/imate/utility/object-copy';
 
 /*고객주문등록 Component*/
 
@@ -61,13 +62,48 @@ export class FORDComponent {
   @ViewChild('tdlnr2Entery', { static: false }) tdlnr2Entery!: CommonPossibleEntryComponent;
   @ViewChild('mvgr1Entery', { static: false }) mvgr1Entery!: CommonPossibleEntryComponent;
   @ViewChild('mvgr2Entery', { static: false }) mvgr2Entery!: CommonPossibleEntryComponent;
+  @ViewChild('zpalEntery', { static: false }) zpalEntery!: CommonPossibleEntryComponent;
   @ViewChild('mvgr3Entery', { static: false }) mvgr3Entery!: CommonPossibleEntryComponent;
   @ViewChild('augruEntery', { static: false }) augruEntery!: CommonPossibleEntryComponent;
 /*  @ViewChild('tdlnr2Entery', { static: false }) tdlnr2Entery!: CommonPossibleEntryComponent;*/
   @ViewChild('t001Entery', { static: false }) t001Entery!: CommonPossibleEntryComponent;
   @ViewChild('incoEntery', { static: false }) incoEntery!: CommonPossibleEntryComponent;
   @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: CommonPossibleEntryComponent;
-
+  /*참조추가엔트리*/
+  @ViewChild('sd007Entery2B', { static: false }) sd007Entery2B!: CommonPossibleEntryComponent;
+  @ViewChild('maktEntery2B', { static: false }) maktEntery2B!: CommonPossibleEntryComponent;
+  @ViewChild('kunnrEnteryB', { static: false }) kunnrEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('kunnEnteryB', { static: false }) kunnEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('t001EnteryB', { static: false }) t001EnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('tvlvEnteryB', { static: false }) tvlvEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('dd07tEnteryB', { static: false }) dd07tEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('zpalEnteryB', { static: false }) zpalEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('incoEnteryB', { static: false }) incoEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('zcarnoModiCodeEnteryB', { static: false }) zcarnoModiCodeEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnrEnteryB', { static: false }) tdlnrEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnr2EnteryB', { static: false }) tdlnr2EnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('dd07tCarEnteryB', { static: false }) dd07tCarEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('augruEnteryB', { static: false }) augruEnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('mvgr2EnteryB', { static: false }) mvgr2EnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('mvgr3EnteryB', { static: false }) mvgr3EnteryB!: CommonPossibleEntryComponent;
+  @ViewChild('mvgr1EnteryB', { static: false }) mvgr1EnteryB!: CommonPossibleEntryComponent;
+  /*상세조회*/
+  @ViewChild('sd007Entery2A', { static: false }) sd007Entery2A!: CommonPossibleEntryComponent;
+  @ViewChild('maktEntery2A', { static: false }) maktEntery2A!: CommonPossibleEntryComponent;
+  @ViewChild('kunnrEnteryA', { static: false }) kunnrEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('kunnEnteryA', { static: false }) kunnEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('t001EnteryA', { static: false }) t001EnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('tvlvEnteryA', { static: false }) tvlvEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('dd07tEnteryA', { static: false }) dd07tEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('incoEnteryA', { static: false }) incoEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('zcarnoModiCodeEnteryA', { static: false }) zcarnoModiCodeEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnrEnteryA', { static: false }) tdlnrEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('tdlnr2EnteryA', { static: false }) tdlnr2EnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('dd07tCarEnteryA', { static: false }) dd07tCarEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('augruEnteryA', { static: false }) augruEnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('mvgr2EnteryA', { static: false }) mvgr2EnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('mvgr3EnteryA', { static: false }) mvgr3EnteryA!: CommonPossibleEntryComponent;
+  @ViewChild('mvgr1EnteryA', { static: false }) mvgr1EnteryA!: CommonPossibleEntryComponent;
 
 
   orderPossible!: string;
@@ -104,6 +140,8 @@ export class FORDComponent {
   maktCode2: TableCodeInfo;
   //도착지 정보
   kunnCode: TableCodeInfo;
+  //파레트유형
+  zpalCode!: TableCodeInfo;
   /*kunnCode2: CommonCodeInfo;*/
   kunnCode2: TableCodeInfo;
   //용도 정보
@@ -139,6 +177,7 @@ export class FORDComponent {
   mvgr2Value!: string | null;
   mvgr3Value!: string | null;
   augruValue!: string | null;
+  zpalValue!: string | null;
 
   auartValueA: string | null;
   maktValueA: string | null;
@@ -156,6 +195,25 @@ export class FORDComponent {
   mvgr2ValueA: string | null;
   mvgr3ValueA: string | null;
   mvgr1ValueA: string | null;
+
+  auartValueB: string | null;
+  maktValueB: string | null;
+  kunnrValue2B: string | null;
+  kunnrValueB: string | null;
+  lgortValueB: string | null;
+  vkausValueB: string | null;
+  zunloadValueB: string | null;
+  incoValueB: string | null;
+  zcarnoModiValueB: string | null;
+  tdlnrValueB: string | null;
+  tdlnr2ValueB: string | null;
+  zcarValueB: string | null;
+  augruValueB: string | null;
+  mvgr2ValueB: string | null;
+  mvgr3ValueB: string | null;
+  mvgr1ValueB: string | null;
+  zpalValueB!: string | null;
+  taxkValue: any;
   //차량번호(수정)
   zcarnoModiValue!: string | null;
   sort: string[];
@@ -166,6 +224,7 @@ export class FORDComponent {
   //셀렉트박스
   data2!: Data2[];
   products!: Product[];
+
   selectData2: string = "";
   //delete
   selectedItemKeys: any[] = [];
@@ -177,6 +236,7 @@ export class FORDComponent {
 
   //농협정보 더블클릭시 수정 불가능
   nh2: boolean = false;
+  nh3: boolean = false;
   //날짜 조회
   startDate: any;
   endDate: any;
@@ -187,6 +247,7 @@ export class FORDComponent {
   dataLoading: boolean = false;
   enteryLoading: boolean = false;
 
+  saveFlag = false;
 
   //form
 
@@ -205,13 +266,13 @@ export class FORDComponent {
   width: any;
   ZDOFLG: string;
   popupData: any;
-
+  popupData3: any;
   popupTitle: string;
 
   addData: any;
 
   orderDataRow: any;
-
+  kunnrAbled: boolean;
   auartFlag: boolean;
   nh!: boolean;
   auartFlag2: boolean;
@@ -226,6 +287,7 @@ export class FORDComponent {
 
   //데이터 저장 버튼
   saveButtonOptions: any;
+  saveButtonOptions3: any;
   //데이터 삭제 버튼
   deleteButtonOptions: any;
   //데이터 조회 버튼
@@ -241,6 +303,7 @@ export class FORDComponent {
   cancelEditButtonOptions: any;
   closeButtonOptions: any;
   closeButtonOptions2: any;
+  closeButtonOptions3: any;
   //detail 편집 모드 설정
   startEditAction = 'click';
   selectTextOnEditStart = true;
@@ -248,16 +311,15 @@ export class FORDComponent {
   //줄 선택
   selectedRowIndex = -1;
   ;
-  taxkData: any;
-
+  taxkData: Product[] = [];
   //필터
   saleAmountHeaderFilter: any;
   customOperations: Array<any>;
-
   editFlag = false;
   saveVisible = true;
   popupVisible = false;
   popupVisible2 = false;
+  popupVisible3 = false;
   //_dataService: ImateDataService;
   capitalize = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
@@ -275,14 +337,13 @@ export class FORDComponent {
     let usrInfo = authService.getUser().data;
     this.rolid = usrInfo.role;
     //this.empid = usrInfo.empId.padStart(10, '0');
-    if (this.rolid.find(item => item === "ADMIN") === undefined) {
+
       this.userid = usrInfo.userId;
       this.username = usrInfo.userName;
       this.vorgid = usrInfo.orgOption.vorgid.padStart(10, '0');
       this.corgid = usrInfo.orgOption.corgid.padStart(10, '0');
       this.torgid = usrInfo.orgOption.torgid.padStart(10, '0');
       this.empid = this.corgid;
-    }
     
     appInfo.title = AppInfoService.APP_TITLE + " | 고객주문등록";
 
@@ -309,7 +370,7 @@ export class FORDComponent {
     this.t001Code = appConfig.commonCode("비료출고사업장");
     this.inco1Code = appConfig.commonCode("농협운송방법");
     this.zcarnoModiCode = appConfig.tableCode("비료차량");
-
+    this.zpalCode = appConfig.tableCode("RFC_파레트유형");
     //if (this.selectData2 === "10") {
 
     //} else if (this.selectData2 === "20") {
@@ -342,7 +403,7 @@ export class FORDComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.t001Code),
       new PossibleEnteryCodeInfo(CodeInfoType.commCode, this.inco1Code),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zcarnoModiCode),
-
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zpalCode),
 
     ];
 
@@ -358,6 +419,7 @@ export class FORDComponent {
     this.lgortValue = "";
     this.tdlnrValue = "";
     this.tdlnr2Value = "";
+    this.zpalValue = "";
     this.zcarValue = "";
     this.vsbedValue = "";
     this.vkausValue = "";
@@ -367,7 +429,7 @@ export class FORDComponent {
     this.augruValue = "";
     this.zcarnoModiValue = "";
     this.taxk1 = "2";
-
+    this.taxkValue = "";
     this.auartValueA = "";
     this.maktValueA = "";
     this.kunnrValue2A = "";;
@@ -384,12 +446,32 @@ export class FORDComponent {
     this.mvgr2ValueA = "";
     this.mvgr3ValueA = "";
     this.mvgr1ValueA = "";
+
+    this.zpalValueB= "";
+    this.auartValueB = "";
+    this.maktValueB = "";
+    this.kunnrValue2B = "";;
+    this.kunnrValueB = "";;
+    this.lgortValueB = "";
+    this.vkausValueB = "";
+    this.zunloadValueB = "";
+    this.incoValueB = "";
+    this.zcarnoModiValueB = "";
+    this.tdlnrValueB = "";
+    this.tdlnr2ValueB = "";
+    this.zcarValueB = "";
+    this.augruValueB = "";
+    this.mvgr2ValueB = "";
+    this.mvgr3ValueB = "";
+    this.mvgr1ValueB = "";
+
     //form
     this.labelMode = 'floating';
     this.labelLocation = 'left';
     this.readOnly = false;
     this.showColon = true;
     this.auartFlag = true;
+    this.kunnrAbled = false;
     this.nh = true;
     this.autruDisabled = true;
     this.volume = true;
@@ -399,6 +481,7 @@ export class FORDComponent {
     let page = this;
     this.popupTitle = "";
     this.products = service.getProducts();
+
     let userInfo = authService.getUser().data;
 
     //정보
@@ -409,10 +492,8 @@ export class FORDComponent {
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
 
 
-    this.taxkData = new ArrayStore({
-      data: this.products,
-      key: 'ID',
-    });
+    this.taxkData = this.products;
+
     //거래처
     this.clients = service.getclient();
     const that = this;
@@ -493,6 +574,16 @@ export class FORDComponent {
         /*this.dataLoad();*/
       },
     };
+
+    //팝업닫기
+    this.closeButtonOptions3 = {
+      text: '닫기',
+      onClick: async () => {
+
+        that.popupVisible3 = false;
+        /*this.dataLoad();*/
+      },
+    };
     //삭제버튼
     this.deleteButtonOptions = {
       icon: 'trash',
@@ -506,111 +597,245 @@ export class FORDComponent {
     this.saveButtonOptions = {
       text: '저장',
       onClick: async () => {
+        try {
+          if (this.saveFlag === true) {
+            return;
+          }
 
-        console.log(this.dxForm.instance.option('formData'));
+          this.saveFlag = true;
+
+          console.log(this.dxForm.instance.option('formData'));
           this.loadingVisible2 = true;
-        //this.dataGrid.instance.saveEditData();
+          //this.dataGrid.instance.saveEditData();
 
-        var info = await this.detailDataLoad();
-        this.loadingVisible2 = false;
-        //var result2 = await this.detailDataLoad();
-        //if (result2.E_RETURN.MVGR3 !== "1") {
-        //  alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
-        //  this.kunnrEntery.ClearSelectedValue();
-        //  return;
-        //}
-        if (this.popupData.AUART === "" || this.popupData.AUART === null) {
-          alert(`필수 필드(주문구분) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.MATNR === "" || this.popupData.MATNR === null) {
-          alert(`필수 필드(제품명) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.KUNNR === "" || this.popupData.KUNNR === null) {
-          alert(`필수 필드(주문처) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.VDATU === "" || this.popupData.VDATU === null || this.popupData.VDATU === undefined) {
-          alert(`필수 필드(출하요청일) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.KUNWE === "" || this.popupData.KUNWE === null) {
-          alert(`필수 필드(도착지) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.LGORT === "" || this.popupData.LGORT === null) {
-          alert(`필수 필드(출고사업장) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.KWMENG === "" || this.popupData.KWMENG === 0 || this.popupData.KWMENG === null)  {
-          alert(`필수 필드(주문수량) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if ((this.selectData2 !== "30" && this.popupData.VKAUS === "") || (this.selectData2 !== "30" && this.popupData.VKAUS === null)) {
-          alert(`필수 필드(용도구분) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.INCO1 === "" || this.popupData.INCO1 === null) {
-          alert(`필수 필드(운송방법) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if (this.popupData.TDLNR === "" || this.popupData.TDLNR === null) {
-          alert(`필수 필드(1차 운송사) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if ((this.nh === true && this.popupData.MVGR2 === "") || (this.nh === true && this.popupData.MVGR2_N === null)) {
-          alert(`필수 필드(사업방식) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if ((this.nh === true && this.popupData.MVGR3 === "") || (this.nh === true && this.popupData.MVGR3_N === null)) {
-          alert(`필수 필드(계통구분) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        else if ((this.nh === true && this.popupData.MVGR1 === "") || (this.nh === true && this.popupData.MVGR1_N === null)) {
-          alert(`필수 필드(대분류) 입력이 누락되었습니다.`, "알림");
-          return;
-        }
-        //else if ((this.nh === true && this.popupData.TAXK1 === "") || (this.nh === true && this.popupData.TAXK1 === null)) {
-        //  alert(`필수 필드(세무구분) 입력이 누락되었습니다.`, "알림");
-        //  return;
-        //}
-
-
-
-        if (this.popupData.AUART === "Z400" || this.popupData.AUART === "Z410") {
-          if (this.popupData.AUGRU === "") {
-            alert('필수 필드(오더사유) 입력이 누락되었습니다.', "알림");
+          var info = await this.checkDetailDataLoad();
+          
+          //var result2 = await this.detailDataLoad();
+          //if (result2.E_RETURN.MVGR3 !== "1") {
+          //  alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
+          //  this.kunnrEntery.ClearSelectedValue();
+          //  return;
+          //}
+          if (this.popupData.AUART === "" || this.popupData.AUART === null) {
+            alert(`필수 필드(주문구분) 입력이 누락되었습니다.`, "알림");
             return;
           }
-        }
-
-        //주문가능량 계산
-
-        
-
-        if (this.popupData.orderPossible !== "") {
-          if (this.popupData.orderPossible < this.popupData.KWMENG) {
-            alert(`주문가능량을 초과하였습니다.`, "알림");
+          else if (this.popupData.MATNR === "" || this.popupData.MATNR === null) {
+            alert(`필수 필드(제품명) 입력이 누락되었습니다.`, "알림");
             return;
           }
-        }
-        var result = await this.createOrder();
-        if (result.E_TYPESO === "E") {
-          alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGESO}`, "알림");
-          return;
-        } else if (result.E_TYPEDO === "E") {
-          alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGEDO}`, "알림");
-          return;
-        } else {
-          alert("주문등록완료", "알림");
-          this.popupVisible = false;
-          this.dataLoad();
-        }
+          else if (this.popupData.KUNNR === "" || this.popupData.KUNNR === null) {
+            alert(`필수 필드(주문처) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData.VDATU === "" || this.popupData.VDATU === null || this.popupData.VDATU === undefined) {
+            alert(`필수 필드(출하요청일) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData.KUNWE === "" || this.popupData.KUNWE === null) {
+            alert(`필수 필드(도착지) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData.LGORT === "" || this.popupData.LGORT === null) {
+            alert(`필수 필드(출고사업장) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData.KWMENG === "" || this.popupData.KWMENG === 0 || this.popupData.KWMENG === null) {
+            alert(`필수 필드(주문수량) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.selectData2 !== "30" && this.popupData.VKAUS === "") || (this.selectData2 !== "30" && this.popupData.VKAUS === null)) {
+            alert(`필수 필드(용도구분) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData.INCO1 === "" || this.popupData.INCO1 === null) {
+            alert(`필수 필드(운송방법) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData.TDLNR === "" || this.popupData.TDLNR === null) {
+            alert(`필수 필드(1차 운송사) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.nh === true && this.popupData.MVGR2 === "") || (this.nh === true && this.popupData.MVGR2_N === null)) {
+            alert(`필수 필드(사업방식) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.nh === true && this.popupData.MVGR3 === "") || (this.nh === true && this.popupData.MVGR3_N === null)) {
+            alert(`필수 필드(계통구분) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.nh === true && this.popupData.MVGR1 === "") || (this.nh === true && this.popupData.MVGR1_N === null)) {
+            alert(`필수 필드(대분류) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          //else if ((this.nh === true && this.popupData.TAXK1 === "") || (this.nh === true && this.popupData.TAXK1 === null)) {
+          //  alert(`필수 필드(세무구분) 입력이 누락되었습니다.`, "알림");
+          //  return;
+          //}
 
+
+
+          if (this.popupData.AUART === "Z400" || this.popupData.AUART === "Z410") {
+            if (this.popupData.AUGRU === "") {
+              alert('필수 필드(오더사유) 입력이 누락되었습니다.', "알림");
+              return;
+            }
+          }
+
+          //주문가능량 계산
+
+
+          if (info.E_RETURN.AVAILCHECK !== "N") {
+            if (this.popupData.orderPossible !== "") {
+              if (this.popupData.orderPossible < this.popupData.KWMENG) {
+                alert(`주문가능량을 초과하였습니다.`, "알림");
+                return;
+              }
+            }
+          }
+
+          var result = await this.createOrder();
+          if (result.E_TYPESO === "E") {
+            alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGESO}`, "알림");
+            return;
+          } else if (result.E_TYPEDO === "E") {
+            alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGEDO}`, "알림");
+            return;
+          } else {
+            alert("주문등록완료", "알림");
+            this.popupVisible = false;
+            this.dataLoad();
+          }
+
+        } catch (error) {
+          alert(`주문등록 실패,\n\n오류 메세지: ${error.message}`, "오류");
+        } finally {
+          this.loadingVisible2 = false;
+          this.saveFlag = false;
+        }
+      },
+    };
+
+    this.saveButtonOptions3 = {
+      text: '저장',
+      onClick: async () => {
+        try {
+          if (this.saveFlag === true) {
+            return;
+          }
+
+          this.saveFlag = true;
+
+          this.loadingVisible2 = true;
+          //this.dataGrid.instance.saveEditData();
+
+          //var result2 = await this.detailDataLoad();
+          //if (result2.E_RETURN.MVGR3 !== "1") {
+          //  alert('검수처 코드와 계통구분이 일치하지 않습니다.', "알림");
+          //  this.kunnrEntery.ClearSelectedValue();
+          //  return;
+          //}
+
+          var info = await this.checkDetailDataLoad2();
+
+          if (info.E_RETURN.AVAILCHECK !== "N") {
+            if (this.popupData3.orderPossible !== "") {
+              if (this.popupData3.orderPossible < this.popupData3.KWMENG) {
+                alert(`주문가능량을 초과하였습니다.`, "알림");
+                return;
+              }
+            }
+          }
+
+          if (this.popupData3.AUART === "" || this.popupData3.AUART === null) {
+            alert(`필수 필드(주문구분) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.MATNR === "" || this.popupData3.MATNR === null) {
+            alert(`필수 필드(제품명) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.KUNNR === "" || this.popupData3.KUNNR === null) {
+            alert(`필수 필드(주문처) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.VDATU === "" || this.popupData3.VDATU === null || this.popupData3.VDATU === undefined) {
+            alert(`필수 필드(출하요청일) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.KUNWE === "" || this.popupData3.KUNWE === null) {
+            alert(`필수 필드(도착지) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.LGORT === "" || this.popupData3.LGORT === null) {
+            alert(`필수 필드(출고사업장) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.KWMENG === "" || this.popupData3.KWMENG === 0 || this.popupData3.KWMENG === null) {
+            alert(`필수 필드(주문수량) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.selectData2 !== "30" && this.popupData3.VKAUS === "") || (this.selectData2 !== "30" && this.popupData3.VKAUS === null)) {
+            alert(`필수 필드(용도구분) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.INCO1 === "" || this.popupData3.INCO1 === null) {
+            alert(`필수 필드(운송방법) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if (this.popupData3.TDLNR === "" || this.popupData3.TDLNR === null) {
+            alert(`필수 필드(1차 운송사) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.nh === true && this.popupData3.MVGR2 === "") || (this.nh === true && this.popupData3.MVGR2_N === null)) {
+            alert(`필수 필드(사업방식) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.nh === true && this.popupData3.MVGR3 === "") || (this.nh === true && this.popupData3.MVGR3_N === null)) {
+            alert(`필수 필드(계통구분) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          else if ((this.nh === true && this.popupData3.MVGR1 === "") || (this.nh === true && this.popupData3.MVGR1_N === null)) {
+            alert(`필수 필드(대분류) 입력이 누락되었습니다.`, "알림");
+            return;
+          }
+          //else if ((this.nh === true && this.popupData.TAXK1 === "") || (this.nh === true && this.popupData.TAXK1 === null)) {
+          //  alert(`필수 필드(세무구분) 입력이 누락되었습니다.`, "알림");
+          //  return;
+          //}
+
+
+
+          if (this.popupData3.AUART === "Z400" || this.popupData3.AUART === "Z410") {
+            if (this.popupData3.AUGRU === "") {
+              alert('필수 필드(오더사유) 입력이 누락되었습니다.', "알림");
+              return;
+            }
+          }
+
+          var result = await this.createOrder3();
+          if (result.E_TYPESO === "E") {
+            alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGESO}`, "알림");
+            return;
+          } else if (result.E_TYPEDO === "E") {
+            alert(`주문등록 실패,\n\n오류 메세지: ${result.E_MESSAGEDO}`, "알림");
+            return;
+          } else {
+            alert("주문등록완료", "알림");
+            this.popupVisible3 = false;
+            this.dataLoad();
+          }
+
+        } catch (error) {
+          alert(`주문등록 실패,\n\n오류 메세지: ${error.message}`, "오류");
+        } finally {
+          this.loadingVisible2 = false;
+          this.saveFlag = false;
+        }
       },
     };
   }
+
 
   /**
  * 화면 종료
@@ -652,7 +877,7 @@ export class FORDComponent {
   orderDBClick(e: any) {
     this.clearEntery();
     this.popupData2 = [];
-
+    setTimeout(() => { 
     this.selectGridData = this.orderGrid.instance.getSelectedRowsData();
     this.popupData2 = this.selectGridData[0];
     this.auartValueA = this.selectGridData[0].AUART
@@ -671,16 +896,68 @@ export class FORDComponent {
     this.mvgr2ValueA = this.selectGridData[0].MVGR2
     this.mvgr3ValueA = this.selectGridData[0].MVGR3
     this.mvgr1ValueA = this.selectGridData[0].MVGR1
+    this.taxkValue = this.selectGridData[0].TAXK1
+      this.popupData2.TAXK1_N = this.selectGridData[0].TAXK1_N
+      this.popupData2.ZPALLTP = this.selectGridData[0].ZPALLTP
     //this.zcarnoModiValue = this.selectGridData[0].ZCARNO;
     //this.popupData.ZCARNO = this.zcarnoModiValue;
 /*    this.infoDataLoad("search");*/
     this.popupTitle = "주문조회";
-    this.editFlag = true;
-    this.nh = false;
-    this.nh2 = true;
+      this.editFlag = true;
+      if ((this.selectData2 === "10" || this.selectData2 === "40") && this.popupData2.AUART !== "Z200") {
+        this.nh2 = true;
+      }
+      else {
+        this.nh2 = false;
+      }
     //저장버튼 여부
     this.saveVisible = false;
-    this.popupVisible2 = !this.popupVisible2;
+      this.popupVisible2 = !this.popupVisible2;
+    }, 500);
+  }
+
+  refAddOrder(e: any) {
+
+    this.selectGridData = this.orderGrid.instance.getSelectedRowsData();
+
+    this.clearEntery();
+    this.popupData3 = [];
+    this.popupData3.TAXK1 = "";
+    this.taxkValue = "";
+    setTimeout(() => { 
+    if (this.selectGridData.length === 0) {
+      alert("라인을 선택해야합니다.", "알림");
+      return;
+      }
+      this.saveVisible = true;
+      this.popupData3 = deepCopy(this.selectGridData[0]);
+      this.popupData3.VBELN = "";
+      this.auartValueB = this.selectGridData[0].AUART
+      this.maktValueB = this.selectGridData[0].MATNR
+      this.kunnrValue2B = this.selectGridData[0].KUNNR
+      this.kunnrValueB = this.selectGridData[0].KUNWE
+      this.lgortValueB = this.selectGridData[0].LGORT
+      this.vkausValueB = this.selectGridData[0].VKAUS
+      this.zunloadValueB = this.selectGridData[0].ZUNLOAD
+      this.incoValueB = this.selectGridData[0].INCO1
+      this.zcarnoModiValueB = this.selectGridData[0].ZCARNO
+      this.tdlnrValueB = this.selectGridData[0].TDLNR
+      this.tdlnr2ValueB = this.selectGridData[0].TDLNR2
+      this.zcarValueB = this.selectGridData[0].ZCARTYPE
+      this.augruValueB = this.selectGridData[0].AUGRU
+      this.mvgr2ValueB = this.selectGridData[0].MVGR2
+      this.mvgr3ValueB = this.selectGridData[0].MVGR3
+      this.mvgr1ValueB = this.selectGridData[0].MVGR1
+      this.zpalValueB = this.selectGridData[0].ZPALLTP
+      this.popupTitle = "참조추가";
+      this.popupVisible3 = true;
+      if ((this.selectData2 === "10" || this.selectData2 === "40") && this.popupData3.AUART !== "Z200") {
+        this.nh3 = true;
+      }
+      else {
+        this.nh3 = false;
+      }
+    }, 1500);
   }
 
   form_fieldDataChanged(e: any) {
@@ -701,27 +978,31 @@ export class FORDComponent {
       }
       else if (this.selectData2 === "20") {
         this.popupData.ZCARNO = e.selectedItem.ZCARNO;
-        this.popupData.ZDRIVER = e.selectedItem.ZDERIVER;
+        this.popupData.ZDRIVER = e.selectedItem.ZDRIVER;
         this.popupData.ZPHONE = e.selectedItem.ZPHONE;
         this.zcarValue = e.selectedItem.ZCARTYPE;
         this.popupData.ZCARTYPE = this.zcarValue
-
         this.popupData.TDLNR = e.selectedItem.LIFNR;
         this.tdlnrValue = e.selectedItem.LIFNR;
-
         return;
       }
       else if (this.selectData2 === "30") {
-        this.popupData.ZCARNO = e.selectedItem.ZCARNO1;
+        this.popupData.ZCARNO = e.selectedItem.ZCARNO;
         this.popupData.ZDRIVER = e.selectedItem.ZDERIVER1;
         this.popupData.ZPHONE = e.selectedItem.ZPHONE1;
         this.zcarValue = e.selectedItem.ZCARTYPE1;
         this.popupData.ZCARTYPE = this.zcarValue
-
         this.popupData.TDLNR = e.selectedItem.LIFNR;
         this.tdlnrValue = e.selectedItem.LIFNR;
         return;
       }
+    });
+  }
+
+  //파레트유형
+  onZpalltpCodeValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData.ZPALLTP = e.selectedValue;
     });
   }
   onKunnrCodeValueChanged(e: any) {
@@ -732,6 +1013,7 @@ export class FORDComponent {
       //유효성점검
       /*var result = await this.detailDataLoad();*/
       var info = await this.detailDataLoad();
+
       //에러뜨면 메시지
       if (info.E_RETURN.E_TYPE === "E") {
         alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
@@ -779,6 +1061,7 @@ export class FORDComponent {
       //변경시 마다 RFC 2번 조회 (파라미터 중 납품처)
       this.loadingVisible2 = true;
       var info = await this.detailDataLoad();
+
       //에러뜨면 메시지
       if (info.E_RETURN.E_TYPE === "E") {
         alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
@@ -852,6 +1135,7 @@ export class FORDComponent {
       this.loadingVisible2 = true;
       /*this.detailDataLoad();*/
       var info = await this.detailDataLoad();
+
       //에러뜨면 메시지
       if (info.E_RETURN.E_TYPE === "E") {
         alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
@@ -885,30 +1169,30 @@ export class FORDComponent {
     }); 
   }
 
-  onMvgr1CodeValueChanged(e: any) {
-    setTimeout(() => {
-      this.popupData.MVGR1 = e.selectedValue;
-      //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
+  //onMvgr1CodeValueChanged(e: any) {
+  //  setTimeout(() => {
+  //    this.popupData.MVGR1 = e.selectedValue;
+  //    //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
 
 
-    });
-  }
-  onMvgr2CodeValueChanged(e: any) {
-    setTimeout(() => {
-      this.popupData.MVGR2 = e.selectedValue;
-      //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
+  //  });
+  //}
+  //onMvgr2CodeValueChanged(e: any) {
+  //  setTimeout(() => {
+  //    this.popupData.MVGR2 = e.selectedValue;
+  //    //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
 
 
-    });
-  }
-  onMvgr3CodeValueChanged(e: any) {
-    setTimeout(() => {
-      this.popupData.MVGR3 = e.selectedValue;
-      //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
+  //  });
+  //}
+  //onMvgr3CodeValueChanged(e: any) {
+  //  setTimeout(() => {
+  //    this.popupData.MVGR3 = e.selectedValue;
+  //    //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
 
 
-    });
-  }
+  //  });
+  //}
   onAugruCodeValueChanged(e: any) {
     setTimeout(async () => {
       this.popupData.AUGRU = e.selectedValue;
@@ -916,6 +1200,7 @@ export class FORDComponent {
       this.loadingVisible2 = true;
       /*this.detailDataLoad();*/
       var info = await this.detailDataLoad();
+
       //에러뜨면 메시지
       if (info.E_RETURN.E_TYPE === "E") {
         alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
@@ -963,12 +1248,26 @@ export class FORDComponent {
       //this.maEntery.ChangeCodeInfo(this.appConfig.tableCode("비료제품구분"), "MATKL", "%WGBEZ%(%MATKL%)", "제품구분")
       //this.maktEntery.ChangeCodeInfo(this.appConfig.tableCode("비료제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.sd007Entery2.ChangeCodeInfo(this.appConfig.commonCode("주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2A.ChangeCodeInfo(this.appConfig.commonCode("주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2B.ChangeCodeInfo(this.appConfig.commonCode("주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
       this.maktEntery2.ChangeCodeInfo(this.appConfig.tableCode("비료제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2A.ChangeCodeInfo(this.appConfig.tableCode("비료제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2B.ChangeCodeInfo(this.appConfig.tableCode("비료제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryA.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryB.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryA.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryB.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("비료출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
-      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "", "%ZCARNO%", "차량")
+      this.t001EnteryA.ChangeCodeInfo(this.appConfig.commonCode("비료출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.t001EnteryB.ChangeCodeInfo(this.appConfig.commonCode("비료출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryA.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryB.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량")
       this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryA.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryB.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "X";
       this.volume = true;
     }
@@ -979,12 +1278,26 @@ export class FORDComponent {
       //this.maEntery.ChangeCodeInfo(this.appConfig.tableCode("액상제품구분"), "MATKL", "%WGBEZ%(%MATKL%)", "제품구분")
       //this.maktEntery.ChangeCodeInfo(this.appConfig.tableCode("액상제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.sd007Entery2.ChangeCodeInfo(this.appConfig.commonCode("액상주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2A.ChangeCodeInfo(this.appConfig.commonCode("액상주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2B.ChangeCodeInfo(this.appConfig.commonCode("액상주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
       this.maktEntery2.ChangeCodeInfo(this.appConfig.tableCode("액상제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2A.ChangeCodeInfo(this.appConfig.tableCode("액상제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2B.ChangeCodeInfo(this.appConfig.tableCode("액상제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryA.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryB.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryA.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryB.ChangeCodeInfo(this.appConfig.tableCode("액상납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("액상출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
-      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("화학종합차량"), "", "%ZCARNO%", "차량")
+      this.t001EnteryA.ChangeCodeInfo(this.appConfig.commonCode("액상출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.t001EnteryB.ChangeCodeInfo(this.appConfig.commonCode("액상출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("화학종합차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryA.ChangeCodeInfo(this.appConfig.tableCode("화학종합차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryB.ChangeCodeInfo(this.appConfig.tableCode("화학종합차량"), "ZCARNO", "%ZCARNO%", "차량")
       this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("화학화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryA.ChangeCodeInfo(this.appConfig.tableCode("화학화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryB.ChangeCodeInfo(this.appConfig.tableCode("화학화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "";
       this.volume = false;
       this.taxk1 = "";
@@ -996,12 +1309,26 @@ export class FORDComponent {
       //this.maEntery.ChangeCodeInfo(this.appConfig.tableCode("유류제품구분"), "MATKL", "%WGBEZ%(%MATKL%)", "제품구분")
       //this.maktEntery.ChangeCodeInfo(this.appConfig.tableCode("유류제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.sd007Entery2.ChangeCodeInfo(this.appConfig.commonCode("유류주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2A.ChangeCodeInfo(this.appConfig.commonCode("유류주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2B.ChangeCodeInfo(this.appConfig.commonCode("유류주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
       this.maktEntery2.ChangeCodeInfo(this.appConfig.tableCode("유류제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2A.ChangeCodeInfo(this.appConfig.tableCode("유류제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2B.ChangeCodeInfo(this.appConfig.tableCode("유류제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryA.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryB.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryA.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryB.ChangeCodeInfo(this.appConfig.tableCode("유류납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("유류출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
-      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("유류차량"), "", "%ZCARNO%", "차량")
+      this.t001EnteryA.ChangeCodeInfo(this.appConfig.commonCode("유류출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.t001EnteryB.ChangeCodeInfo(this.appConfig.commonCode("유류출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("유류차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryA.ChangeCodeInfo(this.appConfig.tableCode("유류차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryB.ChangeCodeInfo(this.appConfig.tableCode("유류차량"), "ZCARNO", "%ZCARNO%", "차량")
       this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("유류화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryA.ChangeCodeInfo(this.appConfig.tableCode("유류화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryB.ChangeCodeInfo(this.appConfig.tableCode("유류화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "";
       this.taxk1 = "";
       this.volume = false;
@@ -1014,12 +1341,26 @@ export class FORDComponent {
       //this.maEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경제품구분"), "MATKL", "%WGBEZ%(%MATKL%)", "제품구분")
       //this.maktEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.sd007Entery2.ChangeCodeInfo(this.appConfig.commonCode("친환경주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2A.ChangeCodeInfo(this.appConfig.commonCode("친환경주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
+      this.sd007Entery2B.ChangeCodeInfo(this.appConfig.commonCode("친환경주문구분"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "주문구분");
       this.maktEntery2.ChangeCodeInfo(this.appConfig.tableCode("친환경제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2A.ChangeCodeInfo(this.appConfig.tableCode("친환경제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+      this.maktEntery2B.ChangeCodeInfo(this.appConfig.tableCode("친환경제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
       this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryA.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnrEnteryB.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.kunnEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryA.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
+      this.kunnEnteryB.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "납품처")
       this.t001Entery.ChangeCodeInfo(this.appConfig.commonCode("친환경출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
-      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "", "%ZCARNO%", "차량")
+      this.t001EnteryA.ChangeCodeInfo(this.appConfig.commonCode("친환경출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.t001EnteryB.ChangeCodeInfo(this.appConfig.commonCode("친환경출고사업장"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "출고사업장")
+      this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryA.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량")
+      this.zcarnoModiCodeEnteryB.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량")
       this.dd07tCarEntery.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryA.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
+      this.dd07tCarEnteryB.ChangeCodeInfo(this.appConfig.tableCode("화물차종"), "DOMVALUE_L", "%DDTEXT%(%DOMVALUE_L%)", "화물차종")
       this.ZDOFLG = "X";
       this.volume = true;
       return;
@@ -1033,6 +1374,9 @@ export class FORDComponent {
       this.loadingVisible2 = true;
       /*this.detailDataLoad();*/
       var info = await this.detailDataLoad();
+      //if (info === null)
+      //  return;
+
       //에러뜨면 메시지
       if (info.E_RETURN.E_TYPE === "E") {
         alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
@@ -1079,85 +1423,62 @@ export class FORDComponent {
         this.autruDisabled = true;
       }
 
-      if (this.selectData2 === "10") {
-        if (e.selectedValue.startsWith('Z1')) {
 
-        //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
 
-        ////안내문
-        //  alert(`주문처목록을 재설정 했습니다.`, "알림");
-/*          this.kunnrEntery.setSelectedValue("0000102957");*/
-          this.kunnrValue2 = "0000102957";
+      //if (this.selectData2 === "10") {
+      //  if (e.selectedValue.startsWith('Z1')) {
+
+      //    this.kunnrValue2 = this.empid;
+      //    this.popupData.KUNNR = this.kunnrValue2;
+      //    this.nh = true;
+      //  }
+      //  else if (e.selectedValue.startsWith('Z2')) {
+      //    this.auartFlag = false;
+      //    this.kunnrEntery.ClearSelectedValue();
+      //}
+      //else {
+      //  this.auartFlag = false;
+      //    this.kunnrValue2 = this.empid;
+      //    this.popupData.KUNNR = this.kunnrValue2;
+      //  }
+      //}
+
+      //if (this.selectData2 === "40") {
+      //  if (e.selectedValue.startsWith('Z1')) {
+      //    this.kunnrValue2 = this.empid;
+      //    this.popupData.KUNNR = this.kunnrValue2;
+      //    this.nh = true;
+      //  } else if (e.selectedValue.startsWith('Z2')) {
+      //    this.auartFlag = false;
+      //    this.kunnrEntery.ClearSelectedValue();
+      //  }
+      //  else {
+      //    this.auartFlag = false;
+      //    this.kunnrValue2 = this.empid;
+      //    this.popupData.KUNNR = this.kunnrValue2;
+      //  }
+      //}
+
+      if (this.selectData2 !== "40") {
+        if (e.selectedValue.startsWith('Z2')) {
+          this.nh = false;
+          this.kunnrValue2 = this.empid;
           this.popupData.KUNNR = this.kunnrValue2;
-          
-        ////edit막고
-        //this.auartFlag = true;
-        ////기본값 넣어주고
-        //this.kunnrValue2 = "0000100028";
-        //임시로직
-        /*this.popupData.KUNNR = this.kunnrValue2;*/
-
-        //2번rfc조회
-        /*this.detailDataLoad();*/
-        this.nh = true;
-      } else if (e.selectedValue.startsWith('Z2')) {
-          this.auartFlag = false;
-          this.kunnrEntery.ClearSelectedValue();
-        //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
-        //alert(`주문처를 직접 설정해주세요.`, "알림");
-/*        this.nh = false;*/
-      }
-      else {
-        this.auartFlag = false;
-        //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
-        //alert(`주문처를 직접 설정해주세요.`, "알림");
-          /*        this.nh = true;*/
-          this.kunnrValue2 = "0000102957";
-          this.popupData.KUNNR = this.kunnrValue2;
-        }
-      }
-
-      if (this.selectData2 === "40") {
-        if (e.selectedValue.startsWith('Z1')) {
-          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
-
-          ////안내문
-          //alert(`주문처목록을 재설정 했습니다.`, "알림");
-          this.kunnrValue2 = "0000102958";
-          this.popupData.KUNNR = this.kunnrValue2;
-          ////edit막고
-          //this.auartFlag = true;
-          ////기본값 넣어주고
-          //this.kunnrValue2 = "0000100028";
-          //임시로직
-          /*this.popupData.KUNNR = this.kunnrValue2;*/
-
-          //2번rfc조회
-          /*this.detailDataLoad();*/
-          this.nh = true;
-        } else if (e.selectedValue.startsWith('Z2')) {
-          this.auartFlag = false;
-          this.kunnrEntery.ClearSelectedValue();
-          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
-          //alert(`주문처를 직접 설정해주세요.`, "알림");
-          /*        this.nh = false;*/
         }
         else {
-          this.auartFlag = false;
-          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
-          //alert(`주문처를 직접 설정해주세요.`, "알림");
-          /*        this.nh = true;*/
-                    this.kunnrValue2 = "0000102958";
-          this.popupData.KUNNR = this.kunnrValue2;
+          this.kunnrValue2 = "0000102957";
+          this.nh = true;
         }
       }
-
-      if (this.selectData2 === "10" || this.selectData2 === "40") {
-      if (e.selectedValue.startsWith('Z2')) {
-        this.nh = false;
-      }
       else {
-        this.nh = true;
+        if (e.selectedValue.startsWith('Z2')) {
+          this.nh = false;
+          this.kunnrValue2 = this.empid;
+          this.popupData.KUNNR = this.kunnrValue2;
+        }
+        else {
+          this.kunnrValue2 = "0000102958";
+          this.nh = true;
         }
       }
 
@@ -1191,6 +1512,7 @@ export class FORDComponent {
       this.loadingVisible2 = true;
       /*this.detailDataLoad();*/
       var info = await this.detailDataLoad();
+
       //에러뜨면 메시지
       if (info.E_RETURN.E_TYPE === "E") {
         alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
@@ -1255,6 +1577,282 @@ export class FORDComponent {
       //    this.popupData.TDLNR = "자차운송사";
       //  }
       //}
+    });
+  }
+
+  //참조추가 valuechange
+  onAuartValueBValueChanged(e: any) {
+    setTimeout(async () => {
+      this.popupData3.AUART = e.selectedValue;
+      //변경시 마다 RFC 2번 조회 (파라미터 중 주문유형)
+      this.loadingVisible2 = true;
+      /*this.detailDataLoad();*/
+      var info = await this.checkDetailDataLoad2();
+      //if (info === null)
+      //  return;
+
+      //에러뜨면 메시지
+      if (info.E_RETURN.E_TYPE === "E") {
+        alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
+        return;
+      }
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2B.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData3.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if (info.E_RETURN.REVQTY !== "0" && info.E_RETURN.REVQTY !== "" && info.E_RETURN.REVQTY !== null) {
+          if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+            this.popupData3.orderPossible = info.E_RETURN.AVAILQTY;
+          }
+          else {
+            this.popupData3.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
+          }
+        }
+        else {
+          this.popupData3.orderPossible = info.E_RETURN.AVAILQTY;
+        }
+      }
+      this.augruEntery.ClearSelectedValue();
+      if (this.popupData3.AUART === "Z200") {
+        this.incoEntery.ChangeCodeInfo(this.appConfig.commonCode("운송방법"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "운송방법")
+      }
+      else if (this.popupData3.AUART === "Z211") {
+        this.incoEntery.ChangeCodeInfo(this.appConfig.commonCode("운송방법"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "운송방법")
+      }
+      else {
+        this.incoEntery.ChangeCodeInfo(this.appConfig.commonCode("농협운송방법"), "ZCM_CODE3", "%ZCMF01_CH%(%ZCM_CODE3%)", "운송방법")
+      }
+      if (this.popupData3.AUART === "Z410") {
+        this.autruDisabled = false;
+      }
+      else {
+        this.autruDisabled = true;
+      }
+
+      if (this.selectData2 === "10") {
+        if (e.selectedValue.startsWith('Z1')) {
+
+          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
+
+          ////안내문
+          //  alert(`주문처목록을 재설정 했습니다.`, "알림");
+          /*          this.kunnrEntery.setSelectedValue("0000102957");*/
+          //this.kunnrValue2 = "0000102957";
+          //this.popupData3.KUNNR = this.kunnrValue2;
+
+          ////edit막고
+          //this.auartFlag = true;
+          ////기본값 넣어주고
+          //this.kunnrValue2 = "0000100028";
+          //임시로직
+          /*this.popupData.KUNNR = this.kunnrValue2;*/
+
+          //2번rfc조회
+          /*this.detailDataLoad();*/
+          this.nh = true;
+        } else if (e.selectedValue.startsWith('Z2')) {
+          this.auartFlag = false;
+          this.kunnrEnteryB.ClearSelectedValue();
+          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
+          //alert(`주문처를 직접 설정해주세요.`, "알림");
+          /*        this.nh = false;*/
+        }
+        else {
+          this.auartFlag = false;
+          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("비료납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
+          //alert(`주문처를 직접 설정해주세요.`, "알림");
+          /*        this.nh = true;*/
+/*          this.kunnrValue2B = "0000102957";*/
+   /*       this.popupData3.KUNNR = this.kunnrValue2;*/
+        }
+      }
+
+      if (this.selectData2 === "40") {
+        if (e.selectedValue.startsWith('Z1')) {
+          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
+
+          ////안내문
+          //alert(`주문처목록을 재설정 했습니다.`, "알림");
+          //this.kunnrValue2B = "0000102958";
+          //this.popupData3.KUNNR = this.kunnrValue2B;
+          ////edit막고
+          //this.auartFlag = true;
+          ////기본값 넣어주고
+          //this.kunnrValue2 = "0000100028";
+          //임시로직
+          /*this.popupData.KUNNR = this.kunnrValue2;*/
+
+          //2번rfc조회
+          /*this.detailDataLoad();*/
+          this.nh3 = true;
+        } else if (e.selectedValue.startsWith('Z2')) {
+          this.auartFlag = false;
+          this.kunnrEnteryB.ClearSelectedValue();
+          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
+          //alert(`주문처를 직접 설정해주세요.`, "알림");
+          /*        this.nh = false;*/
+        }
+        else {
+          this.auartFlag = false;
+          //this.kunnrEntery.ChangeCodeInfo(this.appConfig.tableCode("친환경납품처"), "KUNNR", "%NAME1%(%KUNNR%)", "주문처");
+          //alert(`주문처를 직접 설정해주세요.`, "알림");
+          /*        this.nh = true;*/
+          //this.kunnrValue2B = "0000102958";
+          //this.popupData3.KUNNR = this.kunnrValue2;
+        }
+      }
+
+      if (this.selectData2 === "10" || this.selectData2 === "40") {
+        if (e.selectedValue.startsWith('Z2')) {
+          this.nh3 = false;
+        }
+        else {
+          this.nh3 = true;
+        }
+      }
+
+      if (this.selectData2 === "10" || this.selectData2 === "40") {
+        if (e.selectedValue.startsWith('Z1')) {
+          this.taxk1 = "2";
+        }
+        else if (e.selectedValue.startsWith('Z4')) {
+          this.taxk1 = "2";
+        }
+        else {
+          this.taxk1 = "";
+        }
+      }
+    }, 100);
+  }
+  onMaktValueBValueChanged(e: any) {
+    setTimeout(async () => {
+      this.popupData3.MATNR = e.selectedValue;
+      //변경시 마다 RFC 2번 조회 (파라미터 중 자재)
+      //if (this.popupData.MATNR !== "" && this.popupData.AVAILQTY == "") {
+      //  alert("주문 가능량이 없는 제품입니다.","알림");
+      //  this.maktEntery2.ClearSelectedValue();
+      //}
+      this.loadingVisible2 = true;
+      /*this.detailDataLoad();*/
+      var info = await this.checkDetailDataLoad2();
+
+      //에러뜨면 메시지
+      if (info.E_RETURN.E_TYPE === "E") {
+        alert(`오류 메세지: ${info.E_RETURN.E_MESSAGE}`, "알림");
+        return;
+      }
+      //X면 주문입력 불가능
+      //X면 주문입력 불가능
+      if (info.E_RETURN.BLOCK === "X") {
+        alert('예약발주 통제로 주문 불가합니다.', "알림");
+        this.maktEntery2.ClearSelectedValue();
+        return;
+      }
+      //언블락X면 가용수량내 입력가능
+      else if (info.E_RETURN.UNBLOCK === "X") {
+        this.popupData3.orderPossible = info.E_RETURN.AVAILQTY;
+      }
+      //둘다 빈값이면 예약-출고, 가용수량중 더 적은만큼
+      else if ((info.E_RETURN.BLOCK === "" && info.E_RETURN.UNBLOCK === "") || info.E_RETURN.AVAILCHECK === "Y") {
+        if (info.E_RETURN.REVQTY !== "0" && info.E_RETURN.REVQTY !== "" && info.E_RETURN.REVQTY !== null) {
+          if ((parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY)) > parseInt(info.E_RETURN.AVAILQTY)) {
+            this.popupData3.orderPossible = info.E_RETURN.AVAILQTY;
+          }
+          else {
+            this.popupData3.orderPossible = parseInt(info.E_RETURN.REVQTY) - parseInt(info.E_RETURN.ACTQTY);
+          }
+        }
+        else {
+          this.popupData3.orderPossible = info.E_RETURN.AVAILQTY;
+        }
+      }
+    });
+  }
+  onKunnrValue2BValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.KUNNR = e.selectedValue;
+    });
+  }
+
+  onZpalltpBCodeValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.ZPALLTP = e.selectedValue;
+    });
+  }
+
+  onKunnrValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.KUNWE = e.selectedValue;
+    });
+  }
+  onLgortValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.LGORT = e.selectedValue;
+    });
+  }
+  onVkausValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.VKAUS = e.selectedValue;
+    });
+  }
+  onZunloadValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.ZUNLOAD = e.selectedValue;
+    });
+  }
+  onIncoValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.INCO1 = e.selectedValue;
+    });
+  }
+  onZcarnoModiValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.ZCARNO = e.selectedValue;
+    });
+  }
+  onTdlnrValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.TDLNR = e.selectedValue;
+    });
+  }
+  onTdlnr2ValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.TDLNR2 = e.selectedValue;
+    });
+  }
+  onZcarValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.ZCARTYPE = e.selectedValue;
+    });
+  }
+
+  onAugruValueBValueChanged(e: any) {
+    setTimeout(() => {
+      this.popupData3.AUGRU = e.selectedValue;
+    });
+  }
+
+  onMvgr2ValueBValueChanged(e: any) {
+    setTimeout(() => {
+      //this.popupData3.MVGR2 = e.selectedValue;
+    });
+  }
+  onMvgr3ValueBValueChanged(e: any) {
+    setTimeout(() => {
+      //this.popupData3.MVGR3 = e.selectedValue;
+    });
+  }
+  onMvgr1ValueBValueChanged(e: any) {
+    setTimeout(() => {
+      //this.popupData3.MVGR1 = e.selectedValue;
     });
   }
 
@@ -1341,18 +1939,91 @@ export class FORDComponent {
     var zsdList: ZSDEPSOENTRYInfoModel[] = [zsdModel];
 
     
-    //if (selectData.KUNNR === "" || selectData.KUNWE === "" || selectData.MATNR === "" || selectData.AUART === "") {
-    //  return zsdList[0];
-    //}
+    if (selectData.KUNNR === "" || selectData.KUNWE === "" || selectData.MATNR === "" || selectData.AUART === "") {
+      this.loadingVisible2 = false;
+      return zsdList[0];
+    }
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDEPSOENTRYInfoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDEPSOENTRYInfoModelList", zsdList, QueryCacheType.None);
   
     var allData = Object.assign(this.popupData, resultModel[0].E_RETURN);
 
     this.popupData = allData;
     this.popupData.AVAILQTY = Math.floor(parseInt(this.popupData.AVAILQTY));
-    this.mvgr3Value = allData.MVGR3;
-    this.mvgr2Value = allData.MVGR2;
-    this.mvgr1Value = allData.MVGR1;
+    this.popupData.MVGR3 = this.mvgr3Value = allData.MVGR3;
+    this.popupData.MVGR2 =  this.mvgr2Value = allData.MVGR2;
+    this.popupData.MVGR1 = this.mvgr1Value = allData.MVGR1;
+    this.loadingVisible2 = false;
+    return resultModel[0];
+  }
+
+  public async checkDetailDataLoad() {
+    var selectData = this.popupData;
+
+    var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, this.selectData2, selectData.MATNR, selectData.AUART, selectData.LGORT);
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
+
+    var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
+    var zsdList: ZSDEPSOENTRYInfoModel[] = [zsdModel];
+
+
+    if (selectData.KUNNR === "" || selectData.KUNWE === "" || selectData.MATNR === "" || selectData.AUART === "") {
+      this.loadingVisible2 = false;
+      return zsdList[0];
+    }
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDEPSOENTRYInfoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDEPSOENTRYInfoModelList", zsdList, QueryCacheType.None);
+    this.popupData.MEINS = resultModel[0].E_RETURN.MEINS;
+
+    this.loadingVisible2 = false;
+    return resultModel[0];
+  }
+
+  //참조추가 rfc
+  public async detailDataLoad2() {
+    var selectData = this.popupData3;
+
+    var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, this.selectData2, selectData.MATNR, selectData.AUART, selectData.LGORT);
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
+
+    var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
+    var zsdList: ZSDEPSOENTRYInfoModel[] = [zsdModel];
+
+
+    if (selectData.KUNNR === "" || selectData.KUNWE === "" || selectData.MATNR === "" || selectData.AUART === "") {
+      this.loadingVisible2 = false;
+      return zsdList[0];
+    }
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDEPSOENTRYInfoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDEPSOENTRYInfoModelList", zsdList, QueryCacheType.None);
+
+    var allData = Object.assign(this.popupData3, resultModel[0].E_RETURN);
+
+    this.popupData3 = allData;
+    this.popupData3.AVAILQTY = Math.floor(parseInt(this.popupData3.AVAILQTY));
+    this.mvgr3ValueB = allData.MVGR3;
+    this.popupData3.MVGR1 = this.mvgr1ValueB = allData.MVGR1;
+    this.popupData3.MVGR2 = this.mvgr2ValueB = allData.MVGR2;
+    this.popupData3.MVGR3 = this.mvgr3ValueB = allData.MVGR3;
+    this.mvgr1ValueB = allData.MVGR1;
+    this.loadingVisible2 = false;
+    return resultModel[0];
+  }
+
+  public async checkDetailDataLoad2() {
+    var selectData = this.popupData3;
+
+    var zsd3013Model = new ZSDS3013Model(selectData.KUNNR, selectData.KUNWE, this.selectData2, selectData.MATNR, selectData.AUART, selectData.LGORT);
+    var zsd3014Model = new ZSDS3014Model("", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0, 0, 0, "", 0, "", "");
+
+    var zsdModel = new ZSDEPSOENTRYInfoModel(zsd3014Model, zsd3013Model);
+    var zsdList: ZSDEPSOENTRYInfoModel[] = [zsdModel];
+
+
+    if (selectData.KUNNR === "" || selectData.KUNWE === "" || selectData.MATNR === "" || selectData.AUART === "") {
+      this.loadingVisible2 = false;
+      return zsdList[0];
+    }
+    var resultModel = await this.dataService.RefcCallUsingModel<ZSDEPSOENTRYInfoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDEPSOENTRYInfoModelList", zsdList, QueryCacheType.None);
+    this.popupData3.MEINS = resultModel[0].E_RETURN.MEINS;
+
     this.loadingVisible2 = false;
     return resultModel[0];
   }
@@ -1363,8 +2034,28 @@ export class FORDComponent {
     let fixData = { VKORG: "1000", VTWEG: "10",ZLOGFLG: "X", POSNR: "10", WERKS: "1000"/*, TAXK1: "2"*/ };
     let bstkd = new Date();
     let userInfo = this.authService.getUser().data; // 나중에 고객번호 가져올때 사용(업무포탈도)
-    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, this.selectData2, "", data.AUGRU, "", data.VDATU, bstkd, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", this.taxk1, "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, this.ZDOFLG, "", this.userid, this.username, "");
-    var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS, data.MVGR1, data.MVGR2, data.MVGR3);
+    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, this.selectData2, "", data.AUGRU, "", data.VDATU, bstkd, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", this.taxk1, "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, this.ZDOFLG, "", this.userid, this.username, "", data.ZPALLTP);
+    var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS, this.mvgr1Value, this.mvgr2Value, this.mvgr3Value, 0 ,new Date);
+    var zsds6002Model = new ZSDS6002Model(data.TEXT);
+
+    var zsds6001List: ZSDS6001Model[] = [zsds6001Model];
+    var zsds6002List: ZSDS6002Model[] = [zsds6002Model];
+    var createModel = new ZSDCREATESODoModel("", "", "", "", "", "", zsds3100Model, zsds6001List, zsds6002List);
+    var createModelList: ZSDCREATESODoModel[] = [createModel];
+    var insertModel = await this.dataService.RefcCallUsingModel<ZSDCREATESODoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDCREATESODoModelList", createModelList, QueryCacheType.None);
+    debugger;
+    return insertModel[0];
+  }
+
+  // 참조추가 RFC
+  public async createOrder3() {
+    var data = this.popupData3;
+    let fixData = { VKORG: "1000", VTWEG: "10", ZLOGFLG: "X", POSNR: "10", WERKS: "1000"/*, TAXK1: "2"*/ };
+    let bstkd = new Date();
+    let userInfo = this.authService.getUser().data; // 나중에 고객번호 가져올때 사용(업무포탈도)
+    var zsds3100Model = new ZSDS3100Model(data.AUART, fixData.VKORG, fixData.VTWEG, this.selectData2, "", data.AUGRU, "", data.VDATU, bstkd, data.KUNNR, "", data.KUNWE, data.TDLNR, data.TDLNR2, data.INCO1, "", "", this.taxk1, "", "", "", data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE, data.ZUNLOAD, fixData.ZLOGFLG, this.ZDOFLG, "", this.userid, this.username, "", data.ZPALLTP);
+    /*var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS, data.MVGR1, data.MVGR2, data.MVGR3, 0, new Date);*/
+    var zsds6001Model = new ZSDS6001Model(fixData.POSNR, data.MATNR, data.KWMENG, "", fixData.WERKS, data.LGORT, 0, 0, "", data.VKAUS, this.mvgr1ValueB, this.mvgr2ValueB, this.mvgr3ValueB, 0, new Date);
     var zsds6002Model = new ZSDS6002Model(data.TEXT);
 
     var zsds6001List: ZSDS6001Model[] = [zsds6001Model];
@@ -1374,6 +2065,7 @@ export class FORDComponent {
     var createModelList: ZSDCREATESODoModel[] = [createModel];
 
     var insertModel = await this.dataService.RefcCallUsingModel<ZSDCREATESODoModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDCREATESODoModelList", createModelList, QueryCacheType.None);
+/*    debugger;*/
     return insertModel[0];
   }
 
@@ -1412,8 +2104,8 @@ export class FORDComponent {
     this.zunloadValue = "10"
         this.incoValue = "NH2"
       }
-    var model1 = new ZSDS3100Model("", "", "", "", "", "", "", new Date, new Date, "", "", "", "", "", this.incoValue, "", "", "", "", "", "", "", "", "", "", this.zunloadValue, "", "", "", "", "", "");
-    var model2 = new ZSDS6001Model("", "", 0, "", "", "", 0, 0, "", this.vkausValue, "", "", "");
+    var model1 = new ZSDS3100Model("", "", "", "", "", "", "", new Date, new Date, "", "", "", "", "", this.incoValue, "", "", "", "", "", "", "", "", "", "", this.zunloadValue, "", "", "", "", "", "","");
+    var model2 = new ZSDS6001Model("", "", 0, "", "", "", 0, 0, "", this.vkausValue, "", "", "",0, new Date);
     var model3 = new ZSDS6002Model("");
 
 
@@ -1426,9 +2118,6 @@ export class FORDComponent {
     }, 500);
     //this.dxForm.instance.resetValues();
     this.popupTitle = "주문등록/수정";
-    this.editFlag = false;
-    this.auartFlag = false;
-    this.nh2 = false;
     this.saveVisible = true;
     this.loadingVisible = true;
     this.popupVisible = !this.popupVisible;
@@ -1455,22 +2144,45 @@ export class FORDComponent {
     this.mvgr3Entery.ClearSelectedValue();
     this.augruEntery.ClearSelectedValue();
     this.zcarnoModiCodeEntery.ClearSelectedValue();
+    this.zpalEntery.ClearSelectedValue();
+
+    //참조추가클리어
+    this.sd007Entery2B.ClearSelectedValue();
+    this.maktEntery2B.ClearSelectedValue();
+    this.kunnrEnteryB.ClearSelectedValue();
+    this.kunnEnteryB.ClearSelectedValue();
+    this.t001EnteryB.ClearSelectedValue();
+    this.tvlvEnteryB.ClearSelectedValue();
+    this.dd07tEnteryB.ClearSelectedValue();
+    this.incoEnteryB.ClearSelectedValue();
+    this.zcarnoModiCodeEnteryB.ClearSelectedValue();
+    this.tdlnrEnteryB.ClearSelectedValue();
+    this.tdlnr2EnteryB.ClearSelectedValue();
+    this.dd07tCarEnteryB.ClearSelectedValue();
+    this.augruEnteryB.ClearSelectedValue();
+    this.mvgr2EnteryB.ClearSelectedValue();
+    this.mvgr3EnteryB.ClearSelectedValue();
+    this.mvgr1EnteryB.ClearSelectedValue();
+    this.zpalEnteryB.ClearSelectedValue();
+    //상세조회
+    this.sd007Entery2A.ClearSelectedValue();
+    this.maktEntery2A.ClearSelectedValue();
+    this.kunnrEnteryA.ClearSelectedValue();
+    this.kunnEnteryA.ClearSelectedValue();
+    this.t001EnteryA.ClearSelectedValue();
+    this.tvlvEnteryA.ClearSelectedValue();
+    this.dd07tEnteryA.ClearSelectedValue();
+    this.incoEnteryA.ClearSelectedValue();
+    this.zcarnoModiCodeEnteryA.ClearSelectedValue();
+    this.tdlnrEnteryA.ClearSelectedValue();
+    this.tdlnr2EnteryA.ClearSelectedValue();
+    this.dd07tCarEnteryA.ClearSelectedValue();
+    this.augruEnteryA.ClearSelectedValue();
+    this.mvgr2EnteryA.ClearSelectedValue();
+    this.mvgr3EnteryA.ClearSelectedValue();
+    this.mvgr1EnteryA.ClearSelectedValue();
   }
-  refAddOrder(e: any) {
 
-    // 2022.10.31 참조추가 버튼 관련
-    // 조회된 데이터를 팝업으로 넘겨줄때 파서블엔트리에 데이터를 바인딩 할 수 있도록 현재 엔트리html, cs 작업중 ( 공통적으로 )
-    // 수정완료 시 정상적으로 엔트리에 값을 바인딩 시켜줄 예정 (현재는 정상작동이 안되서 화면에 데이터가 안뿌려짐)
-
-    this.infoDataLoad("add");
-
-    this.popupTitle = "주문등록/수정";
-    this.editFlag = false;
-    this.saveVisible = true;
-    this.loadingVisible = true;
-    this.popupVisible = !this.popupVisible;
-    this.popupData.VBELN = "";
-  }
 
   saveOrder(e: any) {
   }

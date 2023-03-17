@@ -270,11 +270,12 @@ export class ProductDiv {
 
 
 export class Product {
-  ID!: number;
+  ID!: number | string;
   Name!: string;
 }
 
-const products: Product[] = [{
+const products: Product[] = [
+  {
     ID: 1,
     Name: "과세"
   },

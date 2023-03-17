@@ -14,20 +14,20 @@
     <dxi-item location="before" locateInMenu="auto" [disabled]="isLgortDisabled">
       <div *dxTemplate>
         <nh-possible-comm [codeInfo]="lgortInCode" #lgortInCodeDynamic
-                           [dataStoreKey]="dataStoreKey"
-                           valueColumn="LGORT"
-                           valueDisplayFormat="%LGOBE%"
-                           [width]="200"
-                           [gridBoxWidth]="500"
-                           label="입고창고"
-                           (onDataLoaded)="onPEDataLoaded($event)"
-                           [(selectedValue)]="lgortValue"
+                          [dataStoreKey]="dataStoreKey"
+                          valueColumn="LGORT"
+                          valueDisplayFormat="%LGOBE%"
+                          [width]="200"
+                          [gridBoxWidth]="500"
+                          label="입고창고"
+                          (onDataLoaded)="onPEDataLoaded($event)"
+                          [(selectedValue)]="lgortValue"
                           popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                comboGridScrollMode="virtual"
-                           [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]"
-                           [showClearButton]="true">
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          comboGridScrollMode="virtual"
+                          [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]"
+                          [showClearButton]="true">
           <nbp-validator [adapter]="lgortAdapter">
             <dxi-validation-rule type="required"></dxi-validation-rule>
           </nbp-validator>
@@ -38,27 +38,27 @@
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
         <nh-possible-comm [codeInfo]="matnrCode" #matnrCodeDynamic
-                           [dataStoreKey]="dataStoreKey"
-                           [(selectedValue)]="matnrValue"
-                           valueColumn="MATNR"
-                           valueDisplayFormat="%MAKTX%(%MATNR%)"
-                           width="200"
-                           [gridBoxWidth]="500"
+                          [dataStoreKey]="dataStoreKey"
+                          [(selectedValue)]="matnrValue"
+                          valueColumn="MATNR"
+                          valueDisplayFormat="%MAKTX%(%MATNR%)"
+                          width="200"
+                          [gridBoxWidth]="500"
                           popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                comboGridScrollMode="virtual"
-                           label="자재"
-                           [showClearButton]="true"
-                           (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          comboGridScrollMode="virtual"
+                          label="자재"
+                          [showClearButton]="true"
+                          (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
       </div>
     </dxi-item>
     <!--<dxi-item location="before" locateInMenu="auto">
-      <dx-text-box #ebelnText
-                   label="문서번호"
-                   labelMode="floating"
-                   [maxLength]="15"></dx-text-box>
-    </dxi-item>-->
+    <dx-text-box #ebelnText
+                 label="문서번호"
+                 labelMode="floating"
+                 [maxLength]="15"></dx-text-box>
+  </dxi-item>-->
     <dxi-item location="after" locateInMenu="auto">
       <div *dxTemplate>
         <dx-button text="입고" (onClick)="receiveOrder($event)">
@@ -66,13 +66,19 @@
       </div>
     </dxi-item>
     <!--
+  <dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="취소" (onClick)="cancelDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+    -->
     <dxi-item location="after" locateInMenu="auto">
       <div *dxTemplate>
-        <dx-button text="취소" (onClick)="cancelDataGrid($event)">
+        <dx-button text="엑셀다운로드" (onClick)="onExportingOrderData($event)">
         </dx-button>
       </div>
     </dxi-item>
-      -->
     <dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"
@@ -87,8 +93,9 @@
                   [showBorders]="true"
                   [focusedRowIndex]="0"
                   [columnAutoWidth]="true"
-                  [selection]="{ mode: 'single' }"
+                  [selection]="{ mode: 'multiple' }"
                   [(selectedRowKeys)]="selectedRows"
+                  (onExporting)="onExportingOrderData($event)"
                   (onContentReady)="contentReady($event)"
                   height="calc(100vh - 230px)"
                   [allowColumnReordering]="true"
@@ -118,6 +125,7 @@
       <dxi-column dataField="MEINS" caption="기본단위" dataType="string"></dxi-column>
       <dxi-column dataField="ZCARNO" caption="차량번호" dataType="string"></dxi-column>
       <dxi-column dataField="ZDRIVER" caption="운전기사" dataType="string"></dxi-column>
+      <dxi-column dataField="ZADRESS" caption="주소" dataType="string"></dxi-column>
       <dxi-column dataField="TYPE" caption="상태" dataType="string"></dxi-column>
       <dxi-column dataField="MSG" caption="메세지" dataType="string"></dxi-column>
 

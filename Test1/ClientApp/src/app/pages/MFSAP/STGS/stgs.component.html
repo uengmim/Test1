@@ -14,19 +14,19 @@
     <dxi-item location="before" locateInMenu="auto" [disabled]="isLgortDisabled">
       <div *dxTemplate>
         <nh-possible-comm [codeInfo]="lgortInCode" #lgortInCodeDynamic
-                           [dataStoreKey]="dataStoreKey"
-                           valueColumn="LGORT"
-                           valueDisplayFormat="%LGOBE%"
-                           [width]="200"
-                           [gridBoxWidth]="500"
-                           label="입고창고"
-                           (onDataLoaded)="onPEDataLoaded($event)"
-                           [(selectedValue)]="lgortValue"
-                           popupGridScrollMode="standard"
-                           [popupGridPagingMode]="true"
-                           [popupGridPageSize]="10"
-                           comboGridScrollMode="virtual"
-                           [showClearButton]="true">
+                          [dataStoreKey]="dataStoreKey"
+                          valueColumn="LGORT"
+                          valueDisplayFormat="%LGOBE%"
+                          [width]="200"
+                          [gridBoxWidth]="500"
+                          label="입고창고"
+                          (onDataLoaded)="onPEDataLoaded($event)"
+                          [(selectedValue)]="lgortValue"
+                          popupGridScrollMode="standard"
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          comboGridScrollMode="virtual"
+                          [showClearButton]="true">
         </nh-possible-comm>
       </div>
 
@@ -34,27 +34,27 @@
     <dxi-item location="before" locateInMenu="auto" [visible]="false">
       <div *dxTemplate>
         <nh-possible-comm [codeInfo]="matnrCode" #matnrCodeDynamic
-                           [dataStoreKey]="dataStoreKey"
-                           [(selectedValue)]="matnrValue"
-                           valueColumn="MATNR"
-                           valueDisplayFormat="%MAKTX%(%MATNR%)"
-                           width="200"
-                           [gridBoxWidth]="500"
+                          [dataStoreKey]="dataStoreKey"
+                          [(selectedValue)]="matnrValue"
+                          valueColumn="MATNR"
+                          valueDisplayFormat="%MAKTX%(%MATNR%)"
+                          width="200"
+                          [gridBoxWidth]="500"
                           popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                comboGridScrollMode="virtual"
-                           label="자재"
-                           [showClearButton]="true"
-                           (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
+                          [popupGridPagingMode]="true"
+                          [popupGridPageSize]="10"
+                          comboGridScrollMode="virtual"
+                          label="자재"
+                          [showClearButton]="true"
+                          (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
       </div>
     </dxi-item>
     <!--<dxi-item location="before" locateInMenu="auto">
-      <dx-text-box #ebelnText
-                   label="문서번호"
-                   labelMode="floating"
-                   [maxLength]="15"></dx-text-box>
-    </dxi-item>-->
+    <dx-text-box #ebelnText
+                 label="문서번호"
+                 labelMode="floating"
+                 [maxLength]="15"></dx-text-box>
+  </dxi-item>-->
     <dxi-item location="after" locateInMenu="auto" [visible]="false">
       <div *dxTemplate>
         <dx-button text="입고" (onClick)="receiveOrder($event)">
@@ -62,13 +62,19 @@
       </div>
     </dxi-item>
     <!--
+  <dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="취소" (onClick)="cancelDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+    -->
     <dxi-item location="after" locateInMenu="auto">
       <div *dxTemplate>
-        <dx-button text="취소" (onClick)="cancelDataGrid($event)">
+        <dx-button text="엑셀다운로드" (onClick)="onExportingOrderData($event)">
         </dx-button>
       </div>
     </dxi-item>
-      -->
     <dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"
@@ -86,6 +92,7 @@
                   [selection]="{ mode: 'multiple' }"
                   [(selectedRowKeys)]="selectedRows"
                   (onContentReady)="contentReady($event)"
+                  (onExporting)="onExportingOrderData($event)"
                   height="calc(100vh - 230px)"
                   [allowColumnReordering]="true"
                   columnResizingMode="widget"

@@ -36,6 +36,9 @@ import { ZMMS3110Model, ZMMSTOGrModel } from '../../../shared/dataModel/MFSAP/Zm
 import { ZCMS0010Model, ZMMS1000Model, ZMMSTOGRHistoryModel } from '../../../shared/dataModel/MFSAP/ZmmStoGrHistoryProxy';
 import { T001LModel } from '../../../shared/dataModel/MFSAP/t001l';
 import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -393,5 +396,35 @@ export class STGSComponent {
 
     var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
     this.lgNmList = resultModel;
+  }
+
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e: any) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: this.gridData.instance,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `STO입고이력_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    /*e.cancel = true;*/
   }
 }

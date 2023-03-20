@@ -23,6 +23,7 @@ import {
   DxTextBoxModule,
   DxTemplateModule,
 } from 'devextreme-angular';
+import { exportDataGrid } from 'devextreme/excel_exporter';
 import { AppInfoService, AuthService } from '../../../shared/services';
 import { TablePossibleEntryComponent } from '../../../shared/components/table-possible-entry/table-possible-entry.component';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
@@ -32,6 +33,8 @@ import { CommonPossibleEntryComponent } from '../../../shared/components/comm-po
 import { ZSDS0060Model, ZSDS0061Model, ZSDSTOORDERManageModel } from '../../../shared/dataModel/MFSAP/ZSdStoOrderManageProxy';
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { userInfo } from 'os';
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
 import { ChangeDetectorRef } from '@angular/core';
 import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 
@@ -65,7 +68,7 @@ export class STFOComponent {
   @ViewChild('unloadInfoCodeDynamic', { static: false }) unloadInfoCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('zvkausCodeDynamic', { static: false }) zvkausCodeDynamic!: CommonPossibleEntryComponent;
   @ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeEntery!: CommonPossibleEntryComponent;
-
+  @ViewChild('orderGrid', { static: false }) orderGrid!: DxDataGridComponent;
   @ViewChild(DxDataGridComponent, { static: false })
   dataGrid!: DxDataGridComponent;
 
@@ -73,7 +76,7 @@ export class STFOComponent {
   searchButtonOptions: any;
   data: any;
   backButtonOption: any;
-
+  selectData: any;
   /**
    * 데이터 스토어 키
    * */
@@ -197,6 +200,7 @@ export class STFOComponent {
   //multiseletbox
   gridDataSource: any;
   orderInfo: ZSDS0050Model;
+  orderInfo2: ZSDS0050Model;
   orderList: ZSDS0060Model[] = [];
   callbacks = [];
   popupPosition: any;
@@ -356,8 +360,56 @@ export class STFOComponent {
       onClick: async (e: any) => {
         let vali = e.validationGroup.validate();
 
-        if (this.orderInfo.ZUNLOAD === "" || this.orderInfo.ZUNLOAD === null) {
+        if (this.orderInfo.ZUNLOAD === "" || this.orderInfo.ZUNLOAD === null || this.orderInfo.ZUNLOAD === undefined) {
           alert("하차정보는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.KUNNR === "" || this.orderInfo.KUNNR === null || this.orderInfo.KUNNR === undefined) {
+          alert("주문처는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.MATNR === "" || this.orderInfo.MATNR === null || this.orderInfo.MATNR === undefined) {
+          alert("제품명은 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.KWMENG === null || this.orderInfo.KWMENG === undefined || this.orderInfo.KWMENG < 1) {
+          alert("주문수량은 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.VRKME === "" || this.orderInfo.VRKME === null || this.orderInfo.VRKME === undefined) {
+          alert("판매단위는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.ZPALLTP === "" || this.orderInfo.ZPALLTP === null || this.orderInfo.ZPALLTP === undefined) {
+          alert("파레트는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.INCO1 === "" || this.orderInfo.INCO1 === null || this.orderInfo.INCO1 === undefined) {
+          alert("운송방법은 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.ZVKAUS === "" || this.orderInfo.ZVKAUS === null || this.orderInfo.ZVKAUS === undefined) {
+          alert("용도는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.LGORT === "" || this.orderInfo.LGORT === null || this.orderInfo.LGORT === undefined) {
+          alert("도착지는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.CITY1 === "" || this.orderInfo.CITY1 === null || this.orderInfo.CITY1 === undefined) {
+          alert("도착도시는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.STREET === "" || this.orderInfo.STREET === null || this.orderInfo.STREET === undefined) {
+          alert("도착주소는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.TDLNR1 === "" || this.orderInfo.TDLNR1 === null || this.orderInfo.TDLNR1 === undefined) {
+          alert("운송사는 필수값입니다.", "알림")
+          return;
+        }
+        else if (this.orderInfo.UMLGO === "" || this.orderInfo.UMLGO === null || this.orderInfo.UMLGO === undefined) {
+          alert("출고사업장은 필수값입니다.", "알림")
           return;
         }
         if (await confirm("저장하시겠습니까?", "알림")) {
@@ -373,8 +425,10 @@ export class STFOComponent {
             this.orderInfo.ZBLOCK = result.T_DATA[0].ZBLOCK;
           } else {
             alert("저장완료", "알림");
+            this.popupVisible = false;
+            this.dataLoad(this.imInfo, this.dataService, this.appConfig);
           }
-          this.popupVisible = false;
+
         }
       }
     };
@@ -406,11 +460,11 @@ export class STFOComponent {
     return;
   }
 
-  onFormSubmit = function (e: any) {
+  //onFormSubmit = function (e: any) {
    
 
-    e.preventDefault();
-  };
+  //  e.preventDefault();
+  //};
     
   onlgortInCodeValueChanged(e: any) {
     return;
@@ -449,62 +503,80 @@ export class STFOComponent {
     setTimeout(() => {
       this.orderInfo.MATNR = e.selectedItem.MATNR;
       this.orderInfo.VRKME = e.selectedItem.MEINS;
-    });
-    return;
+    }, 100);
+/*    return;*/
   }
 
   //팔렛트유형변경
   onpalletCodeValueChanged(e: any) {
+    setTimeout(() => {
     this.orderInfo.ZPALLTP = e.selectedItem.DOMVALUE_L;
-    return;
+      /*    return;*/
+     }, 100);
   }
 
   //하차정보변경
   onzunloadCodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.ZUNLOAD = e.selectedItem.DOMVALUE_L;
-    return;
+        /*    return;*/
+      }, 100);
   }
 
   //운송방법변경
   oninco1CodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.INCO1 = e.selectedItem.ZCM_CODE3;
-    return;
+        /*    return;*/
+    }, 100);
   }
 
   //도착지변경
   onlgortCodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.LGORT = e.selectedItem.LGORT;
-    return;
+        /*    return;*/
+    }, 100);
   }
 
   //운송사변경
   ontdlnr1CodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.TDLNR1 = e.selectedItem.LIFNR;
-    return;
+        /*    return;*/
+     }, 100);
   }
 
   //실제운송사변경
   ontdlnr2CodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.TDLNR2 = e.selectedItem.LIFNR;
-    return;
+        /*    return;*/
+     }, 100);
   }
 
   //화물차종
   onzcartypeCodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.ZCARTYPE = e.selectedItem.DOMVALUE_L;
-    return;
+        /*    return;*/
+    }, 100);
   }
 
   //출고사업장
   onumlgoCodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.UMLGO = e.selectedItem.LGORT;
-    return;
+        /*    return;*/
+   }, 100);
   }
 
   //재고유형
   oninsmkCodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.INSMK = e.selectedItem.DOMVALUE_L;
-    return;
+        /*    return;*/
+    }, 100);
   }
 
   //취소코드
@@ -515,27 +587,28 @@ export class STFOComponent {
 
   //용도코드
   onzvkausCodeValueChanged(e: any) {
+      setTimeout(() => {
     this.orderInfo.ZVKAUS = e.selectedItem.DOMVALUE_L;
-    return;
+        /*    return;*/
+     }, 100);
   }
 
   //차량번호 선택이벤트
   onZcarnoCodeValueChanged(e: any) {
+      setTimeout(() => {
     /*    setTimeout(() => {*/
     /*this.zcarnoValue = e.selectedValue;*/
     this.orderInfo.ZCARNO = e.selectedValue;
     this.orderInfo.ZDRIVER = e.selectedItem.ZDRIVER;
     this.truckTypeValue = e.selectedItem.ZCARTYPE;
-    /*    });*/
+        /*    });*/
+    }, 100);
   }
 
   //get diffInDay() {
   //  return `${Math.floor(Math.abs(((new Date()).getTime() - this.value.getTime()) / (24 * 60 * 60 * 1000)))} days`;
   //}
 
-  addDataGrid(e: any) {
-    this.dataGrid.instance.addRow();
-  }
 
 
   saveDataGrid(e: any) {
@@ -639,25 +712,95 @@ export class STFOComponent {
   requestOrder(e: any) {
     this.selectYN = false;
     this.clearPossibleEntrys();
+    setTimeout((that: STFOComponent) => {
+    if (e === "add") {
+      var selectData = this.orderGrid.instance.getSelectedRowsData();
+      if (selectData.length === 0) {
+        alert("하나의 행을 선택 후 실행하세요.", "알림");
+        return;
+      }
 
-    
-    var newdata = new ZSDS0050Model("", this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0,
-      new Date(), new Date(), "", "", "", "", "", "", "", "", "", "", "", "", "", 0, "", 0, 0, this.werks, "", "", "", "", "", "", "", "",
-      new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
+      this.kunnrValue = selectData[0].KUNNR;
+      this.kunweValue = selectData[0].LGORT;
+      this.matnrValue = selectData[0].MATNR;
+      this.inco1Value = selectData[0].INCO1;
+      this.tdlnr1Value = selectData[0].TDLNR1;
+      this.tdlnr2Value = selectData[0].TDLNR2;
+      this.sublgortOutValue = selectData[0].RESLO;
+      this.stockTypeValue = selectData[0].INSMK;
+      /*this.cancelValue = selectedData.;*/
+      this.palletTypeValue = selectData[0].ZPALLTP;
+      this.truckTypeValue = selectData[0].ZCARTYPE;
+      this.unloadInfoValue = selectData[0].ZUNLOAD;
+      this.zvkausValue = selectData[0].ZVKAUS;
+      this.zcarnoValue = selectData[0].ZCARNO;
 
-    this.orderInfo = Object.assign(newdata);
+      this.orderInfo = new ZSDS0050Model("", this.zgubn, this.ekorg, this.ekgrp, this.bukrs, selectData[0].KUNNR,
+        this.werks, selectData[0].LGORT, selectData[0].NAME1, selectData[0].CITY1, selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO,
+        selectData[0].WAERK, selectData[0].ZCREDIT1, selectData[0].ZCREDITUSE1, selectData[0].ZCREDIT2, selectData[0].ZCREDITUSE2,
+        selectData[0].ZCREDIT3, selectData[0].ZCREDITUSE3, selectData[0].ZCREDIT4, selectData[0].ZCREDITUSE4,
+        new Date(), new Date(), selectData[0].INCO1, selectData[0].TDLNR1, selectData[0].TDLNR2, selectData[0].ZCARTYPE, selectData[0].ZCARNO, selectData[0].ZDRIVER,
+        selectData[0].ZUNLOAD, selectData[0].ZPALLTP, selectData[0].ZVKAUS, selectData[0].REMARK, selectData[0].ZPRODUCT1, selectData[0].ZPRODUCT2,
+        selectData[0].MATNR, selectData[0].KWMENG, selectData[0].VRKME, selectData[0].NETPR, selectData[0].NETWR, this.werks, selectData[0].UMLGO,
+        selectData[0].INSMK, selectData[0].ZABGRU, selectData[0].ZBLOCK, selectData[0].EBELN, selectData[0].EBELP, selectData[0].ZSTATS, "",
+        new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
+    }
+    else {
+      this.palletTypeValue = "P"
+      this.unloadInfoValue = "10"
+      this.inco1Value = "G01"
+      this.zvkausValue = "A"
+      var newdata = new ZSDS0050Model("", this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0,
+        new Date(), new Date(), this.inco1Value, "", "", "", "", "", this.unloadInfoValue, this.palletTypeValue, this.zvkausValue, "", "", "", "", 0, "", 0, 0, this.werks, "", "", "", "", "", "", "", "",
+        new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
+
+      this.orderInfo = newdata;
+
+      this.kunnrValue = this.empid;
+    }
 
     this.popupStat = false;
     this.popupVisible = true;
 
     //0.5초 뒤에 적용(숨김 상태의 컨트롤은 프로퍼티 변동이 안되므로 POPUP창이 보여진 상태에서 변경을 해 주어야 함)
 
-    setTimeout(async (that: STFOComponent) => {
-      this.kunnrValue = this.empid;
-      that.truckTypeCodeDynamic.ApplyFilter();
+    
+      
+      /*that.truckTypeCodeDynamic.ApplyFilter();*/
     }, 500, this);
   }
 
+  //참조추가
+  addOrder(e: any) {
+    this.clearPossibleEntrys();
+    var newdata = new ZSDS0050Model("", this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, "", "", "", "", "", "", "", 0, 0, 0, 0, 0, 0, 0, 0,
+      new Date(), new Date(), "", "", "", "", "", "", "", "", "", "", "", "", "", 0, "", 0, 0, this.werks, "", "", "", "", "", "", "", "",
+      new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
+     this.orderInfo = Object.assign(newdata);
+    var selectData = this.orderGrid.instance.getSelectedRowsData();
+    setTimeout(async (that: STFOComponent) => {
+
+      this.orderInfo = new ZSDS0050Model("", this.zgubn, this.ekorg, this.ekgrp, this.bukrs, selectData[0].KUNNR, this.werks, selectData[0].LGORT, "", selectData[0].CITY1, selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO, "", 0, 0, 0, 0, 0, 0, 0, 0,
+        new Date(), new Date(), selectData[0].INCO1, selectData[0].TDLNR1, "", "", "", "", selectData[0].ZUNLOAD, selectData[0].ZPALLTP, selectData[0].ZVKAUS, "", "", "", selectData[0].MATNR, selectData[0].KWMENG, selectData[0].VRKME, 0, 0, this.werks, selectData[0].UMLGO, selectData[0].INSMK, selectData[0].ZABGRU, selectData[0].ZBLOCK, "", "", "", "",
+        new Date(), "", "", new Date(), "000000", "", new Date(), "000000", DIMModelStatus.UnChanged);
+      this.orderInfo.VRKME = selectData[0].MEINS;
+      this.kunnrValue = selectData[0].KUNNR;
+      this.matnrValue = selectData[0].MATNR;
+      this.palletTypeValue = selectData[0].ZPALLTP;
+      this.unloadInfoValue = selectData[0].ZUNLOAD;
+      this.inco1Value = selectData[0].INCO1;
+      this.zvkausValue = selectData[0].ZVKAUS;
+      this.kunweValue = selectData[0].LGORT;
+      this.tdlnr1Value = selectData[0].TDLNR1;
+      this.sublgortOutValue = selectData[0].RESLO;
+      this.stockTypeValue = selectData[0].INSMK;
+
+      this.popupStat = false;
+      this.popupVisible = true;
+    }, 500, this);
+
+
+  }
   //Data refresh
   public refreshDataGrid(e: Object) {
     this.dataGrid.instance.refresh();
@@ -676,10 +819,10 @@ export class STFOComponent {
     this.selectYN = true;
     this.clearPossibleEntrys();
 
-    setTimeout(async (that: STFOComponent) => {
+    setTimeout((that: STFOComponent) => {
       var selectedData: ZSDS0060Model = e.data as ZSDS0060Model;
 
-      this.orderInfo = new ZSDS0050Model(selectedData.ZSTVBELN, this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, selectedData.LGORT, selectedData.NAME1,
+      this.orderInfo2 = new ZSDS0050Model(selectedData.ZSTVBELN, this.zgubn, this.ekorg, this.ekgrp, this.bukrs, "", this.werks, selectedData.LGORT, selectedData.NAME1,
         selectedData.CITY1, selectedData.STREET, "", "", "", 0, 0, 0, 0, 0, 0, 0, 0, selectedData.AEDAT, selectedData.EINDT, selectedData.INCO1, selectedData.TDLNR1,
         selectedData.TDLNR2, selectedData.ZCARTYPE, selectedData.ZCARNO, selectedData.ZDRIVER, selectedData.ZUNLOAD, selectedData.ZPALLTP, selectedData.ZVKAUS,
         selectedData.REMARK, "", "", selectedData.MATNR, selectedData.ZMENGE1, selectedData.MEINS, 0, 0, selectedData.RESWK, selectedData.RESLO, selectedData.INSMK,
@@ -772,6 +915,17 @@ export class STFOComponent {
       row.LGOBE = this.lgNmList.find(item => item.LGORT === row.LGORT)?.LGOBE;
 
       row.RESLOT = this.lgNmList.find(item => item.LGORT === row.RESLO)?.LGOBE;
+
+      if (row.ZSHIPSTATUS === "")
+        row.ZSHIPSTATUST = "신규생성";
+      else if (row.ZSHIPSTATUS === "10")
+        row.ZSHIPSTATUST = "배차의뢰";
+      else if (row.ZSHIPSTATUS === "20")
+        row.ZSHIPSTATUST = "배차진행";
+      else if (row.ZSHIPSTATUS === "30")
+        row.ZSHIPSTATUST = "배차완료";
+      else if (row.ZSHIPSTATUS === "40")
+        row.ZSHIPSTATUST = "상차지시완료";
     }
 
     this.gridDataSource = new ArrayStore(
@@ -812,4 +966,33 @@ export class STFOComponent {
     this.lgNmList = resultModel;
   }
 
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e: any) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: this.orderGrid.instance,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `STO주문내역(포장재)_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    /*e.cancel = true;*/
+  }
 }

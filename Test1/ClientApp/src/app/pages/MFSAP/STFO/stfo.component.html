@@ -13,21 +13,21 @@
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
       <nh-possible-comm [codeInfo]="lgortInCode" #lgortInCodeDynamic
-                         [dataStoreKey]="dataStoreKey"
-                         valueColumn="LGORT"
-                         valueDisplayFormat="%LGOBE%"
-                         [width]="200"
-                         [gridBoxWidth]="500"
-                         label="입고창고"
-                         (onDataLoaded)="onPEDataLoaded($event)"
-                         (onEntryValueChanged)="onlgortInCodeValueChanged($event)"
-                         [(selectedValue)]="lgortValue"
+                        [dataStoreKey]="dataStoreKey"
+                        valueColumn="LGORT"
+                        valueDisplayFormat="%LGOBE%"
+                        [width]="200"
+                        [gridBoxWidth]="500"
+                        label="입고창고"
+                        (onDataLoaded)="onPEDataLoaded($event)"
+                        (onEntryValueChanged)="onlgortInCodeValueChanged($event)"
+                        [(selectedValue)]="lgortValue"
                         popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                comboGridScrollMode="virtual"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
                         [showClearButton]="true"
-                         [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]">
+                        [validationErrors]="[{type:'required', message:'입고창고 필수입력'}]">
         <nbp-validator [adapter]="lgortAdapter">
           <dxi-validation-rule type="required"></dxi-validation-rule>
         </nbp-validator>
@@ -37,24 +37,44 @@
   <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate>
       <nh-possible-comm [codeInfo]="lgortOutCode" #lgortOutCodeDynamic
-                         [dataStoreKey]="dataStoreKey"
-                         valueColumn="LGORT"
-                         valueDisplayFormat="%LGOBE%"
-                         [width]="200"
-                         [gridBoxWidth]="500"
-                         label="출고창고"
+                        [dataStoreKey]="dataStoreKey"
+                        valueColumn="LGORT"
+                        valueDisplayFormat="%LGOBE%"
+                        [width]="200"
+                        [gridBoxWidth]="500"
+                        label="출고창고"
                         popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                comboGridScrollMode="virtual"
-                         (onDataLoaded)="onPEDataLoaded($event)"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        (onDataLoaded)="onPEDataLoaded($event)"
                         [showClearButton]="true"
-                         (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-comm>
+                        (onEntryValueChanged)="onlgortOutCodeValueChanged($event)"></nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <!--<dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="참조등록" (onClick)="requestOrder('add')">
+      </dx-button>
+    </div>
+  </dxi-item>-->
+
+  <dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="주문등록" (onClick)="requestOrder($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+  <dxi-item location="after" locateInMenu="auto" [visible]="true">
+    <div *dxTemplate>
+      <dx-button text="참조추가" (onClick)="addOrder($event)">
+      </dx-button>
     </div>
   </dxi-item>
   <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
-      <dx-button text="주문등록" (onClick)="requestOrder($event)">
+      <dx-button text="엑셀다운로드" (onClick)="onExportingOrderData($event)">
       </dx-button>
     </div>
   </dxi-item>
@@ -73,7 +93,7 @@
 </dx-toolbar>
 
 <div>
-  <dx-data-grid id="gridContainer"
+  <dx-data-grid id="gridContainer" #orderGrid
                 [dataSource]="gridDataSource"
                 [showBorders]="true"
                 [focusedRowIndex]="0"
@@ -82,6 +102,7 @@
                 [(selectedRowKeys)]="selectedRows"
                 (onRowDblClick)="orderDBClick($event)"
                 (onContentReady)="contentReady($event)"
+                (onExporting)="onExportingOrderData($event)"
                 height="calc(100vh - 230px)"
                 [allowColumnReordering]="true"
                 columnResizingMode="widget"
@@ -107,6 +128,7 @@
     <dxi-column dataField="BSART" caption="문서유형" type="string"></dxi-column>
     <!--<dxi-column dataField="ZSTATS" caption="진행상태" type="string"></dxi-column>-->
     <dxi-column dataField="ZSTATSNM" caption="진행상태" type="string"></dxi-column>
+    <dxi-column dataField="ZSHIPSTATUST" caption="배차상태" type="string"></dxi-column>
     <dxi-column dataField="LGOBE" caption="입고창고" type="string"></dxi-column>
     <dxi-column dataField="RESLOT" caption="출고창고" type="string"></dxi-column>
     <dxi-column dataField="AEDAT" caption="주문일자" dataType="date" format="yyyy-MM-dd"></dxi-column>
@@ -140,9 +162,10 @@
           height="calc(80vh - 10px)"
           [showTitle]="true"
           title="주문등록"
-          [dragEnabled]="false"
+          [dragEnabled]="true"
           [showCloseButton]="false"
           container=".dx-viewport"
+          [dragOutsideBoundary]="true"
           [(visible)]="popupVisible">
   <dxi-toolbar-item widget="dxButton"
                     toolbar="top"
@@ -159,12 +182,12 @@
 
     <div id="form-container">
       <dx-form id="orderInfo"
-               [formData]="orderInfo"
+               [(formData)]="orderInfo"
                [disabled]="popupStat"
                [colCount]="1"
                width="100%"
                style="margin-bottom:40px"
-               (submit)="onFormSubmit($event)"
+            
                validationGroup="valiData">
         <dxi-item itemType="group" caption="" [colCount]="2">
           <dxi-item dataField="ZSTVBELN" editorType="dxTextBox" disabled="true">
@@ -540,11 +563,12 @@
           height="calc(80vh - 10px)"
           [showTitle]="true"
           title="주문등록"
-          [dragEnabled]="false"
+          [dragEnabled]="true"
           [showCloseButton]="false"
           container=".dx-viewport"
-          [(visible)]="popupVisible2">
-
+          [(visible)]="popupVisible2"
+          [dragOutsideBoundary]="true">
+          
   <dxi-toolbar-item widget="dxButton"
                     toolbar="top"
                     location="after"
@@ -554,12 +578,12 @@
 
     <div id="form-container">
       <dx-form id="orderInfo"
-               [formData]="orderInfo"
+               [(formData)]="orderInfo2"
                [disabled]="true"
                [colCount]="1"
                width="100%"
                style="margin-bottom:40px"
-               (submit)="onFormSubmit($event)"
+               
                validationGroup="valiData">
         <dxi-item itemType="group" caption="" [colCount]="2">
           <dxi-item dataField="ZSTVBELN" editorType="dxTextBox" disabled="true">

@@ -230,7 +230,7 @@ export class ALRCComponent {
     this.cSpart = service.getCSpart();
  
     //this.vsCode = appConfig.tableCode("출하지점");
-    //this.lgCode = appConfig.tableCode("비료창고");
+    this.lgCode = appConfig.tableCode("전체창고");
     /*this.maraCode = appConfig.tableCode("제품구분");*/
     /*this.dd07tCode = appConfig.tableCode("하차정보");*/
     this.dd07tCarCode = appConfig.tableCode("RFC_화물차종");
@@ -246,12 +246,11 @@ export class ALRCComponent {
       /*this.zcarnoCode = appConfig.tableCode("유류차량");*/
       this.zcarnoModiCode = appConfig.tableCode("유류차량");
     }
-    
 
     //----------------------------------------------------------------------------------------------------------
     let codeInfos = [
       //new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.vsCode),
-      //new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.lgCode),
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.maraCode),*/
       /*new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCode),*/
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCarCode),
@@ -284,7 +283,9 @@ export class ALRCComponent {
     //배차등록 팝업 초기화
     this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: this.endDate, ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" }
 
-/*    this.dataLoad();*/
+    /*    this.dataLoad();*/
+
+    this.getLgortNm();
 
     //조회버튼
     this.searchButtonOptions = {
@@ -351,6 +352,16 @@ export class ALRCComponent {
             vbelnMenge.POSNR = row.POSNR;
             vbelnMenge.ZMENGE2 = row.ZMENGE2;
             vbelnMenge.ZMENGE4 = vbelnMenge.ZMENGE4 + row.ZMENGE4;
+
+            if (row.ZCARTYPE === "" || row.ZCARNO === "" || row.ZDRIVER === "") {
+              checkVBELN = row.VBELN + " / " + row.POSNR;
+              carCheck = false;
+            }
+
+            if (row.ZMENGE4 === 0) {
+              checkVBELN = row.VBELN + " / " + row.POSNR;
+              zeroCheck = false;
+            }
           });
 
           //납품수량, 배차수량 비교
@@ -654,7 +665,7 @@ export class ALRCComponent {
     //else
     //  tdlnr2 = this.tdlnrValue ?? ""
 
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "", "", tdlnr1, tdlnr2, "", "", fixData.I_ZSHIPSTATUS, zsds6430);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", this.selectCSpart, this.startDate, this.endDate, "", "", "4000", "X", tdlnr1, tdlnr2, "", "", fixData.I_ZSHIPSTATUS, zsds6430);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
 
@@ -675,6 +686,10 @@ export class ALRCComponent {
       var tdlnr2Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.Z4PARVW);
       if (tdlnr2Text !== undefined)
         row.Z4PARVWTXT = tdlnr2Text.NAME1;
+
+      var tdlnr1Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.Z3PARVW);
+      if (tdlnr1Text !== undefined)
+        row.Z3PARVWTXT = tdlnr1Text.NAME1;
     });
   }
 
@@ -704,7 +719,7 @@ export class ALRCComponent {
         dataModel = thisObj.orderGridData.filter(item => item.VBELN === row.VBELN && item.POSNR === row.POSNR);
         dataModel.forEach(async (subRow: ZSDS6430Model) => {
           zsd6440list.push(new ZSDS6440Model(subRow.VBELN, subRow.POSNR, subRow.ZSEQUENCY, subRow.KZPOD, subRow.VGBEL, subRow.VGPOS, subRow.TDDAT, subRow.MATNR,
-            subRow.ARKTX, subRow.ZMENGE1, subRow.ZMENGE2, subRow.VRKME, subRow.VSTEL, subRow.ZMENGE4, 0, new Date("9999-12-31"), subRow.BRGEW,
+            subRow.ARKTX, subRow.ZMENGE1, subRow.ZMENGE2, subRow.VRKME, subRow.VSTEL, subRow.ZMENGE4, 0, subRow.ZSHIPMENT_DATE, subRow.BRGEW,
             subRow.GEWEI, subRow.LGORT, subRow.ZLGORT, subRow.INCO1, subRow.VSBED, subRow.KUNNR, subRow.NAME1, subRow.CITY, subRow.STREET, subRow.TELF1,
             subRow.MOBILENO, subRow.KUNAG, subRow.NAME1_AG, subRow.SPART, subRow.WERKS, subRow.LFART, subRow.Z3PARVW, subRow.Z4PARVW, subRow.ZCARTYPE,
             subRow.ZCARNO, subRow.ZDRIVER, subRow.ZDRIVER1, subRow.ZPHONE, subRow.ZPHONE1, subRow.ZSHIPMENT, "30", subRow.ZSHIPMENT_NO,
@@ -742,7 +757,7 @@ export class ALRCComponent {
 
       this.loadePeCount = 0;
 
-      var role = this.rolid.find(item => item !== "R27" && item !== "R17" && item !== "R07"  && item !== "ADMIN");
+      var role = this.rolid.find(item => item !== "R13" && item !== "R17" && item !== "R07"  && item !== "ADMIN");
       if (role !== undefined) {
         //this.isTdlnrEnabled = true;
         this.tdlnrValue = this.torgid;
@@ -758,7 +773,7 @@ export class ALRCComponent {
       if (role2 !== undefined)
         this.isTdlnrEnabled = true;
 
-      var role3 = this.rolid.find(item => item === "R07" || item === "R27" || item === "R17")
+      var role3 = this.rolid.find(item => item === "R07" || item === "R13" || item === "R17")
       if (role3 !== undefined)
         this.tdlnr1Value = this.torgid;
 
@@ -895,6 +910,14 @@ export class ALRCComponent {
     this.dd07tCarEntery.ClearSelectedValue();
     //this.zcarnoCodeEntery.ClearSelectedValue();
     this.zcarnoModiCodeEntery.ClearSelectedValue();
+  }
+
+  async getLgortNm() {
+
+    let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgCode);
+
+    var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
+    this.lgNmList = resultModel;
   }
 }
 

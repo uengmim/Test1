@@ -101,15 +101,15 @@
   <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
-            [disabled]="isButtonLimit"
             [height]="25"
+            [visible]="isColVisible"
             [options]="splitButtonOptions">
   </dxi-item>
   <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
-            [disabled]="isButtonLimit"
             [height]="25"
+            [visible]="isColVisible"
             [options]="splitCancelButtonOptions">
   </dxi-item>
   <dxi-item location="after" locateInMenu="auto">
@@ -134,6 +134,7 @@
               (onSelectionChanged)="mainDataselectedChanged($event)"
               height="calc(100vh - 230px)"
               [columnAutoWidth]="true"
+              [allowColumnReordering]="true"
               (onContentReady)="contentReady($event)"
               [allowColumnResizing]="true">
   <!--[columnHidingEnabled]="true"-->
@@ -165,6 +166,7 @@
   <dxi-column dataField="VGBEL"
               [allowEditing]="false"
               [allowFixing]="false"
+              [visible]="isColVisible"
               sortOrder="asc"
               caption="주문번호">
   </dxi-column>
@@ -207,7 +209,13 @@
               [allowEditing]="false"
               caption="단위">
   </dxi-column>
+  <dxi-column dataField="Z4PARVWTXT"
+              [allowEditing]="false"
+              caption="2차운송사">
+  </dxi-column>
   <dxi-column dataField="BEZEI"
+              [allowEditing]="false"
+              [visible]="isColVisible"
               caption="영업소">
   </dxi-column>
   <dxi-column dataField="ZLGOBE"
@@ -216,27 +224,31 @@
   </dxi-column>
   <dxi-column dataField="STREET"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="납품주소">
   </dxi-column>
   <dxi-column dataField="ZTEXT"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="특기사항">
+  </dxi-column>
+  <dxi-column dataField="ZTAXKD_NAME"
+              [allowEditing]="false"
+              caption="부가가치세">
   </dxi-column>
   <dxi-column dataField="ZPALLTP"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="파레트유형">
   </dxi-column>
   <dxi-column dataField="ZPALLETQTY"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="파레트수량">
   </dxi-column>
   <dxi-column dataField="LGOBE"
               [allowEditing]="false"
               caption="출발지">
-  </dxi-column>
-  <dxi-column dataField="Z4PARVWTXT"
-              [allowEditing]="false"
-              caption="2차운송사">
   </dxi-column>
 
   <dxi-column dataField="TDDAT"
@@ -251,21 +263,24 @@
 
   <dxi-column dataField="BRGEW"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="출하총중량">
   </dxi-column>
 
   <dxi-column dataField="총중량"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="BRGEW">
   </dxi-column>
   <dxi-column dataField="GEWEI"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="중량단위">
   </dxi-column>
   <dxi-column dataField="POSNR"
               [allowEditing]="false"
               [allowFixing]="false"
-              [visible]="isColVisible"
+              sortOrder="asc"
               caption="납품품번">
   </dxi-column>
   <dxi-column dataField="ZSEQUENCY"
@@ -276,29 +291,35 @@
   </dxi-column>
   <dxi-column dataField="CITY"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="납품도시">
   </dxi-column>
   <dxi-column dataField="VGBEL"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="주문번호">
   </dxi-column>
   <dxi-column dataField="VGPOS"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="주문품번">
   </dxi-column>
 
   <dxi-column dataField="SPART"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="제품군">
   </dxi-column>
 
   <dxi-column dataField="VSTEL"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="출하지점">
   </dxi-column>
 
   <dxi-column dataField="ZMENGE3"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="출고수량">
   </dxi-column>
   <!--<dxi-column dataField="WADAT_IST"
@@ -309,10 +330,12 @@
   </dxi-column>-->
   <dxi-column dataField="BRGEW"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="출하총중량">
   </dxi-column>
   <dxi-column dataField="GEWEI"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="중량단위">
   </dxi-column>
   <dxi-column dataField="NAME1"
@@ -322,6 +345,7 @@
 
   <dxi-column dataField="STREET"
               [allowEditing]="false"
+              [visible]="isColVisible"
               caption="납품주소">
   </dxi-column>
   <dxi-column dataField="ZSHIPMENT_NO"
@@ -480,8 +504,8 @@
             <dxo-label text="상차일자"></dxo-label>
           </dxi-item>
           <!--<dxi-item dataField="ZMENGE3"><dxo-label text="출고수량"></dxo-label></dxi-item>-->
-          <dxi-item dataField="ZDRIVER1"><dxo-label text="기사명2"></dxo-label></dxi-item>
-          <dxi-item dataField="ZPHONE1"><dxo-label text="전화번호2"></dxo-label></dxi-item>
+          <dxi-item dataField="ZDRIVER1" [visible]="isColVisible"><dxo-label text="기사명2"></dxo-label></dxi-item>
+          <dxi-item dataField="ZPHONE1" [visible]="isColVisible"><dxo-label text="전화번호2"></dxo-label></dxi-item>
         </dxi-item>
       </dx-form>
     </div>

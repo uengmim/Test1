@@ -28,6 +28,9 @@ import { alert, confirm } from "devextreme/ui/dialog";
 import dxTextBox from 'devextreme/ui/text_box';
 import { ZMMT1320Model } from '../../../shared/dataModel/OWHP/Zmmt1320Proxy';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
+import { ZMMT1321Join1320Model } from '../../../shared/dataModel/MLOGP/Zmmt1320Join1321';
+import { ZMMT1321GroupByModel } from '../../../shared/dataModel/OWHP/Zmmt1321GroupByProxy';
+import { ZMMT1321Model } from '../../../shared/dataModel/MLOGP/Zmmt1321';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -75,6 +78,8 @@ export class ALOQComponent {
   vsList: VsGubun[] = [];
 
 
+  zmmt1320List: ZMMT1320Model[] = [];
+
   selectedVs: VsGubun;
   addDisabled: boolean = true;
 
@@ -96,7 +101,7 @@ export class ALOQComponent {
   orderData: any;
   orderList: ZSDS6410Model[] = [];
 
-  imOrderList: ZMMT1320Model[] = [];
+  imOrderList: ZMMT1321Join1320Model[] = [];
 
   //날짜 조회
   startDate: any;
@@ -257,7 +262,7 @@ export class ALOQComponent {
           return;
         }
 
-        selectedData.forEach((array: ZSDS6410Model) => {
+        selectedData.forEach(async (array: ZSDS6410Model) => {
           if (array.ZMENGE4 === 0) {
             checkVBELN = array.VBELN + " / " + array.POSNR;
             zeroCheck = false;
@@ -277,6 +282,13 @@ export class ALOQComponent {
           //납품번호/품번으로 같은 데이터가 있나 확인
           var sameKeyData = thisObj.orderList.filter(item => item.VBELN === array.VBELN && item.POSNR === array.POSNR);
 
+
+          //임가공 추가
+          if (thisObj.vsSelect.value == "9999") {
+            sameKeyData = thisObj.orderList.filter(item => item.VBELN === array.VBELN);
+          }
+
+
           if (sameKeyData.length > 1)
             confirmText = "분할납품이 포함되어 있습니다.<br/>선택하지않은 모든 납품정보가 함께 저장됩니다.<br/>저장하시겠습니까?";
           else
@@ -294,7 +306,14 @@ export class ALOQComponent {
             //  checkTdlnr2 = false;
             //}
           });
-
+          //임가공일때 한번 더 체크
+          if (thisObj.vsSelect.value == "9999") {
+            var resultModel = await thisObj.dataService.SelectModelData<ZMMT1321GroupByModel[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321GroupByList", [thisObj.appConfig.mandt, vbelnMenge.VBELN, " AND ZSHIP_STATUS <> '10' ", "SC_S_MENGE"],
+              "", "", QueryCacheType.None);
+            vbelnMenge.ZMENGE4 = vbelnMenge.ZMENGE4 + (resultModel.length > 0 ? resultModel[0].SUM_VALUE : 0);
+          }
+          console.log(vbelnMenge.ZMENGE2);
+          console.log(vbelnMenge.ZMENGE4);
           //납품수량, 배차수량 비교
           if (vbelnMenge.ZMENGE2 < vbelnMenge.ZMENGE4) {
             checkSum = false;
@@ -303,15 +322,18 @@ export class ALOQComponent {
 
         });
 
+        setTimeout(async () => {
         if (!zeroCheck) {
           alert("배차수량 0은 지정할 수 없습니다.<br/>납품번호 : " + checkVBELN, "알림");
           return;
         }
 
-        if (!checkSum) {
-          alert("납품수량보다 분할수량을 많이 입력할 수 없습니다.<br/>납품번호 : " + checkVBELN, "알림");
-          return;
-        }
+          if (thisObj.vsSelect.value !== "9999") {
+            if (!checkSum) {
+              alert("납품수량보다 분할수량을 많이 입력할 수 없습니다.<br/>납품번호 : " + checkVBELN, "알림");
+              return;
+            }
+          }
 
         //if (!checkTdlnr2) {
         //  alert("2차운송사가 지정되지 않습니다.<br/>납품번호 : " + checkVBELN, "알림");
@@ -338,6 +360,7 @@ export class ALOQComponent {
           }
         }
 
+        }, 500);
       },
     };
 
@@ -352,34 +375,64 @@ export class ALOQComponent {
           alert("하나의 라인만 선택 후 실행하세요.", "알림");
           return;
         }
-        //선택행 인덱스 구하기
-        var selectedIndex = thisObj.orderList.findIndex(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR &&
-          item.ZSEQUENCY === selectData[0].ZSEQUENCY);
+        if (this.vsSelect.value !== "9999") {
+          //선택행 인덱스 구하기
+          var selectedIndex = thisObj.orderList.findIndex(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR &&
+            item.ZSEQUENCY === selectData[0].ZSEQUENCY);
 
-        var newLine = new ZSDS6410Model(selectData[0].VBELN, selectData[0].POSNR, selectData[0].ZSEQUENCY, selectData[0].KZPOD, selectData[0].VGBEL,
-          selectData[0].VGPOS, selectData[0].INCO1, selectData[0].VSBED, selectData[0].TDDAT, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE1,
-          selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE4, selectData[0].ZMENGE3, selectData[0].WADAT_IST,
-          selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].ZLGORT, selectData[0].KUNNR, selectData[0].NAME1, selectData[0].CITY,
-          selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO, selectData[0].KUNAG, selectData[0].NAME1_AG, selectData[0].SPART,
-          selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE, selectData[0].ZCARNO,
-          selectData[0].ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZVKAUS, selectData[0].ZUNLOAD, selectData[0].ZSHIPSTATUS,
-          selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZPALLTP, selectData[0].ZPALLETQTY, selectData[0].ZCONFIRM_CUT, selectData[0].ZTEXT,
-          selectData[0].WBSTK, "", "", selectData[0].LGOBE, selectData[0].Z3PARVWTXT, selectData[0].Z4PARVWTXT, selectData[0].ZLGOBE);
+          var newLine = new ZSDS6410Model(selectData[0].VBELN, selectData[0].POSNR, selectData[0].ZSEQUENCY, selectData[0].KZPOD, selectData[0].VGBEL,
+            selectData[0].VGPOS, selectData[0].INCO1, selectData[0].VSBED, selectData[0].TDDAT, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE1,
+            selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE4, selectData[0].ZMENGE3, selectData[0].WADAT_IST,
+            selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].ZLGORT, selectData[0].KUNNR, selectData[0].NAME1, selectData[0].CITY,
+            selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO, selectData[0].KUNAG, selectData[0].NAME1_AG, selectData[0].SPART,
+            selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE, selectData[0].ZCARNO,
+            selectData[0].ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZVKAUS, selectData[0].ZUNLOAD, selectData[0].ZSHIPSTATUS,
+            selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZPALLTP, selectData[0].ZPALLETQTY, selectData[0].ZCONFIRM_CUT, selectData[0].ZTEXT,
+            selectData[0].WBSTK, "", "", selectData[0].VKBUR, selectData[0].BEZEI, selectData[0].LGOBE, selectData[0].Z3PARVWTXT, selectData[0].Z4PARVWTXT, selectData[0].ZLGOBE,
+            selectData[0].STATUS_TEXT, selectData[0].ZPALLTPT, selectData[0].ZUNLOADT, selectData[0].ZTAXKD_NAME);
 
-        var sameData = thisObj.orderList.filter(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR);
+          var sameData = thisObj.orderList.filter(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR);
 
-        //분할번호 +1
-        var nSeq = sameData.length;
-        newLine.ZSEQUENCY = nSeq.toString().padStart(9, '0');
+          //분할번호 +1
+          var nSeq = sameData.length;
+          newLine.ZSEQUENCY = nSeq.toString().padStart(9, '0');
 
-        //분할데이터 인서트
-        thisObj.orderList.splice(selectedIndex + nSeq, 0, newLine);
+          //분할데이터 인서트
+          thisObj.orderList.splice(selectedIndex + nSeq, 0, newLine);
 
-        thisObj.orderData = new ArrayStore(
-          {
-            key: ["VBELN", "POSNR", "ZSEQUENCY"],
-            data: thisObj.orderList
-          });
+          thisObj.orderData = new ArrayStore(
+            {
+              key: ["VBELN", "POSNR", "ZSEQUENCY"],
+              data: thisObj.orderList
+            });
+        } else {
+          //임가공 분할로직...
+          var selectedIndex = thisObj.orderList.findIndex(item => item.VBELN === selectData[0].VBELN);
+
+          var newLine = new ZSDS6410Model(selectData[0].VBELN, selectData[0].POSNR, selectData[0].ZSEQUENCY, selectData[0].KZPOD, selectData[0].VGBEL,
+            selectData[0].VGPOS, selectData[0].INCO1, selectData[0].VSBED, selectData[0].TDDAT, selectData[0].MATNR, selectData[0].ARKTX, selectData[0].ZMENGE1,
+            selectData[0].ZMENGE2, selectData[0].VRKME, selectData[0].VSTEL, selectData[0].ZMENGE4, selectData[0].ZMENGE3, selectData[0].WADAT_IST,
+            selectData[0].BRGEW, selectData[0].GEWEI, selectData[0].LGORT, selectData[0].ZLGORT, selectData[0].KUNNR, selectData[0].NAME1, selectData[0].CITY,
+            selectData[0].STREET, selectData[0].TELF1, selectData[0].MOBILENO, selectData[0].KUNAG, selectData[0].NAME1_AG, selectData[0].SPART,
+            selectData[0].WERKS, selectData[0].LFART, selectData[0].Z3PARVW, selectData[0].Z4PARVW, selectData[0].ZCARTYPE, selectData[0].ZCARNO,
+            selectData[0].ZDRIVER, selectData[0].ZDRIVER1, selectData[0].ZPHONE, selectData[0].ZPHONE1, selectData[0].ZVKAUS, selectData[0].ZUNLOAD, selectData[0].ZSHIPSTATUS,
+            selectData[0].ZSHIPMENT_NO, selectData[0].ZSHIPMENT_DATE, selectData[0].ZPALLTP, selectData[0].ZPALLETQTY, selectData[0].ZCONFIRM_CUT, selectData[0].ZTEXT,
+            selectData[0].WBSTK, "", "", "", "", selectData[0].LGOBE, selectData[0].Z3PARVWTXT, selectData[0].Z4PARVWTXT, selectData[0].ZLGOBE);
+
+          var sameData = thisObj.orderList.filter(item => item.VBELN === selectData[0].VBELN);
+
+          newLine.POSNR = (parseInt(sameData[sameData.length - 1].POSNR) + 1).toString().padStart(6, '0');
+          //분할데이터 인서트
+          console.log(selectedIndex);
+          console.log(sameData.length);
+          thisObj.orderList.splice(selectedIndex + sameData.length, 0, newLine);
+
+          thisObj.orderData = new ArrayStore(
+            {
+              key: ["VBELN", "POSNR"],
+              data: thisObj.orderList
+            });
+        }
       }
     };
 
@@ -395,27 +448,52 @@ export class ALOQComponent {
           return;
         }
 
-        var sameData = thisObj.orderList.filter(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR);
-        var nSeq = sameData.length - 1;
+        if (this.vsSelect.value !== "9999") {
+          var sameData = thisObj.orderList.filter(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR);
+          var nSeq = sameData.length - 1;
 
-        if (nSeq === 0) {
-          alert("원본 납품문서는 더이상 분할취소할 수 없습니다.", "알림");
-          return;
+          if (nSeq === 0) {
+            alert("원본 납품문서는 더이상 분할취소할 수 없습니다.", "알림");
+            return;
+          }
+
+          var maxSeq = nSeq.toString().padStart(9, '0');
+
+          var maxIndex = thisObj.orderList.findIndex(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR &&
+            item.ZSEQUENCY === maxSeq);
+
+          //분할데이터 삭제
+          thisObj.orderList.splice(maxIndex, 1);
+
+          thisObj.orderData = new ArrayStore(
+            {
+              key: ["VBELN", "POSNR", "ZSEQUENCY"],
+              data: thisObj.orderList
+            });
         }
+        else {
+          //임가공 분할취소
+          var sameData = thisObj.orderList.filter(item => item.VBELN === selectData[0].VBELN);
+          var nSeq = sameData.length - 1;
 
-        var maxSeq = nSeq.toString().padStart(9, '0');
+          if (nSeq === 0) {
+            alert("원본 납품문서는 더이상 분할취소할 수 없습니다.", "알림");
+            return;
+          }
 
-        var maxIndex = thisObj.orderList.findIndex(item => item.VBELN === selectData[0].VBELN && item.POSNR === selectData[0].POSNR &&
-          item.ZSEQUENCY === maxSeq);
+          var maxSeq = nSeq.toString().padStart(6, '0');
 
-        //분할데이터 삭제
-        thisObj.orderList.splice(maxIndex, 1);
+          var maxIndex = thisObj.orderList.findIndex(item => item.VBELN === selectData[0].VBELN && item.POSNR === maxSeq);
 
-        thisObj.orderData = new ArrayStore(
-          {
-            key: ["VBELN", "POSNR", "ZSEQUENCY"],
-            data: thisObj.orderList
-          });
+          //분할데이터 삭제
+          thisObj.orderList.splice(maxIndex, 1);
+
+          thisObj.orderData = new ArrayStore(
+            {
+              key: ["VBELN", "POSNR"],
+              data: thisObj.orderList
+            });
+        }
       }
     };
 
@@ -457,34 +535,37 @@ export class ALOQComponent {
     let fixData = { I_ZSHIPSTATUS: "10" };
 
     if (this.vsSelect.value === "9999") {
-      var whereCondi = " AND TDLNR1 = '" + this.empid + "'";
+      this.orderGrid.instance.columnOption("POSNR", "visibleIndex", 1);
+      this.orderGrid.instance.columnOption("POSNR", "caption", "분할순번");
+      this.orderGrid.instance.columnOption("ZMENGE1", "caption", "출하요청량");
+      this.orderGrid.instance.columnOption("ZMENGE2", "caption", "출하지시량");
+
       thisObj.isButtonLimit = true;
-      thisObj.imOrderList = await this.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
-        [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), fixData.I_ZSHIPSTATUS, whereCondi],
+      thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1321Join1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320List",
+        [thisObj.appConfig.mandt, "1000", `'10', '20'`, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), this.empid, "X", `'${fixData.I_ZSHIPSTATUS}'`, ""],
         "", "A.VBELN", QueryCacheType.None);
 
-      thisObj.imOrderList.forEach(async (row: ZMMT1320Model) => {
-        var tdlnr1txt = "";
-        var tdlnr1Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR1);
-        if (tdlnr1Text !== undefined)
-          tdlnr1txt = tdlnr1Text.NAME1;
+      thisObj.imOrderList.forEach(async (row: ZMMT1321Join1320Model) => {
+        thisObj.orderList.push(new ZSDS6410Model(row.VBELN, row.POSNR == "000000" ? "000001" : row.POSNR, "", "", "", "", "", "", row.SC_R_DATE_R, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
+          row.MEINS, "9999", row.SC_S_MENGE, row.SC_G_MENGE, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
+          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_S_DATE, "", "", 0, "", "", "", "", "", "", row.BLAND_F_NM,
+          this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR1)?.NAME1, this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR2)?.NAME1, row.BLAND_T_NM));
 
-        var tdlnr2txt = "";
-        var tdlnr2Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR2);
-        if (tdlnr2Text !== undefined)
-          tdlnr2txt = tdlnr2Text.NAME1;
-
-        var lgorttxt = "";
-        var lgortText = this.lgEntery.gridDataSource._array.find(item => item.LGORT === row.LGORT);
-        if (lgortText !== undefined)
-          lgorttxt = lgortText.LGOBE;
-
+      })
+        /*
         thisObj.orderList.push(new ZSDS6410Model(row.VBELN, "", "", "", "", "", "", "", row.SC_R_DATE, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
           row.MEINS, "9999", 0, 0, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
           row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", "", "", lgorttxt, tdlnr1txt, tdlnr2txt));
-      })
+        */
+    
      
     } else {
+
+      this.orderGrid.instance.columnOption("POSNR", "visibleIndex", 19);
+      this.orderGrid.instance.columnOption("POSNR", "caption", "납품품번");
+      this.orderGrid.instance.columnOption("ZMENGE1", "caption", "주문수량");
+      this.orderGrid.instance.columnOption("ZMENGE2", "caption", "납품수량");
+
       thisObj.isButtonLimit = false;
       var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", this.lgEntery.selectedValue ?? "", "", this.startDate, this.endDate, "", "",
         this.vsSelect.value, "X", this.empid, "", "", "", fixData.I_ZSHIPSTATUS, []);
@@ -528,7 +609,8 @@ export class ALOQComponent {
   //
   public async saveData() {
     var zsd6420list: ZSDS6420Model[] = [];
-    var zmmt1320List: ZMMT1320Model[] = [];
+    this.zmmt1320List = [];
+    var zmmt1321List: ZMMT1321Model[] = [];
     var insertMod: ZSDIFPORTALSAPLE028RcvModel = new ZSDIFPORTALSAPLE028RcvModel("", "", []);
     var insertModel: ZSDIFPORTALSAPLE028RcvModel[] = [insertMod];
     var rowCount: number = 0;
@@ -579,26 +661,43 @@ export class ALOQComponent {
 
       insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
     } else {
-      this.orderGrid.instance.getSelectedRowsData().forEach(async (array: ZSDS6410Model) => {
-        var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
-        if (getData !== undefined) {
-          getData.ModelStatus = DIMModelStatus.Modify;
-          getData.TDLNR2 = array.Z4PARVW;
-          getData.ZSHIP_STATUS = "20";
-          getData.SC_L_DATE = new Date("0001-01-01");
-          getData.SC_G_DATE = new Date("0001-01-01");
-          getData.SC_A_DATE = new Date("0001-01-01");
-          getData.SC_R_DATE_C = new Date("0001-01-01");
-          getData.SC_L_DATE = new Date("0001-01-01");
-          getData.AENAM = this.appConfig.interfaceId;
-          getData.AEDAT = new Date();
-          getData.AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
-            new Date().getSeconds().toString().padStart(2, '0');
-          zmmt1320List.push(getData);
-        }
-      });
-        rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
+      this.orderGrid.instance.getSelectedRowsData().forEach(async (row: ZSDS6410Model) => {
+        var dataModel: ZSDS6410Model[] = [];
+        var checkKey = zsd6420list.findIndex(item => item.VBELN === row.VBELN);
+        if (checkKey === -1) {
+          dataModel = this.orderList.filter(item => item.VBELN === row.VBELN);
+          var getData = this.imOrderList.find(item => item.VBELN === row.VBELN);
+          dataModel.forEach(async (subRow: ZSDS6410Model) => {
+            zmmt1321List.push(new ZMMT1321Model(this.appConfig.mandt, getData.VBELN, subRow.POSNR, getData.WERKS, getData.LIFNR, getData.IDNRK, getData.LGORT, getData.BWART
+              , getData.MEINS, getData.SC_R_MENGE, getData.SC_R_DATE_R, getData.INCO1, getData.TDLNR1, subRow.Z4PARVW, subRow.ZCARTYPE, subRow.ZCARNO, subRow.ZDRIVER, subRow.ZPHONE
+              , subRow.Z4PARVW == "" ? "10" : "20", subRow.ZSHIPMENT_NO, getData.BLAND_F, getData.BLAND_F_NM, getData.BLAND_T, getData.BLAND_T_NM, subRow.ZMENGE4, subRow.ZSHIPMENT_DATE ?? new Date("0001-01-01")
+              , 0, new Date("0001-01-01"), "000000", getData.ZPOST_RUN_MESSAGE, 0, new Date("0001-01-01"), "000000", "", getData.MBLNR, getData.MJAHR, getData.MBLNR_C, getData.MJAHR_C
+              , getData.WAERS, getData.NETPR, getData.DMBTR, getData.BUKRS, getData.BELNR, getData.GJAHR, getData.BUDAT ?? new Date("0001-01-01"), getData.UNIQUEID, getData.SAVEKEY == "" ? this.appConfig.interfaceId : getData.ERNAM
+              , getData.SAVEKEY == "" ? new Date() : getData.ERDAT, getData.SAVEKEY == "" ? formatDate(new Date(), "HH:mm:ss", "en-US") : getData.ERZET, this.appConfig.interfaceId
+              , new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), "", "", getData.SAVEKEY == "" ? DIMModelStatus.Add : DIMModelStatus.Modify));
+          });
 
+          var row21Count = await this.dataService.ModifyModelData<ZMMT1321Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321ModelList", zmmt1321List);
+
+          var zmmt1320Model = await this.dataService.SelectModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", [],
+            `MANDT = '${this.appConfig.mandt}' AND VBELN = '${getData.VBELN}'`, "VBELN", QueryCacheType.None);
+
+          var sumModel = await this.dataService.SelectModelData<ZMMT1321GroupByModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321GroupByList", [this.appConfig.mandt, getData.VBELN, "", "SC_S_MENGE"],
+            "", "", QueryCacheType.None);
+          zmmt1320Model[0].ModelStatus = DIMModelStatus.Modify;
+          zmmt1320Model[0].SC_S_MENGE_T = sumModel[0].SUM_VALUE;
+          zmmt1320Model[0].ZSHIP_STATUS = "20";
+          zmmt1320Model[0].SC_G_DATE = new Date("0001-01-01");
+          zmmt1320Model[0].AENAM = this.appConfig.interfaceId;
+          zmmt1320Model[0].AEDAT = new Date();
+          zmmt1320Model[0].AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
+            new Date().getSeconds().toString().padStart(2, '0');
+
+          this.zmmt1320List.push(zmmt1320Model[0]);
+
+        }
+        this.imUpdate();
+      });
       /*if (rowCount > 0) {*/
         insertModel[0].E_MTY = "S";
       //}else {
@@ -654,7 +753,7 @@ export class ALOQComponent {
     this.loadingVisible = true;
     setTimeout(async () => {
       this.vsSelect.value = e.value;
-      if (this.vsValue === "9999") {
+      if (this.vsSelect.value === "9999") {
         this.isColVisible = false;
       } else {
         this.isColVisible = true;
@@ -674,5 +773,9 @@ export class ALOQComponent {
       this.addDisabled = true;
     }
   }
-}
+  async imUpdate() {
 
+    var row20Count = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", this.zmmt1320List);
+
+  }
+}

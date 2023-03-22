@@ -328,7 +328,7 @@ export class MGWIComponent {
       var zmms0210Model: ZMMS0210Model[] = [];
       zmms0210Model.push(new ZMMS0210Model("G", now, nowTime, thisObj.weightStartData.ZCARNO, thisObj.weightStartData.ZDRIVER, thisObj.weightStartData.ZGW_MATNR, thisObj.weightStartData.ZGW_MAKTX ?? "",
         thisObj.weightStartData.ZGW_LIFNR, thisObj.weightStartData.ZGW_NAME1 ?? "", thisObj.weightStartData.ZGW_ATGEW, thisObj.weightStartData.GEWEI, thisObj.weightStartData.ZGW_PER1, thisObj.weightStartData.ZGW_PER2,
-        "", "", "", "", "", DIMModelStatus.Add));
+        "", "", "", "", "", "", DIMModelStatus.Add));
 
       var zmmfromgwgrirModel = new ZMMFROMGWGrirModel(zmms9900Model, zmms0210Model);
       var modelList: ZMMFROMGWGrirModel[] = [zmmfromgwgrirModel];

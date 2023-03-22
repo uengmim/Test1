@@ -4,7 +4,15 @@
     <dxi-item location="before">
       <div *dxTemplate>
         <div style="float: left; margin-left: 10px;">
-          <dx-date-box [(value)]="wadatIstDate" label="출고일자" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+          <dx-date-box [(value)]="wadatIstDatefrom" label="출고일자(from)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="wadatIstDateto" label="출고일자(to)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
         </div>
       </div>
     </dxi-item>
@@ -31,6 +39,17 @@
       </div>
     </dxi-item>
 
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate style="float: left; margin-left: 10px; ">
+        <dx-select-box [dataSource]="tdlData"
+                       displayExpr="name"
+                       valueExpr="code"
+                       [(value)]="selectTdlValue"
+                       label="운송사구분"
+                       labelMode="floating"></dx-select-box>
+      </div>
+    </dxi-item>
+
     <dxi-item location="before" locateInMenu="auto" [disabled]="is1chDisabled">
       <div *dxTemplate style="float: left; margin-left: 10px; ">
         <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
@@ -38,7 +57,7 @@
                           valueColumn="LIFNR"
                           valueDisplayFormat="%NAME1%(%LIFNR%)"
                           width="auto"
-                          label="1차운송사"
+                          label="운송사"
                           labelMode="floating"
                           [showClearButton]="true"
                           [(selectedValue)]="tdlnrValue"
@@ -52,26 +71,26 @@
       </div>
     </dxi-item>
 
-    <dxi-item location="before" locateInMenu="auto" [disabled]="is2chDisabled">
-      <div *dxTemplate style="float: left; margin-left: 10px; ">
-        <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
-                          [dataStoreKey]="dataStoreKey"
-                          valueColumn="LIFNR"
-                          valueDisplayFormat="%NAME1%(%LIFNR%)"
-                          width="auto"
-                          label="2차운송사"
-                          labelMode="floating"
-                          [showClearButton]="true"
-                          [(selectedValue)]="tdlnr2Value"
-                          [gridBoxWidth]="500"
-                          [validationErrors]="[{type:'required', message:'2차운송사 필수입력'}]"
-                          (onDataLoaded)="onPEDataLoaded($event)">
-          <nbp-validator [adapter]="tdlnrAdapter">
-            <dxi-validation-rule type="required"></dxi-validation-rule>
-          </nbp-validator>
-        </nh-possible-comm>
-      </div>
-    </dxi-item>
+    <!--<dxi-item location="before" locateInMenu="auto" [disabled]="is2chDisabled">
+    <div *dxTemplate style="float: left; margin-left: 10px; ">
+      <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
+                        [dataStoreKey]="dataStoreKey"
+                        valueColumn="LIFNR"
+                        valueDisplayFormat="%NAME1%(%LIFNR%)"
+                        width="auto"
+                        label="2차운송사"
+                        labelMode="floating"
+                        [showClearButton]="true"
+                        [(selectedValue)]="tdlnr2Value"
+                        [gridBoxWidth]="500"
+                        [validationErrors]="[{type:'required', message:'2차운송사 필수입력'}]"
+                        (onDataLoaded)="onPEDataLoaded($event)">
+        <nbp-validator [adapter]="tdlnrAdapter">
+          <dxi-validation-rule type="required"></dxi-validation-rule>
+        </nbp-validator>
+      </nh-possible-comm>
+    </div>
+  </dxi-item>-->
 
     <dxi-item location="after"
               widget="dxButton"
@@ -144,6 +163,14 @@
                 [allowEditing]="false"
                 caption="출하조건">
     </dxi-column>
+
+    <dxi-column dataField="WADAT_IST"
+                [allowEditing]="false"
+                dataType="date"
+                format="yyyy-MM-dd"
+                caption="실제출고일">
+    </dxi-column>
+
     <dxi-column dataField="SPART"
                 [allowEditing]="false"
                 caption="제품군">

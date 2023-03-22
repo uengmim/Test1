@@ -6,7 +6,7 @@ import { formatDate } from '@angular/common';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, CSpart, SpData } from '../CTOC/app.service';
+import { Service, CSpart, SpData, SelectTdlData } from '../CTOC/app.service';
 import {
   DxDataGridComponent,
   DxDateBoxModule,
@@ -44,7 +44,8 @@ export class CTOCComponent {
   callbacks = [];
 
   //조회조건
-  wadatIstDate: any;
+  wadatIstDatefrom: any;
+  wadatIstDateto: any;
   cSpart: CSpart[];
   Spdata: SpData[];
   tdlnrCode!: TableCodeInfo;
@@ -72,6 +73,8 @@ export class CTOCComponent {
   gridDataSource: any;
   orderList: ZSDS6310Model[] = [];
 
+  tdlData: SelectTdlData[] = [];
+  selectTdlValue: string = "10";
 
   //값 체크
   //validation Adapter
@@ -113,10 +116,12 @@ export class CTOCComponent {
 
     //로그인 사용자 정보
     let usrInfo = authService.getUser().data;
-    this.vorgid = usrInfo.orgOption.vorgid;
-    this.corgid = usrInfo.orgOption.corgid;
-    this.torgid = usrInfo.orgOption.torgid;
+    this.vorgid = usrInfo.orgOption.vorgid.padStart(10, "0");
+    this.corgid = usrInfo.orgOption.corgid.padStart(10, "0");
+    this.torgid = usrInfo.orgOption.torgid.padStart(10, "0");
     this.rolid = usrInfo.role;
+
+    this.tdlData = service.getSelectTdlData();
 
     // 값세팅
     this.spartValue = "20";
@@ -131,7 +136,8 @@ export class CTOCComponent {
     //운송사 code정보
     this.tdlnr2Code = appConfig.tableCode("운송업체");
     //출고일자 Default
-    this.wadatIstDate = new Date();
+    this.wadatIstDatefrom = new Date();
+    this.wadatIstDateto = new Date();
 
     //----------------------------------------------------------------------------------------------------------
     let codeInfos = [
@@ -180,16 +186,19 @@ export class CTOCComponent {
   */
 onPEDataLoaded(e: any) {
   this.loadePeCount++; 
-  if (this.loadePeCount >= 2) {
+  if (this.loadePeCount >= 1) {
 
     if (this.rolid.find(item => item === "ADMIN") === undefined) {
-      if (this.rolid.find(item => item === "R17") !== undefined) {
-        this.tdlnrValue = this.torgid;
-        this.is1chDisabled = true;
-      } else if (this.rolid.find(item => item === "R18") !== undefined) {
-        this.tdlnr2Value = this.torgid;
-        this.is2chDisabled = true;
-      }
+      //if (this.rolid.find(item => item === "R17") !== undefined) {
+      //  this.tdlnrValue = this.torgid;
+      //  this.is1chDisabled = true;
+      //} else if (this.rolid.find(item => item === "R18") !== undefined) {
+      //  this.tdlnr2Value = this.torgid;
+      //  this.is2chDisabled = true;
+      //}
+
+      /*this.tdlnrValue = this.torgid;*/
+      /*this.is1chDisabled = true;*/
     }
 
     this.dataLoad();
@@ -200,9 +209,20 @@ onPEDataLoaded(e: any) {
 
   //고객인수확인 목록 조회
   public async dataLoad() {
+    var tdlnrVal = "";
+    var tdlnr2Val = "";
 
+    if (this.selectTdlValue === "10")
+      tdlnrVal = this.tdlnrValue;
+    else
+      tdlnr2Val = this.tdlnrValue;
 
-    var sendModel = new ZSDIFPORTALSAPLE29SndModel("", "", "", "", "", this.spartValue, this.spdataValue, this.wadatIstDate, this.tdlnrValue, this.tdlnr2Value, "", []);
+    //if (this.tdlnrValue === "") {
+    //  await alert("운송사코드는 필수입니다.", "알림");
+    //  return;
+    //}
+
+    var sendModel = new ZSDIFPORTALSAPLE29SndModel("", "", this.corgid, "", "", this.spartValue, this.spdataValue, this.wadatIstDatefrom, this.wadatIstDateto, tdlnrVal, tdlnr2Val, "", []);
 
     var sendModelList: ZSDIFPORTALSAPLE29SndModel[] = [sendModel];
 
@@ -212,7 +232,7 @@ onPEDataLoaded(e: any) {
 
     this.gridDataSource = new ArrayStore(
       {
-        key: ["VBELN"],
+        key: ["VBELN", "POSNR", "VBELN", "VGPOS" ],
         data: this.orderList
       });
   }

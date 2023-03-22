@@ -10,6 +10,11 @@ export class SpData {
   name!: string;
 }
 
+export class SelectTdlData {
+  code!: string;
+  name!: string;
+}
+
 const cspart: CSpart[] = [
   {
     code: "20",
@@ -27,6 +32,17 @@ const spdata: SpData[] = [
   },
 ];
 
+const selectTdlData: SelectTdlData[] = [
+  {
+    code: '10',
+    name: '1차운송사'
+  },
+  {
+    code: '20',
+    name: '2차운송사'
+  },
+];
+
 
 @Injectable()
 export class Service {
@@ -36,6 +52,10 @@ export class Service {
   }
   getSpData(): SpData[] {
     return spdata;
+  }
+
+  getSelectTdlData(): SelectTdlData[] {
+    return selectTdlData;
   }
 
 }

@@ -33,6 +33,10 @@ import { ZSDIFPORTALSAPLE028SndModel, ZSDS6410Model } from '../../../shared/data
 import { ReportViewerComponent } from '../../../shared/components/reportviewer/report-viewer';
 import notify from 'devextreme/ui/notify';
 import { emitWarning } from 'process';
+import { CarList } from '../SHPC/app.service';
+import { ZMMT1321Join1320Model } from '../../../shared/dataModel/MLOGP/Zmmt1320Join1321';
+import { ZSDIFPORTALSAPLE028RcvModel, ZSDS6420Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Rcv';
+import { ZMMT1321Model } from '../../../shared/dataModel/MLOGP/Zmmt1321';
 
 
 
@@ -79,6 +83,8 @@ export class PGWIComponent {
   columnResizeMode: string = ThemeManager.columnResizeMode;
   //UI 데이터 로딩 패널
   loadingVisible: boolean = false;
+  //남우진흥 거래명세서 로딩 창
+  saveLoadingVisible: boolean = false;
 
   /* 폼 데이터 */
   //입고 저장
@@ -115,6 +121,12 @@ export class PGWIComponent {
   selectedItemKeys: any[] = [];
   selectedRowIndex = -1;
   selectGridData: any;
+
+  //주문선택키
+  selectedSOItemKeys: any[] = [];
+
+  CarNmList: CarList[] = [];
+
   /* 메인 화면 */
   //필터
   customOperations!: Array<any>;
@@ -147,7 +159,7 @@ export class PGWIComponent {
     //this._dataService = dataService;
     var now = new Date();
     this.runMonitoring();
-    this.startDate = formatDate(now.setDate(new Date().getDate() - 1), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(now.setDate(new Date().getDate() - 30), "yyyy-MM-dd", "en-US");
     this.nowDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
     this.now1Date = formatDate(new Date(), "yyyyMMdd", "en-US")
     var now = new Date();
@@ -187,6 +199,8 @@ export class PGWIComponent {
     this.inProgress = true;
     this.disable = true;
 
+    //차량데이터 가져오기
+    this.getCarNm();
 
     this.weightStartData.ZGW_ATGEW = 0;
     this.weightStartData.GEWEI = "KG";
@@ -284,16 +298,30 @@ export class PGWIComponent {
   public async subdataLoad() {
     this.subData = [];
     var now = new Date();
+    var nowDate = formatDate(new Date(), "yyyyMMdd", "en-US")
     //this.carDataValue ?? ""
     this.loadingVisible = true;
     var zsds6430: ZSDS6430Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", "", this.startDate, this.nowDate, "", "", "", "", "", "", this.carDataValue ?? "", "", "", zsds6430);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", "", new Date("0001-01-01"), new Date("0001-01-01"), "", "", "", "X", "", "", this.carDataValue ?? "", "", "30", zsds6430, this.startDate, this.nowDate);
     if (this.carDataValue == undefined || this.carDataValue == "" || this.carDataValue == null) {
       return;
     }
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
-    this.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C" && (item.ZSHIPSTATUS === "30" || item.ZSHIPSTATUS === "40"));
+    this.orderGridData = resultModel[0].IT_DATA;
+
+    var whereCondi = " AND B.ZSHIP_STATUS = '30'";
+
+    var imOrderList = await this.dataService.SelectModelData<ZMMT1321Join1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320CustomList",
+      [this.appConfig.mandt, this.appConfig.plant, this.carDataValue ?? "", whereCondi],
+      "", "A.VBELN, B.POSNR", QueryCacheType.None);
+
+    imOrderList.forEach(async (row: ZMMT1321Join1320Model) => {
+      this.orderGridData.push(new ZSDS6430Model(row.VBELN, row.POSNR == "" ? "000000" : row.POSNR, "", "", "", "", "", "", row.SC_R_DATE_R, row.IDNRK, row.MAKTX,
+        row.SC_R_MENGE, row.SC_L_MENGE, row.MEINS, "9999", row.SC_S_MENGE, row.SC_G_MENGE, row.SC_G_DATE, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "",
+        "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2, row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO,
+        row.SC_S_DATE, 0, "", "", "", "", "", "", "", "", row.BLAND_F_NM, "", "", row.BLAND_T_NM));
+    })
 
     this.loadingVisible = false;
 
@@ -377,6 +405,7 @@ export class PGWIComponent {
       var vbeln = "";
       var matnr = "";
       var lifnr = "";
+      var posnr = "";
       var zmms9900Model = new ZMMS9900Model("", "");
 
       var zmms0210Model: ZMMS0210Model[] = [];
@@ -397,6 +426,11 @@ export class PGWIComponent {
       if (selectedData.length > 0) {
         vbeln = selectedData[0].VBELN;
       }
+
+      if (selectedData.length > 0) {
+        posnr = selectedData[0].POSNR;
+      }
+
       //else {
       //  vbeln = carSelectedData[0].ZGW_DONO;
       //}
@@ -408,7 +442,7 @@ export class PGWIComponent {
       }
       zmms0210Model.push(new ZMMS0210Model("G", now, nowTime, thisObj.weightStartData.ZCARNO, thisObj.weightStartData.ZDRIVER, thisObj.weightStartData.ZGW_MATNR,
         thisObj.weightStartData.ZGW_MAKTX ?? "", thisObj.weightStartData.ZGW_LIFNR, thisObj.weightStartData.ZGW_NAME1 ?? "", thisObj.weightStartData.ZGW_ATGEW,
-        thisObj.weightStartData.GEWEI, thisObj.weightStartData.ZGW_PER1, thisObj.weightStartData.ZGW_PER2, vgbel, shipment, vbeln, matnr, lifnr, DIMModelStatus.Add));
+        thisObj.weightStartData.GEWEI, thisObj.weightStartData.ZGW_PER1, thisObj.weightStartData.ZGW_PER2, vgbel, shipment, vbeln, matnr, lifnr, posnr, DIMModelStatus.Add));
 
       var zmmfromgwgrirModel = new ZMMFROMGWGrirModel(zmms9900Model, zmms0210Model);
       var modelList: ZMMFROMGWGrirModel[] = [zmmfromgwgrirModel];
@@ -417,11 +451,12 @@ export class PGWIComponent {
       this.dataLoad(this.dataService, this);
       this.orderdataLoad(this.dataService, this);
       this.carDataLoad(this.dataService, this);
+      this.subdataLoad();
       return insertModel[0];
 
     }
     catch (error: any) {
-      alert(error, " 오류");
+      alert("저장이 실패했습니다.", " 오류");
       return null;
     }
 
@@ -432,6 +467,9 @@ export class PGWIComponent {
     this.dataLoad(this.dataService, this);
     this.orderdataLoad(this.dataService, this);
     this.carDataLoad(this.dataService, this);
+
+    if (this.carDataValue !== "")
+      this.subdataLoad();
 
     this.now = new Date();
     this.weightStartData.ZGW_GI_TIME = new Date();
@@ -476,6 +514,150 @@ export class PGWIComponent {
     setTimeout(() => { this.reportViewer.printReport("Discharge", params) });
   }
 
+  //남우진흥거래명세서 클릭
+  async printNamwooGI() {
+    this.saveLoadingVisible = true;
+    let selectData = this.maindataGrid.instance.getSelectedRowsData()[0];
+
+    if (selectData.length === 0) {
+      alert("라인을 선택해야합니다.", "알림");
+      return;
+    }
+
+    //var result = await this.datainsert(this);
+    //if (result === null)
+    //  return;
+    var sVBELN = selectData.ZGW_DONO;
+    var sVSTEL = "";
+    var sPOSNR = selectData.POSNR;
+    var imOrderList: ZMMT1321Join1320Model[] = []
+    if (selectData.ZGW_DONO.toString().substring(0, 2) !== "00")
+      sVSTEL = "9999";
+
+    if (selectData.ZGW_DONO === "") {
+      await alert("출고정보가 없는 계근정보입니다.", "알림");
+      this.saveLoadingVisible = false;
+      return;
+    }
+
+      //var realCarno = "";
+      //var realCarData = this.CarNmList.find(item => item.ZCARNO.includes(selectData.ZCARNO));
+      //if (realCarData === undefined)
+      //  realCarno = selectData.ZCARNO;
+      //else
+      //  realCarno = realCarData.ZCARNO;
+
+      //this.loadingVisible = true;
+      //var zsds6430: ZSDS6430Model[] = [];
+      //var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", "", new Date("0001-01-01"), new Date("0001-01-01"), "", "", "", "", "", "", realCarno, "", "", zsds6430, this.startDate, this.nowDate);
+      //var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
+      //var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
+      //if (resultModel[0].IT_DATA.length === 0) {
+
+      //  var whereCondi = "";
+
+      //  //일반주문 없을경우 임가공 정보 찾기
+      //  imOrderList = await this.dataService.SelectModelData<ZMMT1321Join1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320CustomList",
+      //    [this.appConfig.mandt, this.appConfig.plant, this.now1Date, realCarno, whereCondi],
+      //    "", "A.VBELN", QueryCacheType.None);
+
+      //  if (imOrderList.length === 0) {
+      //    await alert("선택한 차량에 해당하는 출고정보가 없습니다.", "알림");
+      //    this.loadingVisible = false;
+      //    return;
+      //  } else {
+      //    sVBELN = imOrderList[0].VBELN;
+      //    sPOSNR = imOrderList[0].POSNR;
+      //    sVSTEL = "9999";
+      //  }
+
+      //} else {
+      //  sVBELN = resultModel[0].IT_DATA[0].VBELN;
+      //  sVSTEL = resultModel[0].IT_DATA[0].VSTEL;
+      //  sPOSNR = "000010";
+      //}
+
+
+    /*this.saveLoadingVisible = false;*/
+
+    if (sVSTEL === "9999") {
+      var whereCondi = ` AND A.VBELN = '${selectData.ZGW_DONO}' AND B.POSNR = '${sPOSNR}' AND B.ZSHIP_STATUS = '30'`;
+      imOrderList = await this.dataService.SelectModelData<ZMMT1321Join1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320CustomList",
+        [this.appConfig.mandt, this.appConfig.plant, selectData.ZCARNO ?? "", whereCondi],
+        "", "A.VBELN, B.POSNR", QueryCacheType.None);
+
+      if (imOrderList.length > 0) {
+        sVBELN = imOrderList[0].VBELN;
+        sPOSNR = imOrderList[0].POSNR;
+
+        var zmmt1321List: ZMMT1321Model[] = [];
+        zmmt1321List.push(new ZMMT1321Model(this.appConfig.mandt, imOrderList[0].VBELN, imOrderList[0].POSNR, imOrderList[0].WERKS, imOrderList[0].LIFNR,
+          imOrderList[0].IDNRK, imOrderList[0].LGORT, imOrderList[0].BWART
+          , imOrderList[0].MEINS, imOrderList[0].SC_R_MENGE, imOrderList[0].SC_R_DATE_R, imOrderList[0].INCO1, imOrderList[0].TDLNR1, imOrderList[0].TDLNR2,
+          imOrderList[0].ZCARTYPE, imOrderList[0].ZCARNO, imOrderList[0].ZDRIVER, imOrderList[0].ZPHONE
+          , "40", imOrderList[0].ZSHIPMENT_NO, imOrderList[0].BLAND_F, imOrderList[0].BLAND_F_NM, imOrderList[0].BLAND_T, imOrderList[0].BLAND_T_NM,
+          imOrderList[0].SC_S_MENGE, imOrderList[0].SC_S_DATE ?? new Date("0001-01-01")
+          , selectData.ZGW_ATGEW / 1000, selectData.ZGW_DATE, "000000", imOrderList[0].ZPOST_RUN_MESSAGE, 0, new Date("0001-01-01"), "000000", "", imOrderList[0].MBLNR,
+          imOrderList[0].MJAHR, imOrderList[0].MBLNR_C, imOrderList[0].MJAHR_C
+          , imOrderList[0].WAERS, imOrderList[0].NETPR, imOrderList[0].DMBTR, imOrderList[0].BUKRS, imOrderList[0].BELNR, imOrderList[0].GJAHR,
+          imOrderList[0].BUDAT ?? new Date("0001-01-01"), imOrderList[0].UNIQUEID, imOrderList[0].ERNAM
+          , imOrderList[0].ERDAT, imOrderList[0].ERZET, this.appConfig.interfaceId, new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), "", "",
+          DIMModelStatus.Modify))
+
+        var rowCount = await this.dataService.ModifyModelData<ZMMT1321Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321ModelList", zmmt1321List);
+      }
+    } else {
+      var zsds6410: ZSDS6410Model[] = [];
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", "", "", new Date("0001-01-01"), new Date("0001-01-01"), sVBELN, "", "", "X", "", "", "", "", "30", zsds6410, new Date("0001-01-01"), new Date("0001-01-01"));
+      var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+      var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
+      if (resultModel[0].IT_DATA.length > 0) {
+        var zsds6420Model = new ZSDS6420Model(resultModel[0].IT_DATA[0].VBELN, resultModel[0].IT_DATA[0].POSNR, resultModel[0].IT_DATA[0].ZSEQUENCY,
+          resultModel[0].IT_DATA[0].VRKME, resultModel[0].IT_DATA[0].ZMENGE4,
+          selectData.ZGW_ATGEW / 1000, selectData.ZGW_DATE, resultModel[0].IT_DATA[0].Z3PARVW, resultModel[0].IT_DATA[0].Z4PARVW,
+          resultModel[0].IT_DATA[0].ZCARTYPE, resultModel[0].IT_DATA[0].ZCARNO, resultModel[0].IT_DATA[0].ZDRIVER, resultModel[0].IT_DATA[0].ZDRIVER1,
+          resultModel[0].IT_DATA[0].ZPHONE, resultModel[0].IT_DATA[0].ZPHONE1, resultModel[0].IT_DATA[0].ZVKAUS, resultModel[0].IT_DATA[0].ZUNLOAD, "40",
+          resultModel[0].IT_DATA[0].ZSHIPMENT_NO, resultModel[0].IT_DATA[0].ZSHIPMENT_DATE, resultModel[0].IT_DATA[0].ZPALLTP, resultModel[0].IT_DATA[0].ZPALLETQTY,
+          resultModel[0].IT_DATA[0].ZCONFIRM_CUT, resultModel[0].IT_DATA[0].ZTEXT, resultModel[0].IT_DATA[0].MTY, resultModel[0].IT_DATA[0].MSG);
+
+        var zsds6420List: ZSDS6420Model[] = [zsds6420Model];
+        var zsdModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsds6420List);
+        var zsdList: ZSDIFPORTALSAPLE028RcvModel[] = [zsdModel];
+
+
+        var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", zsdList, QueryCacheType.None);
+      }
+    }
+
+    this.saveLoadingVisible = false;
+
+    if (sVSTEL === "9999") {
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "mandt": this.appConfig.mandt,
+        "ivbeln": sVBELN,
+        "iposnr": sPOSNR
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction4", params) });
+    } else {
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "itddatFrom": selectData.ZGW_DATE,
+        "itddatTo": selectData.ZGW_DATE,
+        "ivbeln": sVBELN,
+        "mandt": this.appConfig.mandt,
+        "ivstel": "8888"
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction2", params) });
+    }
+
+    
+  }
+
   //계량증명서 클릭
   weighingCertificate() {
     let selectData = this.maindataGrid.instance.getSelectedRowsData()[0];
@@ -506,7 +688,8 @@ export class PGWIComponent {
         this.weightStartData.ZDRIVER = rowData.ZDRIVER;
         this.weightStartData.ZGW_MAKTX = rowData.ARKTX;
         this.weightStartData.ZGW_NAME1 = rowData.NAME1;
-
+        //주문선택 키 
+        this.selectedSOItemKeys = e.currentSelectedRowKeys;
       }
     }, 100);
 
@@ -660,5 +843,11 @@ export class PGWIComponent {
       this.weightStartData.GEWEI = e.value;
       return;
     });
+  }
+
+  //차량정보 찾기
+  async getCarNm() {
+    let chemCarSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.carDataCode);
+    this.CarNmList = chemCarSet?.tables["CODES"].getDataObject(CarList);
   }
 }

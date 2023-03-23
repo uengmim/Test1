@@ -73,6 +73,21 @@
         </dx-button>
       </div>
     </dxi-item>
+
+    <dxi-item location="after"
+              widget="dxButton"
+              horizontalAlignment="center"
+              locateInMenu="auto"
+              style="width: auto;
+            margin-right: 5px;">
+      <dx-button (onClick)="printNamwooGI()"
+                 [disabled]="!selectedItemKeys.length"
+                 [width]="180"
+                 style="margin-top:3px"
+                 text="남우진흥 거래명세서">
+      </dx-button>
+    </dxi-item>
+
     <dxi-item location="after"
               locateInMenu="auto"
               style="width: auto;
@@ -180,17 +195,23 @@
             <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
 
             <!--Data column-->
+            <dxi-column dataField="ZSHIPMENT_DATE"
+                        dataType="date"
+                        format="yyyy-MM-dd"
+                        caption="배차일자">
+            </dxi-column>
+
             <dxi-column dataField="ZCARNO"
                         caption="차량번호">
             </dxi-column>
             <dxi-column dataField="ZDRIVER"
                         caption="운전기사명">
             </dxi-column>
-            <dxi-column dataField="ARKTX"
-                        caption="자재명">
-            </dxi-column>
             <dxi-column dataField="NAME1"
                         caption="업체명">
+            </dxi-column>
+            <dxi-column dataField="ARKTX"
+                        caption="자재명">
             </dxi-column>
             <dxi-column dataField="ZPHONE"
                         caption="전화번호">
@@ -538,3 +559,12 @@
 </dx-popup>
 <report-viewer #reportViewer style="overflow:auto">
 </report-viewer>
+
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
+
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="saveLoadingVisible" [showIndicator]="true" [showPane]="true" message="차량에 맞는 주문정보를 찾는 중입니다."
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>

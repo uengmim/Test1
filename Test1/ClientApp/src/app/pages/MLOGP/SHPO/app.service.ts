@@ -16,16 +16,16 @@ const data2: Data2[] = [
     code: '1000',
     name: '비료'
   },
-
+  /*
   {
     code: '2000',
     name: '화학'
-  },
-
+  },*/
+  /*
   {
     code: '9999',
     name: '임가공(구성품)'
-  },
+  },*/
 ];
 
 export class Status {

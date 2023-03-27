@@ -367,13 +367,14 @@ export class SHPDComponent {
     let fixData = { I_ZSHIPSTATUS: "30" };
     
     var zsds6430: ZSDS6430Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", this.lgortValue, "", "30", this.startDate, this.endDate, "", "", "", "", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6430);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", this.lgortValue, "", "30", this.startDate, this.endDate, "", "", "", "X", "", "", "", "", fixData.I_ZSHIPSTATUS, zsds6430);
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
 
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
 
-    this.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");
+    /*this.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");*/
+    this.orderGridData = resultModel[0].IT_DATA;
 
     this.orderData = new ArrayStore(
       {
@@ -572,7 +573,7 @@ export class SHPDComponent {
         "Tddat": selectData.TDDAT
       };
 
-      setTimeout(() => { this.reportViewer.OpenReport("MeterTicket", params) });
+      setTimeout(() => { this.reportViewer.printReport("MeterTicket", params) });
     }
   }
 

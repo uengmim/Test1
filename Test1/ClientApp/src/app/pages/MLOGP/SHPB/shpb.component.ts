@@ -34,6 +34,9 @@ import { UtichulfModel } from '../../../shared/dataModel/ORACLE/UTICHULFProxy';
 import { TestInData } from '../../../shared/dataModel/MLOGP/TestInData';
 import { QmsInfResult } from '../../../shared/dataModel/QMSIF/QmsInfResult';
 import { TestData } from '../../../shared/dataModel/MLOGP/TestData';
+import { ZSDT7300Model } from '../../../shared/dataModel/MFSAP/Zsdt7300Proxy';
+import { TestDataList } from './app.service';
+import { MAKTEnModel } from '../../../shared/dataModel/MLOGP/MaktEn';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -211,7 +214,7 @@ export class SHPBComponent {
 
     //date
     var now = new Date();
-    this.startDate = formatDate(now.setDate(now.getDate() - 1), "yyyy-MM-dd", "en-US");
+    this.startDate = formatDate(now.setDate(now.getDate()), "yyyy-MM-dd", "en-US");
     this.endDate = formatDate(new Date(), "yyyy-MM-dd", "en-US")
     const that = this;
 
@@ -264,7 +267,8 @@ export class SHPBComponent {
   public async dataLoad() {
 
     var zsds6430: ZSDS6430Model[] = [];
-    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", "20", this.startDate, this.endDate, "", "", "", "C", "", "", "", "", "", zsds6430);
+    var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", "20", new Date("0001-01-01"), new Date("0001-01-01"), "", "", "", "C", "", "", "", "", "", zsds6430 , this.startDate, this.endDate);
+
 
     var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
 
@@ -381,11 +385,17 @@ export class SHPBComponent {
     }
     else {
 
+      var zsdt7300List: ZSDT7300Model[] = [];
+
       let selectData = this.orderGrid.instance.getSelectedRowsData()[0];
 
 
       let testInData = new TestInData(selectData.MATNR, selectData.ARKTX);
       let testDataStr = JSON.stringify(testInData);
+
+      let maktData = await this.dataService.SelectModelData<MAKTEnModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.MAKTEnList",
+        [this.appConfig.mandt, selectData.MATNR, "E"], "", "", QueryCacheType.None);
+
 
       let queryParam = new QueryParameter("testIn", QueryDataType.String, testDataStr, "", "", "", "");
 
@@ -394,11 +404,28 @@ export class SHPBComponent {
       var resultSet = await this.dataService.dbSelectToDataSet([TestResultQuery]);
       let result = resultSet.getDataObject("result", QmsInfResult);
       let resultT = resultSet.getDataObject("tData", TestData);
+      let resultS = resultSet.getDataObject("tData", TestDataList);
 
       if (resultT.length == 0) {
         alert(result[0].msg, "알림");
       } else {
 
+        var checkResult: ZSDT7300Model[] = [];
+        checkResult = await this.dataService.SelectModelData<ZSDT7300Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7300CustomList",
+          [this.appConfig.mandt, selectData.VBELN, formatDate(new Date(), "yyyyMMdd", "en-US")], "", "", QueryCacheType.None);
+
+        var count = 0;
+        if (checkResult.length === 0) {
+          for (var row of resultS) {
+            count = count + 1;
+            zsdt7300List.push(new ZSDT7300Model(this.appConfig.mandt, selectData.VBELN, new Date(), count.toString().padStart(2, "0"), selectData.KUNNR, selectData.MATNR,
+              selectData.ZMENGE3, selectData.VRKME, selectData.ZLIQORDER, row.testitem, "", row.spec ?? row.type, row.val, "", this.appConfig.interfaceId,
+              new Date(), formatDate(new Date(), "hh:mm:ss", "en-US"), this.appConfig.interfaceId, new Date(), formatDate(new Date(), "hh:mm:ss", "en-US"), DIMModelStatus.Add));
+          }
+
+          await this.dataService.ModifyModelData(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7300ModelList", zsdt7300List);
+        }
+        var realWei = selectData.Z_N_WEI_TOT - selectData.Z_N_WEI_EMP;
           let params: ParameterDictionary =
           {
             "partno": selectData.MATNR,
@@ -409,15 +436,16 @@ export class SHPBComponent {
             "col4": selectData.ARKTX,
             "col5": "남해 여수공장",
             "col6": "",
-            "col7": "",
-            "col8": selectData.ZMENGE4,
-            "col9" :selectData.VRKME
-          };
+            "col7": selectData.ZLIQORDER, // 검사번호가 모든 결과데이터에 붙어서 나옴... 똑같은 데이터일테니 가장 첫번째꺼 보내주기 LOT번호 출하지시번호로 대체
+            "col8": realWei.toString(),
+            "col9": selectData.VRKME,
+            "col10": maktData.length > 0 ? maktData[0].MAKTX : ""
+        };
 
-          setTimeout(() => { this.reportViewer.OpenReport("TestResult", params) });
-      
-        }
+        setTimeout(() => { this.reportViewer.printReport("TestResult", params) });
+     
       }
+    }
   }
 
   //운송사 변경 이벤트

@@ -3,12 +3,12 @@
   <dxi-item location="before">
     <div *dxTemplate>
       <div style="float: left; margin-left: 10px;">
-        <dx-date-box [(value)]="startDate" label="운송계획일(From)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="startDate" label="출고일(From)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
       <div style="float: left; margin-left: 10px;">
       </div>
       <div style="float: left; margin-left: 10px;">
-        <dx-date-box [(value)]="endDate" label="운송계획일(to)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        <dx-date-box [(value)]="endDate" label="출고일(to)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
     </div>
   </dxi-item>
@@ -75,11 +75,21 @@
   <dxi-column dataField="VBELN"
               caption="납품문서번호">
   </dxi-column>
-  <dxi-column dataField="TDDAT"
-              caption="운송계획일"
+  <dxi-column dataField="WADAT_IST"
+              caption="출고전기일"
               dataType="date"
+              sortOrder="desc"
+              [sortIndex]="0"
               format="yyyy-MM-dd">
   </dxi-column>
+
+  <dxi-column dataField="ZENDTIME"
+              [visible]="true"
+              sortOrder="desc"
+              [sortIndex]="1"
+              caption="종료시간">
+  </dxi-column>
+
   <dxi-column dataField="ZCARNO"
               caption="차량번호">
   </dxi-column>
@@ -147,12 +157,12 @@
   <dxi-column dataField="VGBEL"
               caption="주문번호">
   </dxi-column>
-  <dxi-column dataField="WADAT_IST"
-              caption="출고전기일"
+
+  <dxi-column dataField="TDDAT"
+              caption="운송계획일"
               dataType="date"
               format="yyyy-MM-dd">
   </dxi-column>
-
 
 
   <dxi-column dataField="CITY"
@@ -162,6 +172,8 @@
   <dxi-column dataField="MATNR"
               caption="자재번호">
   </dxi-column>
+
+
 
 </dx-data-grid>
 

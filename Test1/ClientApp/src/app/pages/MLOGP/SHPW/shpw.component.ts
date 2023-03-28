@@ -32,6 +32,7 @@ import { ZMMGOODSMVTCommonModel, ZMMS3130Model } from '../../../shared/dataModel
 import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
 import { ChangeDetectorRef } from '@angular/core';
 import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
+import { ZMMT1321Join1320Model } from '../../../shared/dataModel/MLOGP/Zmmt1320Join1321';
 //필터
 const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
@@ -167,7 +168,7 @@ export class SHPWComponent {
   orderGridData: ZSDS6410Model[] = [];
 
   //임가공 원데이터
-  imOrderList: ZMMT1320Model[] = [];
+  imOrderList: ZMMT1321Join1320Model[] = [];
 
   //납품총수량-배차량
   possible!: number;
@@ -252,7 +253,7 @@ export class SHPWComponent {
     //  this.empId = "0000102960";
 
     this.vsCode = appConfig.tableCode("출하지점");
-    this.lgCode = appConfig.tableCode("비료창고");
+    this.lgCode = appConfig.tableCode("전체창고");
    /* this.maraCode = appConfig.tableCode("제품구분");*/
     this.dd07tCode = appConfig.tableCode("RFC_하차정보");
     this.dd07tCarCode = appConfig.tableCode("RFC_화물차종");
@@ -342,6 +343,46 @@ export class SHPWComponent {
           alert(`배차일자는 필수값입니다.`, "알림");
           return;
         }
+        if (this.addFormData.ZMENGE3 === null || this.addFormData.ZMENGE3 === undefined || this.addFormData.ZMENGE3 <= 0) {
+          alert(`출고수량은 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.Z3PARVW === null || this.addFormData.Z3PARVW === undefined || this.addFormData.Z3PARVW === "") {
+          alert(`1차운송사는 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZSHIPMENT_NO === null || this.addFormData.ZSHIPMENT_NO === undefined || this.addFormData.ZSHIPMENT_NO === "") {
+          alert(`배차번호는 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZPALLTP === null || this.addFormData.ZPALLTP === undefined || this.addFormData.ZPALLTP === "") {
+          alert(`파레트유형은 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZUNLOAD === null || this.addFormData.ZUNLOAD === undefined || this.addFormData.ZUNLOAD === "") {
+          await alert(`하차정보는 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZVKAUS === null || this.addFormData.ZVKAUS === undefined || this.addFormData.ZVKAUS === "") {
+          await alert(`용도는 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZCARTYPE === null || this.addFormData.ZCARTYPE === undefined || this.addFormData.ZCARTYPE === "") {
+          await alert(`화물차종은 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZCARNO === null || this.addFormData.ZCARNO === undefined || this.addFormData.ZCARNO === "") {
+          await alert(`차량번호는 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZDRIVER === null || this.addFormData.ZDRIVER === undefined || this.addFormData.ZDRIVER === "") {
+          await alert(`운전기사명은 필수값입니다.`, "알림");
+          return;
+        }
+        if (this.addFormData.ZPHONE === null || this.addFormData.ZPHONE === undefined || this.addFormData.ZPHONE === "") {
+          await alert(`전화번호는 필수값입니다.`, "알림");
+          return;
+        }
         if (await confirm("출고처리 하시겠습니까?", "알림")) {
           var result = await this.release();
 
@@ -356,12 +397,21 @@ export class SHPWComponent {
           }
           else if (result.EV_TYPE === "S") {
 
-            alert("출고처리 완료", "알림");
+            var resultMessage = "";
+            for (var row of result.T_DATA) {
+              if (row.ZSAPMESSAGE !== "")
+                resultMessage = resultMessage.concat(row.ZSAPMESSAGE, "</br>");
+            }
 
-            this.popupVisible = false;
-            this.popupVisibleIm = false;
-            this.TeansactionPrint(this);
-            await this.dataLoad(this);
+            if (resultMessage === "") {
+              await alert("출고처리 완료", "알림"); this.popupVisible = false;
+              this.popupVisibleIm = false;
+              this.TeansactionPrint(this);
+              await this.dataLoad(this);
+            }
+            else {
+              await alert(resultMessage, "오류");
+            }
 
           }
         }
@@ -501,9 +551,16 @@ export class SHPWComponent {
       var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
       thisObj.orderGridData = resultModel[0].IT_DATA;
 
+      for (var row of thisObj.orderGridData) {
+        if (row.ZUNLOAD === "10")
+          row.ZUNLOADT = "기본";
+        else if (row.ZUNLOAD === "20")
+          row.ZUNLOADT = "분산"
+      }
+
       /*thisObj.orderGridData = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C");*/
     } else {
-
+      /*
       var whereCondi = " AND ( ( A.MBLNR = '' AND A.MBLNR_C = '' ) OR ( A.MBLNR <> '' AND A.MBLNR_C <> '' ) )"
 
       thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
@@ -515,6 +572,7 @@ export class SHPWComponent {
           row.MEINS, "9999", row.SC_L_MENGE, 0, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
           row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", "", "", "", "", ""));
       })
+      */
     }
 
     this.orderData = new ArrayStore(
@@ -566,7 +624,7 @@ export class SHPWComponent {
         //오픈 시 오류는 테이블에 메시지 저장 
         /*errorMSG = checkError[0].MESSAGE;*/
       }
-
+      /*
       //임가공 CBO업데이트
       this.orderGrid.instance.getSelectedRowsData().forEach(async (array: ZSDS6410Model) => {
         var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
@@ -594,6 +652,7 @@ export class SHPWComponent {
           zmmt1320List.push(getData);
         }
       });
+      */
       rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
 
       /*if (rowCount > 0) {*/
@@ -659,6 +718,7 @@ export class SHPWComponent {
       this.addFormData = model1;
       this.zunloadValue = selectData[0].ZUNLOAD;
       this.zpalValue = selectData[0].ZPALLTP;
+      this.zcarValue = selectData[0].ZCARTYPE;
       this.vkausValue = selectData[0].ZVKAUS;
       /*this.zcarValue = selectData[0].ZCARTYPE;*/
       this.tdlnrValue = selectData[0].Z4PARVW

@@ -59,6 +59,77 @@ export class OilDepot {
   S_END!: string;
 }
 
+export class CarList {
+  ZCARNO!: string;
+  ZDERIVER1!: string;
+  ZPHONE1!: string;
+  ZCARTYPE1!: string;
+  ZRFID!: string;
+  ZCARTON!: number;
+  ZWEIGHT1!: number;
+  LIFNR!: string;
+  ZOWNERNAME!: string;
+}
+
+export class CalculChem {
+  MATNR!: string;
+  TYPE!: string;
+  VAL!: number;
+}
+
+const calculChem: CalculChem[] = [
+  {
+    MATNR: "B010030",
+    TYPE: "API",
+    VAL: 0
+  },
+  {
+    MATNR: "B010040",
+    TYPE: "API",
+    VAL: 0
+  },
+  {
+    MATNR: "B010050",
+    TYPE: "VAL",
+    VAL: 1
+  },
+  {
+    MATNR: "B010060",
+    TYPE: "VAL",
+    VAL: 1
+  },
+  {
+    MATNR: "B010080",
+    TYPE: "VAL",
+    VAL: 0.35
+  },
+  {
+    MATNR: "B010080",
+    TYPE: "VAL",
+    VAL: 0.35
+  },
+  {
+    MATNR: "B010090",
+    TYPE: "VAL",
+    VAL: 0.25
+  },
+  {
+    MATNR: "B010100",
+    TYPE: "VAL",
+    VAL: 0.29
+  },
+  {
+    MATNR: "B010110",
+    TYPE: "VAL",
+    VAL: 0.28
+  },
+  {
+    MATNR: "B010120",
+    TYPE: "VAL",
+    VAL: 0.25
+  },
+]
+
 @Injectable()
 export class Service {
   getCarSeq(): CarSeq[] {
@@ -67,5 +138,9 @@ export class Service {
 
   getCSpart(): CSpart[] {
     return cspart;
+  }
+
+  getCalculChem(): CalculChem[] {
+    return calculChem;
   }
 }

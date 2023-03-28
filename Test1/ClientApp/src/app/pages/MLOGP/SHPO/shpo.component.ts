@@ -305,7 +305,7 @@ export class SHPOComponent {
 
     }
     else {
-      
+      /*
       //대기상태
       thisObj.imOrderList40 = await thisObj.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
         [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), "40", ""],
@@ -336,6 +336,7 @@ export class SHPOComponent {
           row.STATUS_TEXT = "출고확정 대기";
         }
       });
+      */
     }
 
     this.orderData = new ArrayStore(

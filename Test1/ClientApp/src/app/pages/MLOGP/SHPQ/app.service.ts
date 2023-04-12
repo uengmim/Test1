@@ -19,9 +19,12 @@ const data2: Data2[] = [
 
   {
     code: '2000',
-    name: '화학'
+    name: '고체화학'
   },
-
+  {
+    code: '4000',
+    name: '액상화학'
+  },
   {
     code: '9999',
     name: '임가공(구성품)'

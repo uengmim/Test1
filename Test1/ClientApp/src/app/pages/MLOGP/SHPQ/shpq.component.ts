@@ -32,6 +32,20 @@ import { async } from 'rxjs';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZMMGOODSMVTCommonModel, ZMMS3130Model } from '../../../shared/dataModel/OWHP/ZmmGoodsmvtCommonProxy';
 import { deepCopy } from '../../../shared/imate/utility/object-copy';
+import { ZMMT1321Join1320Model } from '../../../shared/dataModel/MLOGP/Zmmt1320Join1321';
+import { ZMMT1321Model } from '../../../shared/dataModel/MLOGP/Zmmt1321';
+import { ZMMT1321GroupByModel } from '../../../shared/dataModel/OWHP/Zmmt1321GroupByProxy';
+import { ZMMT3050Model } from '../../../shared/dataModel/MLOGP/Zmmt3050';
+import { DomainTableModel } from '../../../shared/dataModel/MLOGP/DomainTable';
+import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
+import { LFA1Model } from '../../../shared/dataModel/MLOGP/Lfa1CustomProxy';
+
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
+
+
+
+
 //필터
 const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
@@ -47,6 +61,8 @@ const getOrderDay = function (rowData: any): number {
 export class SHPQComponent {
   @ViewChild(DxDataGridComponent, { static: false }) dataGrid!: DxDataGridComponent;
   @ViewChild('orderGrid', { static: false }) orderGrid!: DxDataGridComponent;
+  @ViewChild('weightGrid', { static: false }) weightGrid!: DxDataGridComponent;
+
   @ViewChild(DxFormComponent, { static: false }) dxForm!: DxFormComponent;
   @ViewChild(DxPopupComponent, { static: false }) dxPop!: DxPopupComponent;
   @ViewChild('vsEntery', { static: false }) vsEntery!: CommonPossibleEntryComponent;
@@ -54,6 +70,7 @@ export class SHPQComponent {
   @ViewChild('maraEntery', { static: false }) maraEntery!: CommonPossibleEntryComponent;
   @ViewChild('dd07tEntery', { static: false }) dd07tEntery!: CommonPossibleEntryComponent;
   @ViewChild('dd07tCarEntery', { static: false }) dd07tCarEntery!: CommonPossibleEntryComponent;
+  @ViewChild('dd07tCarModiEntery', { static: false }) dd07tCarModiEntery!: CommonPossibleEntryComponent;
   @ViewChild('tvlvEntery', { static: false }) tvlvEntery!: CommonPossibleEntryComponent;
   @ViewChild('zpalEntery', { static: false }) zpalEntery!: CommonPossibleEntryComponent;
   @ViewChild('sort', { static: false }) sort!: DxSelectBoxComponent;
@@ -61,6 +78,7 @@ export class SHPQComponent {
   @ViewChild('tdlnrEntery1', { static: false }) tdlnrEntery1!: CommonPossibleEntryComponent;
   @ViewChild('zcarnoCodeEntery', { static: false }) zcarnoCodeEntery!: CommonPossibleEntryComponent;
   @ViewChild('zcarnoModiCodeEntery', { static: false }) zcarnoModiCodeEntery!: CommonPossibleEntryComponent;
+  @ViewChild('carnoModiCodeEntery', { static: false }) carnoModiCodeEntery!: CommonPossibleEntryComponent;
   @ViewChild('z4parvwCodeEntery', { static: false }) z4parvwCodeEntery!: CommonPossibleEntryComponent;
   @ViewChild('reportViewer', { static: false }) reportViewer!: ReportViewerComponent;
   @ViewChild('matnrCodeDynamic', { static: false }) matnrCodeDynamic!: CommonPossibleEntryComponent;
@@ -132,6 +150,7 @@ export class SHPQComponent {
   zpalValue!: string | null;
   //화물차종
   zcarValue!: string | null;
+  zcarInfoValue!: string | null;
   //화물차종
   imzcarValue!: string | null;
 
@@ -149,6 +168,7 @@ export class SHPQComponent {
 
   //차량번호(수정)
   zcarnoModiValue!: string | null;
+  zcarnoInfoModiValue!: string | null;
   //차량번호(수정)
   imzcarnoModiValue!: string | null;
 
@@ -163,6 +183,9 @@ export class SHPQComponent {
   loadingVisible: boolean = false;
   loadingVisible2: boolean = false;
   saveButtonOptions: any;
+  excelButtonOptions: any;
+  popSaveButtonOptions: any;
+  popCloseButtonOptions: any;
   //셀렉트박스
   data2!: Data2[];
   status!: Status[];
@@ -171,7 +194,11 @@ export class SHPQComponent {
   //조회컬럼조절
   isColVisible: boolean = true;
 
+  firstPop: boolean = true;
+  firstTypePop: boolean = true;
+
   isDisableField: boolean = false;
+  popupCarSetupVisible: boolean = false;
   modify: boolean = true;
   modify2: boolean = false;
   selectStatus: string = "30";
@@ -192,9 +219,16 @@ export class SHPQComponent {
   //정보
   orderData: any;
   orderGridData: ZSDS6410Model[] = [];
+  popCarSetData: any; // 배차수정 form데이터
 
   //임가공 원데이터
-  imOrderList: ZMMT1320Model[] = [];
+  imOrderList: ZMMT1321Join1320Model[] = [];
+
+  zmmt1320List: ZMMT1320Model[] = [];
+
+
+  //계근정보 데이터소스
+  weightData: any;
 
   //납품총수량-배차량
   possible!: number;
@@ -221,9 +255,22 @@ export class SHPQComponent {
   //상세 추가 버튼
   addDetailButtonOptions: any;
 
+  //계근팝업
+  popupWeightVisible = false;
+
+  //계근정보 버튼
+  getWeightOptions: any;
+  //계근등록 버튼
+  selectWeightOptions: any;
+  //계근팝업닫기 버튼
+  closeWeightOptions: any;
+  //계근정보조회버튼 활성화구분
+  isWeightDisabled = true;
+
   //편집 취소 버튼
   cancelEditButtonOptions: any;
   loadPanelOption: any;
+  popCancelButtonOptions: any;
   //detail 편집 모드 설정
   startEditAction = 'click';
   selectTextOnEditStart = true;
@@ -250,6 +297,11 @@ export class SHPQComponent {
   //_dataService: ImateDataService;
 
   checkVal: boolean = true;
+
+  palModel: DomainTableModel[] = [];
+  unloadModel: DomainTableModel[] = [];
+  lgortModel: T001lModel[] = [];
+  tdlnrModel: LFA1Model[] = [];
 
   vorgid: string = "";
   corgid: string = "";
@@ -328,6 +380,11 @@ export class SHPQComponent {
     this.imzcarnoModiValue = "";
     this.imzcarValue = "";
 
+    //배차등록 팝업 초기화
+    this.popCarSetData = { ZMENGE4: 0, ZCARTYPE: "", ZCARNO: "", ZDRIVER: "", ZPHONE: "", ZSHIPMENT_DATE: this.endDate, ZDRIVER1: "", ZPHONE1: "", ZSHIPMENT_NO: "" }
+
+    this.getCodeNm();
+
     //date
     var now = new Date();
     this.startDate = formatDate(now.setDate(now.getDate() - 1), "yyyy-MM-dd", "en-US");
@@ -370,15 +427,21 @@ export class SHPQComponent {
         if (this.selectData2 === "9999") {
           this.isColVisible = false;
           this.isDisableField = true;
-          this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("임가공제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+          this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("임가공제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명");
+          this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량번호");
+          this.carnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량번호");
         } else if (this.selectData2 === "1000") {
           this.isColVisible = true;
           this.isDisableField = false;
           this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("비료친환경제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+          this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량번호");
+          this.carnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("비료차량"), "ZCARNO", "%ZCARNO%", "차량번호");
         } else {
           this.isColVisible = true;
           this.isDisableField = false;
           this.matnrCodeDynamic.ChangeCodeInfo(this.appConfig.tableCode("화학제품명"), "MATNR", "%MAKTX%(%MATNR%)", "제품명")
+          this.zcarnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("화학차량"), "ZCARNO", "%ZCARNO%", "차량번호");
+          this.carnoModiCodeEntery.ChangeCodeInfo(this.appConfig.tableCode("화학차량"), "ZCARNO", "%ZCARNO%", "차량번호");
         }
 
 
@@ -391,6 +454,77 @@ export class SHPQComponent {
         this.dataGrid.instance.deleteRow(this.selectedRowIndex);
         this.dataGrid.instance.deselectAll();
       },
+    };
+
+    //수정 저장
+    this.popSaveButtonOptions = {
+      text: "등록",
+      onClick: async () => {
+
+        if (this.popCarSetData.ZCARTYPE === "" || this.popCarSetData.ZCARNO === "" || this.popCarSetData.ZDRIVER === "") {
+          alert("차량정보 및 운전기사정보를 입력해야합니다.", "알림");
+          return;
+        }
+
+        if (this.popCarSetData.ZSHIPMENT_DATE === null) {
+          alert("상차일자를 입력해야합니다.", "알림");
+          return;
+        }
+
+
+        if (await confirm("배차정보를 수정하시겠습니까 ? ", "알림")) {
+          this.loadingVisible = true;
+          var result = await this.setCarInfo();
+
+
+
+          var reMSG = "";
+          result.T_DATA.forEach(async (row: ZSDS6420Model) => {
+            if (row.MTY === "E")
+              reMSG = row.MSG;
+          });
+
+          if (reMSG !== "") {
+            alert(`실패했습니다.<br/> SAP오류 메세지: ${reMSG}`, "알림");
+
+            this.loadingVisible = false;
+            return;
+          }
+          if ((result.E_MTY === "S")) {
+            alert("등록완료되었습니다.", "알림");
+            /*            this.orderData.push(this.popupData);*/
+
+            this.printCar(this);
+            this.popupCarSetupVisible = false;
+
+            setTimeout(() => {
+              this.dataLoad(this);
+
+              this.loadingVisible = false;
+            }, 300);
+
+
+          } else {
+            alert(result.E_MSG, "알림");
+            this.loadingVisible = false;
+            this.popupCarSetupVisible = false;
+          }
+        }
+      },
+    };
+
+    //수정팝업취소버튼
+    this.popCloseButtonOptions = {
+      text: '닫기',
+      onClick(e: any) {
+        that.popupCarSetupVisible = false;
+      },
+    };
+    this.excelButtonOptions = {
+      text: "엑셀다운로드",
+      onClick: async (e: any) => {
+        this.onExportingOrderData(e);
+      }
     };
     //저장(출고확정대기)
     //this.saveButtonOptions = {
@@ -423,7 +557,7 @@ export class SHPQComponent {
       text: "저장",
       onClick: async () => {
         //비료
-        if (this.selectData2 === "1000") {
+        if (this.selectData2 !== "9999") {
           if (this.addFormData.ZMENGE3 === null || this.addFormData.ZMENGE3 === undefined || this.addFormData.ZMENGE3 === "") {
             alert(`출고수량은 필수값입니다.`, "알림");
             return;
@@ -614,7 +748,7 @@ export class SHPQComponent {
             else {
               alert("저장이 완료되었습니다.", "알림")
               //this.print(this);
-              //this.TeansactionPrint(this);
+              this.TeansactionPrint(this);
               this.dataLoad(this);
             }
           }
@@ -638,6 +772,56 @@ export class SHPQComponent {
       },
     };
 
+    //배차취소
+    this.popCancelButtonOptions =
+    {
+      text: '배차취소',
+      onClick: async () => {
+        if (await confirm("선택된 배차를 취소하시겠습니까 ? ", "알림")) {
+          this.zmmt1320List = [];
+
+          var selectData: ZSDS6410Model = this.orderGrid.instance.getSelectedRowsData()[0];
+          var getData = this.imOrderList.find(item => item.VBELN === selectData.VBELN);
+
+          var zmmt1321List: ZMMT1321Model[] = [new ZMMT1321Model(this.appConfig.mandt, getData.VBELN, getData.POSNR, getData.WERKS, getData.LIFNR, getData.IDNRK, getData.LGORT, getData.BWART
+            , getData.MEINS, getData.SC_R_MENGE, getData.SC_R_DATE_R, getData.INCO1, getData.TDLNR1, getData.TDLNR2, "", "", "", ""
+            , getData.TDLNR2 == "" ? "10" : "20", "", getData.BLAND_F, getData.BLAND_F_NM, getData.BLAND_T, getData.BLAND_T_NM, 0, new Date("0001-01-01")
+            , 0, new Date("0001-01-01"), "000000", getData.ZPOST_RUN_MESSAGE, 0, new Date("0001-01-01"), "000000", "", getData.MBLNR, getData.MJAHR, getData.MBLNR_C, getData.MJAHR_C
+            , getData.WAERS, getData.NETPR, getData.DMBTR, getData.BUKRS, getData.BELNR, getData.GJAHR, getData.BUDAT ?? new Date("0001-01-01"), getData.UNIQUEID, getData.ERNAM
+            , getData.ERDAT, getData.ERZET, this.appConfig.interfaceId
+            , new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), "", "", DIMModelStatus.Modify)];
+
+
+          var row21Count = await this.dataService.ModifyModelData<ZMMT1321Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321ModelList", zmmt1321List);
+
+
+          var zmmt1320Model = await this.dataService.SelectModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", [],
+            `MANDT = '${this.appConfig.mandt}' AND VBELN = '${getData.VBELN}'`, "VBELN", QueryCacheType.None);
+
+          var sumModel = await this.dataService.SelectModelData<ZMMT1321GroupByModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321GroupByList", [this.appConfig.mandt, getData.VBELN, "", "SC_S_MENGE"],
+            "", "", QueryCacheType.None);
+          zmmt1320Model[0].ModelStatus = DIMModelStatus.Modify;
+          zmmt1320Model[0].SC_S_MENGE_T = sumModel[0].SUM_VALUE;
+          zmmt1320Model[0].ZSHIP_STATUS = "20";
+          zmmt1320Model[0].SC_G_DATE = new Date("0001-01-01");
+          zmmt1320Model[0].SC_R_DATE_C = zmmt1320Model[0].SC_R_DATE_C ?? new Date("0001-01-01");
+          zmmt1320Model[0].SC_L_DATE = zmmt1320Model[0].SC_L_DATE ?? new Date("0001-01-01");
+          zmmt1320Model[0].AENAM = this.appConfig.interfaceId;
+          zmmt1320Model[0].AEDAT = new Date();
+          zmmt1320Model[0].AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
+            new Date().getSeconds().toString().padStart(2, '0');
+
+          this.zmmt1320List.push(zmmt1320Model[0]);
+
+          var row20Count = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", this.zmmt1320List);
+
+          alert("취소가 완료되었습니다.", "알림");
+          this.popupCarSetupVisible = false;
+          this.dataLoad(this);
+        }
+      },
+    };
+
     //배차등록취소버튼
     this.closeButtonOptions = {
       text: '닫기',
@@ -655,7 +839,77 @@ export class SHPQComponent {
     //  },
     //};
 
+    this.getWeightOptions = {
+      text: '계근목록조회',
+      onClick: async (e: any) => {
+        this.loadingVisible = true;
+        await this.getWeightList(this);
+        this.loadingVisible = false;
+      }
+    };
 
+    //계근정보 등록
+    this.selectWeightOptions = {
+      text: '등록',
+      onClick: async (e: any) => {
+        await this.selectWeightData(this);
+      }
+    };
+
+    //계근팝업닫기
+    this.closeWeightOptions = {
+      text: '닫기',
+      onClick: async (e: any) => {
+        this.popupWeightVisible = false;
+      }
+    };
+  }
+
+  //계근정보 가져오기
+  public async getWeightList(thisObj: SHPQComponent) {
+    var selectData = this.orderGrid.instance.getSelectedRowsData();
+    var dval = new Date(selectData[0].WADAT_IST);
+    var sdate = formatDate(dval.setDate(dval.getDate() - 7), "yyyyMMdd", "en-US")
+    var date = formatDate(selectData[0].WADAT_IST, "yyyyMMdd", "en-US")
+    var resultModel = await thisObj.dataService.SelectModelData<ZMMT3050Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3050ModelList", [],
+      `MANDT = '${thisObj.appConfig.mandt}' AND ZGW_GUBUN = 'G' AND ZGW_DATE >= '${sdate}' AND ZGW_DATE <= '${date}' AND ZCARNO = '${selectData[0].ZCARNO}' AND ZGW_GRIR_GUBUN = 'GI'`, "",
+      QueryCacheType.None);
+
+    if (resultModel.length === 0) {
+      await alert("해당차량에 맞는 계근정보가 없습니다.", "알림");
+      return;
+    }
+
+    if (resultModel.length === 1) {
+      if (await confirm("계근정보를 1건 찾았습니다.</br>적용하시겠습니까?", "알림")) {
+        thisObj.addFormData.ZMENGE3 = resultModel[0].ZGW_ATGEW / 1000;
+      }
+    }
+
+    if (resultModel.length > 1) {
+      this.weightData = new ArrayStore(
+        {
+          key: ["ZGW_GUBUN", "ZGW_DATE", "ZGW_SEQ"],
+          data: resultModel
+        });
+
+      thisObj.popupWeightVisible = true;
+    }
+  }
+
+  //계근정보 선택등록 이벤트
+  public async selectWeightData(thisObj: SHPQComponent) {
+    var selectData = this.weightGrid.instance.getSelectedRowsData();
+    if (selectData.length === 0) {
+      await alert("라인을 선택 후 등록하세요.", "알림");
+      return;
+    }
+
+    if (await confirm("선택한 계근정보를 적용하시겠습니까?", "알림")) {
+      thisObj.addFormData.ZMENGE3 = selectData[0].ZGW_ATGEW / 1000;
+
+      thisObj.popupWeightVisible = false;
+    }
   }
 
   public async dateLoad(dataService: ImateDataService) {
@@ -698,6 +952,10 @@ export class SHPQComponent {
     /*    this.loadingVisible = true;*/
     setTimeout(async () => {
       this.selectData2 = e.value;
+      if (e.value !== "1000")
+        this.isWeightDisabled = false;
+      else
+        this.isWeightDisabled = true;
       //if (this.selectData2 === "9999") {
       //  this.isColVisible = false;
       //  this.isDisableField = true;
@@ -721,7 +979,50 @@ export class SHPQComponent {
   onStatusValueChanged(e: any) {
     this.selectStatus = e.value;
 
+  }
 
+  public async setCarInfo() {
+
+    var checkVSTEL = this.orderGrid.instance.getSelectedRowsData().find(item => item.VSTEL === "9999")
+    var selectData: ZSDS6410Model = this.orderGrid.instance.getSelectedRowsData()[0];
+
+
+    var insertMod: ZSDIFPORTALSAPLE028RcvModel = new ZSDIFPORTALSAPLE028RcvModel("", "", []);
+    var insertModel: ZSDIFPORTALSAPLE028RcvModel[] = [insertMod]
+
+    //포장재 or 임가공 로직 분기
+    if (checkVSTEL === undefined) {
+      var zsd6420list: ZSDS6420Model[] = [new ZSDS6420Model(selectData.VBELN, selectData.POSNR, selectData.ZSEQUENCY, selectData.VRKME, selectData.ZMENGE4,
+        0, new Date(), selectData.Z3PARVW, selectData.Z4PARVW, this.popCarSetData.ZCARTYPE,
+        this.popCarSetData.ZCARNO, this.popCarSetData.ZDRIVER, this.popCarSetData.ZDRIVER1, this.popCarSetData.ZPHONE, this.popCarSetData.ZPHONE1,
+        selectData.ZVKAUS, selectData.ZUNLOAD, "30", selectData.ZSHIPMENT_NO, this.popCarSetData.ZSHIPMENT_DATE ?? selectData.ZSHIPMENT_DATE,
+        selectData.ZPALLTP, selectData.ZPALLETQTY, selectData.ZCONFIRM_CUT, selectData.ZTEXT, "", "")];
+
+
+      var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
+      var createModelList: ZSDIFPORTALSAPLE028RcvModel[] = [createModel];
+
+      insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
+
+    } else {
+      this.zmmt1320List = [];
+
+      var getData = this.imOrderList.find(item => item.VBELN === selectData.VBELN);
+
+      var zmmt1321List: ZMMT1321Model[] = [new ZMMT1321Model(this.appConfig.mandt, getData.VBELN, getData.POSNR, getData.WERKS, getData.LIFNR, getData.IDNRK, getData.LGORT, getData.BWART
+        , getData.MEINS, getData.SC_R_MENGE, getData.SC_R_DATE_R, getData.INCO1, getData.TDLNR1, getData.TDLNR2, this.popCarSetData.ZCARTYPE, this.popCarSetData.ZCARNO
+        , this.popCarSetData.ZDRIVER, this.popCarSetData.ZPHONE, getData.ZSHIP_STATUS, getData.ZSHIPMENT_NO, getData.BLAND_F, getData.BLAND_F_NM, getData.BLAND_T
+        , getData.BLAND_T_NM, getData.SC_S_MENGE, this.popCarSetData.ZSHIPMENT_DATE ?? selectData.ZSHIPMENT_DATE, 0, new Date("0001-01-01"), "000000", getData.ZPOST_RUN_MESSAGE
+        , 0, new Date("0001-01-01"), "000000", "", getData.MBLNR, getData.MJAHR, getData.MBLNR_C, getData.MJAHR_C, getData.WAERS, getData.NETPR, getData.DMBTR
+        , getData.BUKRS, getData.BELNR, getData.GJAHR, getData.BUDAT ?? new Date("0001-01-01"), getData.UNIQUEID, getData.ERNAM, getData.ERDAT, getData.ERZET, this.appConfig.interfaceId
+        , new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), "", "", DIMModelStatus.Modify)];
+
+
+      var row21Count = await this.dataService.ModifyModelData<ZMMT1321Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321ModelList", zmmt1321List);
+
+      insertModel[0].E_MTY = "S";
+    }
+    return insertModel[0];
   }
 
 
@@ -733,7 +1034,20 @@ export class SHPQComponent {
     thisObj.orderGridData = [];
 
     //포장재 or 임가공
-    if (thisObj.selectData2 !== "9999") {
+    if (thisObj.selectData2 === "1000") {
+      this.orderGrid.instance.columnOption("ZCARNO", "visibleIndex", 1);
+      this.orderGrid.instance.columnOption("ZDRIVER", "visibleIndex", 2);
+      this.orderGrid.instance.columnOption("ZPHONE", "visibleIndex", 3);
+      this.orderGrid.instance.columnOption("ARKTX", "visibleIndex", 4);
+      this.orderGrid.instance.columnOption("ZMENGE3", "visibleIndex", 5);
+      this.orderGrid.instance.columnOption("ZLGOBE", "visibleIndex", 6);
+      this.orderGrid.instance.columnOption("ZPALLTPT", "visibleIndex", 7);
+      this.orderGrid.instance.columnOption("ZPALLETQTY", "visibleIndex", 8);
+      this.orderGrid.instance.columnOption("VRKME", "visibleIndex", 9);
+      this.orderGrid.instance.columnOption("POSNR", "visibleIndex", 19);
+      this.orderGrid.instance.columnOption("POSNR", "caption", "납품품번");
+      this.orderGrid.instance.columnOption("ZMENGE1", "caption", "주문수량");
+      this.orderGrid.instance.columnOption("ZMENGE2", "caption", "납품수량");
       var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", "3000", "", this.startDate, this.endDate, "", "", this.selectData2, "X", "", "", "", "",
         this.selectStatus, zsds6410);
 
@@ -745,7 +1059,15 @@ export class SHPQComponent {
       /*resultModel[0].IT_DATA = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C" );*/
       resultModel[0].IT_DATA.forEach(async (row: ZSDS6410Model) => {
         row.ZMENGE3 = row.ZMENGE2;
+        row.ZLGOBE = this.lgortModel.find(item => item.LGORT === row.ZLGORT)?.LGOBE;
+        row.Z4PARVWTXT = thisObj.tdlnrModel.find(item => item.LIFNR === row.Z4PARVW)?.NAME1;
+        var selPal = this.palModel.find(item => item.DOMVALUE_L === row.ZPALLTP);
+        if (selPal !== undefined)
+          row.ZPALLTPT = selPal.DDTEXT;
 
+        var selUnload = this.unloadModel.find(item => item.DOMVALUE_L === row.ZUNLOAD);
+        if (selUnload !== undefined)
+          row.ZUNLOADT = selUnload.DDTEXT;
         thisObj.orderGridData.push(row);
       });
 
@@ -760,28 +1082,113 @@ export class SHPQComponent {
       /*resultModel[0].IT_DATA = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C" );*/
       resultModel[0].IT_DATA.forEach(async (row: ZSDS6410Model) => {
         row.ZMENGE3 = row.ZMENGE2;
+        row.ZLGOBE = this.lgortModel.find(item => item.LGORT === row.ZLGORT)?.LGOBE;
+        row.Z4PARVWTXT = thisObj.tdlnrModel.find(item => item.LIFNR === row.Z4PARVW)?.NAME1;
+        var selPal = this.palModel.find(item => item.DOMVALUE_L === row.ZPALLTP);
+        if (selPal !== undefined)
+          row.ZPALLTPT = selPal.DDTEXT;
+
+        var selUnload = this.unloadModel.find(item => item.DOMVALUE_L === row.ZUNLOAD);
+        if (selUnload !== undefined)
+          row.ZUNLOADT = selUnload.DDTEXT;
 
         thisObj.orderGridData.push(row);
       });
 
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", "5001", "", this.startDate, this.endDate, "", "", this.selectData2, "X", "", "", "", "",
+        this.selectStatus, zsds6410);
 
+      var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+
+      var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
+      /*thisObj.orderGridData = resultModel[0].IT_DATA;*/
+
+      /*resultModel[0].IT_DATA = resultModel[0].IT_DATA.filter(item => item.WBSTK !== "C" );*/
+      resultModel[0].IT_DATA.forEach(async (row: ZSDS6410Model) => {
+        row.ZMENGE3 = row.ZMENGE2;
+        row.ZLGOBE = this.lgortModel.find(item => item.LGORT === row.ZLGORT)?.LGOBE;
+        row.Z4PARVWTXT = thisObj.tdlnrModel.find(item => item.LIFNR === row.Z4PARVW)?.NAME1;
+        var selPal = this.palModel.find(item => item.DOMVALUE_L === row.ZPALLTP);
+        if (selPal !== undefined)
+          row.ZPALLTPT = selPal.DDTEXT;
+
+        var selUnload = this.unloadModel.find(item => item.DOMVALUE_L === row.ZUNLOAD);
+        if (selUnload !== undefined)
+          row.ZUNLOADT = selUnload.DDTEXT;
+
+        thisObj.orderGridData.push(row);
+      });
+    } else if (thisObj.selectData2 === "2000" || thisObj.selectData2 === "4000") {
+
+      this.orderGrid.instance.columnOption("TDDAT", "visibleIndex", 1);
+      this.orderGrid.instance.columnOption("NAME1", "visibleIndex", 2);
+      this.orderGrid.instance.columnOption("ARKTX", "visibleIndex", 3);
+      this.orderGrid.instance.columnOption("ZMENGE1", "visibleIndex", 4);
+      this.orderGrid.instance.columnOption("ZMENGE3", "visibleIndex", 5);
+      this.orderGrid.instance.columnOption("ZPALLTPT", "visibleIndex", 6);
+      this.orderGrid.instance.columnOption("ZPALLETQTY", "visibleIndex", 7);
+      this.orderGrid.instance.columnOption("Z4PARVWTXT", "visibleIndex", 8);
+      this.orderGrid.instance.columnOption("ZCARNO", "visibleIndex", 9);
+      this.orderGrid.instance.columnOption("ZDRIVER", "visibleIndex", 10);
+      this.orderGrid.instance.columnOption("ZPHONE", "visibleIndex", 11);
+      this.orderGrid.instance.columnOption("WADAT_IST", "visibleIndex", 12);
+      this.orderGrid.instance.columnOption("POSNR", "visibleIndex", 19);
+      this.orderGrid.instance.columnOption("POSNR", "caption", "납품품번");
+      this.orderGrid.instance.columnOption("ZMENGE1", "caption", "주문수량");
+      this.orderGrid.instance.columnOption("ZMENGE2", "caption", "납품수량");
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", "", "", this.startDate, this.endDate, "", "", this.selectData2, "X", "", "", "", "",
+        this.selectStatus, zsds6410);
+
+      var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+
+      var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028SndModelList", model, QueryCacheType.None);
+      /*thisObj.orderGridData = resultModel[0].IT_DATA;*/
+
+      resultModel[0].IT_DATA = resultModel[0].IT_DATA.filter(item => item.SPART === "20");
+      resultModel[0].IT_DATA.forEach(async (row: ZSDS6410Model) => {
+        row.ZMENGE3 = row.ZMENGE2;
+        row.Z4PARVWTXT = thisObj.tdlnrModel.find(item => item.LIFNR === row.Z4PARVW)?.NAME1;
+        var selPal = this.palModel.find(item => item.DOMVALUE_L === row.ZPALLTP);
+        if (selPal !== undefined)
+          row.ZPALLTPT = selPal.DDTEXT;
+
+        var selUnload = this.unloadModel.find(item => item.DOMVALUE_L === row.ZUNLOAD);
+        if (selUnload !== undefined)
+          row.ZUNLOADT = selUnload.DDTEXT;
+
+        thisObj.orderGridData.push(row);
+      });
     }
     else {
-      //배차상태가 50이 생기면 없애도 됨
-      var whereCondi = " AND ( ( A.MBLNR = '' AND A.MBLNR_C = '' ) OR ( A.MBLNR <> '' AND A.MBLNR_C <> '' ) )"
 
-      thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
-        [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), this.selectStatus, whereCondi],
+      this.orderGrid.instance.columnOption("TDDAT", "visibleIndex", 1);
+      this.orderGrid.instance.columnOption("NAME1", "visibleIndex", 2);
+      this.orderGrid.instance.columnOption("ARKTX", "visibleIndex", 3);
+      this.orderGrid.instance.columnOption("ZMENGE1", "visibleIndex", 4);
+      this.orderGrid.instance.columnOption("ZMENGE3", "visibleIndex", 5);
+      this.orderGrid.instance.columnOption("Z4PARVWTXT", "visibleIndex", 6);
+      this.orderGrid.instance.columnOption("ZCARNO", "visibleIndex", 7);
+      this.orderGrid.instance.columnOption("ZDRIVER", "visibleIndex", 8);
+      this.orderGrid.instance.columnOption("ZPHONE", "visibleIndex", 9);
+      this.orderGrid.instance.columnOption("WADAT_IST", "visibleIndex", 10);
+      this.orderGrid.instance.columnOption("POSNR", "visibleIndex", 2);
+      this.orderGrid.instance.columnOption("POSNR", "caption", "분할순번");
+      this.orderGrid.instance.columnOption("ZMENGE1", "caption", "출하요청량");
+      this.orderGrid.instance.columnOption("ZMENGE2", "caption", "출하지시량");
+
+      //배차상태가 50이 생기면 없애도 됨
+      var whereCondi = "";
+
+      thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1321Join1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320List",
+        [thisObj.appConfig.mandt, "1000", `'20', '30', '40'`, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), "", "", `'${this.selectStatus}'`, whereCondi],
         "", "A.VBELN", QueryCacheType.None);
 
-      thisObj.imOrderList.forEach(async (row: ZMMT1320Model) => {
-        thisObj.orderGridData.push(new ZSDS6410Model(row.VBELN, "", "", "", "", "", "", "", row.SC_R_DATE, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
-          row.MEINS, "9999", row.SC_L_MENGE, 0, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
-          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", "", "","", "", ""));
+      thisObj.imOrderList.forEach(async (row: ZMMT1321Join1320Model) => {
+        thisObj.orderGridData.push(new ZSDS6410Model(row.VBELN, row.POSNR == "" ? "000000" : row.POSNR, "", "", "", "", "", "", row.SC_R_DATE_R, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
+          row.MEINS, "9999", row.SC_S_MENGE, row.SC_G_MENGE, row.SC_G_DATE, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
+          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_S_DATE, "", "", 0, "", "", "", "", "", "", row.BLAND_F_NM,
+          thisObj.tdlnrModel.find(item => item.LIFNR === row.TDLNR1)?.NAME1, thisObj.tdlnrModel.find(item => item.LIFNR === row.TDLNR2)?.NAME1, row.BLAND_T_NM));
       })
-      thisObj.orderGridData.forEach(async (row: ZSDS6410Model) => {
-        row.ZMENGE3 = row.ZMENGE2;
-      });
     }
 
     this.orderData = new ArrayStore(
@@ -796,18 +1203,25 @@ export class SHPQComponent {
 
   async releaseButton(e: any) {
     if (this.selectData2 !== "9999") {
+      var confirmText = "";
       var selectData = this.orderGrid.instance.getSelectedRowsData();
       if (selectData.length === 0) {
         alert("라인을 선택해야합니다.", "알림");
         return;
       }
+
+      if (this.selectData2 !== "1000")
+        confirmText = "출고처리 하시겠습니까?";
+      else
+        confirmText = "출고수량과 계근정보가 다를 수 있습니다.</br>출고처리 하시겠습니까?";
+
       this.checkVal = true;
       await this.checkData(selectData);
       if (!this.checkVal)
         return;
 
       setTimeout(async () => {
-        if (await confirm("출고처리 하시겠습니까?", "알림")) {
+        if (await confirm(confirmText, "알림")) {
 
           this.loadingVisible = true;
           var result = await this.release();
@@ -817,10 +1231,21 @@ export class SHPQComponent {
             alert(`출고처리 실패,\n\n오류 메세지: ${result.EV_MESSAGE}`, "알림");
             return;
           }
-          else if (result.EV_TYPE === "S") {
-            alert("출고처리 완료", "알림"); this.popupVisible = false;
-            this.popupVisibleIm = false;
-            this.dataLoad(this);
+          else {
+            var resultMessage = "";
+            for (var row of result.T_DATA) {
+              if (row.ZSAPMESSAGE !== "")
+                resultMessage = resultMessage.concat(row.ZSAPMESSAGE, "</br>");
+            }
+
+            if (resultMessage === "") {
+              alert("출고처리 완료", "알림"); this.popupVisible = false;
+              this.popupVisibleIm = false;
+              this.dataLoad(this);
+            }
+            else {
+              await alert(resultMessage, "오류");
+            }
           }
         }
       }, 500);
@@ -835,12 +1260,13 @@ export class SHPQComponent {
 
 
       setTimeout(async () => {
-        if (await confirm("출고처리 하시겠습니까?", "알림")) {
+        if (await confirm("출고수량과 계근정보가 다를 수 있습니다.</br>출고처리 하시겠습니까?", "알림")) {
 
           this.loadingVisible = true;
           var result = await this.release();
           if (result.EV_TYPE === "E") {
             alert(`출고처리 실패,\n\n오류 메세지: ${result.EV_MESSAGE}`, "알림");
+            this.loadingVisible = false;
             return;
           }
           else if (result.EV_TYPE === "S") {
@@ -940,7 +1366,8 @@ export class SHPQComponent {
 
     var data = this.addFormData
     var selectData = this.orderGrid.instance.getSelectedRowsData();
-    var zmmt1320List: ZMMT1320Model[] = [];
+    this.zmmt1320List = [];
+    var zmmt1321List: ZMMT1321Model[] = [];
     var rowCount: number = 0;
     var rcv = new ZSDIFPORTALSAPGIRcvModel("", "", []);
     var insertModel: ZSDIFPORTALSAPGIRcvModel[] = [rcv]
@@ -965,7 +1392,7 @@ export class SHPQComponent {
       var model: ZSDIFPORTALSAPGIRcvModel[] = [rcv];
 
       insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPGIRcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPGIRcvModelList", model, QueryCacheType.None);
-      debugger;
+
     } else { //임가공
       ////바피 모델
       //var zmms3130List = [new ZMMS3130Model(data.MATNR, data.LGORT, "", "", data.KUNNR, data.ZMENGE3, selectData[0].VRKME,
@@ -991,49 +1418,70 @@ export class SHPQComponent {
 
       //임가공 저장데이터 생성
       for (var array of this.orderGrid.instance.getSelectedRowsData() as ZSDS6410Model[]) {
-        var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
+        var getData = this.imOrderList.find(item => item.VBELN === array.VBELN && item.POSNR === array.POSNR)
         if (getData !== undefined) {
-          getData.ModelStatus = DIMModelStatus.Modify;
-          getData.ZCARNO = array.ZCARNO;
-          getData.ZCARTYPE = array.ZCARTYPE;
-          getData.ZDRIVER = array.ZDRIVER;
-          getData.ZPHONE = array.ZPHONE;
-          //getData.SC_G_DATE = this.addFormData.WADAT_IST;
-          //getData.SC_G_MENGE = this.addFormData.ZMENGE3;
-          getData.SC_G_DATE = array.WADAT_IST;
-          getData.SC_G_MENGE = array.ZMENGE3;
-          getData.SC_G_TIME = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
-            new Date().getSeconds().toString().padStart(2, '0');
-
-
-          getData.ZSHIP_STATUS = "50";
 
           //바피 모델
           var zmms3130List = [new ZMMS3130Model(array.MATNR, array.LGORT, "", "", array.KUNNR, array.ZMENGE3, array.VRKME,
             "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 0)];
 
-          var zmmGoodsMVT = [new ZMMGOODSMVTCommonModel([], "", "", "", "", array.WADAT_IST, "04", "", "541",
+          var zmmGoodsMVT = [new ZMMGOODSMVTCommonModel([], "", "", "", "X", array.WADAT_IST, "04", "", "541",
             this.appConfig.plant, array.WADAT_IST, "", zmms3130List)];
 
           //바피 실행
           var runGoodsMVT = await this.dataService.RefcCallUsingModel<ZMMGOODSMVTCommonModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMGOODSMVTCommonModelList", zmmGoodsMVT, QueryCacheType.None);
 
-          //임가공 바피실행 세트
-          getData.MBLNR = runGoodsMVT[0].E_MBLNR;
-          getData.MJAHR = runGoodsMVT[0].E_MJAHR;
-          getData.ZEILE = runGoodsMVT[0].E_ZEILE;
-          getData.ZPOST_RUN_MESSAGE = runGoodsMVT[0].ET_RESULT[0].MESSAGE;
+          // 바피 오류체크
+          var errorMSG = "";
+          var checkError = runGoodsMVT[0].ET_RESULT.filter(item => item.TYPE === "E");
+          if (checkError.length > 0) {
+            insertModel[0].EV_TYPE = "E";
+            insertModel[0].EV_MESSAGE = checkError[0].MESSAGE;
+          }
+          var goodMsg = runGoodsMVT[0].ET_RESULT.length > 0 ? runGoodsMVT[0].ET_RESULT[0].MESSAGE : "";
 
-          getData.SC_A_DATE = new Date("0001-01-01");
-          getData.AENAM = this.appConfig.interfaceId;
-          getData.AEDAT = new Date();
-          getData.AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
-            new Date().getSeconds().toString().padStart(2, '0');
-          zmmt1320List.push(getData);
+          zmmt1321List.push(new ZMMT1321Model(this.appConfig.mandt, getData.VBELN, getData.POSNR, getData.WERKS, getData.LIFNR, getData.IDNRK, getData.LGORT, getData.BWART
+            , getData.MEINS, getData.SC_R_MENGE, getData.SC_R_DATE_R, getData.INCO1, getData.TDLNR1, getData.TDLNR2, getData.ZCARTYPE, getData.ZCARNO, getData.ZDRIVER, getData.ZPHONE
+            , "50", getData.ZSHIPMENT_NO, getData.BLAND_F, getData.BLAND_F_NM, getData.BLAND_T, getData.BLAND_T_NM, getData.SC_S_MENGE, getData.SC_S_DATE ?? new Date("0001-01-01")
+            , getData.SC_G_MENGE, getData.SC_G_DATE, "000000", goodMsg, 0, new Date("0001-01-01"), "000000", "", insertModel[0].EV_TYPE == "E" ? "" : runGoodsMVT[0].E_MBLNR, insertModel[0].EV_TYPE == "E" ? "0000" : runGoodsMVT[0].E_MJAHR
+            , getData.MBLNR_C, getData.MJAHR_C, getData.WAERS, getData.NETPR, getData.DMBTR, getData.BUKRS, getData.BELNR, getData.GJAHR, getData.BUDAT ?? new Date("0001-01-01"), getData.UNIQUEID, getData.ERNAM
+            , getData.ERDAT, getData.ERZET, this.appConfig.interfaceId, new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), "", "", DIMModelStatus.Modify));
+
+
         }
       }
 
-      rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
+      var update21 = await this.dataService.ModifyModelData<ZMMT1321Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321ModelList", zmmt1321List);
+
+      for (var array21 of zmmt1321List as ZMMT1321Model[]) {
+        var sameData = this.zmmt1320List.find(item => item.VBELN === array21.VBELN);
+        if (sameData === undefined) {
+          var zmmt1320Model = await this.dataService.SelectModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", [],
+            `MANDT = '${this.appConfig.mandt}' AND VBELN = '${getData.VBELN}'`, "VBELN", QueryCacheType.None);
+
+          var sumModel = await this.dataService.SelectModelData<ZMMT1321GroupByModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321GroupByList", [this.appConfig.mandt, array21.VBELN, "", "SC_G_MENGE"],
+            "", "", QueryCacheType.None);
+
+          var scDate = zmmt1320Model[0].SC_G_DATE ?? new Date("0001-01-01");
+          if (formatDate(scDate, "yyyyMMdd", "en-US") < formatDate(array21.SC_G_DATE, "yyyyMMdd", "en-US")) {
+            scDate = array21.SC_G_DATE;
+          }
+          zmmt1320Model[0].ModelStatus = DIMModelStatus.Modify;
+          zmmt1320Model[0].SC_G_MENGE_T = sumModel[0].SUM_VALUE;
+          zmmt1320Model[0].ZSHIP_STATUS = sumModel[0].ZSHIP_STATUS == "10" ? "20" : sumModel[0].ZSHIP_STATUS;
+          zmmt1320Model[0].SC_G_DATE = scDate;
+          zmmt1320Model[0].SC_R_DATE_C = zmmt1320Model[0].SC_R_DATE_C ?? new Date("0001-01-01");
+          zmmt1320Model[0].SC_L_DATE = zmmt1320Model[0].SC_L_DATE ?? new Date("0001-01-01");
+          zmmt1320Model[0].AENAM = this.appConfig.interfaceId;
+          zmmt1320Model[0].AEDAT = new Date();
+          zmmt1320Model[0].AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
+            new Date().getSeconds().toString().padStart(2, '0');
+
+          this.zmmt1320List.push(zmmt1320Model[0]);
+        }
+      }
+
+      this.imUpdate();
 
 
       /*if (rowCount > 0) {*/
@@ -1118,6 +1566,9 @@ export class SHPQComponent {
         this.tdlnrValue = selectData[0].Z4PARVW
         this.zcarnoModiValue = selectData[0].ZCARNO;
         this.zcarValue = selectData[0].ZCARTYPE;
+        this.zpalValue = selectData[0].ZPALLTP;
+        this.zunloadValue = selectData[0].ZUNLOAD;
+        this.vkausValue = selectData[0].ZVKAUS;
         this.popupVisible = true;
       }
       else {
@@ -1251,14 +1702,49 @@ export class SHPQComponent {
     }, 500);
   }
 
+  //수정 차량번호 선택이벤트
+  onZcarno2CodeValueChanged(e: any) {
+    setTimeout(() => {
+      if (this.firstPop) {
+        this.popCarSetData.ZCARNO = e.selectedValue;
+
+        this.firstPop = !this.firstPop;
+      } else {
+
+        if (this.selectData2 === "1000") {
+          this.zcarInfoValue = e.selectedItem.ZCARTYPE;
+          this.popCarSetData.ZCARNO = e.selectedValue;
+          this.popCarSetData.ZDRIVER = e.selectedItem.ZDRIVER;
+          this.popCarSetData.ZPHONE = e.selectedItem.ZPHONE;
+          this.popCarSetData.ZCARTYPE = e.selectedItem.ZCARTYPE;
+        } else {
+          this.zcarInfoValue = e.selectedItem.ZCARTYPE1;
+          this.popCarSetData.ZCARNO = e.selectedValue;
+          this.popCarSetData.ZDRIVER = e.selectedItem.ZDERIVER1;
+          this.popCarSetData.ZPHONE = e.selectedItem.ZPHONE1;
+          this.popCarSetData.ZCARTYPE = e.selectedItem.ZCARTYPE1;
+
+        }
+      }
+    }, 200);
+  }
+  //화물차종
+  onZcartypeCode2ValueChanged(e: any) {
+    setTimeout(() => {
+      this.popCarSetData.ZCARTYPE = e.selectedValue;
+    });
+  }
+
   public clearEntery() {
     //팝업화면에 사용되는 엔트리 초기화
     this.dd07tEntery.ClearSelectedValue();
     this.tvlvEntery.ClearSelectedValue();
     this.zpalEntery.ClearSelectedValue();
     this.dd07tCarEntery.ClearSelectedValue();
+    this.dd07tCarModiEntery.ClearSelectedValue();
     /*this.zcarnoCodeEntery.ClearSelectedValue();*/
     this.zcarnoModiCodeEntery.ClearSelectedValue();
+    this.carnoModiCodeEntery.ClearSelectedValue();
     /*    this.z4parvwCodeEntery.ClearSelectedValue();*/
     this.tdlnrEntery.ClearSelectedValue();
     this.tdlnrEntery1.ClearSelectedValue();
@@ -1295,18 +1781,32 @@ export class SHPQComponent {
       alert("라인을 선택해야합니다.", "알림");
       return;
     }
-    let params: ParameterDictionary =
-    {
-      "dbTitle": this.appConfig.dbTitle,
-      "itddatFrom": selectData[0].TDDAT,
-      "itddatTo": selectData[0].TDDAT,
-      "ivbeln": selectData[0].VBELN,
-      /*      "vbelnvl": "",*/
-      "mandt": this.appConfig.mandt,
-      "ivstel": selectData[0].VSTEL
-    };
+    if (selectData[0].VSTEL !== "9999") {
 
-    setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction2", params) });
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "itddatFrom": selectData[0].TDDAT,
+        "itddatTo": selectData[0].TDDAT,
+        "ivbeln": selectData[0].VBELN,
+        /*      "vbelnvl": "",*/
+        "mandt": this.appConfig.mandt,
+        "ivstel": selectData[0].VSTEL
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction2", params) });
+    } else {
+      //임가공 명세서
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "mandt": this.appConfig.mandt,
+        "ivbeln": selectData[0].VBELN,
+        "iposnr": selectData[0].POSNR
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction4", params) });
+    }
   }
 
   //수정저장 rfc
@@ -1333,44 +1833,24 @@ export class SHPQComponent {
 
     var data = this.addFormData
     var selectData = this.orderGrid.instance.getSelectedRowsData();
-    var zmmt1320List: ZMMT1320Model[] = [];
-    var rowCount: number = 0;
+    var zmmt1321List: ZMMT1321Model[] = [];
     var rcv = new ZSDIFPORTALSAPLE028RcvModel("", "", []);
     var insertModel: ZSDIFPORTALSAPLE028RcvModel[] = [rcv]
-    var zsdsList: ZSDS6400Model[] = [];
 
     //임가공 CBO업데이트
-    this.orderGrid.instance.getSelectedRowsData().forEach(async (array: ZSDS6410Model) => {
-      var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
+    selectData.forEach(async (array: ZSDS6410Model) => {
+      var getData = this.imOrderList.find(item => item.VBELN === array.VBELN && item.POSNR === array.POSNR)
       if (getData !== undefined) {
-        getData.ModelStatus = DIMModelStatus.Modify;
-        getData.ZCARNO = data.ZCARNO;
-        getData.ZCARTYPE = data.ZCARTYPE;
-        getData.ZDRIVER = data.ZDRIVER;
-        getData.ZPHONE = data.ZPHONE;
-        //getData.SC_G_DATE = this.addFormData.WADAT_IST;
-        //getData.SC_G_MENGE = this.addFormData.ZMENGE3;
-        getData.SC_G_DATE = data.WADAT_IST;
-        getData.SC_G_MENGE = data.ZMENGE3;
-        getData.SC_G_TIME = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
-          new Date().getSeconds().toString().padStart(2, '0');
-
-        getData.SC_R_DATE_C = new Date();
-        getData.ZSHIP_STATUS = "40";
-
-
-
-
-        getData.SC_A_DATE = new Date("0001-01-01");
-        getData.AENAM = this.appConfig.interfaceId;
-        getData.AEDAT = new Date();
-        getData.AEZET = new Date().getHours().toString().padStart(2, '0') + ":" + new Date().getMinutes().toString().padStart(2, '0') + ":" +
-          new Date().getSeconds().toString().padStart(2, '0');
-
-        zmmt1320List.push(getData);
+        zmmt1321List.push(new ZMMT1321Model(this.appConfig.mandt, getData.VBELN, getData.POSNR, getData.WERKS, getData.LIFNR, getData.IDNRK, getData.LGORT, getData.BWART
+          , getData.MEINS, getData.SC_R_MENGE, getData.SC_R_DATE_R, getData.INCO1, getData.TDLNR1, getData.TDLNR2, data.ZCARTYPE, data.ZCARNO, data.ZDRIVER, data.ZPHONE
+          , "40", getData.ZSHIPMENT_NO, getData.BLAND_F, getData.BLAND_F_NM, getData.BLAND_T, getData.BLAND_T_NM, getData.SC_S_MENGE, data.ZSHIPMENT_DATE ?? new Date("0001-01-01")
+          , data.ZMENGE3, data.WADAT_IST, "000000", getData.ZPOST_RUN_MESSAGE, 0, new Date("0001-01-01"), "000000", "", getData.MBLNR, getData.MJAHR, getData.MBLNR_C, getData.MJAHR_C
+          , getData.WAERS, getData.NETPR, getData.DMBTR, getData.BUKRS, getData.BELNR, getData.GJAHR, getData.BUDAT ?? new Date("0001-01-01"), getData.UNIQUEID, getData.ERNAM
+          , getData.ERDAT, getData.ERZET, this.appConfig.interfaceId, new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), "", "", DIMModelStatus.Modify));
       }
     });
-    rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
+
+    var rowCount = await this.dataService.ModifyModelData<ZMMT1321Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321ModelList", zmmt1321List);
 
     /*if (rowCount > 0) {*/
     insertModel[0].E_MTY = "S";
@@ -1390,5 +1870,138 @@ export class SHPQComponent {
       alert("취소 완료", "알림");
       this.dataLoad(this);
     }
+  }
+  async imUpdate() {
+    var row20Count = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", this.zmmt1320List);
+  }
+
+  async getCodeNm() {
+
+    let palDataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.zpalCode);
+    let unloadDataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.dd07tCode);
+    let lgortdataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgCode);
+    let tdlnrSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.tdlnrCode);
+
+    this.palModel = palDataSet?.tables["CODES"].getDataObject(DomainTableModel);
+    this.unloadModel = unloadDataSet?.tables["CODES"].getDataObject(DomainTableModel);
+    this.lgortModel = lgortdataSet?.tables["CODES"].getDataObject(T001lModel);
+    this.tdlnrModel = tdlnrSet?.tables["CODES"].getDataObject(LFA1Model);
+
+
+  }
+  async carInfoChange(e: any) {
+    this.loadingVisible = true;
+    this.firstPop = true;
+    this.firstTypePop = true;
+    this.clearEntery();
+
+    setTimeout(async () => {
+
+      this.popCarSetData = [];
+
+      var selectData: ZSDS6410Model[] = this.orderGrid.instance.getSelectedRowsData();
+      if (selectData.length === 0) {
+        alert("라인을 선택한 후 실행하세요.", "알림");
+        this.loadingVisible = false;
+        return;
+      }
+      if (selectData.length > 1) {
+        alert("단일 라인 선택 후 실행하세요.", "알림");
+        this.loadingVisible = false;
+        return;
+      }
+
+
+      this.popCarSetData = {
+        ZCARTYPE: selectData[0].ZCARTYPE, ZCARNO: selectData[0].ZCARNO, ZDRIVER: selectData[0].ZDRIVER,
+        ZPHONE: selectData[0].ZPHONE, ZSHIPMENT_DATE: new Date(), ZDRIVER1: selectData[0].ZDRIVER1, ZPHONE1: selectData[0].ZPHONE1, ZSHIPMENT_NO: selectData[0].ZSHIPMENT_NO
+      };
+
+      this.zcarnoInfoModiValue = this.popCarSetData.ZCARNO;
+      this.zcarInfoValue = this.popCarSetData.ZCARTYPE;
+
+
+      this.popupCarSetupVisible = true;
+      this.loadingVisible = false;
+
+      //if (selectData.length > 1)
+      //
+    }, 2000);
+  }
+
+  //화물 위수탁증
+  async printCar(e: any) {
+    var selectData = this.orderGrid.instance.getSelectedRowsData();
+    if (selectData.length === 0) {
+      alert("라인을 선택해야합니다.", "알림");
+      return;
+    }
+
+    if (selectData[0].VSTEL !== "9999") {
+      var checkLgort = false;
+      for (var row of selectData as ZSDS6410Model[]) {
+        if (row.LGORT === "3000" || row.LGORT === "3200")
+          checkLgort = true;
+      }
+
+      if (!checkLgort)
+        return;
+
+
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "itddatFrom": selectData[0].TDDAT,
+        "itddatTo": selectData[0].TDDAT,
+        "ivbeln": selectData[0].VBELN,
+        "ivstel": selectData[0].VSTEL,
+        "mandt": this.appConfig.mandt
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("SHPQReport", params) });
+    }
+    else {
+      //임가공 명세서
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "mandt": this.appConfig.mandt,
+        "ivbeln": selectData[0].VBELN,
+        "iposnr": selectData[0].POSNR
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("SHPQReport2", params) });
+    }
+  }
+
+
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e: any) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: this.orderGrid.instance,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `출하진행현황_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    /*e.cancel = true;*/
   }
 }

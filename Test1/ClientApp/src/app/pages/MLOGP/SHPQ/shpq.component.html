@@ -82,6 +82,13 @@
     </div>
   </dxi-item>-->
 
+  <dxi-item location="after" [visible]="modify">
+    <!--[visible]="certificate"-->
+    <div *dxTemplate>
+      <dx-button text="배차수정" (onClick)="carInfoChange($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
   <dxi-item location="after">
     <!--[visible]="certificate"-->
     <div *dxTemplate>
@@ -180,7 +187,8 @@
               (onContentReady)="contentReady($event)"
               [allowColumnReordering]="true"
               columnResizingMode="widget"
-              [allowColumnResizing]="true">
+              [allowColumnResizing]="true"
+              (onExporting)="onExportingOrderData($event)">
   <!--(onRowDblClick)="orderDBClick($event)"-->
   <!--Datagrid Option-->
   <dxo-paging [pageSize]="10"></dxo-paging>
@@ -204,11 +212,7 @@
   <dxi-column dataField="VBELN"
               caption="납품문서번호">
   </dxi-column>
-  <dxi-column dataField="TDDAT"
-              caption="운송계획일"
-              dataType="date"
-              format="yyyy-MM-dd">
-  </dxi-column>
+
   <dxi-column dataField="ZCARNO"
               caption="차량번호">
   </dxi-column>
@@ -221,44 +225,84 @@
   <dxi-column dataField="ARKTX"
               caption="자재명">
   </dxi-column>
-  <dxi-column dataField="ZMENGE1"
-              caption="주문수량">
+
+  <dxi-column dataField="ZMENGE3"
+              dataType="number"
+              format="#,###.###"
+              caption="출고수량">
   </dxi-column>
-  <dxi-column dataField="ZMENGE2"
-              caption="납품수량">
+  <dxi-column dataField="ZLGOBE"
+              caption="도착지">
   </dxi-column>
-  <dxi-column dataField="ZMENGE4"
-              caption="배차수량">
-  </dxi-column>
-  <dxi-column dataField="ZPALLTP"
-              caption="파레트유형">
-  </dxi-column>
-  <dxi-column dataField="ZPALLETQTY"
-              caption="파레트수량">
-  </dxi-column>
-  <dxi-column dataField="VRKME"
-              caption="단위">
+
+  <dxi-column dataField="TDDAT"
+              caption="운송계획일"
+              dataType="date"
+              format="yyyy-MM-dd">
   </dxi-column>
   <dxi-column dataField="NAME1"
               caption="납품처명">
   </dxi-column>
+  <dxi-column dataField="ZMENGE1"
+              dataType="number"
+              format="#,###.###"
+              caption="주문수량">
+  </dxi-column>
+  <dxi-column dataField="ZMENGE2"
+              dataType="number"
+              format="#,###.###"
+              [visible]="false"
+              caption="납품수량">
+  </dxi-column>
+  <dxi-column dataField="ZMENGE4"
+              dataType="number"
+              format="#,###.###"
+              [visible]="false"
+              caption="배차수량">
+  </dxi-column>
+  <dxi-column dataField="ZPALLTPT"
+              [visible]="isColVisible"
+              caption="파레트유형">
+  </dxi-column>
+  <dxi-column dataField="ZPALLETQTY"
+              dataType="number"
+              format="#,###"
+              [visible]="isColVisible"
+              caption="파레트수량">
+  </dxi-column>
+  <dxi-column dataField="ZUNLOADT"
+              [visible]="isColVisible"
+              caption="하차정보">
+  </dxi-column>
+  <dxi-column dataField="VRKME"
+              caption="단위">
+  </dxi-column>
+
+  <dxi-column dataField="Z4PARVWTXT"
+              caption="2차운송사">
+  </dxi-column>
   <dxi-column dataField="STREET"
+              [visible]="isColVisible"
               caption="납품주소">
   </dxi-column>
   <dxi-column dataField="BRGEW"
+              [visible]="isColVisible"
               caption="출하총중량">
   </dxi-column>
   <dxi-column dataField="ZTEXT"
+              [visible]="isColVisible"
               caption="특기사항">
   </dxi-column>
   <dxi-column dataField="총중량"
+              [visible]="isColVisible"
               caption="BRGEW">
   </dxi-column>
   <dxi-column dataField="GEWEI"
+              [visible]="isColVisible"
               caption="중량단위">
   </dxi-column>
   <dxi-column dataField="POSNR"
-              [visible]="isColVisible"
+              sortOrder="asc"
               caption="납품품번">
   </dxi-column>
   <dxi-column dataField="ZSEQUENCY"
@@ -286,7 +330,7 @@
               caption="주문번호">
   </dxi-column>
   <dxi-column dataField="WADAT_IST"
-              caption="출고전기일"
+              caption="출고일자"
               dataType="date"
               format="yyyy-MM-dd">
   </dxi-column>
@@ -301,9 +345,39 @@
               caption="자재번호">
   </dxi-column>
 
+  <!--합계-->
+  <dxo-summary>
+    <dxi-total-item column="ARKTX"
+                    summaryType="count"
+                    displayFormat="자재 합계 : {0}">
+    </dxi-total-item>
 
 
-
+    <dxi-total-item column="ZMENGE1"
+                    dataType="number"
+                    valueFormat="#,##0.###"
+                    summaryType="sum"
+                    displayFormat="주문수량 합계 : {0}">
+    </dxi-total-item>
+    <dxi-total-item column="ZMENGE2"
+                    dataType="number"
+                    valueFormat="#,##0.###"
+                    summaryType="sum"
+                    displayFormat="납품수량 합계 : {0}">
+    </dxi-total-item>
+    <dxi-total-item column="ZMENGE3"
+                    dataType="number"
+                    valueFormat="#,##0.###"
+                    summaryType="sum"
+                    displayFormat="출고수량 합계 : {0}">
+    </dxi-total-item>
+    <dxi-total-item column="ZMENGE4"
+                    dataType="number"
+                    valueFormat="#,##0.###"
+                    summaryType="sum"
+                    displayFormat="배차수량 합계 : {0}">
+    </dxi-total-item>
+  </dxo-summary>
 </dx-data-grid>
 
 <report-viewer #reportViewer hostUrl="SHPQReport"></report-viewer>
@@ -324,6 +398,14 @@
           container=".dx-viewport"
           [(visible)]="popupVisible">
   <dx-toolbar style="margin-bottom: 9px;">
+    <dxi-item location="after"
+              widget="dxButton"
+              [disabled]="isWeightDisabled"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="getWeightOptions">
+    </dxi-item>
+
     <dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"
@@ -566,12 +648,19 @@
 <dx-popup width="90%"
           height="70%"
           [showTitle]="true"
-          title="출고처리(거래명세서)"
+          title="상차지시"
           [dragEnabled]="false"
           [showCloseButton]="false"
           container=".dx-viewport"
           [(visible)]="popupVisibleIm">
   <dx-toolbar style="margin-bottom: 9px;">
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="getWeightOptions">
+    </dxi-item>
+
     <dxi-item location="after"
               widget="dxButton"
               locateInMenu="auto"
@@ -734,12 +823,205 @@
                   [colSpan]="4">
           <dxi-item dataField="ZDRIVER"> <dxo-label text="기사명1"></dxo-label> </dxi-item>
           <dxi-item dataField="ZPHONE"><dxo-label text="전화번호1"></dxo-label></dxi-item>
-          <dxi-item dataField="ZDRIVER1"><dxo-label text="기사명2"></dxo-label></dxi-item>
-          <dxi-item dataField="ZPHONE1"><dxo-label text="전화번호2"></dxo-label></dxi-item>
-          <dxi-item dataField="ZDRIVER2"><dxo-label text="기사명2"></dxo-label></dxi-item>
-          <dxi-item dataField="ZPHONE2"><dxo-label text="전화번호2"></dxo-label></dxi-item>
         </dxi-item>
 
+      </dx-form>
+    </div>
+  </dx-scroll-view>
+</dx-popup>
+
+<!--계근정보 입력용 팝업-->
+<dx-popup width="70%"
+          height="70%"
+          [showTitle]="true"
+          title="계근정보"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="popupWeightVisible">
+  <dx-toolbar style="margin-bottom: 9px;">
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="selectWeightOptions">
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="closeWeightOptions">
+    </dxi-item>
+  </dx-toolbar>
+
+  <dx-data-grid class="master" #weightGrid
+                [dataSource]="weightData"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                [selection]="{ mode: 'single' }"
+                height="auto"
+                [columnAutoWidth]="true"
+                (onContentReady)="contentReady($event)"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [allowColumnResizing]="true">
+    <!--(onRowDblClick)="orderDBClick($event)"-->
+    <!--Datagrid Option-->
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-builder-popup [position]="popupPosition">
+    </dxo-filter-builder-popup>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-scrolling mode="virtual"></dxo-scrolling>
+
+
+    <!--Data column-->
+    <dxi-column dataField="ZGW_DATE"
+                caption="계근일자"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+    <dxi-column dataField="ZGW_GR_TIME"
+                caption="입문시간"
+                dataType="string"
+                format="##:##:##">
+    </dxi-column>
+    <dxi-column dataField="ZGW_GI_TIME"
+                caption="출문시간"
+                dataType="string"
+                format="##:##:##">
+    </dxi-column>
+    <dxi-column dataField="ZCARNO"
+                caption="차량번호">
+    </dxi-column>
+    <dxi-column dataField="ZDRIVER"
+                caption="운전기사">
+    </dxi-column>
+    <dxi-column dataField="ZGW_NTGEW"
+                dataType="number"
+                format="#,###"
+                caption="공차중량">
+    </dxi-column>
+    <dxi-column dataField="ZGW_BRGEW"
+                dataType="number"
+                format="#,###"
+                caption="총중량">
+    </dxi-column>
+    <dxi-column dataField="ZGW_ATGEW"
+                dataType="number"
+                format="#,###"
+                caption="실중량">
+    </dxi-column>
+
+
+
+  </dx-data-grid>
+
+</dx-popup>
+
+<!--배차등록팝업-->
+<dx-popup width="90%"
+          height="80%"
+          [showTitle]="true"
+          title="배차수정"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="popupCarSetupVisible">
+  <dx-toolbar style="margin-bottom: 9px;">
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [visible]="!isColVisible"
+              [options]="popCancelButtonOptions">
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="popSaveButtonOptions">
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="popCloseButtonOptions">
+    </dxi-item>
+  </dx-toolbar>
+
+  <dx-scroll-view width="100%" height="100%">
+    <div id="form-container">
+      <dx-form id="popupForm" [formData]="popCarSetData">
+        <dxi-item itemType="group"
+                  caption="차량정보"
+                  [colCount]="3"
+                  [colSpan]="2">
+          <dxi-item dataField="ZCARNO">
+            <dxo-label text="차량번호"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #carnoModiCodeEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zcarnoModiCode"
+                                valueColumn="ZCARNO"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%ZCARNO%"
+                                width="auto"
+                                [(selectedValue)]="zcarnoInfoModiValue"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcarno2CodeValueChanged($event)"></nh-possible-comm>
+            </div>
+          </dxi-item>
+          <dxi-item dataField="ZCARTYPE" [disabled]="false">
+            <dxo-label text="화물차종"></dxo-label>
+            <div *dxTemplate>
+              <nh-possible-comm #dd07tCarModiEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="dd07tCarCode"
+                                valueColumn="DOMVALUE_L"
+                                [showClearButton]="true"
+                                valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                width="auto"
+                                [(selectedValue)]="zcarInfoValue"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                (onDataLoaded)="onPEDataLoaded($event)"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZcartypeCode2ValueChanged($event)"></nh-possible-comm>
+            </div>
+          </dxi-item>
+        </dxi-item>
+        <dxi-item itemType="group"
+                  caption="운전기사정보"
+                  [colCount]="3"
+                  [colSpan]="2">
+          <dxi-item dataField="ZDRIVER"><dxo-label text="기사명1"></dxo-label></dxi-item>
+          <dxi-item dataField="ZPHONE"><dxo-label text="전화번호1"></dxo-label></dxi-item>
+          <dxi-item dataField="ZSHIPMENT_DATE" [disabled]="false" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}">
+            <dxo-label text="상차일자"></dxo-label>
+          </dxi-item>
+          <!--<dxi-item dataField="ZMENGE3"><dxo-label text="출고수량"></dxo-label></dxi-item>-->
+          <dxi-item dataField="ZDRIVER1" [visible]="isColVisible"><dxo-label text="기사명2"></dxo-label></dxi-item>
+          <dxi-item dataField="ZPHONE1" [visible]="isColVisible"><dxo-label text="전화번호2"></dxo-label></dxi-item>
+        </dxi-item>
       </dx-form>
     </div>
   </dx-scroll-view>

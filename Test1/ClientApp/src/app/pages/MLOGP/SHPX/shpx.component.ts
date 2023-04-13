@@ -777,7 +777,7 @@ export class SHPXComponent {
     else {
       //배차상태가 50이 생기면 없애도 됨
       /*var whereCondi = " AND ( ( A.MBLNR = '' AND A.MBLNR_C = '' ) OR ( A.MBLNR <> '' AND A.MBLNR_C <> '' ) )"*/
-
+      /*
       thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
         [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), this.selectStatus, ""],
         "", "A.VBELN", QueryCacheType.None);
@@ -789,7 +789,7 @@ export class SHPXComponent {
       })
       thisObj.orderGridData.forEach(async (row: ZSDS6410Model) => {
         row.ZMENGE3 = row.ZMENGE2;
-      });
+      });*/
     }
 
     this.orderData = new ArrayStore(
@@ -996,7 +996,7 @@ export class SHPXComponent {
       //  //오픈 시 오류는 테이블에 메시지 저장 
       //  /*errorMSG = checkError[0].MESSAGE;*/
       //}
-
+      /*
       //임가공 저장데이터 생성
       for (var array of this.orderGrid.instance.getSelectedRowsData() as ZSDS6410Model[]) {
         var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
@@ -1040,7 +1040,7 @@ export class SHPXComponent {
           zmmt1320List.push(getData);
         }
       }
-
+      */
       rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
 
 
@@ -1371,7 +1371,7 @@ export class SHPXComponent {
     var rcv = new ZSDIFPORTALSAPLE028RcvModel("", "", []);
     var insertModel: ZSDIFPORTALSAPLE028RcvModel[] = [rcv]
     var zsdsList: ZSDS6400Model[] = [];
-
+    /*
     //임가공 CBO업데이트
     this.orderGrid.instance.getSelectedRowsData().forEach(async (array: ZSDS6410Model) => {
       var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
@@ -1403,6 +1403,7 @@ export class SHPXComponent {
         zmmt1320List.push(getData);
       }
     });
+    */
     rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
 
     /*if (rowCount > 0) {*/

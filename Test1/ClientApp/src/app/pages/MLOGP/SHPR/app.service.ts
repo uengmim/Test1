@@ -19,7 +19,12 @@ const data2: Data2[] = [
 
   {
     code: '2000',
-    name: '화학'
+    name: '고체화학'
+  },
+
+  {
+    code: '4000',
+    name: '액체화학'
   },
 
   {
@@ -46,7 +51,21 @@ const status: Status[] = [
   },
 ];
 
+export class TdlType {
+  code!: string;
+  name!: string;
+}
 
+const tdlType: TdlType[] = [
+  {
+    code: "1",
+    name: "1차운송사"
+  },
+  {
+    code: "2",
+    name: "2차운송사"
+  }
+]
 
 
 @Injectable()
@@ -59,4 +78,7 @@ export class Service {
     return status;
   }
 
+  getTdlType(): TdlType[] {
+    return tdlType;
+  }
 }

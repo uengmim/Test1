@@ -54,9 +54,9 @@
                         class="weight-test"></nh-possible-comm>
     </div>
   </dxi-item>
-  <!--<dxi-item location="before" locateInMenu="auto">
+  <dxi-item location="before" locateInMenu="auto">
     <div *dxTemplate style="float: left; margin-left: 10px; ">
-      <dx-select-box [dataSource]="carSeq"
+      <dx-select-box [dataSource]="tdlType"
                      displayExpr="name"
                      valueExpr="code"
                      value="1"
@@ -64,7 +64,7 @@
                      labelMode="floating"
                      (onValueChanged)="onGubunValueChanged($event)"></dx-select-box>
     </div>
-  </dxi-item>-->
+  </dxi-item>
   <dxi-item location="before" [visible]="false">
     <div *dxTemplate style="float: left; margin-left: 10px; ">
       <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
@@ -193,6 +193,11 @@
   </dxi-column>
   <dxi-column dataField="TDDAT"
               caption="운송계획일"
+              dataType="date"
+              format="yyyy-MM-dd">
+  </dxi-column>
+  <dxi-column dataField="ZSHIPMENT_DATE"
+              caption="상차일자"
               dataType="date"
               format="yyyy-MM-dd">
   </dxi-column>

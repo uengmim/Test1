@@ -460,8 +460,7 @@ export class OBBDComponent {
                     } else {
                       if (value == true && value1 == true) {
 
-                      if (parseInt(qradthDate) >= parseInt(nowDate)) {
-                        if (parseInt(qradttDate) > parseInt(nowTime)) {
+                        if ((parseInt(qradthDate) > parseInt(nowDate)) || ((parseInt(qradthDate) == parseInt(nowDate)) && (parseInt(qradttDate) > parseInt(nowTime)))) {
                           if (biddingData.length > 0) {
                             this.dataModify(this)
                             this.AttachFile.upload();
@@ -473,9 +472,6 @@ export class OBBDComponent {
                           }
 
                         } else {
-                          alert("입찰 신청이 마감된 공고입니다.", "알림");
-                        }
-                      } else {
                         alert("입찰 신청이 마감된 공고입니다.", "알림");
                         return;
                       }
@@ -491,8 +487,7 @@ export class OBBDComponent {
                       return;
                     } else {
                       if (value == true && value1 == true) {
-                      if (parseInt(qradthDate) >= parseInt(nowDate)) {
-                        if (parseInt(qradttDate) > parseInt(nowTime)) {
+                        if ((parseInt(qradthDate) > parseInt(nowDate)) || ((parseInt(qradthDate) == parseInt(nowDate)) && (parseInt(qradttDate) > parseInt(nowTime)))) {
                           if (biddingData.length > 0) {
                             this.dataModify(this);
                             this.AttachFile.upload();
@@ -502,9 +497,6 @@ export class OBBDComponent {
                             this.AttachFile.upload();
                             alert("입찰신청이 되었습니다.", "알림");
                           }
-                        } else {
-                          alert("입찰 마감된 공고입니다.", "알림");
-                        }
                       } else {
                         alert("입찰 마감된 공고입니다.", "알림");
                         return;
@@ -517,8 +509,7 @@ export class OBBDComponent {
 
                   } else {
                     if (value == true && value1 == true) {
-                    if (parseInt(qradthDate) >= parseInt(nowDate)) {
-                      if (parseInt(qradttDate) > parseInt(nowTime)) {
+                      if ((parseInt(qradthDate) > parseInt(nowDate)) || ((parseInt(qradthDate) == parseInt(nowDate)) && (parseInt(qradttDate) > parseInt(nowTime)))) {
                         if (biddingData.length > 0) {
                           this.dataModify(this);
                           this.AttachFile.upload();
@@ -530,9 +521,7 @@ export class OBBDComponent {
                         }
                       } else {
                         alert("입찰 신청이 마감된 공고입니다.", "알림");
-                      }
-                    } else {
-                      alert("입찰 신청이 마감된 공고입니다.", "알림");
+                        return;
                       }
                     } else {
                       alert("동의를 눌러주세요.", "알림");
@@ -560,8 +549,7 @@ export class OBBDComponent {
                     } else {
                       if (value == true && value1 == true) {
 
-                      if (parseInt(qradthDate) >= parseInt(nowDate)) {
-                        if (parseInt(qradttDate) > parseInt(nowTime)) {
+                        if ((parseInt(qradthDate) > parseInt(nowDate)) || ((parseInt(qradthDate) == parseInt(nowDate)) && (parseInt(qradttDate) > parseInt(nowTime)))) {
                           if (biddingData.length > 0) {
                             this.dataModify(this);
                             this.AttachFile.upload();
@@ -573,10 +561,8 @@ export class OBBDComponent {
                           }
                         } else {
                           alert("입찰 신청이 마감된 공고입니다.", "알림");
+                          return;
                         }
-                      } else {
-                        alert("입찰 신청이 마감된 공고입니다.", "알림");
-                      }
                       } else {
                         alert("동의를 눌러주세요.", "알림");
                         return;
@@ -588,8 +574,7 @@ export class OBBDComponent {
                     } else {
                       if (value == true && value1 == true) {
 
-                      if (parseInt(qradthDate) >= parseInt(nowDate)) {
-                        if (parseInt(qradttDate) > parseInt(nowTime)) {
+                        if ((parseInt(qradthDate) > parseInt(nowDate)) || ((parseInt(qradthDate) == parseInt(nowDate)) && (parseInt(qradttDate) > parseInt(nowTime)))) {
                           if (biddingData.length > 0) {
                             this.dataModify(this);
                             this.AttachFile.upload();
@@ -601,9 +586,7 @@ export class OBBDComponent {
                           }
                         } else {
                           alert("입찰 신청이 마감된 공고입니다.", "알림");
-                        }
-                      } else {
-                        alert("입찰 신청이 마감된 공고입니다.", "알림");
+                          return;
                         }
                       } else {
                         alert("동의를 눌러주세요.", "알림");
@@ -614,8 +597,7 @@ export class OBBDComponent {
                   } else {
                     if (value == true && value1 == true) {
 
-                    if (parseInt(qradthDate) >= parseInt(nowDate)) {
-                      if (parseInt(qradttDate) > parseInt(nowTime)) {
+                      if ((parseInt(qradthDate) > parseInt(nowDate)) || ((parseInt(qradthDate) == parseInt(nowDate)) && (parseInt(qradttDate) > parseInt(nowTime)))) {
                         if (biddingData.length > 0) {
                           this.dataModify(this);
                           this.AttachFile.upload();
@@ -627,9 +609,7 @@ export class OBBDComponent {
                         }
                       } else {
                         alert("입찰 신청이 마감된 공고입니다.", "알림");
-                      }
-                    } else {
-                      alert("입찰 신청이 마감된 공고입니다.", "알림");
+                        return;
                       }
                     } else {
                       alert("동의를 눌러주세요.", "알림");
@@ -1092,9 +1072,8 @@ export class OBBDComponent {
         if (data8300[0].QTADTT == "00:00:00" || data8300[0].QTADTH == null || data8300[0].QTADTT == undefined) {
           alert("입찰 신청 대상 공고가 아닙니다.", "알림");
         } else {
-          if (parseInt(qradthDate) >= parseInt(nowDate)) {
+          if ((parseInt(qradthDate) > parseInt(nowDate)) || ((parseInt(qradthDate) == parseInt(nowDate)) && (parseInt(qradttDate) > parseInt(nowTime))) ) {
             //입찰신청마감 시간이 현재 시간보다 남았을 때
-            if (parseInt(qradttDate) > parseInt(nowTime)) {
 
               this.selectedItemKeys.forEach(async (key: any) => {
 
@@ -1275,9 +1254,6 @@ export class OBBDComponent {
                 }
               });
 
-            } else {
-              alert("입찰 신청이 마감된 공고입니다.", "알림");
-            }
           } else {
             alert("입찰 신청이 마감된 공고입니다.", "알림");
           }

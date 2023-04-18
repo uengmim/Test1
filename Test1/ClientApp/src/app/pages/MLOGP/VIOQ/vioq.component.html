@@ -29,6 +29,17 @@
               locateInMenu="auto"
               style="width: auto;
             margin-right: 5px;">
+      <dx-button (onClick)="printNamwooGI()"
+                 [disabled]="!selectedItemKeys.length"
+                 [width]="180"
+                 text="남우진흥 거래명세서">
+      </dx-button>
+    </dxi-item>
+
+    <dxi-item location="after"
+              locateInMenu="auto"
+              style="width: auto;
+            margin-right: 5px;">
       <dx-button (onClick)="weighingCertificate()"
                  [disabled]="!selectedItemKeys.length"
                  [width]="120"
@@ -39,7 +50,7 @@
 
     <dxi-item location="after"
               locateInMenu="auto"
-              style="width: auto;margin-right: 5px;" >
+              style="width: auto;margin-right: 5px;">
       <dx-button (onClick)="takeOutSpecific()"
                  [disabled]="!selectedItemKeys.length"
                  [width]="100"
@@ -73,11 +84,13 @@
                 [selection]="{ mode: 'single' }"
                 height="calc(100vh - 190px)"
                 [(selectedRowKeys)]="selectedRows"
-                (onSelectionChanged)="selectionChanged($event)">
+                (onSelectionChanged)="selectionChanged($event)"
+                (onExporting)="onExportingOrderData($event)">
 
     <!--Datagrid Option-->
     <dxo-paging [enabled]="false"></dxo-paging>
     <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+    <dxo-export [enabled]="true"></dxo-export>
     <dxo-search-panel [visible]="true"
                       [highlightCaseSensitive]="true"></dxo-search-panel>
     <!--Filtering Option-->
@@ -144,6 +157,16 @@
                 format="HH:mm:ss"
                 caption="출문시간">
     </dxi-column>
+
+    <!--합계-->
+    <dxo-summary>
+      <dxi-total-item column="ZGW_ATGEW"
+                      dataType="number"
+                      valueFormat="#,##0.###"
+                      summaryType="sum"
+                      displayFormat="실중량 합계 : {0}">
+      </dxi-total-item>
+    </dxo-summary>
   </dx-data-grid>
 </div>
 <report-viewer #reportViewer style="overflow:auto">

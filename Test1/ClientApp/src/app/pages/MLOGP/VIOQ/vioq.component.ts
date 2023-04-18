@@ -17,9 +17,20 @@ import ArrayStore from 'devextreme/data/array_store';
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZMMT3050Model } from '../../../shared/dataModel/MLOGP/Zmmt3050';
 import { ZMMFROMGWGrirModel, ZMMS0210Model, ZMMS9900Model } from '../../../shared/dataModel/MLOGP/ZmmFromGwGrir';
-import { ParameterDictionary, ThemeManager } from '../../../shared/app.utilitys';
+import { CodeInfoType, ParameterDictionary, TableCodeInfo, ThemeManager } from '../../../shared/app.utilitys';
 import { ReportViewerComponent } from '../../../shared/components/reportviewer/report-viewer';
 import { alert, confirm } from "devextreme/ui/dialog";
+import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
+import { CarList } from '../SHPC/app.service';
+import { ZSDIFPORTALSAPLELIQSndModel, ZSDS6430Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLeLiqSnd';
+import { ZMMT1321Join1320Model } from '../../../shared/dataModel/MLOGP/Zmmt1320Join1321';
+import { ZSDIFPORTALSAPLE028SndModel, ZSDS6410Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Snd';
+import { ZSDIFPORTALSAPLE028RcvModel, ZSDS6420Model } from '../../../shared/dataModel/MLOGP/ZsdIfPortalSapLe028Rcv';
+import { ZMMT1321Model } from '../../../shared/dataModel/MLOGP/Zmmt1321';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import jsPDF from 'jspdf';
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
 
 /**
  *
@@ -51,6 +62,13 @@ export class VIOQComponent {
   startDate: any;
   endDate: any;
 
+  CarNmList: CarList[] = [];
+
+  //차량번호
+  carDataCode: TableCodeInfo;
+
+  dataStoreKey: string = "vioq";
+
   //date box
   value: Date = new Date(1981, 3, 27);
   min: Date = new Date(1900, 0, 1);
@@ -74,6 +92,16 @@ export class VIOQComponent {
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 차량 입출문 현황";
 
+    //파서블엔트리
+    this.carDataCode = appConfig.tableCode("종합차량");
+    let codeInfos = [
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.carDataCode),
+
+    ];
+    PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
+
+    //차량데이터 가져오기
+    this.getCarNm();
 
     //조회날짜 초기값
     var now = new Date();
@@ -207,5 +235,178 @@ export class VIOQComponent {
     this.selectedRowIndex = data.component.getRowIndexByKey(data.currentSelectedRowKeys[0]);
     this.selectedItemKeys = data.currentSelectedRowKeys;
 
+  }
+
+  //남우진흥거래명세서 클릭
+  async printNamwooGI() {
+    let selectData = this.orderDataGrid.instance.getSelectedRowsData()[0];
+
+    if (selectData.length === 0) {
+      alert("라인을 선택해야합니다.", "알림");
+      return;
+    }
+
+    //var result = await this.datainsert(this);
+    //if (result === null)
+    //  return;
+    var sVBELN = selectData.ZGW_DONO;
+    var sVSTEL = "";
+    var sPOSNR = selectData.POSNR;
+    var imOrderList: ZMMT1321Join1320Model[] = []
+    if (selectData.ZGW_DONO.toString().substring(0, 2) !== "00")
+      sVSTEL = "9999";
+
+    if (selectData.ZGW_DONO === "") {
+      await alert("출고정보가 없는 계근정보입니다.", "알림");
+      this.loadingVisible = false;
+      return;
+
+      //var realCarno = "";
+      //var realCarData = this.CarNmList.find(item => item.ZCARNO.includes(selectData.ZCARNO));
+      //if (realCarData === undefined)
+      //  realCarno = selectData.ZCARNO;
+      //else
+      //  realCarno = realCarData.ZCARNO;
+
+      //this.loadingVisible = true;
+      //var zsds6430: ZSDS6430Model[] = [];
+      //var zsdif = new ZSDIFPORTALSAPLELIQSndModel("", "", "", "", "", "", "", "", new Date("0001-01-01"), new Date("0001-01-01"), "", "", "", "", "", "", realCarno, "", "", zsds6430, selectData.ZGW_DATE, selectData.ZGW_DATE);
+      //var model: ZSDIFPORTALSAPLELIQSndModel[] = [zsdif];
+      //var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLELIQSndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
+      //if (resultModel[0].IT_DATA.length === 0) {
+
+      //  var whereCondi = "";
+
+      //  //일반주문 없을경우 임가공 정보 찾기
+      //  imOrderList = await this.dataService.SelectModelData<ZMMT1321Join1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320CustomList",
+      //    [this.appConfig.mandt, this.appConfig.plant, selectDate, realCarno, whereCondi],
+      //    "", "A.VBELN", QueryCacheType.None);
+
+      //  if (imOrderList.length === 0) {
+      //    await alert("선택한 차량에 해당하는 출고정보가 없습니다.", "알림");
+      //    return;
+      //  } else {
+      //    sVBELN = imOrderList[0].VBELN;
+      //    sPOSNR = imOrderList[0].POSNR;
+      //    sVSTEL = "9999";
+      //  }
+
+      //} else {
+      //  sVBELN = resultModel[0].IT_DATA[0].VBELN;
+      //  sVSTEL = resultModel[0].IT_DATA[0].VSTEL;
+      //  sPOSNR = "000010";
+      //}
+
+      
+    }
+
+    if (sVSTEL === "9999") {
+      var whereCondi = ` AND A.VBELN = '${selectData.ZGW_DONO}' AND B.POSNR = '${sPOSNR}' AND B.ZSHIP_STATUS = '30'`;
+      imOrderList = await this.dataService.SelectModelData<ZMMT1321Join1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320CustomList",
+        [this.appConfig.mandt, this.appConfig.plant, selectData.ZCARNO ?? "", whereCondi],
+        "", "A.VBELN, B.POSNR", QueryCacheType.None);
+
+      if (imOrderList.length > 0) {
+        sVBELN = imOrderList[0].VBELN;
+        sPOSNR = imOrderList[0].POSNR;
+
+        var zmmt1321List: ZMMT1321Model[] = [];
+        zmmt1321List.push(new ZMMT1321Model(this.appConfig.mandt, imOrderList[0].VBELN, imOrderList[0].POSNR, imOrderList[0].WERKS, imOrderList[0].LIFNR,
+          imOrderList[0].IDNRK, imOrderList[0].LGORT, imOrderList[0].BWART
+          , imOrderList[0].MEINS, imOrderList[0].SC_R_MENGE, imOrderList[0].SC_R_DATE_R, imOrderList[0].INCO1, imOrderList[0].TDLNR1, imOrderList[0].TDLNR2,
+          imOrderList[0].ZCARTYPE, imOrderList[0].ZCARNO, imOrderList[0].ZDRIVER, imOrderList[0].ZPHONE
+          , "40", imOrderList[0].ZSHIPMENT_NO, imOrderList[0].BLAND_F, imOrderList[0].BLAND_F_NM, imOrderList[0].BLAND_T, imOrderList[0].BLAND_T_NM,
+          imOrderList[0].SC_S_MENGE, imOrderList[0].SC_S_DATE ?? new Date("0001-01-01")
+          , selectData.ZGW_ATGEW / 1000, selectData.ZGW_DATE, "000000", imOrderList[0].ZPOST_RUN_MESSAGE, 0, new Date("0001-01-01"), "000000", "", imOrderList[0].MBLNR,
+          imOrderList[0].MJAHR, imOrderList[0].MBLNR_C, imOrderList[0].MJAHR_C
+          , imOrderList[0].WAERS, imOrderList[0].NETPR, imOrderList[0].DMBTR, imOrderList[0].BUKRS, imOrderList[0].BELNR, imOrderList[0].GJAHR,
+          imOrderList[0].BUDAT ?? new Date("0001-01-01"), imOrderList[0].UNIQUEID, imOrderList[0].ERNAM
+          , imOrderList[0].ERDAT, imOrderList[0].ERZET, this.appConfig.interfaceId, new Date(), formatDate(new Date(), "HH:mm:ss", "en-US"), "", "",
+          DIMModelStatus.Modify))
+
+        var rowCount = await this.dataService.ModifyModelData<ZMMT1321Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321ModelList", zmmt1321List);
+      }
+    } else {
+      var zsds6410: ZSDS6410Model[] = [];
+      var zsdif = new ZSDIFPORTALSAPLE028SndModel("", "", "", "", "", "", "", new Date("0001-01-01"), new Date("0001-01-01"), sVBELN, "", "", "X", "", "", "", "", "30", zsds6410, new Date("0001-01-01"), new Date("0001-01-01"));
+      var model: ZSDIFPORTALSAPLE028SndModel[] = [zsdif];
+      var resultModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028SndModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLELIQSndModelList", model, QueryCacheType.None);
+      if (resultModel[0].IT_DATA.length > 0) {
+        var zsds6420Model = new ZSDS6420Model(resultModel[0].IT_DATA[0].VBELN, resultModel[0].IT_DATA[0].POSNR, resultModel[0].IT_DATA[0].ZSEQUENCY,
+          resultModel[0].IT_DATA[0].VRKME, resultModel[0].IT_DATA[0].ZMENGE4,
+          selectData.ZGW_ATGEW / 1000, selectData.ZGW_DATE, resultModel[0].IT_DATA[0].Z3PARVW, resultModel[0].IT_DATA[0].Z4PARVW,
+          resultModel[0].IT_DATA[0].ZCARTYPE, resultModel[0].IT_DATA[0].ZCARNO, resultModel[0].IT_DATA[0].ZDRIVER, resultModel[0].IT_DATA[0].ZDRIVER1,
+          resultModel[0].IT_DATA[0].ZPHONE, resultModel[0].IT_DATA[0].ZPHONE1, resultModel[0].IT_DATA[0].ZVKAUS, resultModel[0].IT_DATA[0].ZUNLOAD, "40",
+          resultModel[0].IT_DATA[0].ZSHIPMENT_NO, resultModel[0].IT_DATA[0].ZSHIPMENT_DATE, resultModel[0].IT_DATA[0].ZPALLTP, resultModel[0].IT_DATA[0].ZPALLETQTY,
+          resultModel[0].IT_DATA[0].ZCONFIRM_CUT, resultModel[0].IT_DATA[0].ZTEXT, resultModel[0].IT_DATA[0].MTY, resultModel[0].IT_DATA[0].MSG);
+
+        var zsds6420List: ZSDS6420Model[] = [zsds6420Model];
+        var zsdModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsds6420List);
+        var zsdList: ZSDIFPORTALSAPLE028RcvModel[] = [zsdModel];
+
+
+        var insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", zsdList, QueryCacheType.None);
+      }
+    }
+
+    if (sVSTEL === "9999") {
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "mandt": this.appConfig.mandt,
+        "ivbeln": sVBELN,
+        "iposnr": sPOSNR
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction4", params) });
+    } else {
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "itddatFrom": selectData.ZGW_DATE,
+        "itddatTo": selectData.ZGW_DATE,
+        "ivbeln": sVBELN,
+        "mandt": this.appConfig.mandt,
+        "ivstel": "8888"
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction2", params) });
+    }
+  }
+
+    //차량정보 찾기
+    async getCarNm() {
+      let chemCarSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.carDataCode);
+      this.CarNmList = chemCarSet?.tables["CODES"].getDataObject(CarList);
+  }
+
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: e.component,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `차량입출문_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    e.cancel = true;
   }
 }

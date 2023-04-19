@@ -258,6 +258,13 @@ export class OBPCComponent {
       model.INSDT = model.INSDT ?? cleanDate;
       model.MOMDT = model.MOMDT ?? cleanDate;
       model.AENAM = this.appConfig.interfaceId;
+      model.FNAMT = model.FNAMT / 100;
+      model.GRAMT = model.GRAMT / 100;
+      model.STAMT = model.STAMT / 100;
+      model.FSTINS = model.FSTINS / 100;
+      model.CONINS = model.CONINS / 100;
+      model.HAZINS = model.HAZINS / 100;
+      model.FREIGHT = model.FREIGHT / 100;
       model.PRICE = model.PRICE/100;
       model.VAT = model.VAT/100;
       model.AMOUNT = model.AMOUNT/100;

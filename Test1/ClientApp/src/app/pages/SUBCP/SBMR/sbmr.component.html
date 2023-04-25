@@ -86,6 +86,8 @@
                type="normal">
     </dx-button>
   </dxi-item>
+  <!--
+    
   <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
@@ -106,6 +108,7 @@
                type="normal">
     </dx-button>
   </dxi-item>
+  -->
 
   <!--<dxi-item location="after"
             widget="dxButton"
@@ -131,7 +134,7 @@
   <dx-form id="" width="100%" [formData]="SupplyData" labelMode="floating" #formmm>
 
     <dxi-item itemType="group" [colCount]="3">
-      <dxi-item dataField="Requester">
+      <dxi-item dataField="Requester"  [disabled]="isEnabled">
         <!--<dxo-label text="요청업체"></dxo-label>-->
         <div *dxTemplate>
           <nh-possible-comm #CodeEntery
@@ -158,7 +161,7 @@
         <dxo-label text="요청시간"></dxo-label>
       </dxi-item>
 
-      <dxi-item dataField="Requester_Name" [disabled]="false" editorType="dxTextBox">
+      <dxi-item dataField="Requester_Name" [disabled]="false" editorType="dxTextBox" [editorOptions]="{maxLength :12}">
         <dxo-label text="요청자이름"></dxo-label>
         <dxi-validation-rule type="required"
                              message="Password is required"></dxi-validation-rule>
@@ -187,9 +190,9 @@
                               [(selectedValue)]="StatusValue"
                               [gridBoxWidth]="500"
                               popupGridScrollMode="standard"
-                                    [popupGridPagingMode]="true"
-                                    [popupGridPageSize]="10"
-                                comboGridScrollMode="virtual"
+                              [popupGridPagingMode]="true"
+                              [popupGridPageSize]="10"
+                              comboGridScrollMode="virtual"
                               label="배차상태"
                               labelMode="floating"
                               [showClearButton]="true"
@@ -290,91 +293,91 @@
   </dxi-column>
 
   <dxi-column dataField="SC_L_MENGE"
-              caption="출하지시량" [allowEditing]="false" format="#,##0.###" dataType="number">
+              caption="출하지시량" [allowEditing]="false" format="#,##0.###" dataType="number" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_L_DATE"
               caption="출하지시 일자"
               dataType="date"
-              format="yyyy-MM-dd" [allowEditing]="false">
+              format="yyyy-MM-dd" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_L_TIME"
-              caption="출하지시 시간" [allowEditing]="false">
+              caption="출하지시 시간" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_L_NAME"
-              caption="출하지시자명" [allowEditing]="false">
+              caption="출하지시자명" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="INCO1"
-              caption="인코텀스(파트1)" [allowEditing]="false">
+              caption="인코텀스(파트1)" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="ZSHIPMENT_NO"
-              caption="배차번호" [allowEditing]="false">
+              caption="배차번호" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="TDLNR1"
-              caption="운송업체" [allowEditing]="false">
+              caption="운송업체" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="ZCARTYPE"
-              caption="화물차종" [allowEditing]="false">
+              caption="화물차종" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="ZCARNO"
-              caption="차량번호" [allowEditing]="false">
+              caption="차량번호" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="ZDRIVER"
-              caption="운전기사명" [allowEditing]="false">
+              caption="운전기사명" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="ZPHONE"
-              caption="전화번호" [allowEditing]="false">
+              caption="전화번호" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="BLAND_F"
-              caption="출발지" [allowEditing]="false">
+              caption="출발지" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="BLAND_T"
-              caption="도착지" [allowEditing]="false">
+              caption="도착지" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_G_MENGE"
-              caption="출고량(출하장 계근량)" [allowEditing]="false" format="#,##0.###" dataType="number">
+              caption="출고량(출하장 계근량)" [allowEditing]="false" format="#,##0.###" dataType="number" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_G_DATE"
               caption="출고일자"
               dataType="date"
-              format="yyyy-MM-dd / HH:MM:SS" [allowEditing]="false">
+              format="yyyy-MM-dd / HH:MM:SS" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_G_TIME"
-              caption="출고시간" [allowEditing]="false">
+              caption="출고시간" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_A_MENGE"
-              caption="착지량" [allowEditing]="false" format="#,##0.###" dataType="number">
+              caption="착지량" [allowEditing]="false" format="#,##0.###" dataType="number" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_A_DATE"
               caption="인수일자"
               dataType="date"
-              format="yyyy-MM-dd / HH:MM:SS" [allowEditing]="false">
+              format="yyyy-MM-dd / HH:MM:SS" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_A_TIME"
               dataType="time"
               format="HH:mm:ss"
-              caption="인수시간" [allowEditing]="false">
+              caption="인수시간" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
   <dxi-column dataField="SC_A_NAME"
-              caption="인수자명" [allowEditing]="false">
+              caption="인수자명" [allowEditing]="false" [visible]="false">
   </dxi-column>
 
 

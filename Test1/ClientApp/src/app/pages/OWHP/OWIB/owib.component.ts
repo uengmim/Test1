@@ -20,6 +20,9 @@ import { debug } from 'util';
 import { CodeInfoType, TableCodeInfo } from '../../../shared/app.utilitys';
 import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { AuthService } from '../../../shared/services';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import { Workbook } from 'exceljs';
+import saveAs from 'file-saver';
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
 import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
@@ -106,6 +109,9 @@ export class OWIBComponent {
   enteryLoading: boolean = false;
 
   lgNmList: T001lModel[] = [];
+
+  //0재고 제외 체크박스
+  isRemoveZeroStock = true;
 
   /**
 * 데이터 스토어 키
@@ -224,9 +230,14 @@ export class OWIBComponent {
 
 
   private async dataLoad(thisObj: OWIBComponent) {
+    var zeroStock = "";
+    if (this.isRemoveZeroStock === true)
+      zeroStock = "X";
+    else
+      zeroStock = "";
 
     var model: ZMMS3140Model = new ZMMS3140Model(this.lgortValue, "", "", "", "", "", "", this.selectData, "", "", DIMModelStatus.UnChanged);
-    var rfcModelList: ZMMCURRStockModel[] = [new ZMMCURRStockModel("", "1000", [], [model], DIMModelStatus.UnChanged)];
+    var rfcModelList: ZMMCURRStockModel[] = [new ZMMCURRStockModel(zeroStock, "1000", [], [model], DIMModelStatus.UnChanged)];
     
     var result = await this.dataService.RefcCallUsingModel<ZMMCURRStockModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMCURRStockModelList", rfcModelList, QueryCacheType.None);
 
@@ -266,5 +277,35 @@ export class OWIBComponent {
 
     var resultModel = dataSet?.tables["CODES"].getDataObject(T001lModel);
     this.lgNmList = resultModel;
+  }
+
+  /**
+   * On Exporting Excel
+   * */
+  onExportingOrderData(e: any) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: this.dataGrid.instance,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `재고현황_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    /*e.cancel = true;*/
   }
 }

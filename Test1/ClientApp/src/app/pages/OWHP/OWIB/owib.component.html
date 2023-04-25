@@ -36,6 +36,19 @@
     </div>
   </dxi-item>
 
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate style="float: left; margin-left: 10px; ">
+      <dx-check-box text="0 재고 제외" [(value)]="isRemoveZeroStock"></dx-check-box>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after" locateInMenu="auto">
+    <div *dxTemplate>
+      <dx-button text="엑셀다운로드" (onClick)="onExportingOrderData($event)">
+      </dx-button>
+    </div>
+  </dxi-item>
+
   <dxi-item location="after"
             widget="dxButton"
             locateInMenu="auto"
@@ -44,7 +57,7 @@
   </dxi-item>
 </dx-toolbar>
 
-<dx-data-grid id="grid"
+<dx-data-grid id="grid" #mainGrid
               [dataSource]="mainGridData"
               [showBorders]="true"
               [focusedRowIndex]="0"
@@ -54,6 +67,7 @@
               [allowColumnResizing]="true"
               [remoteOperations]="false"
               [rowAlternationEnabled]="true"
+              (onExporting)="onExportingOrderData($event)"
               height="calc(100vh - 230px)">
   <!--Datagrid Option-->
   <dxo-paging [enabled]="false"></dxo-paging>

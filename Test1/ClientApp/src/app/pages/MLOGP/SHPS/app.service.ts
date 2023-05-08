@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 
 
-
+export class TINCT {
+  INCO1: string;
+  BEZEI: string;
+}
 
 
 

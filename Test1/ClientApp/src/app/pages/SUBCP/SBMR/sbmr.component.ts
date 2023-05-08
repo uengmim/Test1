@@ -148,12 +148,15 @@ export class SBMRComponent {
   newPopupVisible: boolean = false;
   takePopupVisible: boolean = false;
   textVisible: boolean = false;
+  isEnabled: boolean = false;
 
   matnrValue: string | null = "";
 
   displayModel: ZMMT1320Model[] = [];
 
   statusCodeInfo: DomainModel[] = [];
+
+  role = [];
 
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService,
     private router: Router, private imInfo: ImateInfo, private authService: AuthService, private route: ActivatedRoute) {
@@ -165,10 +168,15 @@ export class SBMRComponent {
     thisObj.loadingVisible = true;
 
     var userInfo = this.authService.getUser().data;
+    this.role = userInfo.role;
 
 
-    if (userInfo?.deptId != "") {
-      this.lifnrValue = userInfo?.deptId ;
+
+    var adminRole = this.role.find(item => item === "ADMIN");
+
+    if (adminRole === undefined) {
+      this.lifnrValue = userInfo?.deptId;
+      this.isEnabled = true;
     } else {
       //var userInfo = this.authService.getUser().data;
       this.lifnrValue = "0000302512";
@@ -269,14 +277,17 @@ export class SBMRComponent {
           VBELN = formatDate(new Date(),"yyyy","en-US") + "000001";
         }
 
+        var nowTime = new Date().getHours().toString().padStart(2, "0") + ":" + new Date().getMinutes().toString().padStart(2, "0") + ":" +
+          new Date().getSeconds().toString().padStart(2, "0");
+
         selectData.forEach((array: any) => {
           zmmt1320List.push(new ZMMT1320Model(this.appConfig.mandt, VBELN, this.appConfig.plant, this.authService.getUser().data?.deptId ?? "",
             array.MATNR, "", "", array.MEINS, array.SC_R_MENGE, this.popupData2.SC_R_DATE_R,
-            this.popupData2.SC_R_DATE, formatDate(new Date(), "HH:mm:ss", "en-US"), this.popupData2.SC_R_NAME, "", "", "", "",
-            "", "", "", "", "", "", "", "", "", undefined, 0, undefined, "000000",
-            "", 0, undefined, "000000", "", 0, undefined, "000000", "", "", "", "", "", "", "", "", undefined, "000000", "", undefined, "000000", "", "", DIMModelStatus.Add));
+            this.popupData2.SC_R_DATE, formatDate(new Date(), "HH:mm:ss", "en-US"), this.popupData2.SC_R_NAME, "", "", "", "", "", "", "", undefined, 0, undefined, "000000",
+            "", 0, 0, undefined, this.appConfig.interfaceId, new Date(), nowTime, this.appConfig.interfaceId, new Date(), nowTime, "", "", "", DIMModelStatus.Add));
           VBELN = (parseInt(VBELN) + 1).toString();
         });
+        console.log(zmmt1320List);
         var rowCount1 = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", zmmt1320List);
 
 
@@ -319,9 +330,8 @@ export class SBMRComponent {
 
         result.forEach(async (row: ZMMT1311GroupByModel) => {
           thisObj.displayModel.push(new ZMMT1320Model(thisObj.appConfig.mandt, "", thisObj.appConfig.plant, this.lifnrValue??"", row.MATNR, "", "", row.MEINS, 0,
-            thisObj.SupplyData.ARRequest_Date, thisObj.SupplyData.GIRequest_Date, r_timeString, thisObj.SupplyData.Requester_Name, "", "", "",
-            "", "", "", "", "", "", "", "", "", "", undefined, 0, undefined, "00:00:00", "", 0, undefined, "00:00:00",
-            "", 0, undefined, "00:00:00", "", "", "", "", "", "", "", thisObj.appConfig.interfaceId, new Date(), nowTime, thisObj.appConfig.interfaceId, new Date(), nowTime,row.MAKTX));
+            thisObj.SupplyData.ARRequest_Date, thisObj.SupplyData.GIRequest_Date, r_timeString, thisObj.SupplyData.Requester_Name, "", "", "", "", "", "", "", undefined, 0, undefined, "00:00:00", "", 0, 0
+            , undefined, thisObj.appConfig.interfaceId, new Date(), nowTime, thisObj.appConfig.interfaceId, new Date(), nowTime, row.MAKTX, "", ""));
         });
 
         this.drawalData = new ArrayStore(
@@ -335,6 +345,8 @@ export class SBMRComponent {
     this.SaveBuutonOptions = {
       text: "저장",
       onClick: async () => {
+
+        thisObj.drawalGrid.instance.closeEditCell();
 
         if (thisObj.displayModel.length === 0) {
           var selectData = thisObj.drawalGrid.instance.getSelectedRowsData();
@@ -373,27 +385,28 @@ export class SBMRComponent {
               row.SC_R_DATE_C = new Date("0001-01-01");
               row.SC_L_DATE = new Date("0001-01-01");
               row.SC_G_DATE = new Date("0001-01-01");
-              row.SC_A_DATE = new Date("0001-01-01");
 
             } else {
               row.SC_R_TIME = row.SC_R_TIME ?? "000000";
               row.SC_R_DATE_C = row.SC_R_DATE_C ?? new Date("0001-01-01");
               row.SC_L_DATE = row.SC_L_DATE ?? new Date("0001-01-01");
               row.SC_G_DATE = row.SC_G_DATE ?? new Date("0001-01-01");
-              row.SC_A_DATE = row.SC_A_DATE ?? new Date("0001-01-01");
               if (row.ZSHIP_STATUS === "")
                 row.ModelStatus = DIMModelStatus.Modify;
+                /*
               else if (row.ZSHIP_STATUS == "50" || row.SC_A_NAME != "") {
                 row.ModelStatus = DIMModelStatus.Modify;
                 row.ZSHIP_STATUS = "60"; //인수확인으로 상태 변경
               }
               else
                 row.ModelStatus = DIMModelStatus.UnChanged;
+                */
             }
             
           });
+          console.log(checkMenge);
           //저장
-          var rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", thisObj.displayModel);
+          var rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", checkMenge);
 
           /*await alert((rowCount.toString() + "건 저장되었습니다."), "알림");*/
           await alert("저장되었습니다.", "알림");
@@ -461,9 +474,9 @@ export class SBMRComponent {
 
         result.forEach(async (row: ZMMT1311GroupByModel) => {
           this.displayModel.push(new ZMMT1320Model(this.appConfig.mandt, "", this.appConfig.plant, this.lifnrValue ?? "", row.MATNR, "", "", row.MEINS, 0,
-            this.SupplyData.ARRequest_Date, this.SupplyData.GIRequest_Date, r_timeString, this.SupplyData.Requester_Name, "", "", "",
-            "", "", "", "", "", "", "", "", "", "", undefined, 0, undefined, "00:00:00", "", 0, undefined, "00:00:00",
-            "", 0, undefined, "00:00:00", "", "", "", "", "", "", "", this.appConfig.interfaceId, new Date(), nowTime, this.appConfig.interfaceId, new Date(), nowTime, row.MAKTX));
+            this.SupplyData.ARRequest_Date, this.SupplyData.GIRequest_Date, r_timeString, this.SupplyData.Requester_Name,"", "", "",
+            "", "", "", "", undefined, 0, undefined, "00:00:00", "", 0, 0, undefined, this.appConfig.interfaceId, new Date(), nowTime, this.appConfig.interfaceId, new Date()
+            , nowTime, row.MAKTX));
         });
 
         var matList = await this.getNewData(this);
@@ -483,6 +496,10 @@ export class SBMRComponent {
         this.dataLoad(this.imInfo, this.dataService, this)
       }
       this.loadingVisible = false;
+
+      setTimeout(() => {
+        this.StatusEntery.SetDataFilter([["DOMVALUE_L", "=", ""], "or", ["DOMVALUE_L", "=", "10"], "or", ["DOMVALUE_L", "=", "20"], "or", ["DOMVALUE_L", "=", "50"]]);
+      },500);
       //패널 없애는 로직 추가
 
     }
@@ -517,7 +534,7 @@ export class SBMRComponent {
 
     resultModel.forEach(async (row: ZMMT1320Model) => {
       row.MAKTX = matList.find(item => item.MATNR === row.IDNRK)?.MAKTX;
-      row.ZSHIP_STATUS_NM = "[" + row.ZSHIP_STATUS + "]"+this.statusCodeInfo.find(item => item.DOMVALUE_L === row.ZSHIP_STATUS)?.DDTEXT;
+      row.ZSHIP_STATUS_NM = "[" + row.ZSHIP_STATUS == "" ? "00" : row.ZSHIP_STATUS  + "]"+this.statusCodeInfo.find(item => item.DOMVALUE_L === row.ZSHIP_STATUS)?.DDTEXT;
     });
 
     this.drawalData = new ArrayStore(
@@ -556,11 +573,9 @@ export class SBMRComponent {
       selectData.forEach((array: any) => {
         zmmt1320List.push(new ZMMT1320Model(array.MANDT, array.VBELN, array.WERKS, array.LIFNR, array.IDNRK, array.LGORT, array.BWART, array.MEINS,
           array.SC_R_MENGE, array.SC_R_DATE_R, array.SC_R_DATE, array.SC_R_TIME, array.SC_R_NAME, array.INCO1,
-          array.TDLNR1, array.TDLNR2, array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZPHONE,
-          array.ZSHIP_STATUS, array.ZSHIPMENT_NO, array.BLAND_F, array.BLAND_F_NM, array.BLAND_T, array.BLAND_T_NM,
+          array.TDLNR1, array.ZSHIP_STATUS, array.BLAND_F, array.BLAND_F_NM, array.BLAND_T, array.BLAND_T_NM,
           array.SC_R_DATE_C, array.SC_L_MENGE, array.SC_L_DATE, array.SC_L_TIME, array.SC_L_NAME,
-          array.SC_G_MENGE, array.SC_G_DATE, array.SC_G_TIME, array.ZPOST_RUN_MESSAGE, array.SC_A_MENGE, array.SC_A_DATE, array.SC_A_TIME, array.SC_A_NAME, array.MBLNR, array.MJAHR,
-          array.ZEILE, array.MBLNR_C, array.MJAHR_C, array.ZEILE_C, array.ERNAM, array.ERDAT, array.ERZET, array.AENAM, array.AEDAT, array.AEZET, array.MAKTX, array.NAME1, DIMModelStatus.Modify));
+          array.SC_S_MENGE_T, array.SC_G_MENGE_T, array.SC_G_DATE, array.ERNAM, array.ERDAT, array.ERZET, array.AENAM, array.AEDAT, array.AEZET, array.MAKTX, array.NAME1, DIMModelStatus.Modify));
       });
       var rowCount1 = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", zmmt1320List);
     
@@ -591,11 +606,9 @@ export class SBMRComponent {
       selectData.forEach((array: any) => {
         zmmt1320List.push(new ZMMT1320Model(array.MANDT, array.VBELN, array.WERKS, array.LIFNR, array.IDNRK, array.LGORT, array.BWART, array.MEINS,
           array.SC_R_MENGE, array.SC_R_DATE_R ?? nullDate, array.SC_R_DATE ?? nullDate, array.SC_R_TIME ?? "000000", array.SC_R_NAME, array.INCO1,
-          array.TDLNR1, array.TDLNR2, array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZPHONE,
-          array.ZSHIP_STATUS, array.ZSHIPMENT_NO, array.BLAND_F, array.BLAND_F_NM, array.BLAND_T, array.BLAND_T_NM,
+          array.TDLNR1, array.ZSHIP_STATUS, array.BLAND_F, array.BLAND_F_NM, array.BLAND_T, array.BLAND_T_NM,
           array.SC_R_DATE_C ?? nullDate, array.SC_L_MENGE, array.SC_L_DATE ?? nullDate, array.SC_L_TIME ?? "000000", array.SC_L_NAME,
-          array.SC_G_MENGE, array.SC_G_DATE ?? nullDate, array.SC_G_TIME ?? "000000", array.ZPOST_RUN_MESSAGE, array.SC_A_MENGE, array.SC_A_DATE ?? nullDate, array.SC_A_TIME ?? "000000", array.SC_A_NAME, array.MBLNR, array.MJAHR,
-          array.ZEILE, array.MBLNR_C, array.MJAHR_C, array.ZEILE_C, array.ERNAM, array.ERDAT, array.ERZET, array.AENAM, array.AEDAT, array.AEZET, array.MAKTX, array.NAME1, DIMModelStatus.Delete));
+          array.SC_S_MENGE_T, array.SC_G_MENGE_T, array.SC_G_DATE ?? nullDate, array.ERNAM, array.ERDAT, array.ERZET, array.AENAM, array.AEDAT, array.AEZET, array.MAKTX, array.NAME1,"", DIMModelStatus.Delete));
       });
 
       var rowCount1 = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", zmmt1320List);
@@ -651,11 +664,9 @@ export class SBMRComponent {
       selectData.forEach((array: any) => {
         zmmt1320List.push(new ZMMT1320Model(array.MANDT, array.VBELN, array.WERKS, array.LIFNR, array.IDNRK, array.LGORT, array.BWART, array.MEINS,
           array.SC_R_MENGE, array.SC_R_DATE_R ?? nullDate, array.SC_R_DATE ?? nullDate, array.SC_R_TIME??"000000", array.SC_R_NAME, array.INCO1,
-          array.TDLNR1, array.TDLNR2, array.ZCARTYPE, array.ZCARNO, array.ZDRIVER, array.ZPHONE,
-          "50", array.ZSHIPMENT_NO, array.BLAND_F, array.BLAND_F_NM, array.BLAND_T, array.BLAND_T_NM,
+          array.TDLNR1, "50", array.BLAND_F, array.BLAND_F_NM, array.BLAND_T, array.BLAND_T_NM,
           array.SC_R_DATE_C ?? nullDate, array.SC_L_MENGE, array.SC_L_DATE ?? nullDate, array.SC_L_TIME??"000000", array.SC_L_NAME,
-          array.SC_G_MENGE, array.SC_G_DATE ?? nullDate, array.SC_G_TIME ?? "000000", array.ZPOST_RUN_MESSAGE, array.SC_A_MENGE, new Date("0001-01-01"), "000000", "", array.MBLNR, array.MJAHR,
-          array.ZEILE, array.MBLNR_C, array.MJAHR_C, array.ZEILE_C, array.ERNAM, array.ERDAT, array.ERZET, array.AENAM, array.AEDAT, array.AEZET, DIMModelStatus.Modify));
+          array.SC_S_MENGE_T, array.SC_G_MENGE_T, array.SC_G_DATE ?? nullDate, array.ERNAM, array.ERDAT, array.ERZET, array.AENAM, array.AEDAT, array.AEZET,"","","", DIMModelStatus.Modify));
       });
       var rowCount1 = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320ModelList", zmmt1320List);
 

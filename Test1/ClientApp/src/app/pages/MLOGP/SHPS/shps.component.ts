@@ -35,6 +35,9 @@ import { Workbook } from 'exceljs';
 import saveAs from 'file-saver';
 import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 import { ZSDS0030Model } from '../../../shared/dataModel/MLOGP/ZSDS0030';
+import { ZMMT1321Join1320Model } from '../../../shared/dataModel/MLOGP/Zmmt1320Join1321';
+import { TINCT } from './app.service';
+import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
 //필터
 const getOrderDay = function (rowData: any): number {
   return (new Date(rowData.OrderDate)).getDay();
@@ -100,6 +103,8 @@ export class SHPSComponent {
 
   //차량번호(수정)
   zcarnoModiCode!: TableCodeInfo;
+
+  inco1Code: TableCodeInfo;
 
   /*Entery value 선언*/
   //출하지점
@@ -167,7 +172,7 @@ export class SHPSComponent {
   orderGridData: ZSDS6410Model[] = [];
 
   //임가공 원데이터
-  imOrderList: ZMMT1320Model[] = [];
+  imOrderList: ZMMT1321Join1320Model[] = [];
 
   //납품총수량-배차량
   possible!: number;
@@ -195,6 +200,9 @@ export class SHPSComponent {
   addDetailButtonOptions: any;
 
   excelButtonOptions: any;
+
+  //다중거래명세서 버튼
+  multiTeansactionPrintOptions: any;
 
   //편집 취소 버튼
   cancelEditButtonOptions: any;
@@ -234,6 +242,7 @@ export class SHPSComponent {
   zunloadList: ZSDS0030Model[] = [];
   zpaltypeList: ZSDS0030Model[] = [];
   lgNmList: T001lModel[] = [];
+  inco1List: TINCT[] = [];
 
   enteryLoading: boolean = false;
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
@@ -254,6 +263,7 @@ export class SHPSComponent {
     this.tdlnrCode = appConfig.tableCode("운송업체")
     this.dd07tCode = appConfig.tableCode("RFC_하차정보");
     this.zpalCode = appConfig.tableCode("RFC_파레트유형");
+    this.inco1Code = appConfig.tableCode("인코텀스");
 
     //----------------------------------------------------------------------------------------------------------
     let codeInfos = [
@@ -261,6 +271,7 @@ export class SHPSComponent {
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.tdlnrCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.dd07tCode),
       new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.zpalCode),
+      new PossibleEnteryCodeInfo(CodeInfoType.tableCode, this.inco1Code),
     ];
     PossibleEntryDataStoreManager.setDataStore(this.dataStoreKey, codeInfos, appConfig, dataService);
     //---------------------------------------------------------------------------------------------------------
@@ -325,6 +336,118 @@ export class SHPSComponent {
       text: "엑셀다운로드",
       onClick: async (e: any) => {
         this.onExportingOrderData(e);
+      }
+    };
+
+    this.multiTeansactionPrintOptions = {
+      text: "합적거래명세서",
+      onClick: async (e: any) => {
+        var selectData = this.orderGrid.instance.getSelectedRowsData();
+        if (selectData.length === 0) {
+          alert("라인을 선택해야합니다.", "알림");
+          return;
+        } else if (selectData.length > 4) {
+          alert("한번에 라인은 4행까지 선택가능합니다.</br>5행 이상은 별도로 선택해서 출력가능합니다.", "알림");
+          return;
+        }
+
+        var ivbelns = "";
+        var checkError = "";
+
+        for (var row of selectData) {
+          ivbelns = ivbelns.concat(row.VBELN, "|");
+          if (row.ZCARNO !== selectData[0].ZCARNO) {
+            checkError = "같은 차량끼리만 합적할 수 있습니다.";
+            break;
+          }
+
+          if (row.LGORT !== selectData[0].LGORT) {
+            checkError = "같은 출발지끼리만 합적할 수 있습니다.";
+            break;
+          }
+
+          if (row.ZLGORT !== selectData[0].ZLGORT) {
+            checkError = "같은 도착지끼리만 합적할 수 있습니다.";
+            break;
+          }
+
+          if (row.STREET !== selectData[0].STREET) {
+            checkError = "같은 도착주소끼리만 합적할 수 있습니다.";
+            break;
+          }
+
+          if (row.NAME1 !== selectData[0].NAME1) {
+            checkError = "같은 납품처끼리만 합적할 수 있습니다.";
+            break;
+          }
+
+          if (row.Z3PARVW !== selectData[0].Z3PARVW) {
+            checkError = "같은 1차운송사끼리만 합적할 수 있습니다.";
+            break;
+          }
+
+          if (row.Z4PARVW !== selectData[0].Z4PARVW) {
+            checkError = "같은 2차운송사끼리만 합적할 수 있습니다.";
+            break;
+          }
+        }
+
+        if (checkError !== "") {
+          alert(checkError, "알림");
+          return;
+        }
+
+        ivbelns = ivbelns.substr(0, ivbelns.length - 1);
+
+        var BEZEI = "";
+        var ADDR1 = "";
+        var incoModel = this.inco1List.find(item => item.INCO1 === selectData[0].INCO1)
+        if (incoModel !== undefined)
+          BEZEI = incoModel.BEZEI;
+
+        var result7110Model = await this.dataService.SelectModelData<ZSDT7110Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7110ModelList", [],
+          `MANDT = '${this.appConfig.mandt}' AND LGORT = '${selectData[0].LGORT}' `, "", QueryCacheType.None);
+
+        if (result7110Model.length > 0)
+          ADDR1 = result7110Model[0].ZADDR1;
+
+        let params: ParameterDictionary =
+        {
+          "dbTitle": this.appConfig.dbTitle,
+          "itddatFrom": selectData[0].TDDAT,
+          "itddatTo": selectData[0].TDDAT,
+          "ivbeln": selectData[0].VBELN,
+          /*      "vbelnvl": "",*/
+          "mandt": this.appConfig.mandt,
+          //"ivstel": selectData[0].VSTEL,
+          "zcarno": selectData[0].ZCARNO,
+          "inco1": selectData[0].INCO1,
+          "bezei": BEZEI,
+          "lgort": selectData[0].LGORT,
+          "zlgort": selectData[0].ZLGORT,
+          "lgobe": selectData[0].LGOBE,
+          "zlgobe": selectData[0].ZLGOBE,
+          "zaddr1": ADDR1,
+          "zname": selectData[0].NAME1,
+          "z3Parvw": selectData[0].Z3PARVW,
+          "z4Parvw": selectData[0].Z4PARVW,
+          "z3Parvwnm": "",
+          "z4Parvwnm": "",
+          //"z3Parvwbunum": "",
+          //"z4Parvwbunum": "",
+          //"namhaebunum": "",
+          //"zvkaus": selectData[0].ZVKAUS,
+          //"zvkausnm": "",
+          "ivbelns": ivbelns,
+          "wadat": selectData[0].WADAT_IST,
+          "zphone": selectData[0].ZPHONE,
+          "zdriver": selectData[0].ZDRIVER,
+          "street": selectData[0].STREET,
+          "telf1": selectData[0].TELF1
+        };
+
+        setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction5", params) });
+
       }
     };
 
@@ -469,34 +592,17 @@ export class SHPSComponent {
     }
     else {
       //배차상태가 50이 생기면 없애도 됨
-      /*var whereCondi = " AND ( ( A.MBLNR = '' AND A.MBLNR_C = '' ) OR ( A.MBLNR <> '' AND A.MBLNR_C <> '' ) )"*/
+      var whereCondi = ` AND B.LGORT LIKE '%${this.lgValue}' `;
 
-      //thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
-      //  [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), this.selectStatus, whereCondi],
-      //  "", "A.VBELN", QueryCacheType.None);
-      thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList",
-        [thisObj.appConfig.mandt, thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), "50", ""],
+      thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1321Join1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320List",
+        [thisObj.appConfig.mandt, this.appConfig.plant, "'20', '30', '40', '50'", thisObj.startDate.toString().replaceAll('-', ""), thisObj.endDate.toString().replaceAll('-', ""), "", "", `'50'`, whereCondi],
         "", "A.VBELN", QueryCacheType.None);
 
-      thisObj.imOrderList.forEach(async (row: ZMMT1320Model) => {
-        var tdlnrtxt = "";
-        var tdlnrText = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR2);
-        if (tdlnrText !== undefined)
-          tdlnrtxt = tdlnrText.NAME1;
-
-        var tdlnr1txt = "";
-        var tdlnr1Text = this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR1);
-        if (tdlnr1Text !== undefined)
-          tdlnr1txt = tdlnr1Text.NAME1;
-
-        var lgorttxt = "";
-        var lgortText = this.lgEntery.gridDataSource._array.find(item => item.LGORT === row.LGORT);
-        if (lgortText !== undefined)
-          lgorttxt = lgortText.LGOBE;
-
-        thisObj.orderGridData.push(new ZSDS6410Model(row.VBELN, "", "", "", "", "", "", "", row.SC_R_DATE, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
-          row.MEINS, "9999", row.SC_L_MENGE, 0, undefined, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
-          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_L_DATE, "", "", 0, "", "", "", "", lgorttxt, tdlnr1txt, tdlnrtxt));
+      thisObj.imOrderList.forEach(async (row: ZMMT1321Join1320Model) => {
+        thisObj.orderGridData.push(new ZSDS6410Model(row.VBELN, row.POSNR, "", "", "", "", "", "", row.SC_R_DATE_R, row.IDNRK, row.MAKTX, row.SC_R_MENGE, row.SC_L_MENGE,
+          row.MEINS, "9999", row.SC_S_MENGE, row.SC_G_MENGE, row.SC_G_DATE, 0, "", row.LGORT, "", row.LIFNR, row.NAME1, "", "", "", "", "", "", "", row.WERKS, "", row.TDLNR1, row.TDLNR2,
+          row.ZCARTYPE, row.ZCARNO, row.ZDRIVER, "", row.ZPHONE, "", "", "", row.ZSHIP_STATUS, row.ZSHIPMENT_NO, row.SC_S_DATE, "", "", 0, "", "", "", "", "", "", row.BLAND_F_NM,
+          this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR1)?.NAME1, this.tdlnrEntery.gridDataSource._array.find(item => item.LIFNR === row.TDLNR2)?.NAME1, row.BLAND_T_NM));
       })
     }
 
@@ -565,20 +671,34 @@ export class SHPSComponent {
       alert("라인을 선택해야합니다.", "알림");
       return;
     }
-    let params: ParameterDictionary =
-    {
-      "dbTitle": this.appConfig.dbTitle,
-      "itddatFrom": selectData[0].TDDAT,
-      "itddatTo": selectData[0].TDDAT,
-      "ivbeln": selectData[0].VBELN,
-/*      "vbelnvl": "",*/
-      "mandt": this.appConfig.mandt,
-      "ivstel": selectData[0].VSTEL
-    };
-    if (selectData[0].LGORT === "3000" || selectData[0].LGORT === "3200")
-      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction2", params) });
-    else
-      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction3", params) });
+
+    if (selectData[0].VSTEL !== "9999") {
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "itddatFrom": selectData[0].TDDAT,
+        "itddatTo": selectData[0].TDDAT,
+        "ivbeln": selectData[0].VBELN,
+        /*      "vbelnvl": "",*/
+        "mandt": this.appConfig.mandt,
+        "ivstel": selectData[0].VSTEL
+      };
+      if (selectData[0].LGORT === "3000" || selectData[0].LGORT === "3200")
+        setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction2", params) });
+      else
+        setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction3", params) });
+    } else {
+      //임가공 명세서
+      let params: ParameterDictionary =
+      {
+        "dbTitle": this.appConfig.dbTitle,
+        "mandt": this.appConfig.mandt,
+        "ivbeln": selectData[0].VBELN,
+        "iposnr": selectData[0].POSNR
+      };
+
+      setTimeout(() => { this.reportViewer.printReport("specificationOnTransaction4", params) });
+    }
 
   }
 
@@ -611,7 +731,7 @@ export class SHPSComponent {
     var rcv = new ZSDIFPORTALSAPLE028RcvModel("", "", []);
     var insertModel: ZSDIFPORTALSAPLE028RcvModel[] = [rcv]
     var zsdsList: ZSDS6400Model[] = [];
-
+    /*
       //임가공 CBO업데이트
       this.orderGrid.instance.getSelectedRowsData().forEach(async (array: ZSDS6410Model) => {
         var getData = this.imOrderList.find(item => item.VBELN === array.VBELN)
@@ -644,7 +764,7 @@ export class SHPSComponent {
         }
       });
       rowCount = await this.dataService.ModifyModelData<ZMMT1320Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1320CustomList", zmmt1320List);
-
+      */
     /*if (rowCount > 0) {*/
     insertModel[0].E_MTY = "S";
 
@@ -674,6 +794,10 @@ export class SHPSComponent {
     let zpaltypeDataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.zpalCode);
     var zpaltypeModel = zpaltypeDataSet?.tables["CODES"].getDataObject(ZSDS0030Model);
     this.zpaltypeList = zpaltypeModel;
+
+    let inco1DataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.inco1Code);
+    var inco1Model = inco1DataSet?.tables["CODES"].getDataObject(TINCT);
+    this.inco1List = inco1Model;
 
     let dataSet = await PossibleEntryDataStoreManager.getDataStoreDataSet(this.dataStoreKey, this.appConfig, this.lgCode);
 

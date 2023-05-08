@@ -108,6 +108,7 @@ export class OBMMComponent {
   questionCodeValue: string | null = null;
   key: any;
 
+  idDisabled: boolean = true;
   //--------------------------------------------------------------------
 
   /**
@@ -218,6 +219,7 @@ export class OBMMComponent {
   loadingVisible: boolean = false;
   //로딩
   loading = false;
+  rolid = [];
 
   deviceInfo: any;
   casResult: any;
@@ -252,10 +254,11 @@ export class OBMMComponent {
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private nbpAgetService: NbpAgentservice, private appInfo: AppInfoService, http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, private authService: AuthService) {
     appInfo.title = AppInfoService.APP_TITLE + " | 회원정보 수정";
     var userInfo = authService.getUser();
-    /*
-    if ("admin" == "admin")
-      this.loginText.editorOptions = { disabled: false };
-    */
+    this.rolid = userInfo.data.role;
+
+    if (this.rolid.find(item => item === "ADMIN") !== undefined)
+      this.idDisabled = false;
+    
     //possible-entry
     this.roleGridBoxOpened = false;
     this.statusGridBoxOpened = false;

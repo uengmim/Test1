@@ -216,6 +216,10 @@
              (onClick)="onDeleteDocNo($event)">
   </dx-button>
 </div>
+
+<excel-upload #ExcelUpload (excelUploaded)="onExcelUploaded($event)">
+</excel-upload>
+
 <div style="clear:both"></div>
 <dx-data-grid class="dx-card wide-card"
               [dataSource]="dataSource"

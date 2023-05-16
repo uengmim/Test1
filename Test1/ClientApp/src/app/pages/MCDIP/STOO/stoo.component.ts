@@ -33,7 +33,7 @@ import { ZSDS0060Model, ZSDS0061Model, ZSDSTOORDERManageModel } from '../../../s
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { mode } from 'crypto-js';
 import { SelectDataSourcePage } from '@devexpress/analytics-core/analytics-wizard';
-
+import { Title } from '@angular/platform-browser';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -181,9 +181,12 @@ export class STOOComponent {
     },
     validationRequestsCallbacks: this.callbacks
   };
-  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+  constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService,
+    private appConfig: AppConfigService, private titleService: Title) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO주문-유류/액상";
+    this.titleService.setTitle(appInfo.title);
+
     let page = this;
 
     //QA test용 설정

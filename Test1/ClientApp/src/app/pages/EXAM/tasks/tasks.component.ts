@@ -23,6 +23,7 @@ import { debug } from 'console';
 import { AttachFileComponent } from '../../../shared/components/attach-file/attach-file.component';
 import { OfficeXPUtility } from '../../../shared/officeXp.utility';
 import { HttpClient } from '@angular/common/http';
+import { Workbook } from 'exceljs';
 
 @Component({
   templateUrl: 'tasks.component.html',
@@ -628,5 +629,24 @@ export class TasksComponent implements OnDestroy {
   uploadComplete(e: any) {
     console.info(e);
     console.log("UPLOAD AFTER: " + this.AttachFile.uploadFileExists); //업로드할 첨부파일 있으면 True 아니면 False
+  }
+
+  /**
+   * 업로드 EXCEL 파일
+   * 
+   * @param e
+   */
+  onExcelUploaded(e: any) {
+    var workbook = e.workbook as Workbook;
+
+    console.info(e);
+    console.log("UPLOAD EXCEL: " + e.filename + ", worksheet count:" + workbook.worksheets.length);
+
+    var loadMsg = `${e.filename} Woorkbook loaded\n`;
+    for (var ws of workbook.worksheets) {
+      loadMsg += "---- WorkSheet:" + ws.name + "\n";
+    }
+
+    alert(loadMsg);
   }
 }

@@ -1,0 +1,887 @@
+<!--
+  차량마스타 등록
+  -->
+<div style="margin:10px 10px 0px 10px">
+  <!--toolbar-->
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px;">
+
+
+    <dxi-item location="before" locateInMenu="auto" style="margin-left:10px;">
+      <div *dxTemplate>
+        <dx-select-box [dataSource]="cSpart"
+                       displayExpr="name"
+                       valueExpr="code"
+                       value="20"
+                       label="차량구분"
+                       labelMode="floating"
+                       (onValueChanged)="onCSpartValueChanged($event)"></dx-select-box>
+      </div>
+    </dxi-item>
+    <dxi-item location="before" locateInMenu="auto" style="margin-left: 15px; margin-right: 30px;">
+      <dx-text-box #CarNumText
+                   label="조회하실 차량번호를 입력하세요."
+                   style="width:250px; height:35px;"
+                   labelMode="floating"
+                   [(value)]="idValue"
+                   [maxLength]="15"></dx-text-box>
+    </dxi-item>
+    <dxi-item location="before"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              style="margin-left:30px;"
+              [options]="searchButtonOptions">
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              style="margin-right: 15px;"
+              locateInMenu="auto">
+      <dx-button stylingMode="contained"
+                 text="탱크로리 차량등록"
+                 type="normal"
+                 (onClick)="tankCar()"
+                 [width]="180">
+      </dx-button>
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto">
+      <dx-button stylingMode="contained"
+                 text="카고 차량등록"
+                 type="normal"
+                 (onClick)="cargoRegis()"
+                 [width]="180">
+      </dx-button>
+    </dxi-item>
+  </dx-toolbar>
+
+  <dx-data-grid #maindataGrid
+                [dataSource]="mainData"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                keyExpr="ZCARNO"
+                [columnHidingEnabled]="true"
+                [allowColumnResizing]="true"
+                columnResizingMode="columnResizeMode"
+                [selection]="{ mode: 'single' }"
+                [keyExpr]="['ZCARNO','LIFNR']"
+                [allowColumnReordering]="true"
+                height="calc(100vh - 230px)"
+                (onRowDblClick)="orderDBClick($event)">
+
+    <!--Datagrid Option-->
+    <dxo-paging [enabled]="true"></dxo-paging>
+    <dxo-pager [showInfo]="false"></dxo-pager>
+    <dxo-paging [pageSize]="15"> </dxo-paging>
+    <!--Filtering Option-->
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-builder-popup [position]="popupPosition">
+    </dxo-filter-builder-popup>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
+
+    <!--Data column-->
+    <dxi-column dataField="ZCARNO"
+                caption="차량번호"
+                alignment="center">
+    </dxi-column>
+
+    <dxi-column dataField="ZCARNO_NAME"
+                caption="차량명"
+                [visible]="tankVisible">
+    </dxi-column>
+    <dxi-column dataField="ZDERIVER1"
+                caption="운전기사명"
+                [visible]="tankVisible">
+    </dxi-column>
+    <dxi-column dataField="ZDRIVER"
+                caption="운전기사명"
+                [visible]="cargoVisible">
+    </dxi-column>
+    <dxi-column dataField="ZCARTYPE1"
+                caption="화물차종"
+                alignment="center"
+                [visible]="tankVisible">
+    </dxi-column>
+    <dxi-column dataField="ZCARTYPE"
+                caption="화물차종"
+                alignment="center"
+                [visible]="cargoVisible">
+    </dxi-column>
+    <dxi-column dataField="ZCARTYPE1NAME"
+                caption="화물차종명"
+                alignment="center">
+    </dxi-column>
+    <dxi-column dataField="ZCARYEAR"
+                caption="차량연식"
+                alignment="center">
+    </dxi-column>
+    <dxi-column dataField="ZRFID"
+                caption="RFID"
+                alignment="center">
+    </dxi-column>
+
+
+  </dx-data-grid>
+
+  <!--탱크로리 차종선택 팝업-->
+  <dx-popup width="30%"
+            height="20%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="tankCarSelectVisible">
+    <dxi-toolbar-item text="차량종류"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="carSelectButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="carSelectCloseOptions">
+    </dxi-toolbar-item>
+    <div id="form-container">
+      <dx-form [formData]="carFormData">
+        <dxi-item dataField="ZCARTYPE1" [label]="{text: '화물차종'}">
+          <div *dxTemplate>
+            <nh-possible-comm #carDataCodeEntery2
+                              [dataStoreKey]="dataStoreKey"
+                              [codeInfo]="carDataCode2"
+                              valueColumn="DOMVALUE_L"
+                              [showClearButton]="true"
+                              valueDisplayFormat="(%DOMVALUE_L%)%DDTEXT%"
+                              width="auto"
+                              [(selectedValue)]="carDataValue2"
+                              popupGridScrollMode="standard"
+                              [popupGridPagingMode]="true"
+                              [popupGridPageSize]="10"
+                              comboGridScrollMode="virtual"
+                              [gridBoxWidth]="500"
+                              class="weight-test"
+                              [showDataLoadingPanel]="showDataLoadingPanel"
+                              (onEntryValueChanged)="onCarTypeCodeCodeValueChanged2($event)">
+            </nh-possible-comm>
+          </div>
+        </dxi-item>
+      </dx-form>
+    </div>
+
+  </dx-popup>
+
+  <!--탱크로리 차량등록-->
+  <dx-popup width="50%"
+            height="70%"
+            margin="20px"
+            [showTitle]="true"
+            [title]="popupTitle"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="tankRegisterPopupVisible">
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [visible]="youchangRegisterPopupVisible"
+                      [options]="youchangRegisterOpenButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="tankRegisterSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="tankRegisterCloseButtonOptions">
+    </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form direction="row" #masterform style="margin-bottom:10px; margin-top: 10px;" [formData]="tankRegisterFormData">
+          <dxi-item itemType="group" [colCount]="2" [colSpan]="4" style="margin-top:5px">
+            <dxi-item dataField="ZCARTYPE1" [label]="{text: '화물차종'}" [editorOptions]="{ height: 40 }" [disabled]="true">
+              <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>  <div *dxTemplate>
+                <nh-possible-comm #carDataCodeEntery
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="carDataCode"
+                                  valueColumn="DOMVALUE_L"
+                                  [showClearButton]="true"
+                                  valueDisplayFormat="(%DOMVALUE_L%)%DDTEXT%"
+                                  width="auto"
+                                  [(selectedValue)]="carDataValue"
+                                  popupGridScrollMode="standard"
+                                  [popupGridPagingMode]="true"
+                                  [popupGridPageSize]="10"
+                                  comboGridScrollMode="virtual"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onCarTypeCodeCodeValueChanged($event)">
+                  <nbp-validator [adapter]="carTypeAdapter">
+                    <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>
+                  </nbp-validator>
+                </nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item location="before" locateInMenu="auto">
+              <div *dxTemplate style="float: left; margin-left: 10px; margin-top: 5px; ">
+                <dx-check-box text="사용여부" [(value)]="validValue"></dx-check-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" [colCount]="1" [colSpan]="4">
+            <dxi-item dataField="ZDOCNO" [disabled]="true" [editorOptions]="{ width: 250 }"><dxo-label text="관리번호"></dxo-label></dxi-item>
+            <dxi-item dataField="LIFNR" [disabled]="false">
+              <dxo-label text="운송업체"></dxo-label>
+              <dxi-validation-rule type="required" message="운송업체를 입력해주십시오."></dxi-validation-rule>
+              <div *dxTemplate>
+                <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
+                                  [dataStoreKey]="dataStoreKey"
+                                  valueColumn="LIFNR"
+                                  valueDisplayFormat="%NAME1%(%LIFNR%)"
+                                  width="400"
+                                  label="운송사"
+                                  labelMode="floating"
+                                  [showClearButton]="true"
+                                  [(selectedValue)]="tdlnrValue"
+                                  popupGridScrollMode="standard"
+                                  [popupGridPagingMode]="true"
+                                  [popupGridPageSize]="10"
+                                  comboGridScrollMode="virtual"
+                                  [gridBoxWidth]="500"
+                                  (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ZCARNO" [disabled]="false" [editorOptions]="{ width: 250 }">
+              <dxo-label text="차량번호"></dxo-label>
+              <dxi-validation-rule type="required" message="차량번호를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZCARNO_NAME" [disabled]="false" [editorOptions]="{ width: 400 }">
+              <dxo-label text="차량명"></dxo-label>
+              <dxi-validation-rule type="required" message="차량명을 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" [colCount]="2" [colSpan]="4">
+            <dxi-item dataField="ZOWNERNAME" [disabled]="false" [editorOptions]="{ width: 300 }">
+              <dxo-label text="차량소유주"></dxo-label>
+              <dxi-validation-rule type="required" message="차량소유주를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item location="before" locateInMenu="auto">
+              <div *dxTemplate style="float: left; margin-left: 80px; margin-top: 5px; ">
+                <dx-check-box text="법적서류제출여부" [(value)]="documentValue"></dx-check-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" [colCount]="1" [colSpan]="4">
+            <dxi-item dataField="ZADDRESS" [disabled]="false" [editorOptions]="{ width: 500 }">
+              <dxo-label text="차량소유주 주소"></dxo-label>
+              <dxi-validation-rule type="required" message="차량소유주 주소 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZCAROWNER">
+              <dxi-validation-rule type="required" message="차량소유 구분 입력해주십시오"></dxi-validation-rule>
+              <dxo-label text="차량소유 구분"></dxo-label>
+              <dx-select-box [dataSource]="ownData"
+                             displayExpr="Name"
+                             valueExpr="ID"
+                             width="150"
+                             [(value)]="ownValue"
+                             (onValueChanged)="onOwnValueChanged($event)">
+              </dx-select-box>
+            </dxi-item>
+            <!--<dxi-item dataField="ZLEGION" [disabled]="false" [editorOptions]="{ width: 200 }"><dxo-label text="운송요율 구역"></dxo-label></dxi-item>-->
+            <dxi-item dataField="ZCARYEAR" [disabled]="false" [editorOptions]="{ width: 200 }"><dxo-label text="차량연식"></dxo-label></dxi-item>
+            <dxi-item dataField="ZRFID" [disabled]="false" [editorOptions]="{ width: 250 }"><dxo-label text="RFID"></dxo-label></dxi-item>
+            <dxi-item dataField="ZPRODUCT1" [disabled]="false" [editorOptions]="{ width: 100 }">
+              <dxo-label text="취급제품"></dxo-label>
+              <nh-possible-comm #zproductEntery
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zproductCode"
+                                valueColumn="DOMVALUE_L"
+                                [showClearButton]="true"
+                                valueDisplayFormat="(%DOMVALUE_L%)%DDTEXT%"
+                                width="250"
+                                [(selectedValue)]="zproductValue"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZprocutValueChanged($event)">
+                <dxi-validation-rule type="required" message="취급제품을 입력해주십시오."></dxi-validation-rule>
+              </nh-possible-comm>
+            </dxi-item>
+            <dxi-item itemType="group" [colCount]="2" style="margin-top:5px">
+              <dxi-item dataField="ZQUAN" [disabled]="false" [editorOptions]="{ width: 250 }">
+                <dxo-label text="적재량"></dxo-label>
+                <dxi-validation-rule type="required" message="적재량을 입력해주십시오."></dxi-validation-rule>
+              </dxi-item>
+              <dxi-item dataField="VRKME" [disabled]="true" [editorOptions]="{ width: 50 }">
+                <dxo-label text="단위"></dxo-label>
+              </dxi-item>
+              <dxi-item dataField="ZWEIGHT1" [disabled]="false" [editorOptions]="{ width: 250 }">
+                <dxo-label text="공차중량"></dxo-label>
+                <dxi-validation-rule type="required" message="공차중량을 입력해주십시오."></dxi-validation-rule>
+              </dxi-item>
+              <dxi-item dataField="MEINS" [disabled]="true" [editorOptions]="{ width: 50 }">
+                <dxo-label text="단위"></dxo-label>
+              </dxi-item>
+            </dxi-item>
+            <dxi-item dataField="ZCARTANK" [disabled]="quantity" [editorOptions]="{ width: 100 }">
+              <dxo-label text="유창수량"></dxo-label>
+              <dxi-validation-rule type="required" message="유창수량을 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+
+            <dxi-item dataField="ZDERIVER1" [disabled]="false" [editorOptions]="{ width: 250 }">
+              <dxo-label text="운전기사"></dxo-label>
+              <dxi-validation-rule type="required" message="운전기사를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZPHONE1" [disabled]="false" [editorOptions]="{ width: 500 }">
+              <dxo-label text="운전기사연락처"></dxo-label>
+              <dxi-validation-rule type="required" message="운전기사연락처를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZLICENCE1" [disabled]="false" [editorOptions]="{ width: 500 }">
+              <dxo-label text="면허증번호"></dxo-label>
+              <dxi-validation-rule type="required" message="면허증번호를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="REGNO1" [disabled]="false" [editorOptions]="{ width: 300 }"><dxo-label text="운전기사 주민번호"></dxo-label></dxi-item>
+            <dxi-item dataField="ZADDRESS1" [disabled]="false" [editorOptions]="{ width: 500 }"><dxo-label text="기사주소"></dxo-label></dxi-item>
+          </dxi-item>
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+  </dx-popup>
+
+  <!--탱크로리 수정-->
+  <dx-popup width="50%"
+            height="70%"
+            margin="20px"
+            [showTitle]="true"
+            [title]="popupTitle"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="tankUpdatePopupVisible">
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [visible]="youchangUpdatePopupVisible"
+                      [options]="youchangUpdateOpenButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="tankUpdateSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="tankUpdateCloseButtonOptions">
+    </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form direction="row" #masterform style="margin-bottom:10px; margin-top: 10px;" [formData]="tankUpdateFormData">
+          <dxi-item itemType="group" [colCount]="2" [colSpan]="4" style="margin-top:5px">
+            <dxi-item dataField="ZCARTYPE1" [label]="{text: '화물차종'}" [editorOptions]="{ height: 40 }" [disabled]="true">
+              <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>  <div *dxTemplate>
+                <nh-possible-comm #carDataCodeEntery
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="carDataCode"
+                                  valueColumn="DOMVALUE_L"
+                                  [showClearButton]="true"
+                                  valueDisplayFormat="(%DOMVALUE_L%)%DDTEXT%"
+                                  width="auto"
+                                  [(selectedValue)]="carDataValue"
+                                  popupGridScrollMode="standard"
+                                  [popupGridPagingMode]="true"
+                                  [popupGridPageSize]="10"
+                                  comboGridScrollMode="virtual"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onCarTypeCodeCodeValueChanged($event)">
+                  <nbp-validator [adapter]="carTypeAdapter">
+                    <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>
+                  </nbp-validator>
+                </nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item location="before" locateInMenu="auto">
+              <div *dxTemplate style="float: left; margin-left: 10px; margin-top: 5px; ">
+                <dx-check-box text="사용여부" [(value)]="validValue"></dx-check-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" [colCount]="1" [colSpan]="4">
+            <dxi-item dataField="ZDOCNO" [disabled]="true" [editorOptions]="{ width: 250 }"><dxo-label text="관리번호"></dxo-label></dxi-item>
+            <dxi-item dataField="LIFNR" [disabled]="false">
+              <dxo-label text="운송업체"></dxo-label>
+              <dxi-validation-rule type="required" message="운송업체를 입력해주십시오."></dxi-validation-rule>
+              <div *dxTemplate>
+                <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
+                                  [dataStoreKey]="dataStoreKey"
+                                  valueColumn="LIFNR"
+                                  valueDisplayFormat="%NAME1%(%LIFNR%)"
+                                  width="400"
+                                  label="운송사"
+                                  labelMode="floating"
+                                  [showClearButton]="true"
+                                  [(selectedValue)]="tdlnrValue"
+                                  popupGridScrollMode="standard"
+                                  [popupGridPagingMode]="true"
+                                  [popupGridPageSize]="10"
+                                  comboGridScrollMode="virtual"
+                                  [gridBoxWidth]="500"
+                                  (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ZCARNO" [disabled]="false" [editorOptions]="{ width: 250 }">
+              <dxo-label text="차량번호"></dxo-label>
+              <dxi-validation-rule type="required" message="차량번호를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZCARNO_NAME" [disabled]="false" [editorOptions]="{ width: 400 }">
+              <dxo-label text="차량명"></dxo-label>
+              <dxi-validation-rule type="required" message="차량명을 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" [colCount]="2" [colSpan]="4">
+            <dxi-item dataField="ZOWNERNAME" [disabled]="false" [editorOptions]="{ width: 300 }">
+              <dxo-label text="차량소유주"></dxo-label>
+              <dxi-validation-rule type="required" message="차량소유주를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item location="before" locateInMenu="auto">
+              <div *dxTemplate style="float: left; margin-left: 80px; margin-top: 5px; ">
+                <dx-check-box text="법적서류제출여부" #chkgbox [(value)]="documentValue"></dx-check-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="group" [colCount]="1" [colSpan]="4">
+            <dxi-item dataField="ZADDRESS" [disabled]="false" [editorOptions]="{ width: 500 }">
+              <dxo-label text="차량소유주 주소"></dxo-label>
+              <dxi-validation-rule type="required" message="차량소유주 주소 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZCAROWNER">
+              <dxi-validation-rule type="required" message="차량소유 구분 입력해주십시오"></dxi-validation-rule>
+              <dxo-label text="차량소유 구분"></dxo-label>
+              <dx-select-box [dataSource]="ownData"
+                             displayExpr="Name"
+                             valueExpr="ID"
+                             width="150"
+                             [(value)]="ownValue"
+                             (onValueChanged)="onOwnValueChanged($event)">
+              </dx-select-box>
+            </dxi-item>
+            <!--<dxi-item dataField="ZLEGION" [disabled]="false" [editorOptions]="{ width: 200 }"><dxo-label text="운송요율 구역"></dxo-label></dxi-item>-->
+            <dxi-item dataField="ZCARYEAR" [disabled]="false" [editorOptions]="{ width: 200 }"><dxo-label text="차량연식"></dxo-label></dxi-item>
+            <dxi-item dataField="ZRFID" [disabled]="false" [editorOptions]="{ width: 250 }"><dxo-label text="RFID"></dxo-label></dxi-item>
+            <dxi-item dataField="ZPRODUCT1" [disabled]="false" [editorOptions]="{ width: 100 }">
+              <dxo-label text="취급제품"></dxo-label>
+              <nh-possible-comm #zproductEntery2
+                                [dataStoreKey]="dataStoreKey"
+                                [codeInfo]="zproductCode"
+                                valueColumn="DOMVALUE_L"
+                                [showClearButton]="true"
+                                valueDisplayFormat="(%DOMVALUE_L%)%DDTEXT%"
+                                width="250"
+                                [(selectedValue)]="zproductValue"
+                                popupGridScrollMode="standard"
+                                [popupGridPagingMode]="true"
+                                [popupGridPageSize]="10"
+                                comboGridScrollMode="virtual"
+                                [gridBoxWidth]="500"
+                                class="weight-test"
+                                [showDataLoadingPanel]="showDataLoadingPanel"
+                                (onEntryValueChanged)="onZprocutValueChanged($event)">
+                <dxi-validation-rule type="required" message="취급제품을 입력해주십시오."></dxi-validation-rule>
+              </nh-possible-comm>
+            </dxi-item>
+            <dxi-item itemType="group" [colCount]="2" style="margin-top:5px">
+              <dxi-item dataField="ZQUAN" [disabled]="false" [editorOptions]="{ width: 250 }">
+                <dxo-label text="적재량"></dxo-label>
+                <dxi-validation-rule type="required" message="적재량을 입력해주십시오."></dxi-validation-rule>
+              </dxi-item>
+              <dxi-item dataField="VRKME" [disabled]="true" [editorOptions]="{ width: 50 }">
+                <dxo-label text="단위"></dxo-label>
+              </dxi-item>
+              <dxi-item dataField="ZWEIGHT1" [disabled]="false" [editorOptions]="{ width: 250 }">
+                <dxo-label text="공차중량"></dxo-label>
+                <dxi-validation-rule type="required" message="공차중량을 입력해주십시오."></dxi-validation-rule>
+              </dxi-item>
+              <dxi-item dataField="MEINS" [disabled]="true" [editorOptions]="{ width: 50 }">
+                <dxo-label text="단위"></dxo-label>
+              </dxi-item>
+            </dxi-item>
+
+            <dxi-item dataField="ZCARTANK" [disabled]="quantity" [editorOptions]="{ width: 100 }">
+              <dxo-label text="유창수량"></dxo-label>
+              <dxi-validation-rule type="required" message="유창수량을 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+
+            <dxi-item dataField="ZDERIVER1" [disabled]="false" [editorOptions]="{ width: 250 }">
+              <dxo-label text="운전기사"></dxo-label>
+              <dxi-validation-rule type="required" message="운전기사를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZPHONE1" [disabled]="false" [editorOptions]="{ width: 500 }">
+              <dxo-label text="운전기사연락처"></dxo-label>
+              <dxi-validation-rule type="required" message="운전기사연락처를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZLICENCE1" [disabled]="false" [editorOptions]="{ width: 500 }">
+              <dxo-label text="면허증번호"></dxo-label>
+              <dxi-validation-rule type="required" message="면허증번호를 입력해주십시오."></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="REGNO1" [disabled]="false" [editorOptions]="{ width: 300 }"><dxo-label text="운전기사 주민번호"></dxo-label></dxi-item>
+            <dxi-item dataField="ZADDRESS1" [disabled]="false" [editorOptions]="{ width: 500 }"><dxo-label text="기사주소"></dxo-label></dxi-item>
+          </dxi-item>
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+  </dx-popup>
+
+  <!--카고 차량등록-->
+  <dx-popup width="50%"
+            height="70%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="cargoRegisterPopupVisible">
+    <dxi-toolbar-item text="카고 차량 등록"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="cargoRegisterSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="cargoRegisterCloseButtonOptions">
+    </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form direction="row" #masterform style="margin-bottom:10px; margin-top: 10px;" [formData]="cargoRegisterFormData">
+          <dxi-item itemType="group" [colCount]="1" [colSpan]="4" style="margin-top:5px">
+
+            <dxi-item dataField="ZCARNO" [label]="{text: '차량번호'}" [colCount]="1" [editorOptions]="{ width: 200 }">
+              <dxi-validation-rule type="required" message="차량번호를 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZDRIVER" [label]="{text: '운전기사명'}" [colCount]="1" [editorOptions]="{ width: 250 }">
+              <dxi-validation-rule type="required" message="운전기사이름을 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZPHONE" [label]="{text: '전화번호'}" [colCount]="1" [editorOptions]="{ width: 300}">
+              <dxi-validation-rule type="required" message="전화번호를 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZCARYEAR" [disabled]="true" [label]="{text: '차량연식'}" [colCount]="1" [editorOptions]="{ width: 100 }">
+            </dxi-item>
+            <dxi-item dataField="ZRFID" [disabled]="true" [label]="{text: 'RFID'}" [colCount]="1" [editorOptions]="{ width: 100  }">
+            </dxi-item>
+            <dxi-item dataField="REGNO" [disabled]="true" [label]="{text: '주민번호'}" [colCount]="1" [editorOptions]="{width: 100  }">
+            </dxi-item>
+            <dxi-item dataField="ZCARTYPE" [label]="{text: '화물차종'}" [colCount]="1" [editorOptions]="{ width: 250 }">
+              <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>
+              <div *dxTemplate>
+                <nh-possible-comm #cargoDataCodeEntery
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="carDataCode"
+                                  valueColumn="DOMVALUE_L"
+                                  [showClearButton]="true"
+                                  valueDisplayFormat="(%DOMVALUE_L%)%DDTEXT%"
+                                  width="auto"
+                                  [(selectedValue)]="carDataValue"
+                                  popupGridScrollMode="standard"
+                                  [popupGridPagingMode]="true"
+                                  [popupGridPageSize]="10"
+                                  comboGridScrollMode="virtual"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onChargoCarTypeCodeCodeValueChanged($event)">
+                  <nbp-validator [adapter]="carTypeAdapter">
+                    <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>
+                  </nbp-validator>
+                </nh-possible-comm>
+              </div>
+            </dxi-item>
+            <!--<dxi-item dataField="BEDAT" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true,  width: 250}">
+              <dxo-label text="효력시작일"></dxo-label>
+              <dxi-validation-rule type="required" message="효력시작일을 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ENDAT" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', useMaskBehavior : true,  width: 250}">
+              <dxo-label text="효력종료일"></dxo-label>
+              <dxi-validation-rule type="required" message="효력종료일을 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>-->
+          </dxi-item>
+
+
+
+
+
+
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+  </dx-popup>
+
+  <!--카고 차량수정-->
+  <dx-popup width="50%"
+            height="70%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="cargoUpdatePopupVisible">
+    <dxi-toolbar-item text="카고 차량 등록"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="cargoUpdateSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="cargoUpdateCloseButtonOptions">
+    </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form direction="row" #masterform style="margin-bottom:10px; margin-top: 10px;" [formData]="cargoUpdateFormData">
+          <dxi-item itemType="group" [colCount]="1" [colSpan]="4" style="margin-top:5px">
+
+            <dxi-item dataField="ZCARNO" [label]="{text: '차량번호'}" [colCount]="1" [editorOptions]="{ width: 200 }">
+              <dxi-validation-rule type="required" message="차량번호를 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZDRIVER" [label]="{text: '운전기사명'}" [colCount]="1" [editorOptions]="{ width: 250 }">
+              <dxi-validation-rule type="required" message="운전기사이름을 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZPHONE" [label]="{text: '전화번호'}" [colCount]="1" [editorOptions]="{ width: 300}">
+              <dxi-validation-rule type="required" message="전화번호를 입력해주십시오.">></dxi-validation-rule>
+            </dxi-item>
+            <dxi-item dataField="ZCARYEAR" [disabled]="true" [label]="{text: '차량연식'}" [colCount]="1" [editorOptions]="{ width: 100 }">
+            </dxi-item>
+            <dxi-item dataField="ZRFID" [disabled]="true" [label]="{text: 'RFID'}" [colCount]="1" [editorOptions]="{ width: 100  }">
+            </dxi-item>
+            <dxi-item dataField="REGNO" [disabled]="true" [label]="{text: '주민번호'}" [colCount]="1" [editorOptions]="{width: 100  }">
+            </dxi-item>
+            <dxi-item dataField="ZCARTYPE" [label]="{text: '화물차종'}" [colCount]="1" [editorOptions]="{ width: 250 }">
+              <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>
+              <div *dxTemplate>
+                <nh-possible-comm #cargoDataCodeEntery
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="carDataCode"
+                                  valueColumn="DOMVALUE_L"
+                                  [showClearButton]="true"
+                                  valueDisplayFormat="(%DOMVALUE_L%)%DDTEXT%"
+                                  width="auto"
+                                  [(selectedValue)]="carDataValue"
+                                  popupGridScrollMode="standard"
+                                  [popupGridPagingMode]="true"
+                                  [popupGridPageSize]="10"
+                                  comboGridScrollMode="virtual"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onChargoCarTypeCodeCodeValueChanged($event)">
+                  <nbp-validator [adapter]="carTypeAdapter">
+                    <dxi-validation-rule type="required" message="화물차종을 입력해주십시오."></dxi-validation-rule>
+                  </nbp-validator>
+                </nh-possible-comm>
+              </div>
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+  </dx-popup>
+
+  <!--유창등록-->
+  <dx-popup width="30%"
+            height="50%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="youchangRegisterVisible">
+    <dxi-toolbar-item text="유창정보 등록"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="youchangRegisterSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="youchangRegisterCloseButtonOptions">
+    </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form direction="row" #masterform style="margin-bottom:10px; margin-top: 10px;" [formData]="youchangRegisterFormData">
+          <dxi-item dataField="ZCARNO" [disabled]="true" [editorOptions]="{ width: 100 }">
+            <dxo-label text="차량번호"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZLITER" [disabled]="true" [editorOptions]="{ width: 100 }">
+            <dxo-label text="적재용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZCARTANK" [disabled]="true" [editorOptions]="{ width: 100 }">
+            <dxo-label text="유창수량"></dxo-label>
+          </dxi-item>
+
+
+          <dxi-item dataField="ZTANKLITER1" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창1 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER2" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창2 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER3" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창3 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER4" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창4 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER5" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창5 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER6" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창6 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER7" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창7 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER8" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창8 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER9" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창9 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER10" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창10 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTEXT" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="비고"></dxo-label>
+          </dxi-item>
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+  </dx-popup>
+
+  <!--유창수정-->
+  <dx-popup width="30%"
+            height="50%"
+            margin="20px"
+            [showTitle]="false"
+            [dragEnabled]="false"
+            [hideOnOutsideClick]="true"
+            container=".dx-viewport"
+            [showCloseButton]="false"
+            [(visible)]="youchangUpdateVisible">
+    <dxi-toolbar-item text="유창정보 등록"
+                      toolbar="top"
+                      location="before">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="youchangUpdateSaveButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="youchangUpdateCloseButtonOptions">
+    </dxi-toolbar-item>
+
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form direction="row" #masterform style="margin-bottom:10px; margin-top: 10px;" [formData]="youchangUpdateFormData">
+          <dxi-item dataField="ZCARNO" [disabled]="true" [editorOptions]="{ width: 100 }">
+            <dxo-label text="차량번호"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZLITER" [disabled]="true" [editorOptions]="{ width: 100 }">
+            <dxo-label text="적재용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZCARTANK" [disabled]="true" [editorOptions]="{ width: 100 }">
+            <dxo-label text="유창수량"></dxo-label>
+          </dxi-item>
+
+
+          <dxi-item dataField="ZTANKLITER1" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창1 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER2" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창2 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER3" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창3 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER4" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창4 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER5" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창5 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER6" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창6 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER7" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창7 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER8" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창8 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER9" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창9 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTANKLITER10" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="유창10 용량"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="ZTEXT" [disabled]="false" [editorOptions]="{ width: 250 }">
+            <dxo-label text="비고"></dxo-label>
+          </dxi-item>
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+  </dx-popup>
+</div>
+
+
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>

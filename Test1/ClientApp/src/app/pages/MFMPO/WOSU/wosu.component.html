@@ -1,0 +1,194 @@
+<!--
+  계약현황확인 및 단가작업표
+  -->
+<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="startDate" label="계약일" type="date" [width]="180" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid id="grid" #orderGrid
+              [dataSource]="orderData"
+              keyExpr="EBELN"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'single' }"
+              height="calc(100vh - 230px)"
+              [columnAutoWidth]="true"
+              (onContentReady)="contentReady($event)"
+              (onRowDblClick)="orderDBClick($event)"
+              [allowColumnReordering]="true"
+              columnResizingMode="widget"
+              [loadPanel]="loadPanelOption"
+              (onEditorPreparing)="onEditorPreparing($event)"
+              [allowColumnResizing]="true">
+
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+  <dxi-column dataField="EBELN"
+              caption="문서번호">
+  </dxi-column>
+  <dxi-column dataField="RLWRT"
+              caption="계약총금액"
+              format="#,###.##"
+              dataType="number">
+
+  </dxi-column>
+  <dxi-column dataField="WRBTR_BAS"
+              caption="이전금액"
+              format="#,###.###"
+              dataType="number">
+  </dxi-column>
+  <dxi-column dataField="WRBTR_TOT"
+              caption="정산금액"
+              format="#,###.###"
+              dataType="number">
+  </dxi-column>
+  <dxi-column dataField="CONNM"
+              caption="계약명">
+  </dxi-column>
+
+  <dxi-column dataField="WRBTR"
+              caption="승인금액"
+              format="#,###.###"
+              dataType="number">
+  </dxi-column>
+
+  <dxi-column dataField="BUDAT"
+              caption="승인일자"
+              format="yyyy-MM-dd"
+              dataType="date">
+  </dxi-column>
+
+  <dxi-column dataField="KDATB"
+              caption="유효 기간 시작"
+              format="yyyy-MM-dd"
+              dataType="date">
+  </dxi-column>
+  <dxi-column dataField="KDATE"
+              caption="유효 기간 종료"
+              format="yyyy-MM-dd"
+              dataType="date">
+  </dxi-column>
+
+
+</dx-data-grid>
+
+<dx-popup [title]="popupTitle"
+          [showTitle]="true"
+          width="80%"
+          height="80%"
+          [(visible)]="popupVisible"
+          [dragEnabled]="true"
+          position="center"
+          container=".dx-viewport"
+          [dragOutsideBoundary]="true"
+          [showCloseButton]="false"
+          [hideOnOutsideClick]="true">
+  <dxi-toolbar-item location="after"
+                    widget="dxButton"
+                    locateInMenu="auto"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+
+  <dx-data-grid id="grid" #masterGrid
+                [dataSource]="masterData"
+                keyExpr="EBELN"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                [selection]="{ mode: 'single' }"
+                height="calc(100vh - 230px)"
+                [columnAutoWidth]="true"
+                (onContentReady)="contentReady($event)"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [loadPanel]="loadPanelOption"
+                (onEditorPreparing)="onEditorPreparing($event)"
+                [allowColumnResizing]="true">
+
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+    <dxi-column dataField="EBELN"
+                caption="문서번호">
+    </dxi-column>
+    <dxi-column dataField="EBELP"
+                caption="품목번호">
+    </dxi-column>
+    <dxi-column dataField="PAYITEM"
+                caption="자재 번호">
+    </dxi-column>
+    <dxi-column dataField="TXZ01"
+                caption="내역">
+    </dxi-column>
+    <dxi-column dataField="MENGE"
+                caption="구매 오더 수량">
+    </dxi-column>
+    <dxi-column dataField="NETPR"
+                caption="금액"
+                format="#,###.###"
+                dataType="number"
+                >
+    </dxi-column>
+    <dxi-column dataField="MEINS"
+                caption="단위">
+    </dxi-column>
+    <dxi-column dataField="WAERS"
+                caption="통화 키">
+    </dxi-column>
+    <dxi-column dataField="LGORT"
+                caption="저장 위치">
+    </dxi-column>
+    <dxi-column dataField="LGOBE"
+                caption="저장 위치 내역">
+    </dxi-column>
+    <dxi-column dataField="ZZMATNR_PAY"
+                caption="자재코드">
+    </dxi-column>
+    <dxi-column dataField="ZZPAY_NETPR"
+                caption="항목금액"
+                format="#,###.###"
+                dataType="number"
+                >
+    </dxi-column>
+    <dxi-column dataField="ZZPAY_MENGE"
+                caption="항목수량">
+    </dxi-column>
+    <dxi-column dataField="RLWRT"
+                caption="릴리스 시점의 총액">
+    </dxi-column>
+    <dxi-column dataField="EREKZ"
+                caption="최종 송장 지시자">
+    </dxi-column>
+
+  </dx-data-grid>
+</dx-popup>
+
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>

@@ -40,7 +40,7 @@ import { OILWkodModel } from '../../../shared/dataModel/ORACLE/OIL_WKODProxy';
 import notify from 'devextreme/ui/notify';
 import { ZMMT3063Model } from '../../../shared/dataModel/MLOGP/Zmmt3063';
 import { locale, loadMessages } from "devextreme/localization";
-
+import { Title } from '@angular/platform-browser';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -191,8 +191,11 @@ export class CSSOComponent {
   chmWkodModel: CHMWkodModel[];
   chulfByModel: UtichulfModel[];
   oilCarModel: OILWkodModel[];
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo,
+    private authService: AuthService, private titleService: Title) {
     appInfo.title = AppInfoService.APP_TITLE + " | 출고지시등록";
+    this.titleService.setTitle(appInfo.title);
+
     this.liqsndLGORT = "6000"
     setTimeout(() => {
       this.mainDataLoad();
@@ -1420,7 +1423,8 @@ export class CSSOComponent {
     }
 
     this.choicePopupVisible = false;
-    var zcarno = this.carDataValue
+    //var zcarno = this.carDataValue
+    var zcarno = this.carDataCodeEntery.selectedItemData.ZCARNO;
     var selectResultData = await this.dataService.SelectModelData<ZSDT7020Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDT7020ModelList", [],
       `MANDT = '${this.appConfig.mandt}' AND ZCARNO = '${zcarno}' `, "", QueryCacheType.None);
     console.log(selectResultData)
@@ -1588,9 +1592,10 @@ export class CSSOComponent {
 
       if (rowData) {
         this.oilSubDataLoad();
-        this.carDataValue = rowData.ZCARNO;
+        var zcarKey = "";
+        this.carDataValue = zcarKey.concat(rowData.ZCARNO, rowData.ZDRIVER);
         this.oilFormData = rowData;
-        var carData = this.carDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === rowData.ZCARNO)
+        var carData = this.carDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === this.carDataValue)
         if (carData !== undefined) {
 
           Object.assign(this.oilFormData, { ZDRIVER: carData.ZDERIVER1, ZPHONE: carData.ZPHONE1, ZRFID: carData.ZRFID });
@@ -1623,9 +1628,10 @@ export class CSSOComponent {
     const rowData = e.selectedRowsData[0];
     setTimeout(() => {
       if (rowData) {
-        this.cheCarDataValue = rowData.ZCARNO;
+        var zcarKey = "";
+        this.cheCarDataValue = zcarKey.concat(rowData.ZCARNO, rowData.ZDRIVER);
         this.cheFormData = rowData;
-        var carData = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === rowData.ZCARNO)
+        var carData = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === this.cheCarDataValue)
         if (carData !== undefined) {
 
           Object.assign(this.cheFormData, { ZDRIVER: carData.ZDERIVER1, ZPHONE: carData.ZPHONE1, ZRFID: carData.ZRFID, JITOTAL: carData.ZCARTON, JIEMPTY: carData.ZWEIGHT1 });
@@ -1653,12 +1659,14 @@ export class CSSOComponent {
   //분할 차량번호 선택이벤트
   onZcarNoCodeValueChanged(e: any) {
     setTimeout(() => {
-      this.oilFormData.ZCARNO = this.carDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZCARNO;
-      this.oilFormData.ZDRIVER = this.carDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZDERIVER1;
-      this.oilFormData.ZPHONE = this.carDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZPHONE1;
-      this.oilFormData.ZRFID = this.carDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZRFID;
+      if (e.selectedItem !== null) {
+        this.oilFormData.ZCARNO = this.carDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZCARNO;
+        this.oilFormData.ZDRIVER = this.carDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZDERIVER1;
+        this.oilFormData.ZPHONE = this.carDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZPHONE1;
+        this.oilFormData.ZRFID = this.carDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZRFID;
 
-      return;
+        return;
+      }
     });
   }
   onDetailZcarNoCodeValueChanged(e: any) {
@@ -1675,12 +1683,12 @@ export class CSSOComponent {
     setTimeout(() => {
       if (e.selectedItem !== null) {
 
-        this.cheFormData.ZCARNO = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZCARNO;
-        this.cheFormData.ZDRIVER = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZDERIVER1;
-        this.cheFormData.ZPHONE = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZPHONE1;
-        this.cheFormData.ZRFID = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZRFID;
-        this.cheFormData.JITOTAL = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZCARTON;
-        this.cheFormData.JIEMPTY = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.ZCARNO === e.selectedValue)?.ZWEIGHT1;
+        this.cheFormData.ZCARNO = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZCARNO;
+        this.cheFormData.ZDRIVER = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZDERIVER1;
+        this.cheFormData.ZPHONE = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZPHONE1;
+        this.cheFormData.ZRFID = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZRFID;
+        this.cheFormData.JITOTAL = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZCARTON;
+        this.cheFormData.JIEMPTY = this.cheCarDataCodeEntery.gridDataSource._array.find(item => item.COMBINEKEY === e.selectedValue)?.ZWEIGHT1;
 
         return;
       }
@@ -1788,7 +1796,8 @@ export class CSSOComponent {
         return;
 
       }
-      this.detailcarDataValue = selectData[0].ZCARNO;
+      var zcarKey = "";
+      this.detailcarDataValue = zcarKey.concat(selectData[0].ZCARNO, selectData[0].ZDRIVER);
       var jisiResult = await this.dataService.SelectModelData<UtijisifModel[]>(this.appConfig.ncoilTitle, "NBPDataModels", "NAMHE.Model.UtijisifModelList", [],
         `JIYYMM = '${selectData[0].DODAT}' AND JISEQ = '${selectData[0].ZSEQ}'`, "", QueryCacheType.None);
 
@@ -1829,7 +1838,8 @@ export class CSSOComponent {
         VRKME: this.cheGridData[0].VRKME ?? "", CITY: this.cheGridData[0].CITY ?? "", VSBED: this.cheGridData[0].VSBED ?? "", NAME1_AG: this.cheGridData[0].NAME1_AG ?? "",
       });
 
-      this.detailchecarDataValue = selectData[0].ZCARNO;
+      var zcarKey = "";
+      this.detailchecarDataValue = zcarKey.concat(selectData[0].ZCARNO, selectData[0].ZDRIVER);
       var jisiResult = await this.dataService.SelectModelData<UtijisifModel[]>(this.appConfig.ncoilTitle, "NBPDataModels", "NAMHE.Model.UtijisifModelList", [],
         `JIYYMM = '${selectData[0].DODAT}' AND JISEQ = '${selectData[0].ZSEQ}'`, "", QueryCacheType.None);
 

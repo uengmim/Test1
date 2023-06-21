@@ -5,12 +5,24 @@
   <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
+        <dx-select-box [dataSource]="selectDateType"
+                       displayExpr="NAME"
+                       valueExpr="CODE"
+                       value="1"
+                       label="일자기준"
+                       labelMode="floating"
+                       (onValueChanged)="onDateTypeChanged($event)"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before">
+      <div *dxTemplate style="width:330px">
         <!---<div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>기간</b></div>-->
         <div style="float:left; ">
-          <dx-date-box [(value)]="startDate" type="date" [width]="120" displayFormat="yyyy-MM-dd" label="시작일"></dx-date-box>
+          <dx-date-box [(value)]="startDate" type="date" [width]="140" displayFormat="yyyy-MM-dd" label="시작일"></dx-date-box>
         </div>
         <div style="float:left; margin-left:10px;">
-          <dx-date-box [(value)]="endDate" type="date" [width]="120" displayFormat="yyyy-MM-dd" label="종료일"></dx-date-box>
+          <dx-date-box [(value)]="endDate" type="date" [width]="140" displayFormat="yyyy-MM-dd" label="종료일"></dx-date-box>
         </div>
       </div>
     </dxi-item>
@@ -118,6 +130,30 @@
                 dataType="string">
     </dxi-column>
 
+    <dxi-column dataField="QTY_REQ"
+                caption="예약수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_OUT"
+                caption="출고수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_CON"
+                caption="사용수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_REC"
+                caption="반납수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
     <dxi-column dataField="INGPR_DESC"
                 caption="요청부서"
                 dataType="string">
@@ -151,6 +187,12 @@
 
     <dxi-column dataField="GLTRP"
                 caption="종료일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="REDAT"
+                caption="정산일"
                 dataType="date"
                 format="yyyy-MM-dd">
     </dxi-column>

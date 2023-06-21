@@ -254,17 +254,26 @@ const simpleProducts: string[] = [
 
 
 export class PriorityEntity {
-  id: number = 0;
+  ID: string = "";
 
-  text: string = "";
+  Name: string = "";
 }
 
 const priorityEntities: PriorityEntity[] = [
-  { id: 0, text: '양호' },
-  { id: 1, text: '불량' },
+  { ID: "01", Name: '양호' },
+  { ID: "02", Name: '불량' },
 ];
 
+export class PriorityEntity1 {
+  ID: string = "";
 
+  Name: string = "";
+}
+
+const priorityEntities1: PriorityEntity1[] = [
+  { ID: "01", Name: '있음' },
+  { ID: "02", Name: '없음' },
+];
 
 @Injectable()
 export class Service {
@@ -277,6 +286,8 @@ export class Service {
   getPriorityEntities(): PriorityEntity[] {
     return priorityEntities;
   }
-
+  getpriorityEntities1(): PriorityEntity1[] {
+    return priorityEntities1;
+  }
 
 }

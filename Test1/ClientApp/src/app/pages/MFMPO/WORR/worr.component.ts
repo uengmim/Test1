@@ -6,7 +6,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import 'devextreme/data/odata/store';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { formatDate } from '@angular/common';
 import { ZPMF0001Model, ZPMS0002Model } from '../../../shared/dataModel/MFMPO/ZPmF0001Proxy';
 import { ZPMF0002Model, ZPMS0004Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
@@ -18,7 +18,7 @@ import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, Product, ConHeadFormData, AppStatus, equipFormModel } from './app.service';
+import { Service, Product, ConHeadFormData, AppStatus, equipFormModel, SelectDateType } from './app.service';
 import { DxDataGridComponent, DxTextBoxComponent, } from 'devextreme-angular';
 import { CommonCodeInfo, TableCodeInfo } from '../../../shared/app.utilitys';
 import ArrayStore from 'devextreme/data/array_store';
@@ -35,6 +35,7 @@ import { exportDataGrid } from 'devextreme/excel_exporter';
 import jsPDF from 'jspdf';
 import { Workbook } from 'exceljs';
 import saveAs from 'file-saver';
+import { deepCopy } from '../../../shared/imate/utility/object-copy';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -219,6 +220,9 @@ export class WORRComponent implements OnInit {
 
   workingDate: any;
 
+  selectDateType: SelectDateType[] = [];
+  dateType = "1";
+
   //_dataService: ImateDataService;
   /**
  * 생성자
@@ -228,14 +232,18 @@ export class WORRComponent implements OnInit {
  */
 
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private authService: AuthService, private appInfo: AppInfoService,
-    private http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, service: Service) {
+    private http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, service: Service, private titleService: Title) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 작업결과등록";
+    this.titleService.setTitle(appInfo.title);
+    
     //possible-entry
     this.isGridBoxOpened = false;
     this.displayExpr = "";
     this.localappConfig = appConfig;
     this.selectedValue = "Z100";
     this.selectedLike = "A%";
+
+    this.selectDateType = service.getSelectDateTypeList();
 
     this.appStatus = service.getAppStatusList();
     let userInfo = this.authService.getUser().data;
@@ -472,7 +480,7 @@ export class WORRComponent implements OnInit {
  * 파서블 엔트리 데이터 로딩 완료
  * @param e
  */
-  onPEDataLoaded(e: any) {
+  async onPEDataLoaded(e: any) {
     this.loadePeCount++;
     console.info(`DATA LOAD COUNT: ${this.loadePeCount}`);
     /*
@@ -484,7 +492,7 @@ export class WORRComponent implements OnInit {
      */
     if (this.loadePeCount >= 4) {
 
-      this.dataLoad(this.imInfo, this.dataService);
+      await this.dataLoad(this.imInfo, this.dataService);
       this.loadingVisible = false;
       this.loadePeCount = 0;
     }
@@ -1170,15 +1178,28 @@ export class WORRComponent implements OnInit {
   }
   //데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
-    var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
-    var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
+    //작업배정일
+    var sdate = deepCopy(this.startDate);
+    var edate = deepCopy(this.endDate);
+    //지급기준일
+    var s2date = deepCopy(this.startDate);
+    var e2date = deepCopy(this.endDate);
+
+    if (this.dateType === "1") {
+      s2date = new Date("0001-01-01");
+      e2date = new Date("0001-01-01");
+    } else {
+      sdate = new Date("0001-01-01");
+      edate = new Date("0001-01-01");
+    }
 
     var appStatus = this.selectedAppStatus;
 
     //작업요청 선택 시 RFC는 빈값으로 수행 후 데이터 조정
     if (appStatus === "O") appStatus = "";
 
-    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", this.empId, "", appStatus, "", this.appConfig.plant, []);
+    var zpf0001Model = new ZPMF0001Model("", "", "", "", edate, sdate, "", this.empId, "", appStatus, "", this.appConfig.plant,
+      e2date, s2date, []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
     console.log(`저장진입 - > ${formatDate(new Date(), "yyyy-MM-dd hh:mm:ss", "en-US")}`);
@@ -1330,6 +1351,10 @@ export class WORRComponent implements OnInit {
     });
 
     e.cancel = true;
+  }
+
+  onDateTypeChanged(e: any) {
+    this.dateType = e.value;
   }
 }
 

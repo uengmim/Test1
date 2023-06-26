@@ -30,6 +30,22 @@ const appStatus: AppStatus[] = [
   { CODE: "C", NAME: "검수완료" }
 ];
 
+export class SelectDateType {
+  CODE?: string;
+  NAME?: string;
+}
+
+const selectDatetype: SelectDateType[] = [
+  {
+    CODE: "1",
+    NAME: "작업배정기준"
+  },
+  {
+    CODE: "2",
+    NAME: "정산지급기준"
+  }
+]
+
 
 //오더데이터
 export class OrderData {
@@ -481,5 +497,9 @@ export class Service {
 
   getAppStatusList() {
     return appStatus;
+  }
+
+  getSelectDateTypeList() {
+    return selectDatetype;
   }
 }

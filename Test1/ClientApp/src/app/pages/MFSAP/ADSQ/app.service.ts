@@ -1,5 +1,12 @@
 import { Injectable } from '@angular/core';
 
+export class tdlnrCode {
+  LIFNR!: string;
+  NAME1!: string;
+  ORT01!: string;
+  STRAS!: string;
+}
+
 //검색구분
 export class SelectType {
   //코드

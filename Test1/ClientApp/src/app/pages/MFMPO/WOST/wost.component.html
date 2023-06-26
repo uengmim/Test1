@@ -6,11 +6,23 @@
   <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
     <dxi-item location="before" locateInMenu="auto">
       <div *dxTemplate>
+        <dx-select-box [dataSource]="selectDateType"
+                       displayExpr="NAME"
+                       valueExpr="CODE"
+                       value="1"
+                       label="일자기준"
+                       labelMode="floating"
+                       (onValueChanged)="onDateTypeChanged($event)"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before">
+      <div *dxTemplate style="width:330px">
         <div style="float:left; ">
           <dx-date-box [(value)]="startDate"
                        label="시작일"
                        type="date"
-                       [width]="120"
+                       [width]="140"
                        displayFormat="yyyy-MM-dd"></dx-date-box>
         </div>
 
@@ -19,7 +31,7 @@
                        label="종료일"
                        labelMode="floating"
                        type="date"
-                       [width]="120"
+                       [width]="140"
                        displayFormat="yyyy-MM-dd"></dx-date-box>
         </div>
       </div>
@@ -134,71 +146,6 @@
                 dataType="string">
     </dxi-column>
 
-    <dxi-column dataField="INGPR_DESC"
-                caption="요청부서"
-                dataType="string">
-    </dxi-column>
-
-    <dxi-column dataField="VAPLZ_DESC"
-                caption="작업장"
-                dataType="string">
-    </dxi-column>
-
-    <dxi-column dataField="EQUNR"
-                caption="설비"
-                dataType="string">
-    </dxi-column>
-
-    <dxi-column dataField="EQUNR_DESC"
-                caption="설비명"
-                dataType="string">
-    </dxi-column>
-
-    <!--<dxi-column dataField="AUART"
-                caption="오더유형"
-                dataType="string">
-    </dxi-column>-->
-
-    <dxi-column dataField="GSTRP"
-                caption="시작일"
-                dataType="date"
-                format="yyyy-MM-dd">
-    </dxi-column>
-
-    <dxi-column dataField="GLTRP"
-                caption="종료일"
-                dataType="date"
-                format="yyyy-MM-dd">
-    </dxi-column>
-
-    <dxi-column dataField="QMNUM"
-                caption="통지번호"
-                dataType="string">
-    </dxi-column>
-
-    <!--<dxi-column dataField="GSBER_DESC"
-                caption="사업영역"
-                dataType="string">
-    </dxi-column>-->
-
-    <dxi-column dataField="QTY_REQ_TOT"
-                caption="요청금액"
-                format="#,###.###"
-                dataType="number">
-    </dxi-column>
-
-    <dxi-column dataField="QTY_CON_TOT"
-                caption="승인금액"
-                format="#,###.###"
-                dataType="number">
-    </dxi-column>
-
-    <dxi-column dataField="QTY_NO"
-                caption="작업등록수"
-                format="#,###.###"
-                dataType="number">
-    </dxi-column>
-
     <dxi-column dataField="QTY_REQ"
                 caption="예약수량"
                 format="#,###"
@@ -220,6 +167,77 @@
     <dxi-column dataField="QTY_REC"
                 caption="반납수량"
                 format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="INGPR_DESC"
+                caption="요청부서"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="VAPLZ_DESC"
+                caption="작업장"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="EQUNR"
+                caption="설비"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="EQUNR_DESC"
+                caption="설비명"
+                dataType="string">
+    </dxi-column>
+
+    <!--<dxi-column dataField="AUART"
+              caption="오더유형"
+              dataType="string">
+  </dxi-column>-->
+
+    <dxi-column dataField="GSTRP"
+                caption="시작일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="GLTRP"
+                caption="종료일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="REDAT"
+                caption="정산일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="QMNUM"
+                caption="통지번호"
+                dataType="string">
+    </dxi-column>
+
+    <!--<dxi-column dataField="GSBER_DESC"
+              caption="사업영역"
+              dataType="string">
+  </dxi-column>-->
+
+    <dxi-column dataField="QTY_REQ_TOT"
+                caption="요청금액"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_CON_TOT"
+                caption="승인금액"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_NO"
+                caption="작업등록수"
+                format="#,###.###"
                 dataType="number">
     </dxi-column>
 

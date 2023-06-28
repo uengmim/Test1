@@ -6,7 +6,7 @@ import CustomStore from 'devextreme/data/custom_store';
 import 'devextreme/data/odata/store';
 import { ImateDataService } from '../../../shared/imate/imateDataAdapter';
 import 'devextreme/data/odata/store';
-import { BrowserModule } from '@angular/platform-browser';
+import { BrowserModule, Title } from '@angular/platform-browser';
 import { formatDate } from '@angular/common';
 import { ZPMF0001Model, ZPMS0002Model } from '../../../shared/dataModel/MFMPO/ZPmF0001Proxy';
 import { ZPMF0002Model, ZPMS0003Model, ZPMS0004Model } from '../../../shared/dataModel/MFMPO/ZPmF0002Proxy';
@@ -16,7 +16,7 @@ import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZIMATETESTStructModel, ZXNSCNEWRFCCALLTestModel } from '../../../shared/dataModel/ZxnscNewRfcCallTestFNProxy';
 import { ImateInfo, QueryCacheType } from '../../../shared/imate/imateCommon';
 import { AppInfoService } from '../../../shared/services/app-info.service';
-import { Service, Product } from './app.service';
+import { Service, Product, SelectDateType } from './app.service';
 import { DxDataGridComponent, } from 'devextreme-angular';
 import ArrayStore from 'devextreme/data/array_store';
 import { confirm, alert } from "devextreme/ui/dialog";
@@ -32,6 +32,7 @@ import { AutoPrintInput, jsPDF } from 'jspdf';
 import { Workbook } from 'exceljs';
 import saveAs from 'file-saver';
 import { bottom } from '@devexpress/analytics-core/analytics-elements-metadata';
+import { deepCopy } from '../../../shared/imate/utility/object-copy';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -113,6 +114,10 @@ export class WOSTComponent {
   appStatus: AppStatus[] = [];
   empId: string = "";
   rolid: string[] = [];
+
+  selectDateType: SelectDateType[] = [];
+  dateType = "1";
+
   //_dataService: ImateDataService;
   /**
  * 생성자
@@ -122,8 +127,10 @@ export class WOSTComponent {
  */
 
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, private authService: AuthService, private appInfo: AppInfoService,
-    private http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, service: Service) {
+    private http: HttpClient, private ref: ChangeDetectorRef, private imInfo: ImateInfo, service: Service, private titleService: Title) {
     appInfo.title = AppInfoService.APP_TITLE + " | W/O 진행현황";
+    this.titleService.setTitle(appInfo.title);
+
     let userInfo = this.authService.getUser().data;
 
     this.rolid = userInfo?.role;
@@ -132,6 +139,8 @@ export class WOSTComponent {
       this.empId = "";
     else
       this.empId = userInfo?.empId.padStart(10, '0');
+
+    this.selectDateType = service.getSelectDateTypeList();
 
     this.appStatus = service.getAppStatusList();
 
@@ -160,7 +169,7 @@ export class WOSTComponent {
 
     this.loadingVisible = true;
     this.dataLoad(this.imInfo, this.dataService);
-    this.loadingVisible = false;
+    //this.loadingVisible = false;
 
 
     //엑셀버튼
@@ -430,14 +439,28 @@ export class WOSTComponent {
 
   //데이터 로드
   public async dataLoad(iminfo: ImateInfo, dataService: ImateDataService) {
-    var sdate = formatDate(this.startDate, "yyyy-MM-dd", "en-US")
-    var edate = formatDate(this.endDate, "yyyy-MM-dd", "en-US")
+    //작업배정일
+    var sdate = deepCopy(this.startDate);
+    var edate = deepCopy(this.endDate);
+    //지급기준일
+    var s2date = deepCopy(this.startDate);
+    var e2date = deepCopy(this.endDate);
+
+    if (this.dateType === "1") {
+      s2date = new Date("0001-01-01");
+      e2date = new Date("0001-01-01");
+    } else {
+      sdate = new Date("0001-01-01");
+      edate = new Date("0001-01-01");
+    }
 
     var appStatus = this.selectedAppStatus;
 
     //작업요청 선택 시 RFC는 빈값으로 수행 후 데이터 조정
     if (appStatus === "O") appStatus = "";
-    var zpf0001Model = new ZPMF0001Model("", "", "", "", this.endDate, this.startDate, "", this.empId, "", appStatus, "", this.appConfig.plant, []);
+
+    var zpf0001Model = new ZPMF0001Model("", "", "", "", edate, sdate, "", this.empId, "", appStatus, "", this.appConfig.plant,
+      e2date, s2date, []);
     var modelList: ZPMF0001Model[] = [zpf0001Model];
 
     this.loadingVisible = true;
@@ -474,6 +497,8 @@ export class WOSTComponent {
       });
 
     this.gcOrderData.instance.getScrollable().scrollTo(0);
+
+    this.loadingVisible = false;
   }
 
   // 상세 데이터 로드
@@ -540,6 +565,10 @@ export class WOSTComponent {
       addData.QTY_REC = e.oldData.QTY_OUT - e.newData.QTY_INPUT - e.oldData.QTY_CON;
       e.newData = Object.assign(e.newData, addData);
     }
+  }
+
+  onDateTypeChanged(e: any) {
+    this.dateType = e.value;
   }
 }
 

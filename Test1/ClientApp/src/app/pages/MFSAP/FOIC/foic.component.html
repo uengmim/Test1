@@ -12,7 +12,7 @@
     </div>
   </dxi-item>
   <dxi-item location="before">
-    <div *dxTemplate>
+    <div *dxTemplate style="width:330px">
       <div style="float: left; margin-left: 10px;">
         <dx-date-box [(value)]="startDate" label="납품요청일(From)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
@@ -24,28 +24,28 @@
   </dxi-item>
 
 
-  <dxi-item location="after" [disabled]="deleteButton">
+  <dxi-item location="after" locateInMenu="auto" [disabled]="deleteButton">
     <div *dxTemplate>
       <dx-button text="주문문서삭제" (onClick)="orderDeleteButton($event)">
       </dx-button>
     </div>
   </dxi-item>
 
-  <dxi-item location="after" [disabled]="deliveryButton">
+  <dxi-item location="after" locateInMenu="auto" [disabled]="deliveryButton">
     <div *dxTemplate>
       <dx-button text="납품문서삭제" (onClick)="deliveryDeleteButton($event)">
       </dx-button>
     </div>
   </dxi-item>
 
-  <dxi-item location="after" [disabled]="releaseButton">
+  <dxi-item location="after" locateInMenu="auto" [disabled]="releaseButton">
     <div *dxTemplate>
       <dx-button text="출고문서삭제" (onClick)="releaseDeleteButton($event)">
       </dx-button>
     </div>
   </dxi-item>
 
-  <dxi-item location="after">
+  <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button text="조회" (onClick)="searchButton($event)">
       </dx-button>
@@ -68,6 +68,15 @@
               [loadPanel]="loadPanelOption"
               [allowColumnResizing]="true"
               (onSelectionChanged)="selectionChanged($event)">
+
+  <dxo-toolbar>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="excelButtonOptions">
+    </dxi-item>
+  </dxo-toolbar>
   <dxo-scrolling mode="infinite"></dxo-scrolling>
   <dxo-paging [enabled]="false"></dxo-paging>
   <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
@@ -121,6 +130,10 @@
               type="number"
               caption="납품수량">
   </dxi-column>
+
+  <dxi-column dataField="ZPALLTP" caption="파레트유형"></dxi-column>
+  <dxi-column dataField="ZPALLETQTY" caption="파레트수량" dataType="number"></dxi-column>
+
   <dxi-column dataField="POSNR"
               caption="품목번호">
   </dxi-column>
@@ -143,6 +156,7 @@
   <dxi-column dataField="VRKME"
               caption="판매단위">
   </dxi-column>
+
   <dxi-column dataField="NETWR"
               caption="정가">
   </dxi-column>
@@ -170,3 +184,8 @@
               caption="사용자명">
   </dxi-column>
 </dx-data-grid>
+
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>

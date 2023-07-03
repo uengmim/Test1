@@ -3,7 +3,7 @@
 
 <dx-toolbar style="margin: 20px 0px 20px 0px 20px 0px">
   <dxi-item location="before">
-    <div *dxTemplate>
+    <div *dxTemplate style="width:330px">
       <div style="float: left; margin-left: 10px;">
         <dx-date-box [(value)]="startDate" type="date" [width]="150" label="검색시작일" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
@@ -12,7 +12,7 @@
       </div>
     </div>
   </dxi-item>
-  <dxi-item location="before">
+  <dxi-item location="before" locateInMenu="auto">
     <div style="float: left; margin-left: 10px; ">
       <dx-select-box [dataSource]="selectType"
                      displayExpr="name"
@@ -23,7 +23,7 @@
                      (onValueChanged)="onSelectTypeValueChanged($event)"></dx-select-box>
     </div>
   </dxi-item>
-  <dxi-item location="before">
+  <dxi-item location="before" locateInMenu="auto">
     <div style="float: left; margin-left: 10px; ">
       <dx-select-box [dataSource]="cSpart"
                      displayExpr="name"
@@ -34,7 +34,7 @@
                      (onValueChanged)="onCSpartValueChanged($event)"></dx-select-box>
     </div>
   </dxi-item>
-  <dxi-item location="before">
+  <dxi-item location="before" locateInMenu="auto">
     <div style="float: left; margin-left: 10px; ">
       <nh-possible-table #maEntery
                          [dataStoreKey]="dataStoreKey"
@@ -52,7 +52,7 @@
     </div>
   </dxi-item>
 
-  <dxi-item location="before">
+  <dxi-item location="before" locateInMenu="auto">
     <div style="float: left; margin-left: 10px; ">
       <nh-possible-table #matnrEntery
                          [dataStoreKey]="dataStoreKey"
@@ -88,7 +88,7 @@
 </dx-toolbar>
 <dx-toolbar style="margin:20px 0px 20px 0px">
 
-  <dxi-item location="before">
+  <dxi-item location="before" locateInMenu="auto">
     <div style="float: left; margin-left: 10px; ">
       <dx-text-box #baesongText
                    [showClearButton]="true"
@@ -100,7 +100,7 @@
     </div>
   </dxi-item>
 
-  <dxi-item location="before">
+  <dxi-item location="before" locateInMenu="auto">
     <div style="float: left; margin-left: 10px; ">
       <nh-possible-comm #statusEntery
                         dataStoreKey="dataStoreKey"

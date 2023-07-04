@@ -23,7 +23,7 @@ import { T001LModel } from '../../../shared/dataModel/MFSAP/t001l';
 import { Workbook } from 'exceljs';
 import saveAs from 'file-saver';
 import { exportDataGrid } from 'devextreme/excel_exporter';
-
+import { Title } from '@angular/platform-browser';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -111,9 +111,10 @@ export class ADSRComponent {
   //lgort 선택 값
   lgortValue: string | null = "";
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService,
-    private appConfig: AppConfigService, private authService: AuthService) {
+    private appConfig: AppConfigService, private authService: AuthService, private titleService: Title) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | 검수/미검수 현황-물류기지";
+    this.titleService.setTitle(appInfo.title);
 
     let thisObj = this;
 

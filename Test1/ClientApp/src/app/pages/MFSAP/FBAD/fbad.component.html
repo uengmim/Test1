@@ -1,392 +1,170 @@
-<!--고결/파포자료 등록/수정-->
+<!--
+  고결/파포 등록
+  -->
+<!--toolbar-->
+<dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+
+  <dxi-item location="before" locateInMenu="auto" [disabled]="isDisabled">
+    <div *dxTemplate style="margin-left:15px;">
+      <nh-possible-comm #arehouseEntery
+                        [dataStoreKey]="dataStoreKey"
+                        [codeInfo]="lgortCode"
+                        valueColumn="LGORT"
+                        [(selectedValue)]="lgortValue"
+                        valueDisplayFormat="%LGOBE%(%LGORT%)"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        width="auto"
+                        label="창고"
+                        labelMode="floating"
+                        (onDataLoaded)="onPEDataLoaded($event)">
+      </nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="changeButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid id="grid" #dataGrid
+              [dataSource]="mainGridData"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              columnResizingMode="widget"
+              [selection]="{ mode: 'single' }"
+              [allowColumnReordering]="true"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [remoteOperations]="false"
+              [rowAlternationEnabled]="true"
+              height="calc(100vh - 230px)">
+  <!--Datagrid Option-->
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+
+  <dxo-search-panel [visible]="true"
+                    [highlightCaseSensitive]="true"></dxo-search-panel>
+
+  <!--Grouping Option-->
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+  <!--Data column-->
+  <dxi-column dataField="LGORT" caption="창고코드" dataType="string">  </dxi-column>
+
+  <dxi-column dataField="LGOBE" caption="창고명" dataType="string">  </dxi-column>
+
+  <!--<dxi-column dataField="MTART" caption="자재유형" dataType="string">  </dxi-column>-->
+
+  <dxi-column dataField="MATNR" caption="자재코드" dataType="string">   </dxi-column>
+
+  <dxi-column dataField="MAKTX" caption="자재명" dataType="string">  </dxi-column>
+
+  <dxi-column dataField="LABST" caption="가용재고" dataType="number" format="#,###.###">  </dxi-column>
+
+  <dxi-column dataField="KMENGE" caption="고결수량" dataType="number" format="#,###.###">  </dxi-column>
+
+  <dxi-column dataField="PMENGE" caption="파포수량" dataType="number" format="#,###.###">  </dxi-column>
+
+  <dxi-column dataField="MEINS" caption="기본단위" dataType="string">  </dxi-column>
+
+  <!--<dxi-column dataField="VERPR" caption="단가" dataType="number" format="#,###.##">  </dxi-column>-->
+
+  <!--<dxi-column dataField="MATKL" caption="자재그룹" dataType="string">  </dxi-column>-->
+
+  <dxi-column dataField="WGBEZ" caption="자재그룹명" dataType="string">  </dxi-column>
+
+  <!--<dxi-column dataField="ZZDEPT_CD" caption="운영부서" dataType="string">  </dxi-column>-->
+
+  <dxi-column dataField="ZZDEPT_NM" caption="운영부서명" dataType="string"></dxi-column>
+
+  <!--<dxi-column dataField="ZZBIN" caption="BIN번호" dataType="string">   </dxi-column>
+
+  <dxi-column dataField="PEINH" caption="가격단위">  </dxi-column>
+
+  <dxi-column dataField="SOBKZ" caption="특별재고지시자" dataType="string"> </dxi-column>
+
+  <dxi-column dataField="SOTXT" caption="특별재고명" dataType="string">  </dxi-column>-->
+
+</dx-data-grid>
+
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
 
 
-  <dx-toolbar style="margin:20px 0px 20px 0px">
-    <dxi-item location="before">
-      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>주문처</b> </div>
-      <div style="float: left; margin-left: 10px;">
-        <dx-select-box [items]="states"></dx-select-box>
-      </div>
-    </dxi-item>
-    <dxi-item location="before">
-      <div *dxTemplate>
-        <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>검색기간</b> </div>
-        <div style="float: left; margin-left: 10px;">
-          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
-        </div>
-        <div style="float:left;margin-left:10px;">
-          ~
-        </div>
-        <div style="float: left; margin-left: 10px;">
-          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
-        </div>
-      </div>
-    </dxi-item>
-    <dxi-item location="left">
-      <div *dxTemplate>
-        <dx-button icon="save" (onClick)="saveDataGrid($event)">
-          <dx-box direction="row" width="100%" [height]="15">
-            <dxi-item class="rect demo-light" [ratio]="1"> 주문요청 </dxi-item>
-          </dx-box>
 
-        </dx-button>
-      </div>
-    </dxi-item>
-    <dxi-item location="before"
-              widget="dxButton"
-              locateInMenu="auto"
-              [height]="25"
-              [options]="searchButtonOptions">
-    </dxi-item>
-  </dx-toolbar>
+<dx-popup width="auto"
+          height="auto"
+          [showTitle]="true"
+          title="재고유형전환"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="popupVisible">
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="KsaveButtonOptions">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="PsaveButtonOptions">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
 
-  <div class="dx-field">
-    <dx-data-grid id="gridContainer"
-                  [dataSource]="dataSource"
-                  [showBorders]="true"
-                  [focusedRowEnabled]="true"
-                  [focusedRowIndex]="0"
-                  [columnAutoWidth]="true"
-                  [columnHidingEnabled]="true"
-                  [remoteOperations]="true"
-                  [selection]="{ mode: 'multiple' }"
-                  (onRowDblClick)="orderDBClick($event)"
-                  (onContentReady)="contentReady($event)"
-               
-                  height="calc(100vh - 230px)"
-                  [allowColumnReordering]="true"
-                  columnResizingMode="widget"
-                  [allowColumnResizing]="true"
-                   keyExpr="whereOrder">
-      <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
-      <dxo-paging [pageSize]="100"></dxo-paging>
-      <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
-      <dxo-paging [pageSize]="10"></dxo-paging>
-      <dxo-filter-row [visible]="true"></dxo-filter-row>
-      <dxi-column dataField="division" caption="구분"></dxi-column>
-      <dxi-column dataField="competentBracnh" caption="관할지사"></dxi-column>
-      <dxi-column dataField="whereOrder" caption="주문처" ></dxi-column>
-      <dxi-column dataField="registrationDate" caption="등록일자"></dxi-column>
-      <dxi-column dataField="product" caption="제품"></dxi-column>
-      <dxi-column dataField="packaging" caption="포장"></dxi-column>
-      <dxi-column dataField="registeredQuantity" caption="등록수량" format="#,###"></dxi-column>
-      <dxi-column dataField="throughput" caption="처리수량" format="#,###"></dxi-column>
-      <dxi-column dataField="origin" caption="발생처"></dxi-column>
-      <dxi-column dataField="processingDate" caption="처리예정일" ></dxi-column>
-      <dxi-column dataField="situation" caption="상태"></dxi-column>
-      <dxi-column dataField="note" caption="비고"></dxi-column>
-      <dxi-column dataField="carNumber" caption="차량번호"> </dxi-column>
-      <dxi-column dataField="carType" caption="차종"></dxi-column>
-      <dxi-column dataField="driver" caption="기사"></dxi-column>
-      <dxi-column dataField="phoneNumber" caption="전화번호" ></dxi-column>
-      <dxi-column dataField="approval" caption="승인"></dxi-column>
-      <dxi-column dataField="registrationNumber" caption="등록번호"></dxi-column>
-      <dxi-column dataField="turn" caption="순번"format="#,###"></dxi-column>
-      <dxi-column dataField="sect" caption="SECT"></dxi-column>
-      <dxi-column dataField="productName" caption="제품명"></dxi-column>
-      <dxi-column dataField="inspectionClass" caption="검수구분"></dxi-column>
-      <dxi-column dataField="destination" caption="도착지"></dxi-column>
-      <dxi-column dataField="registration" caption="등록구분"></dxi-column>
-      <dxo-search-panel [visible]="true"></dxo-search-panel>
-      <dxo-paging [pageSize]="10"></dxo-paging>
-      <dxo-group-panel [visible]="true"></dxo-group-panel>
-      <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
-    </dx-data-grid>
+  <div id="form-container">
+    <dx-form id="orderInfo"
+             [(formData)]="changeFormData"
+             width="100%"
+             (onFieldDataChanged)="form_fieldDataChanged($event)"
+             style="margin-top:10px">
+
+      <dxi-item itemType="group" caption="" [colCount]="4">
+        <dxi-item dataField="MAKTX" editorType="dxTextBox" disabled="true" [colSpan]="3">
+          <dxo-label text="자재명"></dxo-label>
+        </dxi-item>
+        <dxi-item dataField="MEINS" editorType="dxTextBox" disabled="true" [colSpan]="1">
+          <dxo-label text="단위"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="" [colCount]="2">
+        <dxi-item dataField="LABST" editorType="dxNumberBox" disabled="true" [colSpan]="1" [editorOptions]="{ format: '#,##0.###', type: 'decimal' }">
+          <dxo-label text="현가용재고"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="INPUT" editorType="dxNumberBox" [colSpan]="1" [editorOptions]="{ format: '#,##0.###', type: 'decimal'}">
+          <dxo-label text="전환수량"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="" [colCount]="1">
+        <dxi-item dataField="MEMO" editorType="dxTextBox" [colSpan]="1">
+          <dxo-label text="메모"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+    </dx-form>
   </div>
-
-
-  <dx-popup width="80%"
-            height="50%"
-            [showTitle]="true"
-            title="수정 및 조회"
-            [dragEnabled]="false"
-            [showCloseButton]="false"
-            container=".dx-viewport"
-            [(visible)]="popupVisible"
-            >
-    <dxi-toolbar-item widget="dxButton"
-                      toolbar="bottom"
-                      location="after"
-                      [options]="saveButtonOptions">
-    </dxi-toolbar-item>
-    <dxi-toolbar-item widget="dxButton"
-                      toolbar="bottom"
-                      location="after"
-                      [options]="closeButtonOptions">
-    </dxi-toolbar-item>
-    <dx-scroll-view width="100%" height="100%">
-
-      <div id="form-container">
-        <dx-form id="orderInfo" [formData]="orderInfo" [colCount]="4" width="100%">
-          <dxi-item itemType="group" caption="">
-            <dxi-item dataField="whereOrder">
-              <dxo-label text="주문처"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue1"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states11">
-
-                  <dx-data-grid [dataSource]="states11"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue1">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-            <dxi-item dataField="productName">
-              <dxo-label text="제품명"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue2"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states2">
-
-                  <dx-data-grid [dataSource]="states2"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue2">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-            <dxi-item dataField="origin">
-              <dxo-label text="발생장소"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue3"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states4">
-
-                  <dx-data-grid [dataSource]="states4"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue3">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-            <dxi-item dataField="remarks" [editorOptions]="{ height: 100}"><dxo-label text="특기사항"></dxo-label></dxi-item>
-          </dxi-item>
-          <dxi-item itemType="group" caption="">
-            <dxi-item dataField="packagingName">
-              <dxo-label text="등록구분"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue9"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states9">
-
-                  <dx-data-grid [dataSource]="states9"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue9">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-
-              </div>
-            </dxi-item>
-            <dxi-item dataField="packagingName">
-              <dxo-label text="포장명"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue4"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states3">
-
-                  <dx-data-grid [dataSource]="states3"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue4">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-
-              </div>
-            </dxi-item>
-            <dxi-item dataField="carNumber">
-              <dxo-label text="차량번호"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue5"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states5">
-
-                  <dx-data-grid [dataSource]="states5"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue5">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-            <dxi-item dataField="carNumber">
-              <dxo-label text="차량종류"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue5"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states8">
-
-                  <dx-data-grid [dataSource]="states8"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue5">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-          </dxi-item>
-          <dxi-item itemType="group" caption="">
-            <dxi-item dataField="registrationDate">
-              <dxo-label text="등록일자"></dxo-label>
-              <dx-date-box type="date"
-                           pickerType="rollers"
-                           displayFormat="yyyy-MM-dd"
-                           [useMaskBehavior]="true"
-                           [showClearButton]="true">
-              </dx-date-box>
-            </dxi-item>
-            <dxi-item dataField="registeredQuantity"><dxo-label text="등록수량"></dxo-label></dxi-item>
-            <dxi-item dataField="driver"><dxo-label text="기사명"></dxo-label></dxi-item>
-            <dxi-item dataField="integrityIngredient"><dxo-label text="고결성분"></dxo-label></dxi-item>
-            <dxi-item dataField="mainCatergory">
-              <dxo-label text="대분류"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue10"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states10">
-
-                  <dx-data-grid [dataSource]="states10"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue10">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-          </dxi-item>
-          <dxi-item itemType="group" caption="">
-            <dxi-item dataField="dueDate">
-              <dxo-label text="생산/완료일"></dxo-label>
-              <dx-date-box type="date"
-                           pickerType="rollers"
-                           displayFormat="yyyy-MM-dd"
-                           [useMaskBehavior]="true"
-                           [showClearButton]="true">
-              </dx-date-box>
-            </dxi-item>
-            <dxi-item dataField="throughput"><dxo-label text="처리수량"></dxo-label></dxi-item>
-            <dxi-item dataField="phoneNumber"><dxo-label text="전화번호"></dxo-label></dxi-item>
-            <dxi-item dataField="completed">
-              <dxo-label text="완료여부"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue6"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states6">
-
-                  <dx-data-grid [dataSource]="states6"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue6">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-            <dxi-item dataField="subCategory">
-              <dxo-label text="소분류"></dxo-label>
-              <dxi-validation-rule type="required"></dxi-validation-rule>
-              <div *dxTemplate>
-                <dx-drop-down-box [(value)]="gridBoxValue7"
-                                  valueExpr="ID"
-                                  displayExpr="Name"
-                                  placeholder="Select a value..."
-                                  [showClearButton]="true"
-                                  [dataSource]="states7">
-
-                  <dx-data-grid [dataSource]="states7"
-                                [columns]="['Name']"
-                                [selection]="{ mode: 'single' }"
-                                [hoverStateEnabled]="true"
-                                [paging]="{ enabled: true, pageSize: 10 }"
-                                [filterRow]="{ visible: true }"
-                                keyExpr="ID"
-                                [(selectedRowKeys)]="gridBoxValue7">
-                  </dx-data-grid>
-                </dx-drop-down-box>
-              </div>
-            </dxi-item>
-          </dxi-item>
-        </dx-form>
-      </div>
-
-    </dx-scroll-view>
-  </dx-popup>
-
-
-
+</dx-popup>

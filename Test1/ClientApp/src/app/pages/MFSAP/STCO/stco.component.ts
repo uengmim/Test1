@@ -33,6 +33,7 @@ import { ZSDS0060Model, ZSDS0061Model, ZSDSTOORDERManageModel } from '../../../s
 import { CodeInfoType, PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../shared/components/possible-entry-datastore';
 import { ZSDS0062Model, ZSDSTODELIVERYCancelModel } from '../../../shared/dataModel/MFSAP/ZSdStoDeliveryCancelProxy';
 import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
+import { Title } from '@angular/platform-browser';
 
 
 if (!/localhost/.test(document.location.host)) {
@@ -146,9 +147,12 @@ export class STCOComponent {
 
   popupPosition: any;
   customOperations!: Array<any>;
-  constructor(private dataService: ImateDataService, service: Service,private authService: AuthService, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+  constructor(private dataService: ImateDataService, service: Service, private authService: AuthService, http: HttpClient, imInfo: ImateInfo,
+    private appInfo: AppInfoService, private appConfig: AppConfigService, private titleService: Title) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO출고진행현황";
+    this.titleService.setTitle(appInfo.title);
+
     let page = this;
     this.cancelCodeList = service.getCancelStatus();
     //QA test용 설정

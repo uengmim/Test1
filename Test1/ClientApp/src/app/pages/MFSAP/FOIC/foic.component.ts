@@ -28,6 +28,10 @@ import { ZMMOILGirecvModel, ZMMS3210Model, ZMMS9900Model } from '../../../shared
 import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZSDIFPORTALSAPSHIPPINGInsModel, ZSDS6901Model, ZSDT6901Model } from '../../../shared/dataModel/MCDIP/ZsdIfPortalSapShippingIns';
 import { ZMMT3063Model } from '../../../shared/dataModel/MLOGP/Zmmt3063';
+import { Title } from '@angular/platform-browser';
+import { Workbook } from 'exceljs';
+import { exportDataGrid } from 'devextreme/excel_exporter';
+import saveAs from 'file-saver';
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
 }
@@ -80,12 +84,16 @@ export class FOICComponent {
   userid: string = "";
   rowCount: any;
 
+  //UI 데이터 로딩 패널
+  loadingVisible: boolean = false;
 
+  excelButtonOptions: any;
   //this
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService,
-    private imInfo: ImateInfo, private authService: AuthService) {
+    private imInfo: ImateInfo, private authService: AuthService, private titleService: Title) {
 
     appInfo.title = AppInfoService.APP_TITLE + " | 고객주문조회 및 취소";
+    this.titleService.setTitle(appInfo.title);
 
     let userInfo = this.authService.getUser().data;
     this.rolid = userInfo?.role;
@@ -111,6 +119,14 @@ export class FOICComponent {
 
     //바로 조회
     this.dataLoad();
+
+    //엑셀다운로드
+    this.excelButtonOptions = {
+      text: "엑셀다운로드",
+      onClick: async (e: any) => {
+        this.onExportingOrderData(e);
+      }
+    };
   }
 
  
@@ -147,6 +163,35 @@ export class FOICComponent {
     }
   }
 
+  /**
+* On Exporting Excel
+* */
+  onExportingOrderData(e: any) {
+    //e.component.beginUpdate();
+    //e.component.columnOption('ID', 'visible', true);
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Main sheet');
+    exportDataGrid({
+      component: this.deleteGrid.instance,
+      worksheet: worksheet,
+      customizeCell: function (options) {
+        const excelCell = options.excelCell;
+        excelCell.font = { name: 'Arial', size: 12 };
+        excelCell.alignment = { horizontal: 'left' };
+      }
+    }).then(function () {
+      workbook.xlsx.writeBuffer()
+        .then(function (buffer: BlobPart) {
+          saveAs(new Blob([buffer], { type: 'application/octet-stream' }), `고객주문조회 및 취소_${formatDate(new Date(), "yyyyMMdd", "en-US")}.xlsx`);
+        });
+    }).then(function () {
+      //e.component.columnOption('ID', 'visible', false);
+      //e.component.endUpdate();
+      return;
+    });
+
+    /*e.cancel = true;*/
+  }
   //고객주문리스트 조회 RFC
   public async dataLoad() {
     var modelList: ZSDS0090Model[] = [];
@@ -154,7 +199,18 @@ export class FOICComponent {
     var list: ZSDDOCUMENTCancelModel[] = [zsdDocument];
     var resultModel = await this.dataService.RefcCallUsingModel<ZSDDOCUMENTCancelModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDDOCUMENTCancelModelList", list, QueryCacheType.None);
 
+    resultModel[0].T_DATA.forEach(async (row: ZSDS0090Model) => {
+      if (row.ZPALLTP === "P") {
+        row.ZPALLTP = "플라스틱"
+      }
+      else if (row.ZPALLTP === "W") {
+        row.ZPALLTP = "목재"
+      }
+      else {
+        row.ZPALLTP = "없음"
+      }
 
+    });
 
     this.orderData = new ArrayStore(
       {
@@ -178,6 +234,8 @@ export class FOICComponent {
     this.releaseButton = true;
 
   }
+
+
 
   //주문문서삭제 rfc
   public async orderDelete() {
@@ -280,9 +338,11 @@ export class FOICComponent {
     var modelList: ZSDS0090Model[] = [];
     var zsdDocument = new ZSDDOCUMENTCancelModel("", "", "", selectData[0].VDATU, selectData[0].VDATU, "", "", "", "", selectData[0].MATNR, "D", "", selectData[0].VBELN, "", "", "", modelList, modelList);
     var list: ZSDDOCUMENTCancelModel[] = [zsdDocument];
+    var resultModel: ZSDDOCUMENTCancelModel[] = [];
 
 
     if (this.selectData2 === "30") {
+      var oilGireCVDeleteResult: ZMMT3063Model[] = [];
       let minDate = new Date("0001-01-01");
       let minTime = formatDate(new Date("0001-01-01"), "HHmmss", "en-US");
       let oilCVTIme = formatDate(new Date(), "HH:mm:ss", "en-US");
@@ -290,32 +350,48 @@ export class FOICComponent {
       //ZSDIFPORTALSAPSHIPPINGInsModel에서 조건 넣어서 검색
       var zsds6901List: ZSDS6901Model[] = [];
       var zsdt6901List: ZSDT6901Model[] = [];
-      var oilDataResult = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", "", "", this.endDate, this.startDate, "D", zsds6901List, zsdt6901List, selectData[0].VBELN_VL ?? "", "", "");
-      var oilModelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilDataResult];
-      var resultOilModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", oilModelList, QueryCacheType.None);
-      //위에서 나온 데이터로 ZMMT3063Model 조회
-      var deleteData = resultOilModel[0].ET_DATA
-      var oilGireCVDeleteResult = await this.dataService.SelectModelData<ZMMT3063Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3063ModelList", [],
-        `MANDT = '${this.appConfig.mandt}' AND ZVBELN = '${deleteData[0].VBELN}' AND ZPOSNR = '${deleteData[0].POSNR}'AND MATNR = '${deleteData[0].MATNR}' AND ZTANK = '${deleteData[0].ZTANK}' `, "", QueryCacheType.None);
 
-      var zmms9900 = new ZMMS9900Model("", "");
-      var zmms3210Model: ZMMS3210Model[] = [];
+      resultModel = await this.dataService.RefcCallUsingModel<ZSDDOCUMENTCancelModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDDOCUMENTCancelModelList", list, QueryCacheType.None);
 
-      //위에서 나온 데이터 값 넣기
-      zmms3210Model.push(new ZMMS3210Model("C", oilGireCVDeleteResult[0].GI_GUBUN, oilGireCVDeleteResult[0].ZVBELN, oilGireCVDeleteResult[0].ZPOSNR, oilGireCVDeleteResult[0].MATNR,
-        oilGireCVDeleteResult[0].ZTANK, oilGireCVDeleteResult[0].ZIIPNO, oilGireCVDeleteResult[0].BUDAT, oilGireCVDeleteResult[0].GRTYP,
-        "", "C", 0, 0, oilGireCVDeleteResult[0].ZGI_QTY, oilGireCVDeleteResult[0].ZADJ_QTY, minDate, minTime, oilNowDate, oilCVTIme, "", minDate, minTime, DIMModelStatus.Add)); console.log(zmms3210Model)
+      if (resultModel[0].T_CAN.length > 0) {
+        if (resultModel[0].T_CAN[0].TYPE !== "E") {
+          var oilDataResult = new ZSDIFPORTALSAPSHIPPINGInsModel("", "", "", "", this.endDate, this.startDate, "D", zsds6901List, zsdt6901List, selectData[0].VBELN_VL ?? "", "", "");
+          var oilModelList: ZSDIFPORTALSAPSHIPPINGInsModel[] = [oilDataResult];
+          var resultOilModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPSHIPPINGInsModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPSHIPPINGInsModelList", oilModelList, QueryCacheType.None);
+          //위에서 나온 데이터로 ZMMT3063Model 조회
+          var deleteData = resultOilModel[0].ET_DATA
 
-      var oilSub = new ZMMOILGirecvModel(zmms9900, "C", this.appConfig.plant, zmms3210Model);
+          if (deleteData.length > 0) {
+            oilGireCVDeleteResult = await this.dataService.SelectModelData<ZMMT3063Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3063ModelList", [],
+              `MANDT = '${this.appConfig.mandt}' AND ZVBELN = '${deleteData[0].VBELN}' AND ZPOSNR = '${deleteData[0].POSNR}'AND MATNR = '${deleteData[0].MATNR}' AND ZTANK = '${deleteData[0].ZTANK}' `, "", QueryCacheType.None);
+          } else {
+            oilGireCVDeleteResult = await this.dataService.SelectModelData<ZMMT3063Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3063ModelList", [],
+              `MANDT = '${this.appConfig.mandt}' AND ZVBELN = '${selectData[0].VBELN_VL}' AND ZPOSNR = '000010'AND MATNR = '${selectData[0].MATNR}'`, "", QueryCacheType.None);
+          }
 
-      console.log(oilSub)
+          //oilGireCVDeleteResult = await this.dataService.SelectModelData<ZMMT3063Model[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT3063ModelList", [],
+          //  `MANDT = '${this.appConfig.mandt}' AND ZVBELN = '${deleteData[0].VBELN}' AND ZPOSNR = '${deleteData[0].POSNR}'AND MATNR = '${deleteData[0].MATNR}' AND ZTANK = '${deleteData[0].ZTANK}' `, "", QueryCacheType.None);
 
-      var oilSubModelList: ZMMOILGirecvModel[] = [oilSub];
-      this.rowCount = await this.dataService.RefcCallUsingModel<ZMMOILGirecvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMOILGirecvModelList", oilSubModelList, QueryCacheType.None);
-      var resultModel = await this.dataService.RefcCallUsingModel<ZSDDOCUMENTCancelModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDDOCUMENTCancelModelList", list, QueryCacheType.None);
+          var zmms9900 = new ZMMS9900Model("", "");
+          var zmms3210Model: ZMMS3210Model[] = [];
 
+          if (oilGireCVDeleteResult.length > 0) {
+            //위에서 나온 데이터 값 넣기
+            zmms3210Model.push(new ZMMS3210Model("C", oilGireCVDeleteResult[0].GI_GUBUN, oilGireCVDeleteResult[0].ZVBELN, oilGireCVDeleteResult[0].ZPOSNR, oilGireCVDeleteResult[0].MATNR,
+              oilGireCVDeleteResult[0].ZTANK, oilGireCVDeleteResult[0].ZIIPNO, oilGireCVDeleteResult[0].BUDAT, oilGireCVDeleteResult[0].GRTYP,
+              "", "C", 0, 0, oilGireCVDeleteResult[0].ZGI_QTY, oilGireCVDeleteResult[0].ZADJ_QTY, minDate, minTime, oilNowDate, oilCVTIme, "", minDate, minTime, DIMModelStatus.Add)); console.log(zmms3210Model)
+
+            var oilSub = new ZMMOILGirecvModel(zmms9900, "C", this.appConfig.plant, zmms3210Model);
+
+            console.log(oilSub)
+
+            var oilSubModelList: ZMMOILGirecvModel[] = [oilSub];
+            this.rowCount = await this.dataService.RefcCallUsingModel<ZMMOILGirecvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMOILGirecvModelList", oilSubModelList, QueryCacheType.None);
+          }
+        }
+      }
     } else {
-      var resultModel = await this.dataService.RefcCallUsingModel<ZSDDOCUMENTCancelModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDDOCUMENTCancelModelList", list, QueryCacheType.None);
+      resultModel = await this.dataService.RefcCallUsingModel<ZSDDOCUMENTCancelModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDDOCUMENTCancelModelList", list, QueryCacheType.None);
     }
     return resultModel[0].T_CAN;
   }

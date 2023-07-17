@@ -41,20 +41,20 @@
     </div>
   </dxi-item>-->
 
-  <dxi-item location="after">
+  <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button text="참조추가" (onClick)="refAddOrder($event)">
       </dx-button>
     </div>
   </dxi-item>
 
-  <dxi-item location="after">
+  <dxi-item location="after" locateInMenu="auto">
     <div *dxTemplate>
       <dx-button text="주문생성" (onClick)="addOrder($event)">
       </dx-button>
     </div>
   </dxi-item>
-  <dxi-item location="after" [visible]="false">
+  <dxi-item location="after" locateInMenu="auto" [visible]="false">
     <div *dxTemplate>
       <dx-button text="참조추가" (onClick)="refAddOrder($event)">
       </dx-button>
@@ -144,7 +144,17 @@
               [allowColumnReordering]="true"
               columnResizingMode="widget"
               [loadPanel]="loadPanelOption"
+              (onEditorPreparing)="onEditorPreparing($event)"
               [allowColumnResizing]="true">
+  <dxo-toolbar>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="excelButtonOptions">
+    </dxi-item>
+  </dxo-toolbar>
+
   <dxo-scrolling mode="infinite"></dxo-scrolling>
   <dxo-paging [enabled]="false"></dxo-paging>
   <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
@@ -200,6 +210,16 @@
   <dxi-column dataField="GIQTY"
               caption="출고량">
   </dxi-column>
+
+  <dxi-column dataField="ZPALLTPT"
+              caption="파레트유형">
+  </dxi-column>
+  <dxi-column dataField="ZPALLETQTY"
+              format='#,##0'
+              dataType="number"
+              caption="파레트수량">
+  </dxi-column>
+
   <dxi-column dataField="VDATU"
               caption="출하요청일"
               format="yyyy-MM-dd"
@@ -247,9 +267,9 @@
           position="center"
           [(visible)]="popupVisible"
           [dragEnabled]="true"
+          container=".dx-viewport"
           [dragOutsideBoundary]="true"
           [showCloseButton]="false"
-          container=".dx-viewport"
           [hideOnOutsideClick]="true"
           >
   <dxi-toolbar-item widget="dxButton"
@@ -404,10 +424,13 @@
           </dxi-item>
 
 
-          <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+          <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,###.###', dataType: 'number'}">
             <dxo-label text="주문가능량"></dxo-label>
           </dxi-item>
-          <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+          <dxi-item dataField="STOCKQTY" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="재고(수량)"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,###.###', dataType: 'number', step: 0 }">
             <dxi-validation-rule type="required" message="주문수량필수입력"></dxi-validation-rule>
             <dxo-label text="주문수량"></dxo-label>
           </dxi-item>
@@ -647,7 +670,7 @@
                   [colCount]="3"
                   [colSpan]="2">
           <dxi-item dataField="ZNHNAME" [disabled]="true"><dxo-label text="농협명"></dxo-label></dxi-item>
-          <dxi-item dataField="MVGR2" >
+          <dxi-item dataField="MVGR2" [disabled]="true" >
             <dxi-validation-rule type="required" message="사업방식필수입력"></dxi-validation-rule>
             <dxo-label text="사업방식"></dxo-label>
             <div *dxTemplate>
@@ -694,7 +717,7 @@
               <!--(onEntryValueChanged)="onMvgr3CodeValueChanged($event)"-->
             </div>
           </dxi-item>
-          <dxi-item dataField="MVGR1" >
+          <dxi-item dataField="MVGR1" [disabled]="true">
             <dxi-validation-rule type="required" message="대분류필수입력"></dxi-validation-rule>
             <dxo-label text="대분류"></dxo-label>
             <div *dxTemplate>
@@ -748,9 +771,9 @@
           [(visible)]="popupVisible2"
           [dragEnabled]="true"
           position="center"
+          container=".dx-viewport"
           [dragOutsideBoundary]="true"
           [showCloseButton]="false"
-          container=".dx-viewport"
           [hideOnOutsideClick]="true"
           >
   <dxi-toolbar-item widget="dxButton"
@@ -900,10 +923,13 @@
           </dxi-item>
 
 
-          <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+          <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,###.###', dataType: 'number'}">
             <dxo-label text="주문가능량"></dxo-label>
           </dxi-item>
-          <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+          <dxi-item dataField="STOCKQTY" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="재고(수량)"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,###.###', dataType: 'number', step: 0 }">
             <dxi-validation-rule type="required" message="주문수량필수입력"></dxi-validation-rule>
             <dxo-label text="주문수량"></dxo-label>
           </dxi-item>
@@ -1063,7 +1089,7 @@
 
           <dxi-item dataField="ZDRIVER" [disabled]="false"><dxo-label text="운전기사명"></dxo-label></dxi-item>
           <dxi-item dataField="ZPHONE" [disabled]="false"><dxo-label text="전화번호"></dxo-label></dxi-item>
-          <dxi-item dataField="ZPALLTP" [disabled]="false" [visible]="false"><dxo-label text="파레트유형"></dxo-label></dxi-item>
+          <dxi-item dataField="ZPALLTP" [disabled]="false" [visible]="true"><dxo-label text="파레트유형"></dxo-label></dxi-item>
         </dxi-item>
       </dx-form>
 
@@ -1209,10 +1235,9 @@
           [(visible)]="popupVisible3"
           [dragEnabled]="true"
           [dragOutsideBoundary]="true"
-          [showCloseButton]="false"
           container=".dx-viewport"
-          [hideOnOutsideClick]="true"
-          >
+          [showCloseButton]="false"
+          [hideOnOutsideClick]="true">
   <dxi-toolbar-item widget="dxButton"
                     toolbar="top"
                     location="after"
@@ -1226,7 +1251,7 @@
   </dxi-toolbar-item>
   <dx-scroll-view width="100%" height="100%">
     <div id="form-container">
-      <dx-form id="popupForm" [formData]="popupData3" [disabled]="false">
+      <dx-form id="popupForm" [formData]="popupData3" [disabled]="false" >
         <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
           <dxi-item dataField="VBELN" [disabled]="true"><dxo-label text="주문번호"></dxo-label></dxi-item>
           <dxi-item dataField="CREDIT_LIMIT" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}"><dxo-label text="여신금액"></dxo-label></dxi-item>
@@ -1365,10 +1390,13 @@
           </dxi-item>
 
 
-          <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+          <dxi-item dataField="orderPossible" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,###.###', type: 'decimal'}">
             <dxo-label text="주문가능량"></dxo-label>
           </dxi-item>
-          <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+          <dxi-item dataField="STOCKQTY" [disabled]="true" editorType="dxNumberBox" [editorOptions]="{ format : '#,##0'}">
+            <dxo-label text="재고(수량)"></dxo-label>
+          </dxi-item>
+          <dxi-item dataField="KWMENG" [disabled]="auartFlag2" editorType="dxNumberBox" [editorOptions]="{ format : '#,###.###', dataType: 'number', step: 0 }">
             <dxi-validation-rule type="required" message="주문수량필수입력"></dxi-validation-rule>
             <dxo-label text="주문수량"></dxo-label>
           </dxi-item>
@@ -1426,10 +1454,10 @@
             <dxo-label text="운송방법"></dxo-label>
             <dxi-validation-rule type="required" message="운송방법 필수입력"></dxi-validation-rule>
             <div *dxTemplate>
-              <nh-possible-comm [codeInfo]="inco1Code" #incoEnteryB
+              <nh-possible-comm [codeInfo]="refInco1Code" #incoEnteryB
                                 [dataStoreKey]="dataStoreKey"
-                                valueColumn="ZCM_CODE3"
-                                valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                valueColumn="INCO1"
+                                valueDisplayFormat="%BEZEI%(%INCO1%)"
                                 width="auto"
                                 [showClearButton]="true"
                                 [(selectedValue)]="incoValueB"
@@ -1438,7 +1466,7 @@
                                 [popupGridPageSize]="10"
                                 comboGridScrollMode="virtual"
                                 [gridBoxWidth]="500"
-                                [filerExpression]="incoFilter"
+                                
                                 (onDataLoaded)="onPEDataLoaded($event)"
                                 [showDataLoadingPanel]="showDataLoadingPanel"
                                 (onEntryValueChanged)="onIncoValueBValueChanged($event)"></nh-possible-comm>
@@ -1609,7 +1637,7 @@
                   [colCount]="3"
                   [colSpan]="2">
           <dxi-item dataField="ZNHNAME" [disabled]="true"><dxo-label text="농협명"></dxo-label></dxi-item>
-          <dxi-item dataField="MVGR2" [disabled]="false">
+          <dxi-item dataField="MVGR2" [disabled]="true">
             <dxi-validation-rule type="required" message="사업방식필수입력"></dxi-validation-rule>
             <dxo-label text="사업방식"></dxo-label>
             <div *dxTemplate>
@@ -1656,7 +1684,7 @@
               <!--(onEntryValueChanged)="onMvgr3ValueBValueChanged($event)"-->
             </div>
           </dxi-item>
-          <dxi-item dataField="MVGR1" [disabled]="false">
+          <dxi-item dataField="MVGR1" [disabled]="true">
             <dxi-validation-rule type="required" message="대분류필수입력"></dxi-validation-rule>
             <dxo-label text="대분류"></dxo-label>
             <div *dxTemplate>
@@ -1701,9 +1729,9 @@
   </dx-scroll-view>
 </dx-popup>
 <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
-               [shading]="true" [hideOnOutsideClick]="true">
+               [shading]="true" [hideOnOutsideClick]="false">
 </dx-load-panel>
 
 <dx-load-panel #popLoadPanel [position]="{ of: '.dx-viewport' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible2" [showIndicator]="true" [showPane]="true"
-               [shading]="true" [hideOnOutsideClick]="true">
+               [shading]="true" [hideOnOutsideClick]="false">
 </dx-load-panel>

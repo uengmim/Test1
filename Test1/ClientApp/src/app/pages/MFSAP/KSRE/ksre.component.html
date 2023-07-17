@@ -2,7 +2,7 @@
 
 <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
   <dxi-item location="before">
-    <div *dxTemplate>
+    <div *dxTemplate style="width:330px">
       <div style="float: left; margin-left: 10px;">
         <dx-date-box [(value)]="startDate" label="검수일(From)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
       </div>
@@ -11,7 +11,7 @@
       </div>
     </div>
   </dxi-item>
-  <dxi-item location="before" [disabled]="true">
+  <dxi-item location="before" locateInMenu="auto" [disabled]="true">
     <div style="float: left; margin-left: 10px; ">
       <nh-possible-comm [codeInfo]="kunnCode" #kunnrEntery3
                         [dataStoreKey]="dataStoreKey"
@@ -30,7 +30,7 @@
                         (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
     </div>
   </dxi-item>
-  <dxi-item location="before">
+  <dxi-item location="before" locateInMenu="auto">
     <div style="float: left; margin-left: 10px; ">
       <nh-possible-comm #lgEntery
                         [dataStoreKey]="dataStoreKey"

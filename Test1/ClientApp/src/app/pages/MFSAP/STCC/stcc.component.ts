@@ -37,7 +37,7 @@ import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 import { ZSDIFPORTALSAPSHIPPINGInsModel, ZSDS6901Model, ZSDT6901Model } from '../../../shared/dataModel/MCDIP/ZsdIfPortalSapShippingIns';
 import { ZMMT3063Model } from '../../../shared/dataModel/MLOGP/Zmmt3063';
 import { ZMMOILGirecvModel, ZMMS3210Model, ZMMS9900Model } from '../../../shared/dataModel/MCDIP/ZmmOilGirecv';
-
+import { Title } from '@angular/platform-browser';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -162,9 +162,12 @@ export class STCCComponent {
 
   popupPosition: any;
   customOperations!: Array<any>;
-  constructor(private dataService: ImateDataService, service: Service,private authService: AuthService, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService, private appConfig: AppConfigService) {
+  constructor(private dataService: ImateDataService, service: Service, private authService: AuthService, http: HttpClient, imInfo: ImateInfo,
+    private appInfo: AppInfoService, private appConfig: AppConfigService, private titleService: Title) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO진행현황-유류";
+    this.titleService.setTitle(appInfo.title);
+
     let page = this;
     this.cancelCodeList = service.getCancelStatus();
     //QA test용 설정

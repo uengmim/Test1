@@ -51,7 +51,7 @@ export class HomeComponent {
         return;
 
       var now = new Date();
-      var cDate = formatDate(now.setDate(now.getDate() - 3), "yyyy-MM-dd", "en-US");
+      var cDate = formatDate(now.setDate(now.getDate() - 3), "yyyy-MM-dd", "en-US"); 
       var mDate = new Date(cDate);
 
       var checkDate = result[0].ET_LIST.find(item => new Date(item.WADAT_IST) < mDate);

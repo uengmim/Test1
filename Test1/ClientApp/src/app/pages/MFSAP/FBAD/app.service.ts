@@ -55,7 +55,7 @@ export class Employee {
 }
 
 export class OrderInfo {
-   //주문처
+  //주문처
   whereOrder: string = "";
   //제품명
   productName: string = "";
@@ -91,7 +91,7 @@ export class OrderInfo {
   mainCategory: string = "";
 }
 
-const employees: Employee[] =[
+const employees: Employee[] = [
   {
     //ID
     ID: 1,
@@ -128,7 +128,7 @@ const employees: Employee[] =[
     //전화번호
     phoneNumber: '010-3331-2222',
     //승인
-    approval: '승인' ,
+    approval: '승인',
     //등록번호
     registrationNumber: '12-11',
     //순번
@@ -465,7 +465,20 @@ export class State11 {
   ID: number = 0;
   Name: string = "";
 }
-
+export class changeForm {
+  MATNR: string = "";
+  MAKTX: string = "";
+  KMENGE: number = 0;
+  INPUT: number = 0;
+  PMENGE: number = 0;
+  LABST: number = 0;
+  MEINS: string = "";
+  MEMO: string = "";
+  LGORT: string = "";
+  LGOBE: string = "";
+  WGBEZ: string = "";
+  ZZDEPT_NM: string = "";
+}
 const states11: State11[] = [
   {
     ID: 1,

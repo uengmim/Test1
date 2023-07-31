@@ -31,6 +31,7 @@ import { DIMModelStatus } from '../../../shared/imate/dimModelStatusEnum';
 import { ZMMT1321Join1320Model } from '../../../shared/dataModel/MLOGP/Zmmt1320Join1321';
 import { ZMMT1321GroupByModel } from '../../../shared/dataModel/OWHP/Zmmt1321GroupByProxy';
 import { ZMMT1321Model } from '../../../shared/dataModel/MLOGP/Zmmt1321';
+import { Title } from '@angular/platform-browser';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -156,8 +157,9 @@ export class ALOQComponent {
 
   enteryLoading: boolean = false;
   constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService,
-    private imInfo: ImateInfo, private authService: AuthService) {
+    private imInfo: ImateInfo, private authService: AuthService, private titleService: Title) {
     appInfo.title = AppInfoService.APP_TITLE + " | 2차운송사지정-비료,고체화학";
+    this.titleService.setTitle(appInfo.title);
 
     let thisObj = this;
 
@@ -312,8 +314,6 @@ export class ALOQComponent {
               "", "", QueryCacheType.None);
             vbelnMenge.ZMENGE4 = vbelnMenge.ZMENGE4 + (resultModel.length > 0 ? resultModel[0].SUM_VALUE : 0);
           }
-          console.log(vbelnMenge.ZMENGE2);
-          console.log(vbelnMenge.ZMENGE4);
           //납품수량, 배차수량 비교
           if (vbelnMenge.ZMENGE2 < vbelnMenge.ZMENGE4) {
             checkSum = false;
@@ -539,6 +539,8 @@ export class ALOQComponent {
       this.orderGrid.instance.columnOption("POSNR", "caption", "분할순번");
       this.orderGrid.instance.columnOption("ZMENGE1", "caption", "출하요청량");
       this.orderGrid.instance.columnOption("ZMENGE2", "caption", "출하지시량");
+      this.orderGrid.instance.columnOption("ZKETDAT", "visible", false);
+
 
       thisObj.isButtonLimit = true;
       thisObj.imOrderList = await thisObj.dataService.SelectModelData<ZMMT1321Join1320Model[]>(thisObj.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMT1321Join1320List",
@@ -561,6 +563,11 @@ export class ALOQComponent {
      
     } else {
 
+      if (this.vsSelect.value !== "1000") {
+        this.orderGrid.instance.columnOption("ZKETDAT", "visible", true);
+      } else {
+        this.orderGrid.instance.columnOption("ZKETDAT", "visible", false);
+      }
       this.orderGrid.instance.columnOption("POSNR", "visibleIndex", 19);
       this.orderGrid.instance.columnOption("POSNR", "caption", "납품품번");
       this.orderGrid.instance.columnOption("ZMENGE1", "caption", "주문수량");
@@ -627,7 +634,7 @@ export class ALOQComponent {
           dataModel = this.orderList.filter(item => item.VBELN === array.VBELN && item.POSNR === array.POSNR);
           dataModel.forEach(async (subRow: ZSDS6410Model) => {
             var shipStatus = "20";
-            if (subRow.Z4PARVW === "" || subRow.Z4PARVW === undefined)
+            if (subRow.Z4PARVW === "" || subRow.Z4PARVW === undefined || subRow.Z4PARVW === null)
               shipStatus = "10";
 
             var ship_date = array.ZSHIPMENT_DATE;
@@ -658,8 +665,9 @@ export class ALOQComponent {
 
       var createModel = new ZSDIFPORTALSAPLE028RcvModel("", "", zsd6420list);
       var createModelList: ZSDIFPORTALSAPLE028RcvModel[] = [createModel];
-
+      
       insertModel = await this.dataService.RefcCallUsingModel<ZSDIFPORTALSAPLE028RcvModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZSDIFPORTALSAPLE028RcvModelList", createModelList, QueryCacheType.None);
+      
     } else {
       this.orderGrid.instance.getSelectedRowsData().forEach(async (row: ZSDS6410Model) => {
         var dataModel: ZSDS6410Model[] = [];

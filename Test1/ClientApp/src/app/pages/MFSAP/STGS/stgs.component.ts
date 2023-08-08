@@ -39,6 +39,7 @@ import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
 import { exportDataGrid } from 'devextreme/excel_exporter';
 import { Workbook } from 'exceljs';
 import saveAs from 'file-saver';
+import { Title } from '@angular/platform-browser';
 
 if (!/localhost/.test(document.location.host)) {
   enableProdMode();
@@ -164,9 +165,11 @@ export class STGSComponent {
   popupPosition: any;
   customOperations!: Array<any>;
   constructor(private dataService: ImateDataService, service: Service, http: HttpClient, imInfo: ImateInfo, private appInfo: AppInfoService,
-    private appConfig: AppConfigService, private authService: AuthService) {
+    private appConfig: AppConfigService, private authService: AuthService, private titleService: Title) {
     // dropdownbox
     appInfo.title = AppInfoService.APP_TITLE + " | STO입고이력 조회";
+    this.titleService.setTitle(appInfo.title);
+
     let page = this;
 
     //로그인 사용자 정보
@@ -376,6 +379,19 @@ export class STGSComponent {
     var histroyModel = new ZMMSTOGRHistoryModel(zcms0010Model, this.startDate, this.endDate, this.lgortValue, zmms1000Model);
     var historyList: ZMMSTOGRHistoryModel[] = [histroyModel];
     var resultModel = await this.dataService.RefcCallUsingModel<ZMMSTOGRHistoryModel[]>(this.appConfig.dbTitle, "NBPDataModels", "NAMHE.Model.ZMMSTOGRHistoryModelList", historyList, QueryCacheType.None);
+
+    resultModel[0].T_DATA.forEach(async (row: ZMMS1000Model) => {
+      if (row.ZPALLTP === "P") {
+        row.ZPALLTP = "플라스틱"
+      }
+      else if (row.ZPALLTP === "W") {
+        row.ZPALLTP = "목재"
+      }
+      else {
+        row.ZPALLTP = "없음"
+      }
+
+    });
 
     this.gridDataSource = new ArrayStore(
       {

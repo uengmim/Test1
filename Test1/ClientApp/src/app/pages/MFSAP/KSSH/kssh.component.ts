@@ -27,6 +27,7 @@ import { PossibleEnteryCodeInfo, PossibleEntryDataStoreManager } from '../../../
 import { CommonPossibleEntryComponent } from '../../../shared/components/comm-possible-entry/comm-possible-entry.component';
 import { ZSDT7110Model } from '../../../shared/dataModel/MLOGP/Zsdt7110';
 import { T001lModel } from '../../../shared/dataModel/MLOGP/T001l';
+import { Title } from '@angular/platform-browser';
 
 //필터
 const getOrderDay = function (rowData: any): number {
@@ -146,8 +147,11 @@ export class KSSHComponent {
   loadingVisible: boolean = false;
   //_dataService: ImateDataService;
 
-  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo, private authService: AuthService) {
+  constructor(private appConfig: AppConfigService, private dataService: ImateDataService, service: Service, private appInfo: AppInfoService, private imInfo: ImateInfo,
+    private authService: AuthService, private titleService: Title) {
     appInfo.title = AppInfoService.APP_TITLE + " | 보관자료분 출고등록";
+    this.titleService.setTitle(appInfo.title);
+
     //정보
 
     this.loadingVisible = true;

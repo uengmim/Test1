@@ -1,0 +1,115 @@
+<!--차량입출문 이력 조회-->
+<div style="margin:10px 10px 0px 10px">
+
+  <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="startDate" label="조회일자(From)" type="date" [width]="130" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="endDate" label="조회일자(to)" type="date" [width]="130" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button text="조회"
+                   [width]="100"
+                   (onClick)="searchButton($event)"
+                   style="margin-top:4px; margin-left:5px;">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <!--<dxi-item location="after"
+              locateInMenu="auto"
+              style="width: auto;margin-right: 5px;">
+      <dx-button (onClick)="takeOutSpecific()"
+                 [disabled]="!selectedItemKeys.length"
+                 [width]="100"
+                 text="반출증"
+                 style="margin-top:4px;">
+      </dx-button>
+    </dxi-item>-->
+    <dxi-item location="after"
+              locateInMenu="auto"
+              style="width: auto;
+            margin-right: 5px;">
+      <dx-button (onClick)="deleteRecords(this)"
+                 [disabled]="!selectedItemKeys.length"
+                 [width]="100"
+                 style="margin-top:4px;"
+                 text="삭제">
+      </dx-button>
+    </dxi-item>
+
+  </dx-toolbar>
+
+  <dx-data-grid id="grid" #orderDataGrid
+                [dataSource]="orderData"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                [allowColumnResizing]="true"
+                [columnResizingMode]="columnResizeMode"
+                [columnHidingEnabled]="true"
+                [allowColumnReordering]="true"
+                [keyExpr]="['ZGW_DATE','ZGW_TIME']"
+                [selection]="{ mode: 'single' }"
+                height="calc(100vh - 190px)"
+                [(selectedRowKeys)]="selectedRows"
+                (onSelectionChanged)="selectionChanged($event)">
+
+    <!--Datagrid Option-->
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-builder-popup [position]="popupPosition">
+    </dxo-filter-builder-popup>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+    <!--Data column-->
+    <dxi-column dataField="ZGW_DATE"
+                dataType="date"
+                alignment="center"
+                format="yyyy-MM-dd"
+                caption="발생일">
+    </dxi-column>
+    <dxi-column dataField="ZGW_TIME"
+                dataType="time"
+                alignment="center"
+                sortOrder="desc"
+                format="HH:mm:ss"
+                caption="시간">
+    </dxi-column>
+    <dxi-column dataField="ZCARNO"
+                caption="차량번호">
+    </dxi-column>
+    <dxi-column dataField="ZDRIVER"
+                caption="운전기사명">
+    </dxi-column>
+    <dxi-column dataField="ZGW_MAKTX"
+                caption="자재명">
+    </dxi-column>
+    <dxi-column dataField="ZGW_NAME1"
+                caption="업체명">
+    </dxi-column>
+    <dxi-column dataField="ZGW_ATGEW"
+                caption="실중량"
+                format="#,###">
+    </dxi-column>
+
+  </dx-data-grid>
+</div>
+<report-viewer #reportViewer style="overflow:auto">
+</report-viewer>

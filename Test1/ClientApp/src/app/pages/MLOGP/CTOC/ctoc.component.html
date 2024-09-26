@@ -1,0 +1,281 @@
+ <!--toolbar-->
+<div style="margin:10px 10px 10px 10px">
+  <dx-toolbar style="margin:20px 0px 20px 0px">
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="wadatIstDatefrom" label="출고일자(from)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="wadatIstDateto" label="출고일자(to)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-select-box [dataSource]="cSpart"
+                       displayExpr="name"
+                       valueExpr="code"
+                       [(value)]="spartValue"
+                       label="구분"
+                       labelMode="floating"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-select-box [dataSource]="Spdata"
+                       displayExpr="name"
+                       valueExpr="code"
+                       [(value)]="spdataValue"
+                       label="출하지점"
+                       labelMode="floating"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate style="float: left; margin-left: 10px; ">
+        <dx-select-box [dataSource]="tdlData"
+                       displayExpr="name"
+                       valueExpr="code"
+                       [(value)]="selectTdlValue"
+                       label="운송사구분"
+                       labelMode="floating"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto" [disabled]="is1chDisabled">
+      <div *dxTemplate style="float: left; margin-left: 10px; ">
+        <nh-possible-comm [codeInfo]="tdlnrCode" #tdlnrEntery
+                          [dataStoreKey]="dataStoreKey"
+                          valueColumn="LIFNR"
+                          valueDisplayFormat="%NAME1%(%LIFNR%)"
+                          width="auto"
+                          label="운송사"
+                          labelMode="floating"
+                          [showClearButton]="true"
+                          [(selectedValue)]="tdlnrValue"
+                          [gridBoxWidth]="500"
+                          [validationErrors]="[{type:'required', message:'1차운송사 필수입력'}]"
+                          (onDataLoaded)="onPEDataLoaded($event)">
+          <nbp-validator [adapter]="tdlnrAdapter">
+            <dxi-validation-rule type="required"></dxi-validation-rule>
+          </nbp-validator>
+        </nh-possible-comm>
+      </div>
+    </dxi-item>
+
+    <!--<dxi-item location="before" locateInMenu="auto" [disabled]="is2chDisabled">
+    <div *dxTemplate style="float: left; margin-left: 10px; ">
+      <nh-possible-comm [codeInfo]="tdlnr2Code" #tdlnr2Entery
+                        [dataStoreKey]="dataStoreKey"
+                        valueColumn="LIFNR"
+                        valueDisplayFormat="%NAME1%(%LIFNR%)"
+                        width="auto"
+                        label="2차운송사"
+                        labelMode="floating"
+                        [showClearButton]="true"
+                        [(selectedValue)]="tdlnr2Value"
+                        [gridBoxWidth]="500"
+                        [validationErrors]="[{type:'required', message:'2차운송사 필수입력'}]"
+                        (onDataLoaded)="onPEDataLoaded($event)">
+        <nbp-validator [adapter]="tdlnrAdapter">
+          <dxi-validation-rule type="required"></dxi-validation-rule>
+        </nbp-validator>
+      </nh-possible-comm>
+    </div>
+  </dxi-item>-->
+
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="searchButtonOptions">
+    </dxi-item>
+    <dxi-item location="after" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-button text="저장" (onClick)="saveData()">
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dx-toolbar>
+
+  <dx-data-grid #detailGrid
+                [showBorders]="true"
+                [dataSource]="gridDataSource"
+                [columnAutoWidth]="true"
+                keyExpr="cuName"
+                [allowColumnResizing]="true"
+                [selection]="{ mode: 'multiple' }"
+                columnResizingMode="widget"
+                [allowColumnReordering]="true"
+                height="calc(100vh - 230px)">
+
+    <!--Datagrid Option-->
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+    <dxo-editing mode="cell"
+                 [allowUpdating]="true">
+    </dxo-editing>
+
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-builder-popup [position]="popupPosition">
+    </dxo-filter-builder-popup>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+
+    <!--Data column-->
+    <dxi-column dataField="VBELN"
+                caption="납품문서번호"
+                [fixed]="true" fixedPosition="left"
+                [allowEditing]="false">
+    </dxi-column>
+
+    <dxi-column dataField="POSNR"
+                caption="납품품번"
+                [allowEditing]="false"
+                [fixed]="true" fixedPosition="left">
+    </dxi-column>
+    <dxi-column dataField="VGBEL"
+                caption="주문번호"
+                [allowEditing]="false"
+                [fixed]="true" fixedPosition="left">
+    </dxi-column>
+    <dxi-column dataField="VGPOS"
+                caption="주문품번"
+                [allowEditing]="false"
+                [fixed]="true" fixedPosition="left">
+    </dxi-column>
+    <dxi-column dataField="VSBED"
+                [allowEditing]="false"
+                caption="출하조건">
+    </dxi-column>
+
+    <dxi-column dataField="WADAT_IST"
+                [allowEditing]="false"
+                dataType="date"
+                format="yyyy-MM-dd"
+                caption="실제출고일">
+    </dxi-column>
+
+    <dxi-column dataField="SPART"
+                [allowEditing]="false"
+                caption="제품군">
+    </dxi-column>
+    <dxi-column dataField="MATNR"
+                [allowEditing]="false"
+                caption="자재코드">
+    </dxi-column>
+    <dxi-column dataField="ARKTX"
+                [allowEditing]="false"
+                caption="자재명">
+    </dxi-column>
+    <dxi-column dataField="MBDAT"
+                caption="자재가용일"
+                [allowEditing]="false"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+    <dxi-column dataField="KWMENG"
+                [allowEditing]="false"
+                type="number"
+                format="#,###.###"
+                caption="주문수량">
+    </dxi-column>
+    <dxi-column dataField="LFIMG"
+                [allowEditing]="false"
+                type="number"
+                format="#,###.###"
+                caption="납품수량">
+    </dxi-column>
+    <dxi-column dataField="VRKME"
+                [allowEditing]="false"
+                caption="단위">
+    </dxi-column>
+    <dxi-column dataField="ZCONFIRM_CUT"
+                [allowEditing]="true"
+                type="number" format="#,###.###"
+                caption="고객확인 수량">
+    </dxi-column>
+    <dxi-column dataField="LFIMG_DIFF"
+                [allowEditing]="false"
+                type="number"
+                format="#,###.###"
+                caption="편차수량">
+    </dxi-column>
+    <dxi-column dataField="LGORT_NM"
+                [allowEditing]="false"
+                caption="저장위치">
+    </dxi-column>
+    <dxi-column dataField="ZNAME1_WE"
+                [allowEditing]="false"
+                caption="고객명">
+    </dxi-column>
+    <dxi-column dataField="ZNAME1_AG"
+                [allowEditing]="false"
+                caption="판매처">
+    </dxi-column>
+    <dxi-column dataField="LFART"
+                [allowEditing]="false"
+                caption="납품유형">
+    </dxi-column>
+    <dxi-column dataField="Z3NAME1"
+                [allowEditing]="false"
+                caption="1차운송업체">
+    </dxi-column>
+    <dxi-column dataField="ZCARTYPE"
+                [allowEditing]="false"
+                caption="화물차종">
+    </dxi-column>
+    <dxi-column dataField="ZCARNO"
+                [allowEditing]="false"
+                caption="차량번호">
+    </dxi-column>
+    <dxi-column dataField="ZDRIVER"
+                [allowEditing]="false"
+                caption="운전기사명">
+    </dxi-column>
+    <dxi-column dataField="ZSHIPMENT_NO"
+                [allowEditing]="false"
+                caption="배차번호">
+    </dxi-column>
+    <dxi-column dataField="ZPALLTP"
+                [allowEditing]="false"
+                caption="파렛트유형">
+    </dxi-column>
+    <dxi-column dataField="ZPALLETQTY"
+                [allowEditing]="false"
+                type="number"
+                format="#,###.###"
+                caption="파렛트수량">
+    </dxi-column>
+    <dxi-column dataField="PDSTA"
+                [allowEditing]="false"
+                caption="POD상태">
+    </dxi-column>
+
+    <dxi-column dataField="WBSTK"
+                [allowEditing]="false"
+                caption="자재이동상태">
+    </dxi-column>
+
+
+  </dx-data-grid>
+  </div>
+  <!-- 로딩 패널-->
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>

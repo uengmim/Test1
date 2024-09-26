@@ -1,0 +1,14 @@
+.logos-container {
+  margin: 30px 0 30px 0;
+  text-align: center;
+  svg {
+    display: inline-block;
+  }
+}
+
+:host-context(.screen-x-small) .logos-container {
+  svg {
+    width: 100%;
+    display: block;
+  }
+}

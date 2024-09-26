@@ -1,0 +1,133 @@
+<!--<div class="dx-field-label">Date picker</div>
+<div class="dx-field-value">
+  <dx-date-box [value]="now" pickerType="rollers"> </dx-date-box>
+</div>-->
+
+
+<div>
+  <dx-toolbar>
+    <dxi-item location="before">
+      <div class="toolbar-label" style="float:left;margin-top:10px;margin-right:5px"><b>주문처</b> </div>
+      <div style="float:left">
+        <dx-select-box [items]="simpleProducts"></dx-select-box>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div class="toolbar-label" style="float: left; margin-top: 10px; margin-right: 5px; margin-left: 15px"><b>출고요청기간</b> </div>
+        <div style="float:left">
+          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+        </div>
+        <div style="float:left;margin-left:10px;margin-right:10px">
+          ~
+        </div>
+        <div style="float:left">
+          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+    <dxi-item location="left">
+      <div *dxTemplate>
+        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="left">
+      <div *dxTemplate>
+        <dx-button icon="save" (onClick)="saveDataGrid($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="left">
+      <div *dxTemplate>
+        <dx-button icon="trash" (onClick)=" deleteDataGrid($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+
+  </dx-toolbar>
+  <dx-data-grid id="gridContainer"
+                [dataSource]="dataSource"
+                [showBorders]="true"
+                [focusedRowEnabled]="true"
+                [focusedRowIndex]="0"
+                [columnAutoWidth]="true"
+                [columnHidingEnabled]="true"
+                [remoteOperations]="true"
+                [wordWrapEnabled]="true"
+                [selection]="{ mode: 'multiple' }">
+
+
+
+
+
+    <dxo-editing mode="popup">
+      <dxo-popup title="Employee Info"
+                 [showTitle]="true"
+                 [width]="700"
+                 [height]="525">
+      </dxo-popup>
+
+    </dxo-editing>
+
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+    <dxo-paging [pageSize]="100"></dxo-paging>
+
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxi-column dataField="A" caption="관할지사"></dxi-column>
+    <dxi-column dataField="B" caption="출고지"></dxi-column>
+    <dxi-column dataField="C" caption="출고번호"></dxi-column>
+    <dxi-column dataField="D" caption="주문처" [groupIndex]="0"></dxi-column>
+    <dxi-column dataField="E" caption="출고일자"></dxi-column>
+    <dxi-column dataField="F" caption="제품명"></dxi-column>
+    <dxi-column dataField="G" caption="포장"></dxi-column>
+    <dxi-column dataField="H" caption="출고수량"></dxi-column>
+    <dxi-column dataField="I" caption="출고수량(톤)"></dxi-column>
+    <dxi-column dataField="J" caption="P-수량"></dxi-column>
+    <dxi-column dataField="K" caption="W-수량"></dxi-column>
+    <dxi-column dataField="L" caption="도착지"></dxi-column>
+    <dxi-column dataField="M" caption="운송사"></dxi-column>
+    <dxi-column dataField="N" caption="실제운송사"></dxi-column>
+    <dxi-column dataField="O" caption="차량번호"></dxi-column>
+    <dxi-column dataField="P" caption="차종"></dxi-column>
+    <dxi-column dataField="Q" caption="기사명"></dxi-column>
+    <dxi-column dataField="R" caption="전화번호"></dxi-column>
+    <dxi-column dataField="S" caption="인수여부"> </dxi-column>
+    <dxi-column dataField="T" caption="인수일자"></dxi-column>
+    <dxi-column dataField="U" caption="납기일자"></dxi-column>
+    <dxi-column dataField="V" caption="직송구분"></dxi-column>
+    <dxi-column dataField="W" caption="주문구분"></dxi-column>
+    <dxi-column dataField="X" caption="전송상태"></dxi-column>
+    <dxi-column dataField="Y" caption="배송전표"></dxi-column>
+    <dxi-column dataField="Z" caption="배송처"></dxi-column>
+    <dxi-column dataField="AA" caption="출고구분"></dxi-column>
+    <dxi-column dataField="BB" caption="제품구분"></dxi-column>
+    <dxi-column dataField="CC" caption="검수상태"></dxi-column>
+    <dxi-column dataField="DD" caption="인수도구분"></dxi-column>
+    <dxi-column dataField="EE" caption="상하차"></dxi-column>
+    <dxi-column dataField="FF" caption="주문번호"></dxi-column>
+    <dxi-column dataField="GG" caption="출하요청번호"></dxi-column>
+    <dxi-column dataField="HH" caption="관할대리점"></dxi-column>
+    <dxi-column dataField="II" caption="시군명"></dxi-column>
+    <dxi-column dataField="JJ" caption="사업구분"></dxi-column>
+    <dxi-column dataField="KK" caption="비고"></dxi-column>
+    <dxi-column dataField="LL" caption="본/지소"></dxi-column>
+    <dxi-column dataField="MM" caption="PROD"></dxi-column>
+    <dxi-column dataField="NN" caption="PACK"></dxi-column>
+    <dxi-column dataField="OO" caption="단위"></dxi-column>
+    <dxi-column dataField="PP" caption="상차"></dxi-column>
+    <dxi-column dataField="QQ" caption="하차"></dxi-column>
+    <dxi-column dataField="RR" caption="운송"></dxi-column>
+    <dxi-column dataField="SS" caption="화공운송방법"></dxi-column>
+    <dxi-column dataField="TT" caption="용도"></dxi-column>
+    <dxi-column dataField="UU" caption="인수/출력"></dxi-column>
+    <dxi-column dataField="VV" caption="제품"></dxi-column>
+
+
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-group-panel [visible]="true"></dxo-group-panel>
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+  </dx-data-grid>
+
+</div>

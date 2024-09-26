@@ -1,0 +1,148 @@
+<!--보관검수대비 실출고량-->
+
+<dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+  <dxi-item location="before">
+    <div *dxTemplate style="width:330px">
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="startDate" label="검수일(From)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="endDate" label="검수일(to)" type="date" [width]="150" displayFormat="yyyy-MM-dd"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto" [disabled]="true">
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-comm [codeInfo]="kunnCode" #kunnrEntery3
+                        [dataStoreKey]="dataStoreKey"
+                        valueColumn="KUNNR"
+                        valueDisplayFormat="%NAME1%(%KUNNR%)"
+                        width="200"
+                        placeholderText="주문처"
+                        label="주문처(산하)"
+                        popupGridScrollMode="standard"
+                        [(selectedValue)]="kunnCodeValue"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        [gridBoxWidth]="500"
+                        [showClearButton]="true"
+                        (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-comm>
+    </div>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-comm #lgEntery
+                        [dataStoreKey]="dataStoreKey"
+                        [codeInfo]="lgCode"
+                        valueColumn="LGORT"
+                        valueDisplayFormat="%LGOBE%(%LGORT%)"
+                        [(selectedValue)]="lgValue"
+                        placeholderText="창고"
+                        width="200"
+                        label="비료창고"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        [gridBoxWidth]="500"
+                        (onDataLoaded)="onPEDataLoaded($event)"
+                        [showClearButton]="true"
+                        class="weight-test"></nh-possible-comm>
+    </div>
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid id="grid"
+              [dataSource]="orderData"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'single' }"
+              height="calc(100vh - 230px)"
+              [columnAutoWidth]="true"
+              (onContentReady)="contentReady($event)"
+              [allowColumnResizing]="true">
+
+  <dxo-scrolling mode="virtual"></dxo-scrolling>
+  <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+  <dxo-search-panel [visible]="true"></dxo-search-panel>
+  <dxo-group-panel [visible]="true"></dxo-group-panel>
+  <!--<dxo-grouping #expand [autoExpandAll]="false"></dxo-grouping>-->
+
+  <dxi-column dataField="VGBEL" caption="보관검수 출고번호" [groupIndex]="0"></dxi-column>
+  <dxi-column dataField="NAME1_AG" caption="주문처"></dxi-column>
+  <!--<dxi-column dataField="STREET" caption="선검수 출고지"></dxi-column>-->
+  <dxi-column dataField="NAME1" caption="보관검수 도착지"></dxi-column>
+  <dxi-column dataField="ARKTX" caption="제품"></dxi-column>
+  <dxi-column dataField="FKDAT" caption="검수일" dataType="date" format="yyyy-MM-dd"></dxi-column>
+  <dxi-column dataField="WADAT_IST" caption="출고일" dataType="date" format="yyyy-MM-dd"></dxi-column>
+  <!--<dxi-column dataField="ZPALLTP" caption="포장"></dxi-column>-->
+  <dxi-column dataField="FKIMG" caption="보관검수량" format="#,###"></dxi-column>
+  <dxi-column dataField="나중에 rfc추가" caption="실주문량" format="#,###"></dxi-column>
+  <dxi-column dataField="ZMENGE3" caption="실출고량" format="#,###"></dxi-column>
+
+
+
+  <dxo-summary>
+    <!--<dxi-total-item column="FKIMG"
+                    valueFormat="#,###.###"
+                    summaryType="sum">
+    </dxi-total-item>
+    <dxi-total-item column="나중에 rfc추가"
+                    valueFormat="#,###.###"
+                    summaryType="sum">
+    </dxi-total-item>
+    <dxi-total-item column="ZMENGE3"
+                    valueFormat="#,###.###"
+                    summaryType="sum">
+    </dxi-total-item>-->
+
+    <dxi-group-item column="FKIMG"
+                    valueFormat="#,###.###"
+                    displayFormat="{0}"
+                    [showInGroupFooter]="false" [alignByColumn]="true"
+                    summaryType="max">
+    </dxi-group-item>
+    <dxi-group-item column="나중에 rfc추가"
+                    valueFormat="#,###.###"
+                    displayFormat="{0}"
+                    [showInGroupFooter]="false" [alignByColumn]="true"
+                    summaryType="sum">
+    </dxi-group-item>
+    <dxi-group-item column="ZMENGE3"
+                    valueFormat="#,###.###"
+                    displayFormat="소계 : {0}"
+                    [showInGroupFooter]="false" [alignByColumn]="true"
+                    summaryType="sum">
+    </dxi-group-item>
+
+    <!--<dxi-group-item column="inspQuantity"
+                    summaryType="sum"
+                    valueFormat="number"
+                    [showInGroupFooter]="false" [alignByColumn]="true">
+    </dxi-group-item>
+
+    <dxi-group-item column="orderQuantity"
+                    summaryType="sum"
+                    valueFormat="number"
+                    [showInGroupFooter]="false" [alignByColumn]="true">
+    </dxi-group-item>
+
+    <dxi-group-item column="deliQuantity"
+                    summaryType="sum"
+                    valueFormat="number"
+                    [showInGroupFooter]="false" [alignByColumn]="true">
+    </dxi-group-item>-->
+  </dxo-summary>
+</dx-data-grid>
+
+
+
+
+

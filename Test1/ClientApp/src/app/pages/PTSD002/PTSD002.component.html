@@ -1,0 +1,170 @@
+  <!--toolbar-->
+<dx-toolbar style="height: 40px; margin-top: 5px;">
+
+  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>주문처(산하)</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <dx-select-box [items]="clients"></dx-select-box>
+  </dxi-item>
+
+
+
+  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label"><b>주문기간</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div *dxTemplate>
+
+      <div style="float:left">
+
+        <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+      </div>
+      <div style="float:left; margin-left:10px; margin-right:10px;">
+        ~
+      </div>
+      <div style="float:left">
+        <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="cancelEditButtonOptions">
+  </dxi-item>
+  <dxi-item location="after"
+            locateInMenu="auto">
+    <dx-button (onClick)="deleteRecords()"
+               [disabled]="!selectedItemKeys.length"
+               icon="trash">
+    </dx-button>
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="saveButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+<dx-data-grid class="master"
+              [dataSource]="employees2"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [selection]="{ mode: 'multiple' }"
+              [columnAutoWidth]="true"
+              keyExpr="PARAM1"
+              [columnHidingEnabled]="true"
+              [allowColumnReordering]="true"
+              (onSelectionChanged)="selectionChanged($event)">
+  <!--Datagrid Option-->
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+  <!--Filtering Option-->
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-builder-popup [position]="popupPosition">
+  </dxo-filter-builder-popup>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+  <!--Grouping Option-->
+  <dxo-group-panel [visible]="true"></dxo-group-panel>
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+
+  <!--Batch Option-->
+  <dxo-editing mode="cell"
+               [allowUpdating]="true"
+               [selectTextOnEditStart]="selectTextOnEditStart"
+               [startEditAction]="startEditAction">
+  </dxo-editing>
+
+
+  <!--Data column-->
+  <dxi-column dataField="PARAM1"
+              caption="주문번호">
+  </dxi-column>
+
+  <dxi-column dataField="PARAM2"
+              caption="주문처"
+              [groupIndex]="0">
+  </dxi-column>
+  <dxi-column dataField="PARAM3"
+              caption="제품">
+  </dxi-column>
+  <dxi-column dataField="PARAM4"
+              caption="포장">
+  </dxi-column>
+  <dxi-column dataField="PARAM5"
+              caption="주문구분">
+  </dxi-column>
+  <dxi-column dataField="PARAM6"
+              caption="용도">
+  </dxi-column>
+  <dxi-column dataField="PARAM7"
+              caption="도착지">
+  </dxi-column>
+  <dxi-column dataField="PARAM8"
+              caption="주문량">
+  </dxi-column>
+  <dxi-column dataField="PARAM9"
+              caption="주문단가"
+              format="currency"
+              dataType="number">
+    <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+  </dxi-column>
+  <dxi-column dataField="PARAM10"
+              caption="배차량">
+  </dxi-column>
+  <dxi-column dataField="PARAM11"
+              caption="출고량">
+  </dxi-column>
+  <dxi-column dataField="PARAM12"
+              caption="차량댓수">
+  </dxi-column>
+  <dxi-column dataField="PARAM13"
+              caption="상차">
+  </dxi-column>
+  <dxi-column dataField="PARAM14"
+              caption="납기일자"
+              dataType="date">
+  </dxi-column>
+  <dxi-column dataField="PARAM15"
+              caption="출고지">
+  </dxi-column>
+  <dxi-column dataField="PARAM16"
+              caption="운송사">
+  </dxi-column>
+  <dxi-column dataField="PARAM17"
+              caption="제품구분">
+  </dxi-column>
+  <dxi-column dataField="PARAM18"
+              caption="승인구분">
+  </dxi-column>
+
+
+
+</dx-data-grid>

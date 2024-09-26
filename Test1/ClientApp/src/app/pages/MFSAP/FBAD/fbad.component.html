@@ -1,0 +1,170 @@
+<!--
+  고결/파포 등록
+  -->
+<!--toolbar-->
+<dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+
+  <dxi-item location="before" locateInMenu="auto" [disabled]="isDisabled">
+    <div *dxTemplate style="margin-left:15px;">
+      <nh-possible-comm #arehouseEntery
+                        [dataStoreKey]="dataStoreKey"
+                        [codeInfo]="lgortCode"
+                        valueColumn="LGORT"
+                        [(selectedValue)]="lgortValue"
+                        valueDisplayFormat="%LGOBE%(%LGORT%)"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        width="auto"
+                        label="창고"
+                        labelMode="floating"
+                        (onDataLoaded)="onPEDataLoaded($event)">
+      </nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="changeButtonOptions">
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid id="grid" #dataGrid
+              [dataSource]="mainGridData"
+              [showBorders]="true"
+              [focusedRowIndex]="0"
+              columnResizingMode="widget"
+              [selection]="{ mode: 'single' }"
+              [allowColumnReordering]="true"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [remoteOperations]="false"
+              [rowAlternationEnabled]="true"
+              height="calc(100vh - 230px)">
+  <!--Datagrid Option-->
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+
+  <dxo-search-panel [visible]="true"
+                    [highlightCaseSensitive]="true"></dxo-search-panel>
+
+  <!--Grouping Option-->
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+  <!--Data column-->
+  <dxi-column dataField="LGORT" caption="창고코드" dataType="string">  </dxi-column>
+
+  <dxi-column dataField="LGOBE" caption="창고명" dataType="string">  </dxi-column>
+
+  <!--<dxi-column dataField="MTART" caption="자재유형" dataType="string">  </dxi-column>-->
+
+  <dxi-column dataField="MATNR" caption="자재코드" dataType="string">   </dxi-column>
+
+  <dxi-column dataField="MAKTX" caption="자재명" dataType="string">  </dxi-column>
+
+  <dxi-column dataField="LABST" caption="가용재고" dataType="number" format="#,###.###">  </dxi-column>
+
+  <dxi-column dataField="KMENGE" caption="고결수량" dataType="number" format="#,###.###">  </dxi-column>
+
+  <dxi-column dataField="PMENGE" caption="파포수량" dataType="number" format="#,###.###">  </dxi-column>
+
+  <dxi-column dataField="MEINS" caption="기본단위" dataType="string">  </dxi-column>
+
+  <!--<dxi-column dataField="VERPR" caption="단가" dataType="number" format="#,###.##">  </dxi-column>-->
+
+  <!--<dxi-column dataField="MATKL" caption="자재그룹" dataType="string">  </dxi-column>-->
+
+  <dxi-column dataField="WGBEZ" caption="자재그룹명" dataType="string">  </dxi-column>
+
+  <!--<dxi-column dataField="ZZDEPT_CD" caption="운영부서" dataType="string">  </dxi-column>-->
+
+  <dxi-column dataField="ZZDEPT_NM" caption="운영부서명" dataType="string"></dxi-column>
+
+  <!--<dxi-column dataField="ZZBIN" caption="BIN번호" dataType="string">   </dxi-column>
+
+  <dxi-column dataField="PEINH" caption="가격단위">  </dxi-column>
+
+  <dxi-column dataField="SOBKZ" caption="특별재고지시자" dataType="string"> </dxi-column>
+
+  <dxi-column dataField="SOTXT" caption="특별재고명" dataType="string">  </dxi-column>-->
+
+</dx-data-grid>
+
+<dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+               [shading]="true" [hideOnOutsideClick]="true">
+</dx-load-panel>
+
+
+
+<dx-popup width="auto"
+          height="auto"
+          [showTitle]="true"
+          title="재고유형전환"
+          [dragEnabled]="false"
+          [showCloseButton]="false"
+          container=".dx-viewport"
+          [(visible)]="popupVisible">
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="KsaveButtonOptions">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="PsaveButtonOptions">
+  </dxi-toolbar-item>
+  <dxi-toolbar-item widget="dxButton"
+                    toolbar="top"
+                    location="after"
+                    [options]="closeButtonOptions">
+  </dxi-toolbar-item>
+
+  <div id="form-container">
+    <dx-form id="orderInfo"
+             [(formData)]="changeFormData"
+             width="100%"
+             (onFieldDataChanged)="form_fieldDataChanged($event)"
+             style="margin-top:10px">
+
+      <dxi-item itemType="group" caption="" [colCount]="4">
+        <dxi-item dataField="MAKTX" editorType="dxTextBox" disabled="true" [colSpan]="3">
+          <dxo-label text="자재명"></dxo-label>
+        </dxi-item>
+        <dxi-item dataField="MEINS" editorType="dxTextBox" disabled="true" [colSpan]="1">
+          <dxo-label text="단위"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="" [colCount]="2">
+        <dxi-item dataField="LABST" editorType="dxNumberBox" disabled="true" [colSpan]="1" [editorOptions]="{ format: '#,##0.###', type: 'decimal' }">
+          <dxo-label text="현가용재고"></dxo-label>
+        </dxi-item>
+
+        <dxi-item dataField="INPUT" editorType="dxNumberBox" [colSpan]="1" [editorOptions]="{ format: '#,##0.###', type: 'decimal'}">
+          <dxo-label text="전환수량"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+      <dxi-item itemType="group" caption="" [colCount]="1">
+        <dxi-item dataField="MEMO" editorType="dxTextBox" [colSpan]="1">
+          <dxo-label text="메모"></dxo-label>
+        </dxi-item>
+      </dxi-item>
+
+    </dx-form>
+  </div>
+</dx-popup>

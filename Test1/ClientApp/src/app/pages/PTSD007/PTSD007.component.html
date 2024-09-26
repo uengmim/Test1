@@ -1,0 +1,78 @@
+<!--<div class="dx-field-label">Date picker</div>
+<div class="dx-field-value">
+  <dx-date-box [value]="now" pickerType="rollers"> </dx-date-box>
+</div>-->
+
+<div style="margin:5px 5px 10px 5px">
+  <dx-toolbar>
+    <dxi-item location="before">
+      <div class="toolbar-label" style="float:left;margin-top:10px;margin-right:5px"><b>주문처</b> </div>
+      <div style="float:left">
+        <dx-select-box [items]="simpleProducts"></dx-select-box>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div class="toolbar-label" style="float: left; margin-top: 10px; margin-right: 5px; margin-left: 15px"><b>주문기간</b> </div>
+        <div style="float:left">
+          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+        </div>
+        <div style="float:left;margin-left:10px;margin-right:10px">
+          ~
+        </div>
+        <div style="float:left">
+          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+    <dxi-item location="left">
+      <div *dxTemplate>
+        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
+          <dx-box direction="row" width="100%" [height]="15">
+            <dxi-item class="rect demo-light" [ratio]="1"> 조회 </dxi-item>
+          </dx-box>
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dx-toolbar>
+</div>
+<div>
+  <dx-data-grid id="gridContainer"
+                [dataSource]="dataSource"
+                [showBorders]="true"
+                [focusedRowEnabled]="true"
+                [focusedRowIndex]="0"
+                [columnAutoWidth]="true"
+                [columnHidingEnabled]="true"
+                [remoteOperations]="true"
+                [wordWrapEnabled]="true">
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+    <dxo-paging [pageSize]="100"></dxo-paging>
+
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxi-column dataField="A" caption="요청번호"></dxi-column>
+    <dxi-column dataField="B" caption="주문처"></dxi-column>
+    <dxi-column dataField="C" caption="제품명"></dxi-column>
+    <dxi-column dataField="D" caption="주문상태"></dxi-column>
+    <dxi-column dataField="E" caption="포장"></dxi-column>
+    <dxi-column dataField="F" caption="주문구분"></dxi-column>
+    <dxi-column dataField="G" caption="용도"></dxi-column>
+    <dxi-column dataField="H" caption="도착지"></dxi-column>
+    <dxi-column dataField="I" caption="주문량"></dxi-column>
+    <dxi-column dataField="J" caption="주문단가"></dxi-column>
+    <dxi-column dataField="K" caption="주문단위"></dxi-column>
+    <dxi-column dataField="L" caption="주문잔량"></dxi-column>
+    <dxi-column dataField="M" caption="주문가능량"></dxi-column>
+    <dxi-column dataField="N" caption="납품잔량"></dxi-column>
+    <dxi-column dataField="O" caption="인도처"></dxi-column>
+    <dxi-column dataField="P" caption="검수요청여부"></dxi-column>
+    <dxi-column dataField="Q" caption="검수반려여부"></dxi-column>
+    <dxi-column dataField="R" caption="검수완료여부"></dxi-column>
+    <dxi-column dataField="S" caption="납기일자" dataType="date"></dxi-column>
+    <dxi-column dataField="T" caption="출고지"></dxi-column>
+    <dxi-column dataField="U" caption="주문구분"></dxi-column>
+    <dxi-column dataField="V" caption="제품구분"></dxi-column>
+    <dxi-column dataField="W" caption="승인구분"></dxi-column>
+  </dx-data-grid>
+</div>

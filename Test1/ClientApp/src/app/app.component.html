@@ -1,0 +1,14 @@
+<!-- 메인 -->
+<ng-container *ngIf="isAuthenticated(); else unauthenticated">
+  <app-side-nav-outer-toolbar title="{{appInfo.title}}">
+    <router-outlet></router-outlet>
+    <app-footer>
+      Copyright © 2022-{{appInfo.currentYear}} {{appInfo.companyTitle}}
+      <img src="/assets/nc_title_small_w.png" height="24" style="float: right; object-fit:contain;margin-top:0px" />
+    </app-footer>
+  </app-side-nav-outer-toolbar>
+</ng-container>
+
+<ng-template #unauthenticated>
+  <app-unauthenticated-content></app-unauthenticated-content>
+</ng-template>

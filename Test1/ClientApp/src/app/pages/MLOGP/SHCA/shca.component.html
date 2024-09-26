@@ -1,0 +1,196 @@
+ <!--toolbar-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <!---<div class="toolbar-label" style="float:left;margin-right:10px;padding:5px;"><b>정산년월</b></div>-->
+      <div style="float:left; margin-left: 10px;">
+        <dx-date-box [value]="now" type="date" [width]="150" label="정산년월"> </dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-select-box [items]="foAgent"
+                   labelMode="floating"
+                   label="운송사"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-select-box [items]="settlementCl"
+                   labelMode="floating"
+                   label="정산구분"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-select-box [items]="seedlingCl"
+                   labelMode="floating"
+                   label="비종구분"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-select-box [items]="seClassification"
+                   labelMode="floating"
+                   label="비종구분"
+                   style="width: auto;
+                   margin-left: 5px;
+                   margin-right: 5px;">
+    </dx-select-box>
+  </dxi-item>
+
+  <dxi-item location="left"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="data"
+              [showBorders]="false"
+              [columnAutoWidth]="true"
+              keyExpr="forDate"
+              [columnHidingEnabled]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="widget"
+              [selection]="{ mode: 'multiple' }"
+              [allowColumnReordering]="true"
+              height="calc(100vh - 230px)">
+
+  <!--Datagrid Option-->
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+
+  <!--Filtering Option-->
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-builder-popup [position]="popupPosition">
+  </dxo-filter-builder-popup>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+  <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+
+  <!--Grouping Option-->
+  <dxo-group-panel [visible]="true"></dxo-group-panel>
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+  <dxi-column dataField="sortation"
+              caption="구분">
+  </dxi-column>
+
+  <dxi-column dataField="branch"
+              caption="지사">
+  </dxi-column>
+
+  <dxi-column dataField="forDate"
+              caption="출고일자"
+              alignment="center">
+  </dxi-column>
+
+  <dxi-column dataField="forDest"
+              caption="출고지">
+  </dxi-column>
+
+  <dxi-column dataField="turn"
+              caption="순번"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="forAgent"
+              caption="2차운송사">
+  </dxi-column>
+
+  <dxi-column dataField="deDest"
+              caption="배송처">
+  </dxi-column>
+
+  <dxi-column dataField="product"
+              caption="제품명">
+  </dxi-column>
+
+  <dxi-column dataField="quantity"
+              caption="수량(포)"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="tonsQuantity"
+              caption="수량(톤)"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+  <dxi-column dataField="place"
+              alignment="right"
+              caption="출발지">
+  </dxi-column>
+
+  <dxi-column dataField="destination"
+              alignment="right"
+              caption="도착지">
+  </dxi-column>
+
+  <dxi-column dataField="distance"
+              alignment="right"
+              caption="거리">
+  </dxi-column>
+
+  <dxi-column dataField="unitPrice"
+              caption="단가"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="transportCosts"
+              caption="운송비"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="boExpenses"
+              caption="도서비"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="adCost"
+              caption="관리비"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="disFee"
+              caption="하치비"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="trcoTotal"
+              caption="운송비합계"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="amount"
+              caption="합계금액"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="note"
+              caption="비고">
+  </dxi-column>
+</dx-data-grid>

@@ -1,0 +1,175 @@
+<!--
+
+  여신현황정보조회
+
+  -->
+<dx-toolbar style="margin: 5px 0px 5px 0px;padding:0px 5px 0px 5px">
+  <dxi-item location="before" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float:left;margin:10px 5px 0px 5px"><b>주문기간</b></div>
+      <div style="float:left">
+        <dx-date-box [(value)]="now" type="date" [width]="150"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-select-box [items]="clients" placeholder="거래처"></dx-select-box>
+  </dxi-item>
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="printSelectedData">
+  </dxi-item>
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="exportSelectedData">
+  </dxi-item>
+</dx-toolbar>
+
+<div id="form-container">
+  <dx-form id="summary" [formData]="Summary" width="80%">
+    <dxi-item itemType="group" caption="담보합계" [colCount]="6" [colSpan]="2">
+      <dxi-item dataField="totalColl"><dxo-label text="담보합계"></dxo-label></dxi-item>
+      <dxi-item dataField="estate"><dxo-label text="부동산"></dxo-label></dxi-item>
+      <dxi-item dataField="pledge"><dxo-label text="질권"></dxo-label></dxi-item>
+      <dxi-item dataField="suretyIns"><dxo-label text="보증보험"></dxo-label></dxi-item>
+      <dxi-item dataField="surplusMoney"><dxo-label text="가수금"></dxo-label></dxi-item>
+    </dxi-item>
+
+    <dxi-item itemType="group" caption="채권합계" [colCount]="6" [colSpan]="2">
+      <dxi-item dataField="totalBond"><dxo-label text="채권합계"></dxo-label></dxi-item>
+      <dxi-item dataField="accReceivable"><dxo-label text="외상매출"></dxo-label></dxi-item>
+      <dxi-item dataField="outstanding"><dxo-label text="미수금"></dxo-label></dxi-item>
+      <dxi-item dataField="invenRetained"><dxo-label text="보유재고"></dxo-label></dxi-item>
+      <dxi-item dataField="orderAppQuan"><dxo-label text="주문승인물량"></dxo-label></dxi-item>
+      <dxi-item dataField="sameTimShip"><dxo-label text="당하출하(화공)"></dxo-label></dxi-item>
+    </dxi-item>
+  </dx-form>
+</div>
+
+<dx-data-grid class="master"
+              [dataSource]="datainq"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              keyExpr="orderNum"
+              [columnHidingEnabled]="true"
+              [allowColumnReordering]="true"
+              [columnWidth]="150"
+              [columnAutoWidth]="false"
+              [allowColumnResizing]="true"
+              height="calc(100vh - 230px)">
+  <!--Datagrid Option-->
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+  <!--Filtering Option-->
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-builder-popup [position]="popupPosition">
+  </dxo-filter-builder-popup>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+  <!--Grouping Option-->
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+  <dxo-editing mode="popup"
+               [allowUpdating]="true"
+               [allowAdding]="true"
+               [allowDeleting]="true">
+    <dxo-popup title="Employee Info"
+               [showTitle]="true"
+               [width]="700"
+               [height]="525">
+    </dxo-popup>
+
+    <dxo-form>
+      <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+        <dxi-item dataField="orderNum"
+                  caption="주문번호"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="orderDate"
+                  caption="주문일자"
+                  itemtype="date"
+                  displayFormat="MM-dd-yyyy"
+                  editorType="dxDateBox"
+                  [editorOptions]="{ height: 50 ,dateSerializationFormat:'yyyy/MM/dd' }">
+
+        </dxi-item>
+        <dxi-item dataField="releBusi"
+                  caption="출고사업장"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="busiCode"
+                  caption="사업장코드"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="roughBusi"
+                  caption="도칙사업장"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="proCode"
+                  caption="제품코드"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="proName"
+                  caption="제품명"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="quant"
+                  caption="수량"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="unitPrice"
+                  caption="단가"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="price"
+                  caption="금액"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+        <dxi-item dataField="note"
+                  caption="비고"
+                  [editorOptions]="{ height: 50 }"></dxi-item>
+      </dxi-item>
+    </dxo-form>
+  </dxo-editing>
+
+  <dxi-column dataField="orderNum"
+              caption="주문번호"></dxi-column>
+  <dxi-column dataField="orderDate"
+              caption="주문일자"
+              [width]="140"
+              format="yyyy-MM-dd"
+              alignment="center"> </dxi-column>
+  <dxi-column dataField="releBusi"
+              caption="출고사업장"></dxi-column>
+  <dxi-column dataField="busiCode"
+              caption="사업장코드"></dxi-column>
+  <dxi-column dataField="roughBusi"
+              caption="도칙사업장"></dxi-column>
+  <dxi-column dataField="proCode"
+              caption="제품코드"></dxi-column>
+  <dxi-column dataField="proName"
+              caption="제품명"> </dxi-column>
+  <dxi-column dataField="quant"
+              caption="수량">  </dxi-column>
+  <dxi-column dataField="unitPrice"
+              caption="단가"
+              format="#,###"> </dxi-column>
+  <dxi-column dataField="price"
+              caption="금액"
+              format="#,###">
+    <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+  </dxi-column>
+  <dxi-column dataField="note"
+              caption="비고"> </dxi-column>
+</dx-data-grid>
+
+
+
+

@@ -1,0 +1,186 @@
+<!--
+  출고결과반영
+  -->
+<div style="margin:10px 10px 0px 10px">
+
+  <!--toolbar-->
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px;">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate style="margin-left:10px;">
+        <div style="float:left; ">
+          <dx-date-box [(value)]="startDate"
+                       label="시작일(From)"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+
+        <div style="float:left; margin-left:10px;">
+          <dx-date-box [(value)]="endDate"
+                       label="종료일(To)"
+                       labelMode="floating"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before"
+              widget="dxButton"
+              horizontalAlignment="center"
+              locateInMenu="center"
+              style="margin-top:3px">
+      <div *dxTemplate style="margin-left:15px;">
+        <dx-button stylingMode="contained"
+                   text="조회"
+                   (onClick)="refreshDataGrid($event)"
+                   [width]="80"
+                   style="margin-top:3px">
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dx-toolbar>
+
+  <dx-form>
+    <dxi-item itemType="tabbed">
+      <dxo-tab-panel-options [deferRendering]="false">
+      </dxo-tab-panel-options>
+      <dxi-tab title="유류출하">
+        <dx-data-grid id="grid"
+                      #oilDataGrid
+                      [dataSource]="OilShip"
+                      [showBorders]="true"
+                      [focusedRowIndex]="0"
+                      [columnResizingMode]="columnResizeMode"
+                      keyExpr="oilNum"
+                      [allowColumnReordering]="true"
+                      [columnAutoWidth]="true"
+                      [allowColumnResizing]="true"
+                      [remoteOperations]="false"
+                      [rowAlternationEnabled]="true"
+                      height="calc(100vh - 265px)">
+
+          <!--Datagrid Option-->
+          <dxo-paging [enabled]="false"></dxo-paging>
+          <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+          <!--Filtering Option-->
+          <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+          <dxo-filter-builder [customOperations]="customOperations"
+                              [allowHierarchicalFields]="true">
+          </dxo-filter-builder>
+          <dxo-filter-row [visible]="true"></dxo-filter-row>
+          <dxo-header-filter [visible]="true"></dxo-header-filter>
+          <!--Grouping Option-->
+          <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+          <dxo-search-panel [visible]="true"
+                            [highlightCaseSensitive]="true"></dxo-search-panel>
+          <!--Data column-->
+          <dxi-column dataField="oilShipDate" caption="출하일" dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="oilNum" caption="순번">  </dxi-column>
+
+          <dxi-column dataField="oilClient" caption="거래처">  </dxi-column>
+
+          <dxi-column dataField="oilState" caption="상태">   </dxi-column>
+
+          <dxi-column dataField="oilType" caption="유종">  </dxi-column>
+
+          <dxi-column dataField="oilVehNum" caption="차량번호">  </dxi-column>
+
+          <dxi-column dataField="oilDesti" caption="도착지">  </dxi-column>
+
+          <dxi-column dataField="oilInsQuan" caption="지시량" format="#,###">
+            <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+          </dxi-column>
+
+          <dxi-column dataField="oilYuchang1" caption="유창#1" alignment="center"> </dxi-column>
+
+          <dxi-column dataField="oilYuchang2" caption="유창#2" alignment="center">   </dxi-column>
+
+          <dxi-column dataField="oilYuchang3" caption="유창#3" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="oilYuchang4" caption="유창#4" alignment="center"> </dxi-column>
+
+          <dxi-column dataField="oilYuchang5" caption="유창#5" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="oilYuchang6" caption="유창#6" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="oilYuchang7" caption="유창#7" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="oilYuchang8" caption="유창#8" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="oilYuchang9" caption="유창#9" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="oilYuchang10" caption="유창#10" alignment="center">  </dxi-column>
+        </dx-data-grid>
+      </dxi-tab>
+      <dxi-tab title="화학출하">
+        <dx-data-grid id="grid"
+                      #cheDataGrid
+                      [dataSource]="ChemShip"
+                      [showBorders]="true"
+                      [focusedRowIndex]="0"
+                      [columnAutoWidth]="true"
+                      [remoteOperations]="false"
+                      [rowAlternationEnabled]="true"
+                      [allowColumnResizing]="true"
+                      [columnResizingMode]="columnResizeMode"
+                      keyExpr="chemNum"
+                      [allowColumnReordering]="true"
+                      height="calc(100vh - 265px)">
+          <!--Datagrid Option-->
+          <dxo-paging [enabled]="false"></dxo-paging>
+          <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+          <!--Filtering Option-->
+          <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+          <dxo-filter-builder [customOperations]="customOperations"
+                              [allowHierarchicalFields]="true">
+          </dxo-filter-builder>
+          <dxo-filter-row [visible]="true"></dxo-filter-row>
+          <dxo-header-filter [visible]="true"></dxo-header-filter>
+          <!--Grouping Option-->
+          <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+          <dxo-search-panel [visible]="true"
+                            [highlightCaseSensitive]="true"></dxo-search-panel>
+          <dxi-column dataField="chemShipDate" caption="출하일" dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="chemNum" caption="순번">  </dxi-column>
+
+          <dxi-column dataField="chemClient" caption="거래처">  </dxi-column>
+
+          <dxi-column dataField="chemState" caption="상태">  </dxi-column>
+
+          <dxi-column dataField="chemProduct" caption="제품">  </dxi-column>
+
+          <dxi-column dataField="chemVehNum" caption="차량번호">  </dxi-column>
+
+          <dxi-column dataField="chemDesti" caption="도착지">  </dxi-column>
+
+          <dxi-column dataField="chemInsQuan" caption="지시량" format="#,###">
+            <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+          </dxi-column>
+
+          <dxi-column dataField="chemShipQuan" caption="출하량" format="#,###">
+          </dxi-column>
+
+          <dxi-column dataField="chemWeight" caption="공차중량" format="#,###">  </dxi-column>
+
+          <dxi-column dataField="chemTWeight" caption="총중량" format="#,###">
+            <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+          </dxi-column>
+
+          <dxi-column dataField="chemStaTim" caption="시작시간" alignment="center">  </dxi-column>
+
+          <dxi-column dataField="chemEndTim" caption="종료시간" alignment="center">  </dxi-column>
+
+        </dx-data-grid>
+      </dxi-tab>
+    </dxi-item>
+  </dx-form>
+</div>
+
+

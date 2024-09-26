@@ -1,0 +1,79 @@
+<!--출하진행현황-->
+
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before">
+    <div class="toolbar-label" style="float:left; margin-top:5px; margin-left:10px;"><b>주문처</b> </div>
+    <div style="float: left; margin-left: 10px; ">
+      <dx-select-box [items]="simpleProducts"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px;"><b>주문기간</b> </div>
+      <div style="float: left; margin-left: 10px;" >
+        <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+      </div>
+      <div style="float: left; margin-left: 10px;">
+        ~
+      </div>
+      <div style="float: left; margin-left: 10px;">
+        <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+<div>
+  <dx-data-grid id="gridContainer"
+                [dataSource]="dataSource"
+                [showBorders]="true"
+                [focusedRowEnabled]="true"
+                [focusedRowIndex]="0"
+                [columnAutoWidth]="true"
+                [remoteOperations]="true"
+          
+                height="calc(100vh - 230px)"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [allowColumnResizing]="true"
+                keyExpr="reqNum">
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+    <dxo-paging [pageSize]="100"></dxo-paging>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxi-column dataField="reqNum" caption="요청번호"  format="#,###" ></dxi-column>
+    <dxi-column dataField="whereOrder" caption="주문처"></dxi-column>
+    <dxi-column dataField="productName" caption="제품명" ></dxi-column>
+    <dxi-column dataField="orderState" caption="주문상태" ></dxi-column>
+    <dxi-column dataField="packaging" caption="포장"></dxi-column>
+    <dxi-column dataField="orderClass" caption="주문구분" ></dxi-column>
+    <dxi-column dataField="purpose" caption="용도" ></dxi-column>
+    <dxi-column dataField="destination" caption="도착지"></dxi-column>
+    <dxi-column dataField="orderQuantity" caption="주문량" format="#,###" ></dxi-column>
+    <dxi-column dataField="orderPrice" caption="주문단가"  format="#,###" ></dxi-column>
+    <dxi-column dataField="orderUnit" caption="주문단위"></dxi-column>
+    <dxi-column dataField="orderBacklog" caption="주문잔량"  format="#,###" ></dxi-column>
+    <dxi-column dataField="availableOrder" caption="주문가능량" format="#,###" ></dxi-column>
+    <dxi-column dataField="deliveryBalance" caption="납품잔량"  format="#,###" ></dxi-column>
+    <dxi-column dataField="whereabouts" caption="인도처"></dxi-column>
+    <dxi-column dataField="inspectionReq" caption="검수요청여부" ></dxi-column>
+    <dxi-column dataField="inspectionReturn" caption="검수반려여부" ></dxi-column>
+    <dxi-column dataField="inspectionComplete" caption="검수완료여부" ></dxi-column>
+    <dxi-column dataField="deliveryDate" caption="납기일자" ></dxi-column>
+    <dxi-column dataField="placeShipment" caption="출고지" ></dxi-column>
+    <dxi-column dataField="productClass" caption="제품구분"></dxi-column>
+    <dxi-column dataField="approvalClass" caption="승인구분"></dxi-column>
+
+    <dxo-search-panel [visible]="true"></dxo-search-panel>
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-group-panel [visible]="true"></dxo-group-panel>
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+  </dx-data-grid>
+</div>

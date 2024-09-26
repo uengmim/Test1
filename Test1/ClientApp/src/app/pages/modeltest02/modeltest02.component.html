@@ -1,0 +1,147 @@
+<h2 class="content-block">iMATE TEST 02</h2>
+
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="dataSource"
+              [showBorders]="true"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              [columnHidingEnabled]="true"
+              (onFocusedRowChanged)="roleFocusedRowChanged($event)">
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+  <dxo-editing mode="popup"
+               [allowUpdating]="true"
+               [allowAdding]="true"
+               [allowDeleting]="true"
+               refreshMode="repaint">
+
+    <dxo-popup title="Employee Info"
+               [showTitle]="true"
+               [width]="700"
+               [height]="650">
+
+    </dxo-popup>
+    <dxo-form>
+      <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+        <dxi-item dataField="dATA1"></dxi-item>
+        <dxi-item dataField="dATA2"></dxi-item>
+        <dxi-item dataField="dATA3" [colSpan]="2"></dxi-item>
+        <dxi-item dataField="nUM1" [colSpan]="2"></dxi-item>
+        <dxi-item dataField="cOD1"></dxi-item>
+        <dxi-item>
+          <dxo-label text="직책"></dxo-label>
+          <div *dxTemplate>
+            <dx-drop-down-box [(value)]="gridBoxValue"
+                              valueExpr="ID"
+                              displayExpr="Name"
+                              placeholder="Select a value..."
+                              [showClearButton]="true"
+                              [dataSource]="roles">
+
+              <dx-data-grid [dataSource]="roles"
+                            [columns]="['ID', 'Name']"
+                            [selection]="{ mode: 'multiple' }"
+                            [hoverStateEnabled]="true"
+                            [paging]="{ enabled: true, pageSize: 10 }"
+                            [filterRow]="{ visible: true }"
+                            [scrolling]="{ mode: 'virtual' }"
+                            [height]="345"
+                            keyExpr="ID"
+                            [(selectedRowKeys)]="gridBoxValue">
+              </dx-data-grid>
+            </dx-drop-down-box>
+          </div>
+        </dxi-item>
+        <dxi-item dataField="updat" caption="일자">
+          <dx-date-box type="date"
+                       [(value)]="now"
+                       pickerType="rollers"
+                       displayFormat="MM-dd-yyyy"
+                       [useMaskBehavior]="true"
+                       [showClearButton]="true">
+          </dx-date-box>
+        </dxi-item>
+
+        <dxi-item dataField="uptim" caption="시간">
+          <dx-date-box type="time"
+                       [(value)]="now"
+                       pickerType="rollers"
+                       displayFormat="HH:mm:ss"
+                       [useMaskBehavior]="true"
+                       [showClearButton]="true">
+          </dx-date-box>
+        </dxi-item>
+
+      </dxi-item>
+
+    </dxo-form>
+  </dxo-editing>
+
+
+
+  <dxi-column dataField="dATA1"
+              [width]="90">
+  </dxi-column>
+  <dxi-column dataField="dATA2"
+              [width]="190"
+              caption="데이터1">
+  </dxi-column>
+  <dxi-column dataField="dATA3"
+              caption="데이터2">
+  </dxi-column>
+  <dxi-column dataField="nUM1"
+              caption="숫자">
+  </dxi-column>
+
+  <dxi-column dataField="cOD1" caption="상태">
+    <dxo-lookup [dataSource]="states" displayExpr="Name" valueExpr="ID">
+    </dxo-lookup>
+  </dxi-column>
+
+  <dxi-column dataField="sEL1" caption="직책">
+
+  </dxi-column>
+
+  <dxi-column dataField="updat"
+              dataType="date"
+              caption="수정/추가 일자">
+  </dxi-column>
+  <dxi-column dataField="uptim"
+              dataType="time"
+              caption="수정/추가 시간">
+  </dxi-column>
+
+  <dxo-toolbar>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div style="float:left">
+          <dx-date-box [(value)]="startDate" type="date" [width]="150"></dx-date-box>
+        </div>
+        <div style="float:left; margin-left:10px; margin-right:10px;">
+          ~
+        </div>
+        <div style="float:left">
+          <dx-date-box [(value)]="endDate" type="date" [width]="150"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <dx-button icon="refresh" (onClick)="refreshDataGrid($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button icon="add" (onClick)="addDataGrid($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+  </dxo-toolbar>
+
+</dx-data-grid>

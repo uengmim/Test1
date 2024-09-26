@@ -1,0 +1,142 @@
+<!--
+
+
+  서버 유류출하자료
+
+  -->
+<div style="margin:10px 10px 0px 10px">
+
+  <!--toolbar-->
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <div style="float:left; ">
+          <dx-date-box [(value)]="startDate"
+                       label="시작일"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+
+        <div style="float: left; margin-left: 10px; margin-right: 10px;">
+          <dx-date-box [(value)]="endDate"
+                       label="종료일"
+                       labelMode="floating"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              
+              [options]="searchButtonOptions">
+    </dxi-item>
+
+
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [options]="cancelEditButtonOptions">
+    </dxi-item>
+    <dxi-item location="after"
+              locateInMenu="auto">
+      <dx-button (onClick)="deleteRecords()"
+                 [disabled]="!selectedItemKeys.length"
+                 icon="trash">
+      </dx-button>
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [options]="saveButtonOptions">
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [options]="exportSelectedData">
+    </dxi-item>
+  </dx-toolbar>
+
+
+  <dx-data-grid id="grid"
+                [dataSource]="shipdata"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                columnResizingMode="nextColumn"
+                keyExpr="turn"
+                [selection]="{ mode: 'multiple' }"
+                (onSelectionChanged)="selectionChanged($event)"
+                [allowColumnReordering]="true"
+                [columnAutoWidth]="true"
+                [remoteOperations]="false"
+                [rowAlternationEnabled]="true"
+                [allowColumnResizing]="true"
+                height="calc(100vh - 155px)">
+
+    <!--Datagrid Option-->
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <!--Grouping Option-->
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
+
+    <!--Data column-->
+
+    <dxi-column dataField="shipDate" caption="출하일자" dataType="date" format="yyyy-MM-dd" alignment="center">   </dxi-column>
+
+    <dxi-column dataField="turn" caption="순번">  </dxi-column>
+
+    <dxi-column dataField="insDate" caption="지시일자" dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="insTurn" caption="지시순번">  </dxi-column>
+
+    <dxi-column dataField="prodcCode" caption="상품코드" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="prodcName" caption="상품명">  </dxi-column>
+
+    <dxi-column dataField="vehNum" caption="차량번호">   </dxi-column>
+
+    <dxi-column dataField="shipSort" caption="출하구분" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="startTime" caption="시작시간" alignment="center"> </dxi-column>
+
+    <dxi-column dataField="endTime" caption="종료시간" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="arrivCode" caption="도착코드" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="arriv" caption="도착지">  </dxi-column>
+
+    <dxi-column dataField="insQuan" caption="지시량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="literWeight" caption="Liter중량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="tolerWeight" caption="공차중량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="shipQuan" caption="출하량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="shipTotalAmt" caption="출하총량" format="#,###">
+      <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+    </dxi-column>
+
+    <dxi-column dataField="settleAmt" caption="정산량" format="#,###">   </dxi-column>
+
+    <dxi-column dataField="temper" caption="온도" format="#,###">  </dxi-column>
+  </dx-data-grid>
+  </div>
+
+
+

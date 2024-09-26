@@ -1,0 +1,32 @@
+<div style="margin:10px 10px 10px 10px">
+  <dx-data-grid class="dx-card wide-card"
+                [dataSource]="dataSource"
+                [showBorders]="false"
+                [focusedRowEnabled]="true"
+                [focusedRowIndex]="0"
+                [columnAutoWidth]="true"
+                [columnHidingEnabled]="true">
+
+    <dxo-paging [pageSize]="10"></dxo-paging>
+    <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+    <dxi-column dataField="PARAM1"
+                [width]="90">
+    </dxi-column>
+    <dxi-column dataField="PARAM2"
+                [width]="190"
+                caption="파라미터1">
+    </dxi-column>
+    <dxi-column dataField="PARAM3"
+                caption="파라미터2">
+    </dxi-column>
+    <dxi-column dataField="UPDDAT"
+                caption="일자">
+    </dxi-column>
+    <dxi-column dataField="UPDTIM"
+                caption="시간"
+                [allowSorting]="false">
+    </dxi-column>
+  </dx-data-grid>
+</div>

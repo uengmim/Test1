@@ -1,0 +1,190 @@
+<h2 class="content-block">Tasks</h2>
+
+<div style="margin:10px">
+  <dx-validation-group name="codeGroup">
+    <nh-possible-comm #cm001Entery
+                      dataStoreKey ="task"
+                      [codeInfo]="cm001Code"
+                      valueColumn="ZCM_CODE1"
+                      valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE1%)"
+                      label="결재코드"
+                      [width]="200"
+                      [gridBoxWidth]="500"
+                       [validationErrors]="[{type:'required', message:'코드1를 입력 하십시오.'}]"
+                      [showClearButton] ="true"
+                      [(selectedValue)]="cm001Value"
+                      [showDataLoadingPanel]="showDataLoadingPanel"
+                      class="weight-test"
+                      (onDataLoaded)="onPEDataLoaded($event)"
+                      (onEntryValueChanged)="onCm001ValueChanged($event)">
+      <nbp-validator [adapter]="c001Adapter">
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </nbp-validator>
+     </nh-possible-comm>
+
+    <nh-possible-comm #dynamicEntery
+                      dataStoreKey ="task"
+                      [width]="200"
+                      label="코드선택"
+                      [gridBoxWidth]="500"
+                      [validationErrors]="[{type:'required', message:'코드2를 입력 하십시오.'}]"
+                      [(selectedValue)]="dynamicValue"
+                      class="weight-test"
+                      (onEntryValueChanged)="onDynamicValueChanged($event)">
+      <nbp-validator [adapter]="dynamicAdapter">
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </nbp-validator>
+    </nh-possible-comm>
+
+    <nh-possible-comm #sd007Entery
+                      dataStoreKey ="task"
+                      [codeInfo]="sd007Code"
+                      valueColumn="ZCM_CODE3"
+                      valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                      label="주문유형"
+                      [width]="200"
+                      [gridBoxWidth]="500"
+                      [showDataLoadingPanel]="showDataLoadingPanel"
+                      [filerExpression]="sd007Filter"
+                      class="weight-test"
+                      (onDataLoading)="onSd004DataLoading($event)"
+                      (onDataLoaded)="onPEDataLoaded($event)"
+                      (onEntryValueChanged)="onSd004ValueChanged($event)"></nh-possible-comm>
+
+    <nh-possible-comm #maraEntery
+                        dataStoreKey ="task"
+                       [codeInfo]="maraCode"
+                       valueColumn="MATNR"
+                       valueDisplayFormat="%MAKTX%(%MATNR%)"
+                       [(selectedValue)]="maraValue"
+                       label="아이템코드"
+                       width="100%"
+                       [parameters]="maraParameters"
+                       [gridBoxWidth]="800"
+                       [showClearButton] ="true"
+                       [validationErrors]="[{type:'required', message:'자재를 선택하여 주십시오.'}]"
+                       [showDataLoadingPanel]="showDataLoadingPanel"
+                       [filerExpression]="maraFilter"
+                       class="weight-test"
+                       (onDataLoaded)="onPEDataLoaded($event)"
+                       (onEntryValueChanged)="onMaraValueChanged($event)">
+      <nbp-validator [adapter]="maraAdapter">
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </nbp-validator>
+    </nh-possible-comm>
+
+    <dx-button stylingMode="contained"
+               text="저장"
+               type="normal"
+               [width]="150"
+               class="weight-test-btn"
+               (onClick)="saveClick($event)">
+    </dx-button>
+    </dx-validation-group>
+    <div style="clear:both"></div>
+</div>
+
+<div style="margin:10px">
+  <dx-number-box [value]="weight" width="120px" class="weight-test" label="무게" stylingMode="outlined" labelMode="floating"></dx-number-box>
+  <dx-button stylingMode="contained"
+              text="모니터링중지"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="stopMonitorClick($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+              text="모니터링시작"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="startMonitorClick($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+              text="저울COM 닫기"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="closeComClick($event)">
+  </dx-button>
+  <dx-button stylingMode="contained"
+              text="저울COM 열기"
+              type="normal"
+              [width]="150"
+              class="weight-test-btn"
+              (onClick)="openComClick($event)">
+  </dx-button>
+  <div style="clear:both"></div>
+</div>
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="dataSource"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              [columnResizingMode]="columnResizeMode"
+              [columnHidingEnabled]="true">
+
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+  <dxi-column dataField="Task_ID"
+              [width]="90"
+              [hidingPriority]="2">
+  </dxi-column>
+  <dxi-column dataField="Task_Subject"
+              [width]="190"
+              caption="Subject"
+              [hidingPriority]="8">
+  </dxi-column>
+  <dxi-column dataField="Task_Status"
+              caption="Status"
+              [hidingPriority]="6">
+  </dxi-column>
+  <dxi-column dataField="Task_Priority"
+              caption="Priority"
+              [hidingPriority]="5">
+    <dxo-lookup [dataSource]="priority"
+                valueExpr="value"
+                displayExpr="name">
+    </dxo-lookup>
+  </dxi-column>
+  <dxi-column dataField="ResponsibleEmployee.Employee_Full_Name"
+              caption="Assigned To"
+              [allowSorting]="false"
+              [hidingPriority]="7">
+  </dxi-column>
+  <dxi-column dataField="Task_Start_Date"
+              caption="Start Date"
+              dataType="date"
+              [hidingPriority]="3">
+  </dxi-column>
+  <dxi-column dataField="Task_Due_Date"
+              caption="Due Date"
+              dataType="date"
+              [hidingPriority]="4">
+  </dxi-column>
+  <dxi-column dataField="Task_Priority"
+              caption="Priority"
+              name="Priority"
+              [hidingPriority]="1">
+  </dxi-column>
+  <dxi-column dataField="Task_Completion"
+              caption="Completion"
+              [hidingPriority]="0">
+  </dxi-column>
+</dx-data-grid>
+
+<!-- 로딩 패널-->
+<dx-load-panel #loadPanel
+               [position]="{ of: '#pageContent' }"
+               shadingColor="rgba(0,0,0,0.4)"
+               [(visible)]="loadingVisible"
+               [showIndicator]="true"
+               [showPane]="true"
+               [shading]="true" 
+               [hideOnOutsideClick]="false">
+</dx-load-panel>

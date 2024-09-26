@@ -1,0 +1,530 @@
+<!--고객주문처리(액상)-->
+<div style="margin:10px 10px 0px 10px">
+  <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+    <dxi-item location="before">
+      <div style="float: left; margin-left: 10px; ">
+        <nh-possible-table [codeInfo]="kunnCode" #kunnrEntery3
+                           [dataStoreKey]="dataStoreKey"
+                           valueColumn="KUNNR"
+                           valueDisplayFormat="%NAME1%(%KUNNR%)"
+                           width="200"
+                           placeholderText="주문처(산하)"
+                           label="주문처(산하)"
+                           [gridBoxWidth]="500"
+                           [showClearButton]="true"
+                           (onDataLoaded)="onPEDataLoaded($event)"></nh-possible-table>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div *dxTemplate>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="startDate" label="출고기간(From)" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+        <div style="float: left; margin-left: 10px;">
+          ~
+        </div>
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="endDate" label="출고기간(From)" type="date" [width]="120" displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+    <dxi-item>
+      <div style="float: left; margin-left: 10px; ">
+        <nh-possible-comm #sd007Entery1
+                          [dataStoreKey]="dataStoreKey"
+                          [codeInfo]="sd007Code"
+                          valueColumn="ZCM_CODE3"
+                          valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                          placeholderText="주문구분"
+                          label="주문구분"
+                          [width]="200"
+                          [showClearButton]="true"
+                          [gridBoxWidth]="500"
+                          (onDataLoaded)="onPEDataLoaded($event)"
+                          class="weight-test"></nh-possible-comm>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button text="추가" (onClick)="addOrder($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="searchButtonOptions">
+    </dxi-item>
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button icon="save" (onClick)="saveOrder($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+
+  </dx-toolbar>
+
+  <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+    <dxi-item location="before">
+      <div style="float: left; margin-left: 10px; ">
+        <nh-possible-table #maEntery
+                           [dataStoreKey]="dataStoreKey"
+                           [codeInfo]="maCode"
+                           valueColumn="MATKL"
+                           valueDisplayFormat="%WGBEZ%(%MATKL%)"
+                           placeholderText="제품구분"
+                           width="200"
+                           label="제품구분"
+                           [gridBoxWidth]="500"
+                           (onDataLoaded)="onPEDataLoaded($event)"
+                           [showClearButton]="true"
+                           class="weight-test"></nh-possible-table>
+      </div>
+    </dxi-item>
+    <dxi-item location="before">
+      <div style="float: left; margin-left: 10px; ">
+        <nh-possible-table #maktEntery
+                           [dataStoreKey]="dataStoreKey"
+                           [codeInfo]="maktCode"
+                           valueColumn="MATNR"
+                           valueDisplayFormat="%MAKTX%(%MATNR%)"
+                           placeholderText="제품명"
+                           label="제품명"
+                           width="270"
+                           [showClearButton]="true"
+                           [gridBoxWidth]="500"
+                           (onDataLoaded)="onPEDataLoaded($event)"
+                           class="weight-test"></nh-possible-table>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button text="참조추가" (onClick)="refAddOrder($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              [options]="deleteButtonOptions">
+    </dxi-item>
+
+  </dx-toolbar>
+
+
+  <dx-data-grid id="grid"
+                [dataSource]="orderData"
+                keyExpr="VBELN"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                [selection]="{ mode: 'single' }"
+                height="calc(100vh - 230px)"
+                [columnAutoWidth]="true"
+                (onContentReady)="contentReady($event)"
+                (onRowDblClick)="orderDBClick($event)"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [loadPanel]="loadPanelOption"
+                [allowColumnResizing]="true">
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+
+
+
+    <!--Data column-->
+    <dxi-column dataField="VBELN"
+                caption="주문번호">
+    </dxi-column>
+
+    <dxi-column dataField="ZEXIDNAME"
+                caption="주문처">
+    </dxi-column>
+    <dxi-column dataField="MAKTX"
+                caption="제품명">
+    </dxi-column>
+    <dxi-column dataField="ZZPACK_N"
+                caption="포장">
+    </dxi-column>
+    <dxi-column dataField="AUART_N"
+                caption="주문구분">
+    </dxi-column>
+    <dxi-column dataField="VKAUS_N"
+                caption="용도">
+    </dxi-column>
+    <dxi-column dataField="KUNWE_N"
+                caption="도착지">
+    </dxi-column>
+    <dxi-column dataField="KWMENG"
+                caption="주문량">
+    </dxi-column>
+
+    <dxi-column dataField="NETPR"
+                caption="주문단가"
+                format="currency"
+                dataType="number">
+      <dxo-header-filter [dataSource]="saleAmountHeaderFilter"></dxo-header-filter>
+    </dxi-column>
+    <dxi-column dataField="GIQTY"
+                caption="출고량">
+    </dxi-column>
+    <dxi-column dataField="VDATU"
+                caption="납기일자"
+                dataType="date">
+    </dxi-column>
+    <dxi-column dataField="LGORT"
+                caption="출고지">
+    </dxi-column>
+    <dxi-column dataField="TDLNR_N"
+                caption="운송사">
+    </dxi-column>
+    <dxi-column dataField="shipmentNum"
+                caption="출하요청번호">
+    </dxi-column>
+    <dxi-column dataField="orderAccount"
+                caption="주문등록계정">
+    </dxi-column>
+
+    <dxi-column dataField="ERDAT"
+                dataType="date"
+                caption="주문일자">
+    </dxi-column>
+    <dxi-column dataField="DOLOG"
+                caption="출하가능">
+    </dxi-column>
+    <dxi-column dataField="productClass"
+                caption="제품구분">
+    </dxi-column>
+    <dxi-column dataField="TEXT"
+                caption="비고">
+    </dxi-column>
+
+
+  </dx-data-grid>
+</div>
+  <dx-popup [title]="popupTitle"
+            [showTitle]="true"
+            width="80%"
+            height="80%"
+            [(visible)]="popupVisible"
+            [dragEnabled]="false"
+            [showCloseButton]="false"
+            container=".dx-viewport">
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="saveButtonOptions"
+                      [visible]="saveVisible">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="top"
+                      location="after"
+                      [options]="closeButtonOptions">
+    </dxi-toolbar-item>
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <dx-form #popupForm id="popupForm" [formData]="popupData" [disabled]="editFlag" validationGroup="valiData">
+          <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+            <dxi-item name="VBELN" dataField="VBELN" [disabled]="true"><dxo-label text="주문번호"></dxo-label></dxi-item>
+            <dxi-item dataField="ZEXIDNAME" [disabled]="true"><dxo-label text="주문처(산하)"></dxo-label></dxi-item>
+            <dxi-item dataField="temp15" [disabled]="true"><dxo-label text="담보금액"></dxo-label></dxi-item>
+            <dxi-item [colSpan]="2"></dxi-item>
+            <dxi-item dataField="temp13" [disabled]="true"><dxo-label text="미수채권(비료+화공등)"></dxo-label></dxi-item>
+          </dxi-item>
+
+          <dxi-item itemType="empty" [colSpan]="3"> </dxi-item>
+
+          <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+            <dxi-item dataField="VDATU" [disabled]="false" editorType="dxDateBox" [editorOptions]="{ displayFormat: 'yyyy-MM-dd', type: 'date', showClearButton : true , useMaskBehavior : true}"><dxo-label text="납기일자"></dxo-label></dxi-item>
+            <dxi-item dataField="KUNWE" [disabled]="false">
+              <dxo-label text="도착지"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="kunnCode" #kunnEntery
+                                   [dataStoreKey]="dataStoreKey"
+                                   valueColumn="KUNNR"
+                                   valueDisplayFormat="%NAME1%(%KUNNR%)"
+                                   width="auto"
+                                   valueExpr="KUNWE"
+                                   [gridBoxWidth]="500"
+                                   [showClearButton]="true"
+                                   [(selectedValue)]="kunnrValue"
+                                   [validationErrors]="[{type:'required', message:'도착지를 입력 하십시오.'}]"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [showDataLoadingPanel]="showDataLoadingPanel"
+                                   (onEntryValueChanged)="onKunweCodeValueChanged($event)"></nh-possible-table>
+                <nbp-validator [adapter]="kunnAdapter">
+                  <dxi-validation-rule type="required"></dxi-validation-rule>
+                </nbp-validator>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="KUNNR" [disabled]="false">
+              <dxo-label text="주문처"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table [codeInfo]="kunnCode" #kunnrEntery
+                                   [dataStoreKey]="dataStoreKey"
+                                   valueColumn="KUNNR"
+                                   valueDisplayFormat="%NAME1%(%KUNNR%)"
+                                   width="auto"
+                                   [gridBoxWidth]="500"
+                                   [showClearButton]="true"
+                                   [(selectedValue)]="kunnrValue2"
+                                   [validationErrors]="[{type:'required', message:'주문처를 입력 하십시오.'}]"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [showDataLoadingPanel]="showDataLoadingPanel"
+                                   (onEntryValueChanged)="onKunnrCodeValueChanged($event)"></nh-possible-table>
+                <nbp-validator [adapter]="kunnrAdapter">
+                  <dxi-validation-rule type="required"></dxi-validation-rule>
+                </nbp-validator>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="MATNR" [disabled]="false">
+              <dxo-label text="제품명"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table #maktEntery2
+                                   [dataStoreKey]="dataStoreKey"
+                                   [codeInfo]="maktCode"
+                                   valueColumn="MATNR"
+                                   valueDisplayFormat="%MAKTX%(%MATNR%)"
+                                   width="auto"
+                                   [(selectedValue)]="maktValue"
+                                   [gridBoxWidth]="500"
+                                   class="weight-test"
+                                   [validationErrors]="[{type:'required', message:'제품을 입력 하십시오.'}]"
+                                   [showClearButton]="true"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [showDataLoadingPanel]="showDataLoadingPanel"
+                                   (onEntryValueChanged)="onMatnrCodeValueChanged($event)"></nh-possible-table>
+                <nbp-validator [adapter]="maktAdapter">
+                  <dxi-validation-rule type="required"></dxi-validation-rule>
+                </nbp-validator>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="KWMENG" [disabled]="false" editorType="dxNumberBox" [editorOptions]="{ format : '#,###'}">
+              <dxi-validation-rule type="custom" [validationCallback]="validateNumber" message="주문수량을 입력 하십시오."></dxi-validation-rule>
+              <dxo-label text="주문수량"></dxo-label>
+            </dxi-item>
+            <dxi-item dataField="AUART" [disabled]="false">
+              <dxo-label text="주문구분"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-comm #sd007Entery2
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="sd007Code"
+                                  valueColumn="ZCM_CODE3"
+                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                  width="auto"
+                                  [showClearButton]="true"
+                                  [(selectedValue)]="auartValue"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  [validationErrors]="[{type:'required', message:'주문구분을 입력 하십시오.'}]"
+                                  (onDataLoaded)="onPEDataLoaded($event)"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onAuartCodeValueChanged($event)"></nh-possible-comm>
+                <nbp-validator [adapter]="sd007Adapter">
+                  <dxi-validation-rule type="required"></dxi-validation-rule>
+                </nbp-validator>
+              </div>
+            </dxi-item>
+
+            <!-- 비료용으로 주석
+
+                <dxi-item dataField="VKAUS" [disabled]="false" >
+                  <dxo-label text="용도구분"></dxo-label>
+                  <div *dxTemplate>
+                    <nh-possible-table #tvlvEntery
+                                       [dataStoreKey] ="dataStoreKey"
+                                       [codeInfo]="tvlvCode"
+                                       valueColumn="ABRVW"
+                                       valueDisplayFormat="%BEZEI%(%ABRVW%)"
+                                       width="auto"
+                                       [(selectedValue)]="vkausValue"
+                                       [gridBoxWidth]="500"
+                                       class="weight-test"
+                                       (onDataLoaded)="onPEDataLoaded($event)"
+                                       [showDataLoadingPanel]="showDataLoadingPanel"
+                                       (onEntryValueChanged)="onTvlvCodeValueChanged($event)"></nh-possible-table>
+                  </div>
+                </dxi-item>
+                <dxi-item dataField="VKAUS_N" [disabled]="false" [visible]="!saveVisible">
+                  <dxo-label text="용도구분"></dxo-label>
+                </dxi-item>
+              -->
+            <dxi-item dataField="ZUNLOAD" [disabled]="false">
+              <dxo-label text="하차방법"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table #dd07tEntery
+                                   [dataStoreKey]="dataStoreKey"
+                                   [codeInfo]="dd07tCode"
+                                   valueColumn="DOMVALUE_L"
+                                   valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                   width="auto"
+                                   [showClearButton]="true"
+                                   [(selectedValue)]="zunloadValue"
+                                   [gridBoxWidth]="500"
+                                   class="weight-test"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [showDataLoadingPanel]="showDataLoadingPanel"
+                                   (onEntryValueChanged)="onZunloadCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="INCO1" [disabled]="false">
+              <dxo-label text="운송방법"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-comm [codeInfo]="inco1Code" #incoEntery
+                                  [dataStoreKey]="dataStoreKey"
+                                  valueColumn="ZCM_CODE3"
+                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                  width="auto"
+                                  [showClearButton]="true"
+                                  [(selectedValue)]="incoValue"
+                                  [gridBoxWidth]="500"
+                                  [filerExpression]="incoFilter"
+                                  (onDataLoaded)="onPEDataLoaded($event)"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onIncoCodeValueChanged($event)"></nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="TEXT" [colSpan]="2" [editorOptions]="{height:60}" [disabled]="false"><dxo-label text="특기사항"></dxo-label></dxi-item>
+            <dxi-item dataField="LGORT" [disabled]="false">
+              <dxo-label text="출고사업장"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-comm #t001Entery
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="t001Code"
+                                  valueColumn="ZCM_CODE3"
+                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                  width="auto"
+                                  [showClearButton]="true"
+                                  [(selectedValue)]="lgortValue"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  [validationErrors]="[{type:'required', message:'출고사업장을 입력 하십시오.'}]"
+                                  (onDataLoaded)="onPEDataLoaded($event)"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onLgortCodeValueChanged($event)"></nh-possible-comm>
+                <nbp-validator [adapter]="t001Adapter">
+                  <dxi-validation-rule type="required"></dxi-validation-rule>
+                </nbp-validator>
+              </div>
+            </dxi-item>
+            <!-- 비료용
+             <dxi-item dataField="REVQTY" [disabled]="true"><dxo-label text="예약물량"></dxo-label></dxi-item>
+             <dxi-item dataField="GIQTY" [disabled]="true"><dxo-label text="출고물량"></dxo-label></dxi-item>
+            -->
+            <dxi-item dataField="TDLNR" [disabled]="false">
+              <dxo-label text="운송사"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-comm #tdlnr1Entery
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="tdlnrCode"
+                                  valueColumn="ZCM_CODE3"
+                                  [showClearButton]="true"
+                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                  width="auto"
+                                  [(selectedValue)]="tdlnrValue"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  (onDataLoaded)="onPEDataLoaded($event)"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onTdlnrCodeValueChanged($event)"></nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="TDLNR2" [disabled]="false">
+              <dxo-label text="실제운송사"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-comm #tdlnr2Entery
+                                  [dataStoreKey]="dataStoreKey"
+                                  [codeInfo]="tdlnrCode"
+                                  valueColumn="ZCM_CODE3"
+                                  [showClearButton]="true"
+                                  valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                  width="auto"
+                                  [(selectedValue)]="tdlnrValue2"
+                                  [gridBoxWidth]="500"
+                                  class="weight-test"
+                                  (onDataLoaded)="onPEDataLoaded($event)"
+                                  [showDataLoadingPanel]="showDataLoadingPanel"
+                                  (onEntryValueChanged)="onTdlnr2CodeValueChanged($event)"></nh-possible-comm>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ZCARTYPE" [disabled]="false">
+              <dxo-label text="화물차종"></dxo-label>
+              <div *dxTemplate>
+                <nh-possible-table #dd07tCarEntery
+                                   [dataStoreKey]="dataStoreKey"
+                                   [codeInfo]="dd07tCarCode"
+                                   valueColumn="DOMVALUE_L"
+                                   [showClearButton]="true"
+                                   valueDisplayFormat="%DDTEXT%(%DOMVALUE_L%)"
+                                   width="auto"
+                                   [(selectedValue)]="zcarValue"
+                                   [gridBoxWidth]="500"
+                                   class="weight-test"
+                                   (onDataLoaded)="onPEDataLoaded($event)"
+                                   [showDataLoadingPanel]="showDataLoadingPanel"
+                                   (onEntryValueChanged)="onZcartypeCodeValueChanged($event)"></nh-possible-table>
+              </div>
+            </dxi-item>
+            <dxi-item dataField="ZCARNO" [disabled]="false"><dxo-label text="차량번호"></dxo-label></dxi-item>
+            <dxi-item dataField="ZDRIVER" [disabled]="false"><dxo-label text="운전기사명"></dxo-label></dxi-item>
+            <dxi-item dataField="ZPHONE" [disabled]="false"><dxo-label text="전화번호"></dxo-label></dxi-item>
+            <!-- 유류용
+                <dxi-item dataField="VSBED" [disabled]="true">
+                  <dxo-label text="출하조건"></dxo-label>
+                  <div *dxTemplate>
+                    <nh-possible-comm #sd007Entery3
+                                      [dataStoreKey]="dataStoreKey"
+                                      [codeInfo]="sd007Code"
+                                      valueColumn="ZCM_CODE3"
+                                      [showClearButton]="true"
+                                      valueDisplayFormat="%ZCMF01_CH%(%ZCM_CODE3%)"
+                                      width="auto"
+                                      [(selectedValue)]="vsbedValue"
+                                      [gridBoxWidth]="500"
+                                      class="weight-test"
+                                      (onDataLoaded)="onPEDataLoaded($event)"
+                                      [showDataLoadingPanel]="showDataLoadingPanel"
+                                      (onEntryValueChanged)="onVsbedCodeValueChanged($event)"></nh-possible-comm>
+                  </div>
+                </dxi-item>
+              -->
+          </dxi-item>
+          <!-- 비료용
+             <dxi-item itemType="group"
+                       caption="농협검수항목관리"
+                       [colCount]="3"
+                       [colSpan]="2"
+                       style="margin-top:30px;">
+               <dxi-item dataField="ZNHMAME" [disabled]="true"><dxo-label text="농협명"></dxo-label></dxi-item>
+               <dxi-item dataField="MVGR2" [disabled]="true"><dxo-label text="사업방식"></dxo-label></dxi-item>
+               <dxi-item dataField="temp1" [disabled]="true"><dxo-label text="거래구분"></dxo-label></dxi-item>
+               <dxi-item dataField="MAKTX_NH" [disabled]="true"><dxo-label text="농협제품"></dxo-label></dxi-item>
+               <dxi-item dataField="MVGR3" [disabled]="true"><dxo-label text="계통구분"></dxo-label></dxi-item>
+               <dxi-item dataField="temp2" [disabled]="true"><dxo-label text="단가구분"></dxo-label></dxi-item>
+               <dxi-item dataField="MVGR1" [disabled]="true"><dxo-label text="대분류"></dxo-label></dxi-item>
+               <dxi-item dataField="TAXK1" [disabled]="true"><dxo-label text="세무구분"></dxo-label></dxi-item>
+               <dxi-item dataField="INCO1__" [disabled]="true"><dxo-label text="인수도구분"></dxo-label></dxi-item>
+             </dxi-item>
+
+             <dxi-item itemType="group" [colCount]="2" [colSpan]="2">
+               <dxi-item dataField="temp3" [disabled]="true"><dxo-label text="주문처 담보금액"></dxo-label></dxi-item>
+               <dxi-item dataField="temp4" [disabled]="true"><dxo-label text="주문처 미수채권"></dxo-label></dxi-item>
+             </dxi-item>
+            -->
+
+        </dx-form>
+      </div>
+    </dx-scroll-view>
+  </dx-popup>
+
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>
+
+  <dx-load-panel #popLoadPanel [position]="{ of: '.dx-viewport' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="popupLoading" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>
+

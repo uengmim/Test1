@@ -1,0 +1,158 @@
+ <!--toolbar-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" locateInMenu="auto">
+    <div *dxTemplate>
+      <div style="float:left;width:auto">
+        <dx-date-box [(value)]="startDate" type="date" label="조회일(From)" labelmode="floating" displayFormat="yyyy-MM-dd" [width]="120"></dx-date-box>
+      </div>
+      <div style="float: left; margin-right: 10px; width: auto">
+        <dx-date-box [(value)]="endDate" type="date" label="조회일(To)" labelmode="floating" displayFormat="yyyy-MM-dd" [width]="120"></dx-date-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;" [disabled]="!btnVisible">
+    <div *dxTemplate style="margin-left:15px;">
+      <nh-possible-comm #CodeEntery
+                        dataStoreKey="dataStoreKey"
+                        [codeInfo]="lifnrCode"
+                        valueColumn="LIFNR"
+                        valueDisplayFormat="%NAME1%(%LIFNR%)"
+                        [(selectedValue)]="lifnrValue"
+                        [gridBoxWidth]="500"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        width="auto"
+                        label="업체정보"
+                        labelMode="floating"
+                        [showClearButton]="true"
+                        (onDataLoaded)="onPEDataLoaded($event)">
+      </nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before">
+    <div style="float: left; margin-left: 10px; ">
+      <nh-possible-comm #maktEntery
+                        [dataStoreKey]="dataStoreKey"
+                        [codeInfo]="maktxCode"
+                        valueColumn="MATNR"
+                        valueDisplayFormat="%MAKTX%(%MATNR%)"
+                        placeholderText="구성품"
+                        label="구성품"
+                        width="220"
+                        popupGridScrollMode="standard"
+                        [popupGridPagingMode]="true"
+                        [popupGridPageSize]="10"
+                        comboGridScrollMode="virtual"
+                        [showClearButton]="true"
+                        [(selectedValue)]="maktxValue"
+                        [gridBoxWidth]="500"
+                        (onDataLoaded)="onPEDataLoaded($event)"
+                        (onEntryValueChanged)="onCodeChanged($event)"
+                        labelMode="floating"
+                        class="weight-test">
+      </nh-possible-comm>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+
+<dx-data-grid #paymentGrid
+              [dataSource]="supplyData"
+              [remoteOperations]="false"
+              (onSelectionChanged)="selectionChanged($event)"
+              [focusedRowIndex]="0"
+              [allowColumnReordering]="true"
+              [allowColumnResizing]="true"
+              [rowAlternationEnabled]="true"
+              [showBorders]="true"
+              [columnAutoWidth]="true"
+              height="calc(100vh - 155px)"
+              [columnResizingMode]="columnResizeMode">
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-scrolling mode="infinite"></dxo-scrolling>
+
+  <dxo-selection mode="single"></dxo-selection>
+  <dxo-filter-row visible="true"></dxo-filter-row>
+  <dxo-header-filter visible="true"></dxo-header-filter>
+
+  <dxo-search-panel [visible]="true"
+                    [highlightCaseSensitive]="true"></dxo-search-panel>
+
+  <!--Data column-->
+  <dxi-column dataField="MATKL"
+              caption="제품그룹"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+
+  <dxi-column dataField="MATNR"
+              caption="자재코드"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+
+  <dxi-column dataField="MAKTX"
+              caption="품명"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+  <dxi-column dataField="MEINS"
+              caption="기본단위"
+              [fixed]="true"
+              fixedPosition="left">
+  </dxi-column>
+
+  <dxi-column dataField="SC_R_MENGE"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출하요청량">
+  </dxi-column>
+
+  <dxi-column dataField="SC_MENGE_541"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="출고량(이동)">
+  </dxi-column>
+
+  <dxi-column dataField="SC_MENGE_101"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="입고량(자체조달)">
+  </dxi-column>
+
+  <dxi-column dataField="SC_MENGE_543"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="투입량">
+  </dxi-column>
+
+  <dxi-column dataField="LBLAB"
+              format="#,##0.###"
+              dataType="number"
+              alignment="right"
+              caption="가용재고(업체)">
+  </dxi-column>
+
+  <dxo-summary>
+    <dxi-total-item column="MEINS"
+                    alignment="right"
+                    summaryType="count"
+                    displayFormat="{0}">
+    </dxi-total-item>
+  </dxo-summary>
+</dx-data-grid>

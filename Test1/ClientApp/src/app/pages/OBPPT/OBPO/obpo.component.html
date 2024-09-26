@@ -1,0 +1,183 @@
+<!--구매발주확인-->
+<div style="margin:10px 10px 0px 10px">
+  <dx-toolbar style="margin:20px 0px 20px 0px" width="99%">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-date-box label="발주일자" [(value)]="poDate" type="date" [width]="130"
+                     displayFormat="yyyy-MM-dd">
+        </dx-date-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto" style=" margin-right:10px;">
+      <div *dxTemplate style="margin-top:7px;">
+        <dx-select-box #ynSelect
+                       [dataSource]="ynList"
+                       displayExpr="name"
+                       valueExpr="code"
+                       (onValueChanged)="selectApply($event)"
+                       label="접수구분"
+                       labelMode="floating"
+                       [(value)]="selectBoxValue"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-text-box #bizNoText
+                     [showClearButton]="true"
+                     label="사업자등록번호"
+                     labelMode="floating"
+                     [maxLength]="40"
+                     [disabled]="true"
+                     [(value)]="bizNo"
+                     [width]="180"></dx-text-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-text-box #companyText
+                     [showClearButton]="true"
+                     label="회사명"
+                     [disabled]="true"
+                     labelMode="floating"
+                     [(value)]="comNm"
+                     [maxLength]="40"
+                     [width]="230"></dx-text-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-text-box #personText
+                     [showClearButton]="true"
+                     label="확인자"
+                     [disabled]="true"
+                     labelMode="floating"
+                     [(value)]="name"
+                     [maxLength]="40"
+                     [width]="100"></dx-text-box>
+      </div>
+    </dxi-item>
+
+
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button text="조회" (onClick)="searchData($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button text="발주확인" (onClick)="saveData($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    <!--
+      
+    <dxi-item location="after">
+      <div *dxTemplate>
+        <dx-button text="취소" (onClick)="cancelData($event)">
+        </dx-button>
+      </div>
+    </dxi-item>
+    -->
+  </dx-toolbar>
+
+
+  <dx-data-grid id="grid"
+                #poGrid
+                keyExpr="EBELN"
+                [dataSource]="poData"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                [selection]="{ mode: 'single' }"
+                height="calc(100vh - 230px)"
+                [columnAutoWidth]="true"
+                [noDataText]="noText"
+                [allowColumnReordering]="true"
+                columnResizingMode="widget"
+                [allowColumnResizing]="true">
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+    <dxo-column-fixing [enabled]="true"></dxo-column-fixing>
+    <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+
+
+
+    <!--Data column-->
+    <dxi-column dataField="AEDAT" dataType="date" format="yyyy-MM-dd" [fixed]="true"
+                caption="PO일자">
+    </dxi-column>
+    <dxi-column dataField="EBELN" [fixed]="true"
+                caption="PO번호">
+    </dxi-column>
+    <dxi-column dataField="EBELP" [fixed]="true"
+                caption="PO항번">
+    </dxi-column>
+    <dxi-column dataField="ZZCONTRACT_NO" [fixed]="true"
+                caption="계약번호">
+    </dxi-column>
+    <dxi-column dataField="ZZCONTRACT_ITEM" [fixed]="true"
+                caption="계약항번">
+    </dxi-column>
+    <dxi-column dataField="CONNM" [fixed]="true"
+                caption="계약명">
+    </dxi-column>
+    <dxi-column dataField="LABNR" dataType="date" format="yyyy-MM-dd"
+                caption="확인일자">
+    </dxi-column>
+    <dxi-column dataField="MATNR"
+                caption="자재코드">
+    </dxi-column>
+    <dxi-column dataField="TXZ01"
+                caption="품명">
+    </dxi-column>
+    <dxi-column dataField="MENGE"
+                caption="발주수량" format="#,###">
+    </dxi-column>
+    <dxi-column dataField="NETPR"
+                caption="단가" format="#,###" dataType="number">
+    </dxi-column>
+    <dxi-column dataField="WAERS"
+                caption="통화">
+    </dxi-column>
+    <dxi-column dataField="EINDT"
+                caption="납품일자">
+    </dxi-column>
+    <dxi-column dataField="ZAMT"
+                caption="발주금액" format="#,###" dataType="number">
+    </dxi-column>
+    <dxi-column dataField="LGORT"
+                caption="저장위치">
+    </dxi-column>
+    <dxi-column dataField="ZTERM"
+                caption="지급조건">
+    </dxi-column>
+    <dxi-column dataField="AFNAM"
+                caption="요청자">
+    </dxi-column>
+    <dxi-column dataField="EKGRP"
+                caption="구매담당자">
+    </dxi-column>
+    <dxi-column dataField="INCO1"
+                caption="인코텀스">
+    </dxi-column>
+    <dxi-column dataField="INCO2"
+                caption="납품장소">
+    </dxi-column>
+    <dxi-column dataField="WEMNG"
+                caption="납품수량" format="#,###" dataType="number">
+    </dxi-column>
+    <dxi-column dataField="ZSPEC_LONG"
+                caption="스펙">
+    </dxi-column>
+
+  </dx-data-grid>
+
+</div>
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>
+

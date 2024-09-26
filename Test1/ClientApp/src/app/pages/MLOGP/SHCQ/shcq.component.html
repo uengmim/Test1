@@ -1,0 +1,65 @@
+ <!--toolbar-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-select-box [items]="price"
+                   labelMode="floating"
+                   label="구분"
+                   style="width: auto;
+                   margin-left: 10px;
+                   margin-right: 10px;">
+    </dx-select-box>
+  </dxi-item>
+
+  <dxi-item location="left"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+
+<dx-data-grid class="dx-card wide-card"
+              [dataSource]="data"
+              keyExpr="sortation"
+              [showBorders]="false"
+              [focusedRowEnabled]="true"
+              [focusedRowIndex]="0"
+              [columnAutoWidth]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="widget"
+              [columnHidingEnabled]="true"
+              [allowColumnReordering]="true"
+              height="calc(100vh - 230px)">
+
+  <dxo-paging [pageSize]="10"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+  <!--Data column-->
+  <dxi-column dataField="seq"
+              caption=" "
+              alignment="center">
+  </dxi-column>
+
+  <dxi-column dataField="sortation"
+              caption="구분">
+  </dxi-column>
+
+  <dxi-column dataField="distance1"
+              caption="거리1">
+  </dxi-column>
+
+  <dxi-column dataField="distance2"
+              caption="거리2">
+  </dxi-column>
+
+  <dxi-column dataField="shStory"
+              caption="단사"
+              format="#,###">
+  </dxi-column>
+
+  <dxi-column dataField="omparison"
+              caption="비교">
+  </dxi-column>
+
+</dx-data-grid>

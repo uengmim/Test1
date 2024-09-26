@@ -1,0 +1,469 @@
+<!--
+  출하 요청 등록
+  -->
+<div style="margin:10px 10px 0px 10px">
+  <!--toolbar-->
+  <dx-toolbar style="margin: 20px 0px 20px 0px; padding: 0px 5px 0px 5px; ">
+    <dxi-item location="before" locateInMenu="auto" >
+      <div *dxTemplate>
+        <div style="float: left; height: 26px;" >
+          <dx-date-box [(value)]="startDate"
+                       label="시작일"
+                       labelMode="floating"
+                       type="date"
+                       [width]="120"
+                       locateInMenu="auto"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+
+        <div style="float: left; margin-left: 10px; margin-right: 10px; ">
+          <dx-date-box [(value)]="endDate"
+                       label="종료일"
+                       labelMode="floating"
+                       type="date"
+                       [width]="120"
+                       locateInMenu="auto"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before"
+              widget="dxButton"
+                            locateInMenu="auto"
+              [options]="searchButtonOptions">
+    </dxi-item>
+
+    <dxi-item location="after"
+              widget="dxButton"
+                            locateInMenu="auto"
+              [options]="addButtonOptions">
+    </dxi-item>
+
+    <dxi-item location="after"
+              widget="dxButton"
+              style="margin-right:10px; margin-left:10px;"
+              locateInMenu="auto">
+      <dx-button stylingMode="contained"
+                 text="참조 추가"
+                 type="normal"
+                 (onClick)="AddRecords()"
+                 [disabled]="!selectedItemKeys.length"
+                 [width]="130">
+      </dx-button>
+    </dxi-item>
+
+    <dxi-item location="after"
+              widget="dxButton"
+              style="margin-right:10px;"
+              locateInMenu="auto">
+      <dx-button stylingMode="contained"
+                 text="S-OIL 추가"
+                 type="normal"
+                 (onClick)="SOILRecords()"
+                 [width]="130">
+      </dx-button>
+    </dxi-item>
+    <dxi-item location="after"
+              widget="dxButton"
+              style="margin-right: 10px; "
+              locateInMenu="auto"
+              [options]="saveButtonOptions">
+    </dxi-item>
+
+  </dx-toolbar>
+
+
+  <dx-data-grid id="grid"
+                [dataSource]="Orderdata"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                [columnAutoWidth]="true"
+                (onInitNewRow)="onInitNewRow($event)"
+                (onRowDblClick)="editRow($event)"
+                keyExpr="reqNum"
+                [selection]="{ mode: 'multiple' }"
+                [allowColumnReordering]="true"
+                [allowColumnResizing]="true"
+                [remoteOperations]="false"
+                [rowAlternationEnabled]="true"
+                (onSelectionChanged)="selectionChanged($event)"
+                (onFocusedRowChanged)="detailRowChanged($event)"
+                height="calc(100vh - 155px)">
+    <!--Datagrid Option-->
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <!--Grouping Option-->
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
+
+
+    <!--Popup Option-->
+    <dxo-editing mode="popup"
+                 [allowUpdating]="true"
+                 [allowDeleting]="true"
+                 [selectTextOnEditStart]="selectTextOnEditStart"
+                 [startEditAction]="startEditAction"
+                 refreshMode="repaint">
+      <dxo-popup title="출하요청서 등록"
+                 [showTitle]="true"
+                 width="80%"
+                 height="80%">
+      </dxo-popup>
+      <dxo-form>
+        <dxi-item itemType="group" [colCount]="3" [colSpan]="2">
+          <dxi-item dataField="reqNum" caption="요청번호" [editorOptions]="{ height: 50 }"></dxi-item>
+          <dxi-item dataField="reqDate" caption="요청일자" [editorOptions]="{ height: 50 }"></dxi-item>
+          <dxi-item dataField="orderClass" caption="주문구분" [editorOptions]="{ height: 50 }"></dxi-item>
+          <dxi-item dataField="client" caption="거래처" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="allocationNum" caption="배차번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="vehicleNum" caption="차량번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="liquidClass" caption="액상구분" [editorOptions]="{ height: 50 }"></dxi-item>
+          <dxi-item dataField="orderQuantity" caption="주문량" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="orderUnit" caption="주문단위" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="sOil" caption="선적번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="insNum" caption="지시번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="address" caption="주소" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="phoneNum" caption="전화번호" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="shipmentDate" caption="출하일" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="HP" caption="H.P" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="vehicleCapacity" caption="차량용량" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="sort" caption="구분" [editorOptions]="{ height: 50 }"></dxi-item>
+          <dxi-item dataField="storage" caption="저장소" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="settlement" caption="정산량" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="shippingMethod" caption="출하방식" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="cTank" caption="CTANK" [editorOptions]="{ height: 50 }"> </dxi-item>
+          <dxi-item dataField="remark" [editorOptions]="{ height: 100 }" [colSpan]="3">
+            <dxo-label text="비고"></dxo-label>
+          </dxi-item>
+        </dxi-item>
+      </dxo-form>
+    </dxo-editing>
+
+    <!--Data column-->
+    <dxi-column dataField="reqNum" caption="요청번호">  </dxi-column>
+
+    <dxi-column dataField="reqDate"
+                caption="요청일자"
+                format="yyyy-MM-dd"
+                dataType="date"
+                editCellTemplate="datcellTemplate">  </dxi-column>
+
+    <dxi-column dataField="orderClass" caption="주문구분" [allowFiltering]="false" [allowSorting]="false" editCellTemplate="reqcellTemplate">  </dxi-column>
+
+    <dxi-column dataField="client" caption="거래처">  </dxi-column>
+
+    <dxi-column dataField="allocationNum" caption="배차번호">  </dxi-column>
+
+    <dxi-column dataField="vehicleNum" caption="차량번호">  </dxi-column>
+
+    <dxi-column dataField="liquidClass" caption="액상구분" [allowFiltering]="false" [allowSorting]="false" editCellTemplate="oilcellTemplate">  </dxi-column>
+
+    <dxi-column dataField="orderQuantity" caption="주문량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="orderUnit" caption="주문단위" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="sOil" caption="선적번호(S-OIL)">  </dxi-column>
+
+    <dxi-column dataField="insNum" caption="지시번호">  </dxi-column>
+
+    <dxi-column dataField="address" caption="주소">  </dxi-column>
+
+    <dxi-column dataField="phoneNum" caption="전화번호" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="shipmentDate" caption="출하일" dataType="date" format="yyyy-MM-dd" alignment="center" editCellTemplate="datcellTemplate">  </dxi-column>
+
+    <dxi-column dataField="HP" caption="H.P" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="vehicleCapacity" caption="차량용량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="sort" caption="구분" [allowFiltering]="false" [allowSorting]="false" editCellTemplate="shipcellTemplate">  </dxi-column>
+
+    <dxi-column dataField="storage" caption="저장소">  </dxi-column>
+
+    <dxi-column dataField="settlement" caption="정산량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="shippingMethod" caption="출하방식">  </dxi-column>
+
+    <dxi-column dataField="cTank" caption="cTank" alignment="center">  </dxi-column>
+    <div *dxTemplate="let cellInfo of 'reqcellTemplate'">
+      <dx-drop-down-box #gridBox1
+                        [(value)]="selectedOption1"
+                        valueExpr="ID"
+                        displayExpr="Name"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="reqclass"
+                        [height]="50"
+                        (onValueChanged)="onDetailOptionChanged(cellInfo, $event)"
+                        (onSelectionChanged)="cellInfo.component.updateDimensions()">
+
+
+        <dx-data-grid [dataSource]="reqclass"
+                      [columns]="['Name']"
+                      [selection]="{ mode: 'single' }"
+                      [hoverStateEnabled]="true"
+                      [paging]="{ enabled: true, pageSize: 10 }"
+                      [filterRow]="{ visible: true }"
+                      [height]="400"
+                      keyExpr="ID"
+                      (onSelectionChanged)="onSelectionChanged($event)"
+                      [(selectedRowKeys)]="selectedOption1">
+        </dx-data-grid>
+      </dx-drop-down-box>
+    </div>
+    <div *dxTemplate="let cellInfo of 'oilcellTemplate'">
+      <dx-drop-down-box #gridBox2
+                        [(value)]="selectedOption2"
+                        valueExpr="ID"
+                        displayExpr="Name"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="oiltype"
+                        [height]="50"
+                        (onValueChanged)="onDetailOptionChanged(cellInfo, $event)"
+                        (onSelectionChanged)="cellInfo.component.updateDimensions()">
+
+        <dx-data-grid [dataSource]="oiltype"
+                      [columns]="['Name']"
+                      [selection]="{ mode: 'single' }"
+                      [hoverStateEnabled]="true"
+                      [paging]="{ enabled: true, pageSize: 10 }"
+                      [filterRow]="{ visible: true }"
+                      [height]="400"
+                      keyExpr="ID"
+                      (onSelectionChanged)="onSelectionChanged($event)"
+                      [(selectedRowKeys)]="selectedOption2">
+        </dx-data-grid>
+      </dx-drop-down-box>
+    </div>
+    <div *dxTemplate="let cellInfo of 'shipcellTemplate'">
+      <dx-drop-down-box #gridBox3
+                        [(value)]="selectedOption3"
+                        valueExpr="ID"
+                        displayExpr="Name"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="shipsort"
+                        [height]="50"
+                        (onValueChanged)="onDetailOptionChanged(cellInfo, $event)"
+                        (onSelectionChanged)="cellInfo.component.updateDimensions()">
+
+        <dx-data-grid [dataSource]="shipsort"
+                      [columns]="['Name']"
+                      [selection]="{ mode: 'single' }"
+                      [hoverStateEnabled]="true"
+                      [paging]="{ enabled: true, pageSize: 10 }"
+                      [filterRow]="{ visible: true }"
+                      [height]="400"
+                      keyExpr="ID"
+                      (onSelectionChanged)="onSelectionChanged($event)"
+                      [(selectedRowKeys)]="selectedOption3">
+        </dx-data-grid>
+      </dx-drop-down-box>
+    </div>
+    <div *dxTemplate="let cellInfo of 'shipcellTemplate'">
+      <dx-drop-down-box #gridBox3
+                        [(value)]="selectedOption3"
+                        valueExpr="ID"
+                        displayExpr="Name"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="shipsort"
+                        [height]="50"
+                        (onValueChanged)="onDetailOptionChanged(cellInfo, $event)"
+                        (onSelectionChanged)="cellInfo.component.updateDimensions()">
+
+        <dx-data-grid [dataSource]="shipsort"
+                      [columns]="['Name']"
+                      [selection]="{ mode: 'single' }"
+                      [hoverStateEnabled]="true"
+                      [paging]="{ enabled: true, pageSize: 10 }"
+                      [filterRow]="{ visible: true }"
+                      [height]="400"
+                      keyExpr="ID"
+                      (onSelectionChanged)="onSelectionChanged($event)"
+                      [(selectedRowKeys)]="selectedOption3">
+        </dx-data-grid>
+      </dx-drop-down-box>
+    </div>
+
+    <div *dxTemplate="let cellInfo of 'datcellTemplate'">
+      <dx-date-box type="date"
+                   [(value)]="cellInfo.value"
+                   (onValueChanged)="cellInfo.setValue($event.value)"
+                   displayFormat="yyyy-MM-dd"
+                   [height]="50">
+      </dx-date-box>
+    </div>
+  </dx-data-grid>
+
+
+  <dx-popup title="S-OIL 출하요청서 등록"
+            [showTitle]="true"
+            [(visible)]="popupVisible"
+            [maxWidth]="800"
+            [maxHeight]="600"
+            [showCloseButton]="false">
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="bottom"
+                      location="before"
+                      [options]="savesButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="bottom"
+                      location="after"
+                      [options]="closeButtonOptions">
+    </dxi-toolbar-item>
+    <dx-form id="form"
+             [formData]="formOrderData"
+             labelLocation="top"
+             [colCountByScreen]="colCountByScreen"
+             [screenByWidth]="screen">
+
+      <dxi-item dataField="sreqNum" [editorOptions]="{ height: 50}">
+        <dxo-label text="요청번호"></dxo-label>
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </dxi-item>
+
+      <dxi-item dataField="sorderClass" [editorOptions]="{ height: 50 }">
+        <dxo-label text="요청구분"></dxo-label>
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+        <div *dxTemplate>
+          <dx-drop-down-box #gridBox4
+                            [(value)]="gridBoxValue4"
+                            valueExpr="ID"
+                            displayExpr="Name"
+                            placeholder="Select a value..."
+                            [showClearButton]="true"
+                            [dataSource]="reqclass"
+                            [height]="50">
+
+            <dx-data-grid [dataSource]="reqclass"
+                          [columns]="['Name']"
+                          [selection]="{ mode: 'single' }"
+                          [hoverStateEnabled]="true"
+                          [paging]="{ enabled: true, pageSize: 10 }"
+                          [filterRow]="{ visible: true }"
+                          [height]="400"
+                          keyExpr="ID"
+                          (onSelectionChanged)="onSelectionChanged($event)"
+                          [(selectedRowKeys)]="gridBoxValue4">
+            </dx-data-grid>
+          </dx-drop-down-box>
+        </div>
+
+      </dxi-item>
+      <dxi-item dataField="sreqDate">
+        <dxo-label text="요청일"></dxo-label>
+        <dx-date-box type="date"
+                     [(value)]="now"
+                     displayFormat="yyyy-MM-dd"
+                     [useMaskBehavior]="true"
+                     [showClearButton]="true"
+                     [height]="50">
+        </dx-date-box>
+      </dxi-item>
+      <dxi-item dataField="sshipmentDate">
+        <dxo-label text="출하희망일"></dxo-label>
+        <dx-date-box type="date"
+                     [(value)]="now"
+                     displayFormat="yyyy-MM-dd"
+                     [useMaskBehavior]="true"
+                     [showClearButton]="true"
+                     [height]="50">
+        </dx-date-box>
+      </dxi-item>
+
+      <dxi-item dataField="sclient" [editorOptions]="{ height: 50 }">
+        <dxo-label text="거래처"></dxo-label>
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </dxi-item>
+
+      <dxi-item dataField="svehicleNum" [editorOptions]="{ height: 50 }">
+        <dxo-label text="차량번호"></dxo-label>
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </dxi-item>
+
+      <dxi-item dataField="sliquidClass" [editorOptions]="{ height: 50 }">
+        <dxo-label text="유종"></dxo-label>
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+        <div *dxTemplate>
+          <dx-drop-down-box #gridBox5
+                            [(value)]="gridBoxValue5"
+                            valueExpr="ID"
+                            displayExpr="Name"
+                            placeholder="Select a value..."
+                            [showClearButton]="true"
+                            [dataSource]="oiltype"
+                            [height]="50">
+
+            <dx-data-grid [dataSource]="oiltype"
+                          [columns]="['Name']"
+                          [selection]="{ mode: 'single' }"
+                          [hoverStateEnabled]="true"
+                          [paging]="{ enabled: true, pageSize: 10 }"
+                          [filterRow]="{ visible: true }"
+                          [height]="400"
+                          keyExpr="ID"
+                          (onSelectionChanged)="onSelectionChanged($event)"
+                          [(selectedRowKeys)]="gridBoxValue5">
+            </dx-data-grid>
+          </dx-drop-down-box>
+        </div>
+      </dxi-item>
+
+      <dxi-item dataField="ssort" [editorOptions]="{ height: 50 }">
+        <dxo-label text="출하구분"></dxo-label>
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+        <dx-drop-down-box #gridBox6
+                          [(value)]="gridBoxValue6"
+                          valueExpr="ID"
+                          displayExpr="Name"
+                          [deferRendering]="false"
+                          placeholder="Select a value..."
+                          [showClearButton]="true"
+                          [dataSource]="shipsort"
+                          [height]="50">
+          <div *dxTemplate="let data of 'content'">
+
+            <dx-data-grid [dataSource]="shipsort"
+                          [columns]="['Name']"
+                          [hoverStateEnabled]="true"
+                          [paging]="{ enabled: true, pageSize: 10 }"
+                          [filterRow]="{ visible: true }"
+                          [height]="400"
+                          keyExpr="ID"
+                          [selection]="{ mode: 'single' }"
+                          (onSelectionChanged)="onSelectionChanged($event)"
+                          [(selectedRowKeys)]="gridBoxValue6">
+
+            </dx-data-grid>
+          </div>
+
+        </dx-drop-down-box>
+      </dxi-item>
+
+      <dxi-item dataField="sorderQuantity" [editorOptions]="{ height: 50 }">
+        <dxo-label text="출하요청물량"></dxo-label>
+        <dxi-validation-rule type="required"></dxi-validation-rule>
+      </dxi-item>
+
+      <dxi-item dataField="sremark" [colSpan]="3" [editorOptions]="{ height: 100 }">
+        <dxo-label text="비고"></dxo-label>
+      </dxi-item>
+
+    </dx-form>
+
+  </dx-popup>
+
+  </div>

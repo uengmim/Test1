@@ -1,0 +1,176 @@
+<div style="margin:10px 10px 10px 10px">
+  <!--<div class="dx-field">
+    <div class="dx-field-label">Value-dependent icon</div>
+    <div class="dx-field-value">
+      <dx-select-box [dataSource]="products"
+                     [(selectedItem)]="selectedItem"
+                     [showClearButton]="true"
+                     displayExpr="SCODENM"
+                     valueExpr="SCODE">
+
+        <div *dxTemplate="let data of 'item'" class="custom-item">
+          <div>{{ data.GCODE }}</div>
+          <div>{{ data.GCODENM }}</div>
+          <div>{{ data.SCODE }}</div>
+          <div>{{ data.SCODENM }}</div>
+        </div>
+      </dx-select-box>
+    </div>
+  </div>-->
+</div>
+<div style="margin:10px 10px 10px 10px">
+  <div class="dx-field">
+    <div class="dx-field-label">DropDownBox with embedded DataGrid</div>
+    <div class="dx-field-value">
+      <dx-drop-down-box [(value)]="gridBoxValue"
+                        [(opened)]="isGridBoxOpened"
+                        valueExpr="SCODE"
+                        [deferRendering]="false"
+                        [displayExpr]="gridBox_displayExpr"
+                        placeholder="Select a value..."
+                        [showClearButton]="true"
+                        [dataSource]="products"
+                        (onOptionChanged)="onGridBoxOptionChanged($event)">
+        <div *dxTemplate="let data of 'content'">
+
+          <div class="dx-field">
+            <div class="dx-field-label">Default mode</div>
+            <div class="dx-field-value">
+              <dx-select-box [items]="simpleProducts"></dx-select-box>
+            </div>
+          </div>
+          <div class="dx-field">
+            <div class="dx-field-label">With a custom placeholder</div>
+            <div class="dx-field-value">
+              <dx-select-box [items]="simpleProducts"
+                             placeholder="Choose Product"
+                             [showClearButton]="true"></dx-select-box>
+            </div>
+          </div>
+
+          <dx-data-grid [dataSource]="products"
+                        [hoverStateEnabled]="true"
+                        [(selectedRowKeys)]="gridBoxValue"
+                        height="100%">
+
+            <dxi-column dataField="GCODE" dataType="string" caption="그룹코드"></dxi-column>
+            <dxi-column dataField="GCODENM" dataType="string" caption="그룹코드명"></dxi-column>
+            <dxi-column dataField="SCODE" dataType="string" caption="코드"></dxi-column>
+            <dxi-column dataField="SCODENM" dataType="string" caption="코드명"></dxi-column>
+
+            <dxo-selection mode="single"></dxo-selection>
+            <dxo-filter-row [visible]="true"></dxo-filter-row>
+            <dxo-scrolling mode="virtual"></dxo-scrolling>
+            <dxo-paging [enabled]="true" [pageSize]="10"></dxo-paging>
+          </dx-data-grid>
+        </div>
+      </dx-drop-down-box>
+    </div>
+  </div>
+  <div class="dx-field">
+    <nh-possible-comm [codeInfo]="sd007Code"
+                      valueColumn="ZCM_CODE3"
+                      valueDisplayFormat="%ZCMF01_CH%"
+                      [width]="200"
+                      [gridBoxWidth]="500"
+                      label="주문유형"
+                      (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-comm>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table #t023tDynamic
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="제품구분"
+                       (onEntryValueChanged)="ont023tCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="t023tCode" #t023tDynamic2
+                       valueColumn="MATKL"
+                       valueDisplayFormat="%WGBEZ%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="제품구분"
+                       (onEntryValueChanged)="ont023tCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="maraCode"
+                       valueColumn="KUNNR"
+                       valueDisplayFormat="%NAME1%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="제품구분"
+                       groupFiled="SPART"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="cCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="오브젝트파트"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="dCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="손상"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="oCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="사유"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="aCode"
+                       valueColumn="CODE"
+                       valueDisplayFormat="%KURZTEXT_GR%-%KURZTEXT_CODE%"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="액티비티"
+                       groupFiled="KURZTEXT_GR"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+
+  <div class="dx-field">
+    <nh-possible-table [codeInfo]="cartypeCode"
+                       valueColumn="DOMNAME"
+                       valueDisplayFormat="%DDTEXT%(%DOMNAME%)"
+                       [width]="200"
+                       [gridBoxWidth]="500"
+                       label="화물차종"
+                       [searchPanel]="true"
+                       (onEntryValueChanged)="onCodeValueChanged($event)"></nh-possible-table>
+
+  </div>
+</div>

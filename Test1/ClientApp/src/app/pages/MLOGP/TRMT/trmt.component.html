@@ -1,0 +1,211 @@
+  <!--toolbar-->
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before" locateInMenu="auto" style="margin-right:10px;">
+    <div *dxTemplate>
+      <div class="dx-field-label" style="width: auto;"></div>
+      <div class="dx-field-value" style="width: 100px; float: left; margin-right: 10px; ">
+        <dx-text-box label="차량번호" labelMode="floating"
+                     [maxLength]="40"></dx-text-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto" style="margin-right:10px;">
+    <div *dxTemplate>
+      <div class="dx-field-label" style="width: auto;"></div>
+      <div class="dx-field-value" style="width: 100px; float: left; margin-right: 10px; ">
+        <dx-text-box label="기사명" labelMode="floating"
+                     [maxLength]="40"></dx-text-box>
+      </div>
+    </div>
+  </dxi-item>
+
+  <dxi-item location="before" locateInMenu="auto">
+    <dx-select-box [items]="carsnumber"
+                   labelMode="floating"
+                   label="차량종류"
+                   style="width: auto;
+                   margin-left: 10px;
+                   margin-right: 10px;">
+    </dx-select-box>
+  </dxi-item>
+
+
+  <dxi-item location="left"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="searchButtonOptions">
+  </dxi-item>
+
+
+  <dxi-item location="after"
+            widget="dxButton"
+            locateInMenu="auto"
+            [options]="addButtonOptions">
+  </dxi-item>
+
+</dx-toolbar>
+
+<dx-data-grid class="master"
+              [dataSource]="data"
+              [showBorders]="false"
+              [columnAutoWidth]="true"
+              keyExpr="vehNumber"
+              [columnHidingEnabled]="true"
+              [allowColumnResizing]="true"
+              columnResizingMode="widget"
+              [selection]="{ mode: 'multiple' }"
+              [allowColumnReordering]="true"
+              (onRowDblClick)="orderDBClick($event)"
+              height="calc(100vh - 230px)">
+
+  <!--Datagrid Option-->
+  <dxo-paging [enabled]="false"></dxo-paging>
+  <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+
+
+  <!--Filtering Option-->
+  <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+  <dxo-filter-builder [customOperations]="customOperations"
+                      [allowHierarchicalFields]="true">
+  </dxo-filter-builder>
+  <dxo-filter-builder-popup [position]="popupPosition">
+  </dxo-filter-builder-popup>
+  <dxo-filter-row [visible]="true"></dxo-filter-row>
+  <dxo-header-filter [visible]="true"></dxo-header-filter>
+  <dxo-scrolling mode="virtual"></dxo-scrolling>
+
+
+  <!--Grouping Option-->
+  <dxo-group-panel [visible]="true"></dxo-group-panel>
+  <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+
+  <!--Batch Option-->
+  <dxo-editing mode="popup"
+               [selectTextOnEditStart]="selectTextOnEditStart"
+               [startEditAction]="startEditAction">
+
+    <dxo-popup title="차량번호"
+               [showTitle]="true"
+               width="55%"
+               height="55%">
+    </dxo-popup>
+    <dxo-form>
+      <dxi-item dataField="PARAM1"></dxi-item>
+      <dxi-item dataField="년도"></dxi-item>
+      <dxi-item dataField="PARAM2"></dxi-item>
+      <dxi-item dataField="차량뒷번호"></dxi-item>
+      <dxi-item dataField="차량전체번호"></dxi-item>
+      <dxi-item dataField="PARAM3"></dxi-item>
+      <dxi-item dataField="기사명"></dxi-item>
+      <dxi-item dataField="자택전화"></dxi-item>
+      <dxi-item dataField="회사전화"></dxi-item>
+      <dxi-item dataField="휴대폰번호"></dxi-item>
+      <dxi-item dataField="호출번호"></dxi-item>
+      <dxi-item dataField="적재중량"></dxi-item>
+      <dxi-item dataField="유창수량"></dxi-item>
+      <dxi-item dataField="공차중량"></dxi-item>
+      <dxi-item dataField="우편번호"></dxi-item>
+      <dxi-item dataField="주소"></dxi-item>
+      <dxi-item dataField="RFID번호"></dxi-item>
+      <dxi-item dataField="PARAM4"></dxi-item>
+    </dxo-form>
+  </dxo-editing>
+
+
+  <!--Data column-->
+  <dxi-column dataField="vehNumber"
+              caption="차량번호">
+  </dxi-column>
+
+  <dxi-column dataField="affCompany"
+              caption="소속회사">
+  </dxi-column>
+  <dxi-column dataField="drName"
+              caption="기사명">
+  </dxi-column>
+  <dxi-column dataField="homeCall"
+              caption="자택전화"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="companyCall"
+              caption="회사전화"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="cellPhone"
+              caption="휴대폰"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="loWeight"
+              caption="적재중량"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+  <dxi-column dataField="toWeight"
+              caption="공차중량"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+  <dxi-column dataField="flQuantity"
+              caption="유창수량"
+              alignment="right"
+              format="#,###">
+  </dxi-column>
+  <dxi-column dataField="sortation"
+              caption="구분"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="poCode"
+              caption="우편번호"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="address"
+              caption="주소">
+  </dxi-column>
+  <dxi-column dataField="rfid"
+              caption="RFID번호"
+              alignment="right">
+  </dxi-column>
+  <dxi-column dataField="area"
+              caption="지역"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="year"
+              caption="년도"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="prNumber"
+              caption="앞번호"
+              alignment="center">
+  </dxi-column>
+  <dxi-column dataField="baNumber"
+              caption="뒷번호"
+              alignment="right">
+  </dxi-column>
+  <dxi-column dataField="PARAM1"
+              caption="지역"
+              [visible]="false">
+    <dxo-lookup [dataSource]="local" displayExpr="Name" valueExpr="ID">
+    </dxo-lookup>
+  </dxi-column>
+  <dxi-column dataField="PARAM2"
+              caption="차량 앞번호"
+              [visible]="false">
+    <dxo-lookup [dataSource]="car" displayExpr="Name" valueExpr="ID">
+    </dxo-lookup>
+  </dxi-column>
+
+  <dxi-column dataField="PARAM3"
+              caption="소속회사"
+              [visible]="false">
+    <dxo-lookup [dataSource]="company" displayExpr="Name" valueExpr="ID">
+    </dxo-lookup>
+  </dxi-column>
+
+  <dxi-column dataField="PARAM4"
+              caption="유류,화학"
+              [visible]="false">
+    <dxo-lookup [dataSource]="options" displayExpr="Name" valueExpr="ID">
+    </dxo-lookup>
+  </dxi-column>
+</dx-data-grid>

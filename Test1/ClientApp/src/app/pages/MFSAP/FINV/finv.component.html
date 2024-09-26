@@ -1,0 +1,96 @@
+<!--재고확인(비료영업)-->
+
+
+<dx-toolbar style="margin:20px 0px 20px 0px">
+  <dxi-item location="before;">
+    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>주문처</b> </div>
+    <div style="float:left; margin-left:10px">
+      <dx-select-box [items]="simpleProducts"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before;">
+    <div class="toolbar-label" style="float: left; margin-top: 5px; margin-left: 10px; "><b>사업장</b> </div>
+    <div style="float:left; margin-left:10px">
+      <dx-select-box [items]="simpleProducts"></dx-select-box>
+    </div>
+  </dxi-item>
+  <dxi-item location="before;" widget="dxButton" locateInMenu="never">
+    <div *dxTemplate>
+      <div class="toolbar-label" style="float: left; margin-left: 10px;"><b>재고0제외</b></div>
+    </div>
+  </dxi-item>
+  <dxi-item location="before">
+    <dx-check-box [value]=""></dx-check-box>
+  </dxi-item>
+  <dxi-item location="before"
+            widget="dxButton"
+            locateInMenu="auto"
+            [height]="25"
+            [options]="searchButtonOptions">
+  </dxi-item>
+</dx-toolbar>
+
+    <dx-data-grid id="gridContainer"
+                  keyExpr="product"
+                  [dataSource]="dataSource"
+                  [showBorders]="true"
+                  [focusedRowIndex]="0"
+                  [columnAutoWidth]="true"
+                  [allowColumnResizing]="true"
+                  columnResizingMode="widget"
+                  [allowColumnReordering]="true"
+                  height="calc(100vh - 230px)">
+      <dxo-paging [enabled]="false"></dxo-paging>
+      <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+      <dxo-header-filter [visible]="true" [allowSearch]="true"></dxo-header-filter>
+      <dxo-paging [pageSize]="10"></dxo-paging>
+      <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+      <dxo-filter-builder [customOperations]="customOperations"
+                          [allowHierarchicalFields]="true">
+      </dxo-filter-builder>
+      <dxo-filter-builder-popup [position]="popupPosition">
+      </dxo-filter-builder-popup>
+      <dxo-filter-row [visible]="true"></dxo-filter-row>
+
+      <dxi-column dataField="productCategory" caption="제품구분" ></dxi-column>
+      <dxi-column dataField="product" caption="제품"></dxi-column>
+      <dxi-column dataField="packaging" caption="포장" ></dxi-column>
+      <dxi-column dataField="nowStock" caption="현재고" format="#,###"></dxi-column>
+      <dxi-column dataField="storageStock" caption="고내재고"  format="#,###"></dxi-column>
+      <dxi-column dataField="availableStock" caption="가용재고" format="#,###"></dxi-column>
+      <dxi-column dataField="fullClosing" caption="전마감" ></dxi-column>
+      <dxi-column dataField="inspection" caption="보관검수량"  format="#,###"></dxi-column>
+      <dxi-column caption="출고">
+        <dxi-column dataField="normal" caption="정상" format="#,###"></dxi-column>
+        <dxi-column dataField="sample" caption="샘플" ></dxi-column>
+        <dxi-column dataField="papo" caption="파포" ></dxi-column>
+        <dxi-column dataField="service" caption="서비스"></dxi-column>
+        <dxi-column dataField="return" caption="반품"></dxi-column>
+        <dxi-column dataField="exchange" caption="교환" ></dxi-column>
+        <dxi-column dataField="evangelism" caption="전배"></dxi-column>
+        <dxi-column dataField="storageInspection" caption="보관검수" ></dxi-column>
+        <dxi-column dataField="inspector" caption="기검수" ></dxi-column>
+      </dxi-column>
+      <dxi-column caption="입고">
+        <dxi-column dataField="produce" caption="생산" ></dxi-column>
+        <dxi-column dataField="normal2" caption="정상" format="#,###"></dxi-column>
+        <dxi-column dataField="sample2" caption="샘플"></dxi-column>
+        <dxi-column dataField="service2" caption="서비스"></dxi-column>
+        <dxi-column dataField="exchange2" caption="교환" ></dxi-column>
+        <dxi-column dataField="wanted" caption="수배" ></dxi-column>
+      </dxi-column>
+      <dxi-column caption="조정">
+        <dxi-column dataField="actualStock" caption="실재고"  format="#,###"></dxi-column>
+        <dxi-column dataField="accountInventory" caption="회계재고" format="#,###"></dxi-column>
+      </dxi-column>
+      <dxi-column caption="검수">
+        <dxi-column dataField="insepctionReq" caption="검수요청량"  format="#,###"></dxi-column>
+        <dxi-column dataField="inspectAmount" caption="검수된량"  format="#,###"></dxi-column>
+      </dxi-column>
+
+        <dxo-search-panel [visible]="true"></dxo-search-panel>
+        <dxo-group-panel [visible]="true"></dxo-group-panel>
+        <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    </dx-data-grid>
+
+

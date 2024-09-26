@@ -1,0 +1,165 @@
+<!--
+  유창 배분 등록
+  -->
+<div style="margin:10px 10px 0px 10px">
+
+  <!--toolbar-->
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <div style="float:left; ">
+          <dx-date-box [(value)]="startDate"
+                       label="시작일"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+
+        <div style="float: left; margin-left: 10px; margin-right: 10px;">
+          <dx-date-box [(value)]="endDate"
+                       label="종료일"
+                       labelMode="floating"
+                       type="date"
+                       [width]="120"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before"
+              widget="dxButton"
+              locateInMenu="auto"
+              [height]="25"
+              [options]="searchButtonOptions">
+    </dxi-item>
+  </dx-toolbar>
+
+
+  <dx-data-grid id="grid"
+                [dataSource]="regis"
+                [showBorders]="true"
+                [focusedRowIndex]="0"
+                columnResizingMode="nextColumn"
+                keyExpr="dispcNum"
+                [selection]="{ mode: 'multiple' }"
+                (onRowDblClick)="addRow($event)"
+                (onSelectionChanged)="selectionChanged($event)"
+                [allowColumnReordering]="true"
+                [columnAutoWidth]="true"
+                [remoteOperations]="false"
+                [rowAlternationEnabled]="true"
+                height="calc(100vh - 155px)">
+    <!--Datagrid Option-->
+    <dxo-paging [enabled]="false"></dxo-paging>
+    <dxo-scrolling columnRenderingMode="virtual"></dxo-scrolling>
+
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <!--Grouping Option-->
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
+    <!--Data column-->
+    <dxi-column dataField="dispcDate" caption="배차일자" dataType="date" format="yyyy-MM-dd" alignment="center">  </dxi-column>
+
+    <dxi-column dataField="clientName" caption="거래처명">  </dxi-column>
+
+    <dxi-column dataField="vehNum" caption="차량번호">  </dxi-column>
+
+    <dxi-column dataField="product" caption="제품">   </dxi-column>
+
+    <dxi-column dataField="rack" caption="RACK">  </dxi-column>
+
+    <dxi-column dataField="indiQuan" caption="지시량" format="#,###">  </dxi-column>
+
+    <dxi-column dataField="dispcNum" caption="배차번호">  </dxi-column>
+
+    <dxi-column dataField="indiNum" caption="지시번호">  </dxi-column>
+
+    <dxi-column dataField="cPart" caption="C-PART" alignment='center'>  </dxi-column>
+
+  </dx-data-grid>
+
+
+
+  <dx-popup width="80%"
+            height="80%"
+            margin="20px"
+            [showTitle]="true"
+            title="유류출하 지시 등록"
+            [dragEnabled]="false"
+            [showCloseButton]="false"
+            container=".dx-viewport"
+            [(visible)]="popupVisible">
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="bottom"
+                      location="before"
+                      [options]="savesButtonOptions">
+    </dxi-toolbar-item>
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="bottom"
+                      location="after"
+                      [options]="closeButtonOptions">
+    </dxi-toolbar-item>
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <div style="margin-bottom:20px">오더내역</div>
+        <dx-form id="data" [formData]="data" width="80%">
+          <dxi-item dataField="dDispcNumv"><dxo-label text="배차번호"></dxo-label></dxi-item>
+          <dxi-item dataField="dIndiNum"><dxo-label text="지시번호"></dxo-label></dxi-item>
+          <dxi-item dataField="dIndiQuan"><dxo-label text="총지시량"></dxo-label></dxi-item>
+        </dx-form>
+      </div>
+
+      <div style="margin-bottom: 20px;margin-top: 20px">유창</div>
+
+      <dx-data-grid class="dx-card wide-card"
+                    [dataSource]="adddata"
+                    [showBorders]="true"
+                    [selection]="{ mode: 'single' }"
+                    [focusedRowIndex]="0"
+                    [height]="400"
+                    keyExpr="yuChang"
+                    [focusedRowEnabled]="true"
+                    [allowColumnResizing]="true"
+                    columnResizingMode="nextColumn">
+        <dxo-paging [pageSize]="10"></dxo-paging>
+        <dxo-pager [showPageSizeSelector]="true" [showInfo]="true"></dxo-pager>
+        <dxo-filter-row [visible]="true"></dxo-filter-row>
+        <dxo-editing mode="batch"
+                     [allowAdding]="true"
+                     [allowUpdating]="true"
+                     [allowDeleting]="true">
+        </dxo-editing>
+
+        <dxi-column dataField="yuChang"
+                    format="#,###.###"
+                    caption="유창">
+        </dxi-column>
+        <dxi-column dataField="capacity"
+                    format="#,###.###"
+                    caption="용량">
+        </dxi-column>
+        <dxi-column dataField="distriQuan"
+                    format="#,###.###"
+                    caption="배분량">
+        </dxi-column>
+
+        <dxo-summary>
+          <dxi-total-item column="capacity"
+                          summaryType="sum">
+          </dxi-total-item>
+          <dxi-total-item column="distriQuan"
+                          summaryType="sum">
+          </dxi-total-item>
+        </dxo-summary>
+      </dx-data-grid>
+    </dx-scroll-view>
+
+  </dx-popup>
+  </div>

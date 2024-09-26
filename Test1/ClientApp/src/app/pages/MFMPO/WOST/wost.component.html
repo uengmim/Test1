@@ -1,0 +1,604 @@
+<!--
+  W/O 진행현황
+  -->
+<div style="margin:10px 10px 0px 10px">
+
+  <dx-toolbar style="margin: 20px 0px 20px 0px;padding:0px 5px 0px 5px">
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-select-box [dataSource]="selectDateType"
+                       displayExpr="NAME"
+                       valueExpr="CODE"
+                       value="1"
+                       label="일자기준"
+                       labelMode="floating"
+                       (onValueChanged)="onDateTypeChanged($event)"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before">
+      <div *dxTemplate style="width:330px">
+        <div style="float:left; ">
+          <dx-date-box [(value)]="startDate"
+                       label="시작일"
+                       type="date"
+                       [width]="140"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+
+        <div style="float: left; margin-left: 10px;">
+          <dx-date-box [(value)]="endDate"
+                       label="종료일"
+                       labelMode="floating"
+                       type="date"
+                       [width]="140"
+                       displayFormat="yyyy-MM-dd"></dx-date-box>
+        </div>
+      </div>
+    </dxi-item>
+
+    <dxi-item location="before" locateInMenu="auto">
+      <div *dxTemplate>
+        <dx-select-box [dataSource]="appStatus"
+                       displayExpr="NAME"
+                       valueExpr="CODE"
+                       value="O"
+                       label="검수구분"
+                       labelMode="floating"
+                       (onValueChanged)="onAppStatusChanged($event)"></dx-select-box>
+      </div>
+    </dxi-item>
+
+    <!--<dxi-item location="before">
+    <div *dxTemplate>
+      <dx-button icon="search" (onClick)="refreshDataGrid($event)">
+      </dx-button>
+    </div>
+  </dxi-item>-->
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="margin-left:10px;"
+              [height]="25"
+              [options]="searchButtonOptions">
+    </dxi-item>
+
+    <dxi-item location="after"
+              widget="dxButton"
+              locateInMenu="auto"
+              style="margin-left:10px;"
+              [height]="25"
+              [options]="exportSelectedData">
+    </dxi-item>
+  </dx-toolbar>
+
+
+  <dx-data-grid id="gcOrderData" #gcOrderData
+                [dataSource]="orderData"
+                [remoteOperations]="false"
+                [focusedRowIndex]="0"
+                [allowColumnReordering]="true"
+                [allowColumnResizing]="true"
+                [rowAlternationEnabled]="true"
+                [showBorders]="true"
+                [columnAutoWidth]="true"
+                keyExpr="AUFNR"
+                [columnResizingMode]="columnResizeMode"
+                height="calc(100vh - 155px)"
+                [selection]="{ mode: 'multiple' }"
+                (onSelectionChanged)="selectionChanged($event)"
+                (onRowDblClick)="dblClick($event)"
+                (onContentReady)="contentReady($event)"
+                (onExporting)="onExportingOrderData($event)">
+    >
+    <dxo-scrolling mode="infinite"></dxo-scrolling>
+    <dxo-export [enabled]="true"></dxo-export>
+    <dxo-selection mode="single"></dxo-selection>
+    <dxo-filter-row visible="true"></dxo-filter-row>
+    <dxo-header-filter visible="true"></dxo-header-filter>
+    <!--Filtering Option-->
+    <dxo-filter-panel [visible]="true"></dxo-filter-panel>
+    <dxo-filter-builder [customOperations]="customOperations"
+                        [allowHierarchicalFields]="true">
+    </dxo-filter-builder>
+    <dxo-filter-row [visible]="true"></dxo-filter-row>
+    <dxo-header-filter [visible]="true"></dxo-header-filter>
+    <!--Grouping Option-->
+    <dxo-grouping #expand [autoExpandAll]="true"></dxo-grouping>
+    <dxo-search-panel [visible]="true"
+                      [highlightCaseSensitive]="true"></dxo-search-panel>
+
+    <!--<dxo-group-panel [visible]="true"></dxo-group-panel>
+  <dxo-grouping [autoExpandAll]="false"></dxo-grouping>-->
+
+    <dxi-column dataField="IDAT1"
+                caption="배정일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="AUFNR"
+                caption="오더번호"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="KTEXT"
+                caption="내역"
+                dataType="string">
+    </dxi-column>
+
+    <!--<dxi-column dataField="BUKRS"
+              caption="회사코드"
+              dataType="string">
+  </dxi-column>
+
+  <dxi-column dataField="WERKS_DESC"
+              caption="플랜트"
+              dataType="string">
+  </dxi-column>-->
+    <!--<dxi-column dataField="STAT"
+              caption="오더상태"
+              dataType="string">
+  </dxi-column>-->
+
+    <dxi-column dataField="STATNAME"
+                caption="오더상태"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_REQ"
+                caption="예약수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_OUT"
+                caption="출고수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_CON"
+                caption="사용수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_REC"
+                caption="반납수량"
+                format="#,###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="INGPR_DESC"
+                caption="요청부서"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="VAPLZ_DESC"
+                caption="작업장"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="EQUNR"
+                caption="설비"
+                dataType="string">
+    </dxi-column>
+
+    <dxi-column dataField="EQUNR_DESC"
+                caption="설비명"
+                dataType="string">
+    </dxi-column>
+
+    <!--<dxi-column dataField="AUART"
+              caption="오더유형"
+              dataType="string">
+  </dxi-column>-->
+
+    <dxi-column dataField="GSTRP"
+                caption="시작일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="GLTRP"
+                caption="종료일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="REDAT"
+                caption="정산일"
+                dataType="date"
+                format="yyyy-MM-dd">
+    </dxi-column>
+
+    <dxi-column dataField="QMNUM"
+                caption="통지번호"
+                dataType="string">
+    </dxi-column>
+
+    <!--<dxi-column dataField="GSBER_DESC"
+              caption="사업영역"
+              dataType="string">
+  </dxi-column>-->
+
+    <dxi-column dataField="QTY_REQ_TOT"
+                caption="요청금액"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_CON_TOT"
+                caption="승인금액"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxi-column dataField="QTY_NO"
+                caption="작업등록수"
+                format="#,###.###"
+                dataType="number">
+    </dxi-column>
+
+    <dxo-summary>
+      <dxi-total-item column="QTY_REQ_TOT"
+                      valueFormat="#,###.###"
+                      displayFormat="합계 : {0}"
+                      summaryType="sum">
+      </dxi-total-item>
+      <dxi-total-item column="QTY_CON_TOT"
+                      valueFormat="#,###.###"
+                      displayFormat="합계 : {0}"
+                      summaryType="sum">
+      </dxi-total-item>
+
+    </dxo-summary>
+
+  </dx-data-grid>
+
+  <!-- 로딩 패널-->
+  <dx-load-panel #loadPanel [position]="{ of: '#pageContent' }" shadingColor="rgba(0,0,0,0.4)" [(visible)]="loadingVisible" [showIndicator]="true" [showPane]="true"
+                 [shading]="true" [hideOnOutsideClick]="true">
+  </dx-load-panel>
+
+  <dx-popup width="80%"
+            height="80%"
+            margin="20px"
+            [showTitle]="true"
+            title="W/O 상세현황"
+            [dragEnabled]="false"
+            [showCloseButton]="false"
+            container=".dx-viewport"
+            [(visible)]="popupVisible">
+
+    <dxi-toolbar-item widget="dxButton"
+                      toolbar="bottom"
+                      location="after"
+                      [options]="closeButtonOptions">
+    </dxi-toolbar-item>
+    <dx-scroll-view width="100%" height="100%">
+      <div id="form-container">
+        <div style="margin-bottom:20px">오더내역</div>
+
+        <dx-form id="orderInfo" [formData]="orderInfo" width="80%">
+          <dxi-item itemType="group" caption="" [colCount]="5">
+            <dxi-item dataField="AUFNR" [disabled]="true"><dxo-label text="오더번호"></dxo-label></dxi-item>
+            <dxi-item dataField="ARBEI" [disabled]="true"><dxo-label text="작업시간"></dxo-label></dxi-item>
+            <dxi-item dataField="MEINH" [disabled]="true"><dxo-label text="작업단위"></dxo-label></dxi-item>
+            <dxi-item>
+              <dxo-label text="사용일"></dxo-label>
+              <div *dxTemplate>
+                <dx-date-box [(value)]="selectBUDAT"
+                              type="date"
+                              [width]="120"
+                              displayFormat="yyyy-MM-dd"></dx-date-box>
+              </div>
+            </dxi-item>
+          </dxi-item>
+          <dxi-item itemType="group" caption="" [colCount]="5">
+            <dxi-item dataField="KURZTEXT" [colSpan]="2" [editorOptions]="{  placeholder: '40자까지 입력가능합니다.'}"><dxo-label text="요청 내역"></dxo-label></dxi-item>
+            <dxi-item dataField="ANZZL" [disabled]="true"><dxo-label text="작업자수"></dxo-label></dxi-item>
+            <dxi-item widget="dxButton">
+              <dx-button stylingMode="contained"
+                         text="자재요청"
+                         type="normal"
+                         [disabled]="isDisabled"
+                         (onClick)="ReqRecords()"
+                         [width]="150">
+              </dx-button>
+            </dxi-item>
+            <dxi-item widget="dxButton">
+              <dx-button stylingMode="contained"
+                         text="자재사용등록"
+                         type="normal"
+                         [disabled]="isDisabled"
+                         (onClick)="matUseSave()"
+                         [width]="150">
+              </dx-button>
+            </dxi-item>
+          </dxi-item>
+        </dx-form>
+      </div>
+
+      <div style="margin-bottom: 20px;margin-top: 20px">이전배정일</div>
+      <dx-data-grid id="gcMaterialList"
+                    [dataSource]="alDateList"
+                    [remoteOperations]="false"
+                    [allowColumnReordering]="true"
+                    [allowColumnResizing]="true"
+                    [rowAlternationEnabled]="true"
+                    [columnResizingMode]="columnResizeMode"
+                    height="200px"
+                    width="200px"
+                    [columnAutoWidth]="true"
+                    [showBorders]="true">
+
+        <!--<dxo-filter-row visible="false"></dxo-filter-row>
+    <dxo-header-filter visible="false"></dxo-header-filter>-->
+        <dxo-scrolling mode="virtual"></dxo-scrolling>
+
+        <!--<dxi-column dataField="AUFNR"
+    caption="오더번호"
+    dataType="string"></dxi-column>-->
+
+        <dxi-column dataField="ALDAT"
+                    caption="배정일"
+                    dataType="date"
+                    sortOrder="asc"
+                    format="yyyy-MM-dd"></dxi-column>
+
+      </dx-data-grid>
+
+      <div style="margin-bottom: 20px;margin-top: 20px">사용자재정보</div>
+      <dx-data-grid id="gcMaterialList"
+                    [dataSource]="MaterialList"
+                    [remoteOperations]="false"
+                    [allowColumnReordering]="true"
+                    [allowColumnResizing]="true"
+                    [rowAlternationEnabled]="true"
+                    [columnResizingMode]="columnResizeMode"
+                    [columnAutoWidth]="true"
+                    (onRowUpdating)="gridDataUpdating($event)"
+                    [showBorders]="true">
+
+        <dxo-filter-row visible="true"></dxo-filter-row>
+        <dxo-header-filter visible="true"></dxo-header-filter>
+
+        <dxo-editing mode="cell"
+                     [allowDeleting]="false"
+                     [allowAdding]="false"
+                     [allowUpdating]="true">
+        </dxo-editing>
+
+        <dxi-column dataField="AUFNR"
+                    caption="오더번호"
+                    [allowEditing]="false"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="RSNUM"
+                    caption="예약번호"
+                    [allowEditing]="false"
+                    sortOrder="asc"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="RSPOS"
+                    caption="예약항번"
+                    [allowEditing]="false"
+                    sortOrder="asc"
+                    dataType="string"></dxi-column>
+
+        <!--<dxi-column dataField="WERKS"
+  caption="플랜트"
+  dataType="string"></dxi-column>-->
+        <!--<dxi-column dataField="LGORT"
+  caption="저장위치"
+  dataType="string"></dxi-column>-->
+        <!--<dxi-column dataField="LGOBE"
+              caption="저장위치명"
+              [allowEditing]="false"
+              dataType="string"></dxi-column>-->
+
+        <dxi-column dataField="MATNR"
+                    caption="자재코드"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="MATNR_DESC"
+                    caption="자재명"
+                    [allowEditing]="false"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="QTY_REQ"
+                    caption="요청수량"
+                    format="#,###.###"
+                    [allowEditing]="false"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="QTY_OUT"
+                    caption="출고수량"
+                    format="#,###.###"
+                    [allowEditing]="false"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="QTY_CON"
+                    caption="기사용수량"
+                    format="#,###.###"
+                    [allowEditing]="false"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="QTY_INPUT"
+                    caption="입력수량"
+                    format="#,###.###"
+                    [allowEditing]="true"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="QTY_REC"
+                    caption="반납수량"
+                    format="#,###.###"
+                    [allowEditing]="false"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="MEINS"
+                    caption="수량단위"
+                    [allowEditing]="false"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="ZAPP_CDT"
+                    caption="결재상태"
+                    [allowEditing]="false"
+                    dataType="string"></dxi-column>
+
+      </dx-data-grid>
+
+      <div style="margin-bottom: 20px;margin-top: 20px">항목단가</div>
+      <dx-data-grid id="gcMaterialList"
+                    [dataSource]="ItemPrice"
+                    [remoteOperations]="false"
+                    [allowColumnReordering]="true"
+                    [allowColumnResizing]="true"
+                    [columnResizingMode]="columnResizeMode"
+                    [rowAlternationEnabled]="true"
+                    [columnAutoWidth]="true"
+                    [showBorders]="true">
+
+        <dxo-filter-row visible="true"></dxo-filter-row>
+        <dxo-header-filter visible="true"></dxo-header-filter>
+
+        <dxi-column dataField="AUFNR"
+                    caption="오더번호"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="PAYITEM"
+                    caption="자재번호"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="PAYITEM_DESC"
+                    caption="자재명"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="QTY_REQ"
+                    caption="요청수량"
+                    format="#,###.###"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="QTY_CON"
+                    caption="승인수량"
+                    format="#,###.###"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="STAT"
+                    caption="검수상태"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="MEINS"
+                    caption="수량단위"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="WRBTR"
+                    caption="금액"
+                    format="#,###.###"
+                    dataType="number"></dxi-column>
+
+        <dxi-column dataField="WAERS"
+                    caption="금액단위"
+                    dataType="string"></dxi-column>
+
+      </dx-data-grid>
+
+      <div style="margin-bottom: 20px;margin-top: 20px">고장해결</div>
+      <dx-data-grid id="gcMaterialList"
+                    [dataSource]="TroubleshootingList"
+                    [remoteOperations]="false"
+                    [allowColumnReordering]="true"
+                    [allowColumnResizing]="true"
+                    [columnResizingMode]="columnResizeMode"
+                    [rowAlternationEnabled]="true"
+                    [columnAutoWidth]="true"
+                    [showBorders]="true">
+
+        <dxo-filter-row visible="true"></dxo-filter-row>
+        <dxo-header-filter visible="true"></dxo-header-filter>
+
+        <dxi-column dataField="QMNUM"
+                    caption="통지번호"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="MANUM"
+                    caption="순번"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="FENUM"
+                    caption="품목번호"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="MNGRP"
+                    caption="액비티비코드그룹"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="MNCOD"
+                    caption="액비티비코드"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="MATXT"
+                    caption="액티비티"
+                    dataType="string"></dxi-column>
+
+      </dx-data-grid>
+
+      <div style="margin-bottom: 20px;margin-top: 20px">고장정보</div>
+      <dx-data-grid id="gcMaterialList"
+                    [dataSource]="FaultInfo"
+                    [remoteOperations]="false"
+                    [columnResizingMode]="columnResizeMode"
+                    [allowColumnReordering]="true"
+                    [allowColumnResizing]="true"
+                    [rowAlternationEnabled]="true"
+                    [columnAutoWidth]="true"
+                    [showBorders]="true">
+
+        <dxo-filter-row visible="true"></dxo-filter-row>
+        <dxo-header-filter visible="true"></dxo-header-filter>
+
+        <dxi-column dataField="NOTIF_NO"
+                    caption="통지번호"
+                    dataType="string"></dxi-column>
+
+        <!--<dxi-column dataField="POSNR"
+          caption="항목번호"
+          dataType="string"></dxi-column>
+
+    <dxi-column dataField="CAUSE_KEY"
+          caption="원인번호"
+          dataType="string"></dxi-column>-->
+        <!--<dxi-column dataField="KATALOGART"
+      caption="카탈로그"
+      dataType="string"></dxi-column>-->
+
+        <dxi-column dataField="KATALNAME"
+                    caption="카탈로그"
+                    dataType="string"></dxi-column>
+
+        <!--<dxi-column dataField="CODEGRUPPE"
+                    caption="코드그룹"
+                    dataType="string"></dxi-column>-->
+
+        <dxi-column dataField="KURZTEXT_GR"
+                    caption="그룹명"
+                    dataType="string"></dxi-column>
+
+        <!--<dxi-column dataField="CODE"
+                    caption="코드"
+                    dataType="string"></dxi-column>-->
+
+        <dxi-column dataField="KURZTEXT_CODE"
+                    caption="코드명"
+                    dataType="string"></dxi-column>
+
+        <dxi-column dataField="FETXT"
+                    caption="텍스트"
+                    dataType="string"></dxi-column>
+
+      </dx-data-grid>
+    </dx-scroll-view>
+  </dx-popup>
+</div>
